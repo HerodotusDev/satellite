@@ -27,7 +27,7 @@ contract Satellite is Ownable {
     uint256 constant EMPTY_MMR_ID = 0;
     /// @notice empty MMR size
     uint256 constant EMPTY_MMR_SIZE = 1;
-    /// @notice empty MMR root - keccak256
+    /// @notice empty MMR root - calculated using keccak256
     bytes32 constant EMPTY_MMR_ROOT = 0x5d8d23518dd388daa16925ff9475c5d1c06430d21e0422520d6a56402f42937b;
 
     // ========================= Mappings ========================= //

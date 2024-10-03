@@ -5,10 +5,18 @@ import {Lib_RLPReader as RLPReader} from "@optimism/libraries/rlp/Lib_RLPReader.
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {StatelessMmr} from "solidity-mmr/lib/StatelessMmr.sol";
 
-import "./lib/Types.sol";
-
 contract Satellite is Ownable {
+    // ========================= Types ========================= //
     using RLPReader for RLPReader.RLPItem;
+
+    /// @notice This struct represents a Merkle Mountain Range accumulating provably valid block hashes
+    /// @dev each MMR is mapped to a unique ID also referred to as mmrId
+    struct MMRInfo {
+        /// @notice latestSize represents the latest size of the MMR
+        uint256 latestSize;
+        /// @notice mmrSizeToRoot maps the MMR size to the MMR root, that way we have automatic versioning
+        mapping(uint256 => bytes32) mmrSizeToRoot;
+    }
 
     // ========================= Constants ========================= //
     /// @notice non existent MMR size

@@ -1,4 +1,8 @@
 [profile.default]
+remappings = [
+    "@optimism/libraries=src/lib/external/optimism",
+    "@openzeppelin=lib/openzeppelin-contracts",
+]
 src = "src"
 out = "out"
 libs = ["lib"]

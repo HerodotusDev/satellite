@@ -1,0 +1,16 @@
+{
+  "name": "herodotus-evm",
+  "version": "2.0.0",
+  "repository": "git@github.com:HerodotusDev/herodotus-evm.git",
+  "author": "Herodotus Ltd <hello@herodotus.dev>",
+  "license": "GPL-3.0",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "prettier": "prettier --write --list-different ./*"
+  },
+  "devDependencies": {
+    "only-allow": "^1.2.1",
+    "prettier": "^3.3.3",
+    "prettier-plugin-solidity": "^1.4.1"
+  }
+}

@@ -14,8 +14,8 @@ contract SatelliteCore is Ownable {
     struct MMRInfo {
         /// @notice latestSize represents the latest size of the MMR
         uint256 latestSize;
-        /// @notice hashingFunctionToMmrSizeToRoot maps the hashing function => MMR size => the MMR root, that way we have automatic versioning
-        mapping(bytes32 => mapping(uint256 => bytes32)) hashingFunctionToMmrSizeToRoot;
+        /// @notice mmrSizeToRoot maps the  MMR size => the MMR root, that way we have automatic versioning
+        mapping(uint256 => bytes32) mmrSizeToRoot;
     }
 
     // ========================= Constants ========================= //
@@ -31,8 +31,9 @@ contract SatelliteCore is Ownable {
     bytes32 constant EMPTY_MMR_ROOT = 0x5d8d23518dd388daa16925ff9475c5d1c06430d21e0422520d6a56402f42937b;
 
     // ========================= Mappings ========================= //
-    /// @dev mapping of ChainId => MMR ID => MMR info
-    mapping(uint256 => mapping(uint256 => MMRInfo)) public mmrs;
+    /// @dev mapping of ChainId => MMR ID => hashing function => MMR info
+    /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
+    mapping(uint256 => mapping(uint256 => mapping(bytes32 => MMRInfo))) public mmrs;
 
     /// @notice mapping of ChainId => hashing function => block number => block parent hash
     mapping(uint256 => mapping(bytes32 => mapping(uint256 => bytes32))) public receivedParentHashes;
@@ -49,6 +50,7 @@ contract SatelliteCore is Ownable {
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
     /// @param originChainId the ID of the chain from which the new MMR comes from
     /// @param originalMmrId the ID of the MMR from which the new MMR is created
+    /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
     /// @param mmrRoots the roots of the MMR -> abi endoded hashing function => MMR root
     event MmrCreatedFromForeign(uint256 newMmrId, uint256 mmrSize, uint256 accumulatedChainId, uint256 originChainId, uint256 originalMmrId, bytes mmrRoots);
     /// @notice emitted when a new MMR is created from a domestic source (from another MMR, or a standalone new empty MMR)
@@ -56,6 +58,7 @@ contract SatelliteCore is Ownable {
     /// @param mmrSize the size of the MMR
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
     /// @param originalMmrId the ID of the MMR from which the new MMR is created - if 0, it means an new empty MMR was created
+    /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
     /// @param mmrRoots the roots of the MMR -> abi endoded hashing function => MMR root
     event MmrCreatedFromDomestic(uint256 newMmrId, uint256 mmrSize, uint256 accumulatedChainId, uint256 originalMmrId, bytes mmrRoots);
     /// @notice emitted when a batch of blocks is appended to the MMR
@@ -64,7 +67,9 @@ contract SatelliteCore is Ownable {
     /// @param newMMRSize the new size of the MMR after the batch is appended
     /// @param mmrId the ID of the MMR that was updated
     /// @param newMMRRoot the root of the MMR
-    event OnchainAppendedBlocksBatch(uint256 firstAppendedBlock, uint256 lastAppendedBlock, uint256 newMMRSize, uint256 mmrId, bytes32 newMMRRoot);
+    /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
+    /// @param hashingFunction the hashing function used to calculate the MMR
+    event OnchainAppendedBlocksBatch(uint256 firstAppendedBlock, uint256 lastAppendedBlock, uint256 newMMRSize, uint256 mmrId, bytes32 newMMRRoot, bytes32 hashingFunction);
 
     // ========================= Satellite Dish ========================= //
     /// @notice address of the MessagesInbox contract allowed to forward messages to this contract
@@ -114,13 +119,13 @@ contract SatelliteCore is Ownable {
         require(hashingFunctions.length == roots.length, "ROOTS_FUNCTIONS_LENGTH_MISMATCH");
 
         // Ensure the given ID is not already taken
-        require(mmrs[accumulatedChainId][newMmrId].latestSize == NO_MMR_SIZE, "NEW_MMR_ALREADY_EXISTS");
 
         // Create a new MMR
-        mmrs[accumulatedChainId][newMmrId].latestSize = mmrSize;
         for (uint256 i = 0; i < hashingFunctions.length; i++) {
             require(roots[i] != NO_MMR_ROOT, "ROOT_0_NOT_ALLOWED");
-            mmrs[accumulatedChainId][newMmrId].hashingFunctionToMmrSizeToRoot[hashingFunctions[i]][mmrSize] = roots[i];
+            require(mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize == NO_MMR_SIZE, "NEW_MMR_ALREADY_EXISTS");
+            mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize = mmrSize;
+            mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize] = roots[i];
         }
 
         // Emit the event
@@ -134,12 +139,13 @@ contract SatelliteCore is Ownable {
     /// @param mmrSize size at which the MMR will be copied
     function createMmrFromDomestic(uint256 newMmrId, uint256 originalMmrId, uint256 accumulatedChainId, uint256 mmrSize, bytes32[] calldata hashingFunctions) external {
         require(newMmrId != EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
-        require(mmrs[accumulatedChainId][newMmrId].latestSize == NO_MMR_SIZE, "NEW_MMR_ALREADY_EXISTS");
         require(hashingFunctions.length >= 1, "INVALID_HASHING_FUNCTIONS_LENGTH");
 
         bytes32[] memory roots;
 
         for (uint256 i = 0; i < hashingFunctions.length; i++) {
+            require(mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize == NO_MMR_SIZE, "NEW_MMR_ALREADY_EXISTS");
+
             bytes32 mmrRoot;
             if (originalMmrId == EMPTY_MMR_ID) {
                 // Create an empty MMR
@@ -147,24 +153,21 @@ contract SatelliteCore is Ownable {
                 mmrSize = EMPTY_MMR_SIZE;
             } else {
                 // Load existing MMR data
-                mmrRoot = mmrs[accumulatedChainId][originalMmrId].hashingFunctionToMmrSizeToRoot[hashingFunctions[i]][mmrSize];
+                mmrRoot = mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize];
                 // Ensure the given MMR exists
                 require(mmrRoot != NO_MMR_ROOT, "SRC_MMR_NOT_FOUND");
             }
 
             // Copy the MMR data to the new MMR
-            mmrs[accumulatedChainId][newMmrId].hashingFunctionToMmrSizeToRoot[hashingFunctions[i]][mmrSize] = mmrRoot;
+            mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize = mmrSize;
+            mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize] = mmrRoot;
             roots[i] = mmrRoot;
         }
-
-        // Copy the MMR data to the new MMR
-        mmrs[accumulatedChainId][newMmrId].latestSize = mmrSize;
 
         // Emit the event
         emit MmrCreatedFromDomestic(newMmrId, mmrSize, accumulatedChainId, originalMmrId, abi.encode(hashingFunctions, roots));
     }
 
-    // !!! This causes a threat that one mmr will grow and another with another hashing function, won't, and they will go out of sync, concider splitting the mmrs into different hashing functions earlier than in MMRInfo
     /// @notice Processes & appends a batch of blocks
     /// @dev We sometimes refer to appending blocks as "processing" or "accumulating" them
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
@@ -183,7 +186,7 @@ contract SatelliteCore is Ownable {
         bytes[] calldata headersSerialized
     ) external {
         require(headersSerialized.length > 0, "ERR_EMPTY_BATCH");
-        require(mmrs[accumulatedChainId][mmrId].latestSize != NO_MMR_SIZE, "ERR_MMR_DOES_NOT_EXIST");
+        require(mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize != NO_MMR_SIZE, "ERR_MMR_DOES_NOT_EXIST");
 
         uint256 firstAppendedBlock;
         uint256 newMMRSize;
@@ -195,7 +198,7 @@ contract SatelliteCore is Ownable {
             (firstAppendedBlock, newMMRSize, newMMRRoot) = _processBatchFromAccumulated(mmrId, ctx, headersSerialized, accumulatedChainId, hashingFunction);
         }
 
-        emit OnchainAppendedBlocksBatch(firstAppendedBlock, firstAppendedBlock - headersSerialized.length + 1, newMMRSize, mmrId, newMMRRoot);
+        emit OnchainAppendedBlocksBatch(firstAppendedBlock, firstAppendedBlock - headersSerialized.length + 1, newMMRSize, mmrId, newMMRRoot, hashingFunction);
     }
 
     /// ========================= Internal functions ========================= //
@@ -260,8 +263,8 @@ contract SatelliteCore is Ownable {
         bytes32 hashingFunction
     ) internal returns (uint256 newSize, bytes32 newRoot) {
         // Getting current mmr state for the treeId
-        newSize = mmrs[accumulatedChainId][mmrId].latestSize;
-        newRoot = mmrs[accumulatedChainId][mmrId].hashingFunctionToMmrSizeToRoot[hashingFunction][newSize];
+        newSize = mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize;
+        newRoot = mmrs[accumulatedChainId][mmrId][hashingFunction].mmrSizeToRoot[newSize];
 
         // Allocate temporary memory for the next peaks
         bytes32[] memory nextPeaks = lastPeaks;
@@ -271,8 +274,8 @@ contract SatelliteCore is Ownable {
         }
 
         // Update the contract storage
-        mmrs[accumulatedChainId][mmrId].hashingFunctionToMmrSizeToRoot[hashingFunction][newSize] = newRoot;
-        mmrs[accumulatedChainId][mmrId].latestSize = newSize;
+        mmrs[accumulatedChainId][mmrId][hashingFunction].mmrSizeToRoot[newSize] = newRoot;
+        mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize = newSize;
     }
 
     function _isHeaderValid(bytes32 hash, bytes memory headerRlp) internal pure returns (bool) {
@@ -297,23 +300,23 @@ contract SatelliteCore is Ownable {
         bytes32 hashingFunction
     ) internal view {
         // Verify the reference block is in the MMR and the proof is valid
-        uint256 mmrSize = mmrs[accumulatedChainId][mmrId].latestSize;
-        bytes32 root = mmrs[accumulatedChainId][mmrId].hashingFunctionToMmrSizeToRoot[hashingFunction][mmrSize];
+        uint256 mmrSize = mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize;
+        bytes32 root = mmrs[accumulatedChainId][mmrId][hashingFunction].mmrSizeToRoot[mmrSize];
         StatelessMmr.verifyProof(referenceProofLeafIndex, keccak256(referenceHeaderSerialized), referenceProof, mmrPeaks, mmrSize, root);
     }
 
     // ========================= View functions ========================= //
 
     function getMMRRoot(uint256 mmrId, uint256 mmrSize, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bytes32) {
-        return mmrs[accumulatedChainId][mmrId].hashingFunctionToMmrSizeToRoot[hashingFunction][mmrSize];
+        return mmrs[accumulatedChainId][mmrId][hashingFunction].mmrSizeToRoot[mmrSize];
     }
 
     function getLatestMMRRoot(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bytes32) {
-        uint256 latestSize = mmrs[accumulatedChainId][mmrId].latestSize;
-        return mmrs[accumulatedChainId][mmrId].hashingFunctionToMmrSizeToRoot[hashingFunction][latestSize];
+        uint256 latestSize = mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize;
+        return mmrs[accumulatedChainId][mmrId][hashingFunction].mmrSizeToRoot[latestSize];
     }
 
-    function getLatestMMRSize(uint256 mmrId, uint256 accumulatedChainId) external view returns (uint256) {
-        return mmrs[accumulatedChainId][mmrId].latestSize;
+    function getLatestMMRSize(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (uint256) {
+        return mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize;
     }
 }

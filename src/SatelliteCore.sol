@@ -319,4 +319,8 @@ contract SatelliteCore is Ownable {
     function getLatestMMRSize(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (uint256) {
         return mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize;
     }
+
+    function getReceivedParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber) external view returns (bytes32) {
+        return receivedParentHashes[chainId][hashingFunction][blockNumber];
+    }
 }

@@ -6,7 +6,8 @@
   "license": "GPL-3.0",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "prettier": "prettier --write --list-different ./*"
+    "prettier": "prettier --write --list-different ./*",
+    "prettier:check": "prettier --check ."
   },
   "devDependencies": {
     "only-allow": "^1.2.1",

@@ -20,6 +20,18 @@ jobs:
         with:
           submodules: recursive
 
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
@@ -29,9 +41,9 @@ jobs:
         run: |
           forge --version
 
-      - name: Run Forge fmt
+      - name: Run Prettier fmt
         run: |
-          forge fmt --check
+          pnpm prettier:check
         id: fmt
 
       - name: Run Forge build

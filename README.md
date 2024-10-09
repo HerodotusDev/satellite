@@ -1,66 +1,60 @@
-## Foundry
+![](/banner.png)
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+### Herodotus EVM V2 Smart Contracts
 
-Foundry consists of:
+Herodotus contracts for EVM chains.
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+# Prerequisites:
+
+- Git
+- Node.js (^18.0)
+- npm
+- pnpm
+- Foundry
+- Solc
+
+## Running Locally
+
+Create a `.env` file based on `.env.example`, and then run:
+
+```bash
+git clone git@github.com:HerodotusDev/herodotus-evm-v2.git
+cd herodotus-evm-v2
+
+# If you do not have pnpm, run `npm install -g pnpm`
+# Install dependencies
+pnpm install
+
+# Install libraries
+forge install
+
+# Running tests requires .env to be configured
+forge test
+```
+
+## Contracts Overview
+
+- `Satellite`: a Diamond contract
+  - `LibSatellite`: a Diamond library, holds the persistent diamond state and manages Diamond functionalities
+  - `SatelliteInspectorModule`: a Diamond Loupe contract
+  - `SatelliteMaintenanceModule`: a Diamond Cut contract
+- `SatelliteCoreModule`: contains core logic, emits all indexed events
+
+## Deployed Contracts
+
+- [Deployed Contracts Addresses](https://docs.herodotus.dev/herodotus-docs/deployed-contracts)
+
+## Deployment
+
+`pnpm run deploy`
 
 ## Documentation
 
-https://book.getfoundry.sh/
+Here are some useful links for further reading:
 
-## Usage
+- [Herodotus Documentation](https://docs.herodotus.dev)
+- [Herodotus Builder Guide](https://herodotus.notion.site/herodotus/Herodotus-Hands-On-Builder-Guide-5298b607069f4bcfba9513aa75ee74d4)
 
-### Build
+## License
 
-```shell
-$ forge build
-```
-
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+Copyright 2024 - Herodotus Dev Ltd

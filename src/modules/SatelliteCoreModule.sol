@@ -173,16 +173,14 @@ contract SatelliteCoreModule {
 
         _validateParentBlockAndProveIntegrity(treeId, referenceProofLeafIndex, referenceProof, mmrPeaks, referenceHeaderSerialized, accumulatedChainId, hashingFunction);
 
-        bytes32 decodedParentHash = _decodeParentHash(referenceHeaderSerialized);
-
-        require(decodedParentHash == keccak256(headersSerialized[0]), "ERR_NON_CONSECUTIVE_ELEMENT");
-
         bytes32[] memory headersHashes = new bytes32[](headersSerialized.length);
-        headersHashes[0] = decodedParentHash;
+        headersHashes[0] = _decodeParentHash(referenceHeaderSerialized);
+
+        require(headersHashes[0] == keccak256(headersSerialized[0]), "ERR_NON_CONSECUTIVE_ELEMENT");
+
         for (uint256 i = 1; i < headersSerialized.length; ++i) {
-            bytes32 parentHash = _decodeParentHash(headersSerialized[i - 1]);
-            require(_isHeaderValid(parentHash, headersSerialized[i]), "ERR_INVALID_CHAIN_ELEMENT");
-            headersHashes[i] = parentHash;
+            headersHashes[i] = _decodeParentHash(headersSerialized[i - 1]);
+            require(_isHeaderValid(headersHashes[i], headersSerialized[i]), "ERR_INVALID_CHAIN_ELEMENT");
         }
         (newMMRSize, newMMRRoot) = _appendMultipleBlockhashesToMMR(headersHashes, mmrPeaks, treeId, accumulatedChainId, hashingFunction);
         firstAppendedBlock = _decodeBlockNumber(headersSerialized[0]);

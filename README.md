@@ -40,6 +40,12 @@ forge test
   - `SatelliteMaintenanceModule`: a Diamond Cut contract
 - `SatelliteCoreModule`: contains core logic, emits all indexed events
 
+## Next Steps
+
+- Messaging contracts
+- Parent Hash getters
+- Facts aggregators
+
 ## Deployed Contracts
 
 - [Deployed Contracts Addresses](https://docs.herodotus.dev/herodotus-docs/deployed-contracts)

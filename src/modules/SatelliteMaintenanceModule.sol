@@ -4,9 +4,6 @@ pragma solidity ^0.8.27;
 import {ISatelliteMaintenance} from "../interfaces/ISatelliteMaintenance.sol";
 import {LibSatellite} from "../libraries/LibSatellite.sol";
 
-// Remember to add the loupe functions from SatelliteLoupeModule to the satellite.
-// The loupe functions are required by the EIP2535 Satellites standard
-
 contract SatelliteMaintenanceModule is ISatelliteMaintenance {
     /// @notice Add/replace/remove any number of functions and optionally exemaintenancee
     ///         a function with delegatecall

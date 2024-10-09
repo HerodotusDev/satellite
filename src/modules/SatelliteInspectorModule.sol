@@ -4,8 +4,6 @@ pragma solidity ^0.8.27;
 import {LibSatellite} from "../libraries/LibSatellite.sol";
 import {ISatelliteInspector} from "../interfaces/ISatelliteInspector.sol";
 
-// The functions in SatelliteLoupeModule MUST be added to a satellite.
-// The EIP-2535 Satellite standard requires these functions.
 contract SatelliteInspectorModule is ISatelliteInspector {
     /// @notice Gets all modules and their selectors.
     /// @return modules_ Module

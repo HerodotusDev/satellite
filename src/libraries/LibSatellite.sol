@@ -38,14 +38,13 @@ library LibSatellite {
     }
 
     struct SatelliteStorage {
-        // maps function selector to the module address and
-        // the position of the selector in the moduleFunctionSelectors.selectors array
+        /// @dev maps function selector to the module address and the position of the selector in the moduleFunctionSelectors.selectors array
         mapping(bytes4 => ModuleAddressAndPosition) selectorToModuleAndPosition;
-        // maps module addresses to function selectors
+        /// @dev maps module addresses to function selectors
         mapping(address => ModuleFunctionSelectors) moduleFunctionSelectors;
-        // module addresses
+        /// @dev module addresses
         address[] moduleAddresses;
-        // owner of the contract
+        /// @dev owner of the contract
         address contractOwner;
         // ========================= Core mappings ========================= //
         /// @dev mapping of ChainId => MMR ID => hashing function => MMR info
@@ -91,7 +90,6 @@ library LibSatellite {
 
     event SatelliteMaintenance(ISatelliteMaintenance.ModuleMaintenance[] _satelliteMaintenance, address _init, bytes _calldata);
 
-    // Internal function version of satelliteMaintenance
     function satelliteMaintenance(ISatelliteMaintenance.ModuleMaintenance[] memory _satelliteMaintenance, address _init, bytes memory _calldata) internal {
         for (uint256 moduleIndex; moduleIndex < _satelliteMaintenance.length; moduleIndex++) {
             ISatelliteMaintenance.ModuleMaintenance memory moduleMaintenance = _satelliteMaintenance[moduleIndex];
@@ -115,7 +113,7 @@ library LibSatellite {
         SatelliteStorage storage s = satelliteStorage();
         require(_moduleAddress != address(0), "LibSatelliteMaintenance: Add module can't be address(0)");
         uint96 selectorPosition = uint96(s.moduleFunctionSelectors[_moduleAddress].functionSelectors.length);
-        // add new module address if it does not exist
+        /// @dev add new module address if it does not exist
         if (selectorPosition == 0) {
             addModule(s, _moduleAddress);
         }
@@ -133,7 +131,7 @@ library LibSatellite {
         SatelliteStorage storage s = satelliteStorage();
         require(_moduleAddress != address(0), "LibSatelliteMaintenance: Add module can't be address(0)");
         uint96 selectorPosition = uint96(s.moduleFunctionSelectors[_moduleAddress].functionSelectors.length);
-        // add new module address if it does not exist
+        /// @dev add new module address if it does not exist
         if (selectorPosition == 0) {
             addModule(s, _moduleAddress);
         }
@@ -150,7 +148,7 @@ library LibSatellite {
     function removeFunctions(address _moduleAddress, bytes4[] memory _functionSelectors) internal {
         require(_functionSelectors.length > 0, "LibSatelliteMaintenance: No selectors in module to maintenance");
         SatelliteStorage storage s = satelliteStorage();
-        // if function does not exist then do nothing and return
+        /// @dev if function does not exist then do nothing and return
         require(_moduleAddress == address(0), "LibSatelliteMaintenance: Remove module address must be address(0)");
         for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {
             bytes4 selector = _functionSelectors[selectorIndex];
@@ -173,24 +171,20 @@ library LibSatellite {
 
     function removeFunction(SatelliteStorage storage s, address _moduleAddress, bytes4 _selector) internal {
         require(_moduleAddress != address(0), "LibSatelliteMaintenance: Can't remove function that doesn't exist");
-        // an immutable function is a function defined directly in a satellite
+        /// @dev an immutable function is a function defined directly in a satellite
         require(_moduleAddress != address(this), "LibSatelliteMaintenance: Can't remove immutable function");
-        // replace selector with last selector, then delete last selector
         uint256 selectorPosition = s.selectorToModuleAndPosition[_selector].functionSelectorPosition;
         uint256 lastSelectorPosition = s.moduleFunctionSelectors[_moduleAddress].functionSelectors.length - 1;
-        // if not the same then replace _selector with lastSelector
         if (selectorPosition != lastSelectorPosition) {
             bytes4 lastSelector = s.moduleFunctionSelectors[_moduleAddress].functionSelectors[lastSelectorPosition];
             s.moduleFunctionSelectors[_moduleAddress].functionSelectors[selectorPosition] = lastSelector;
             s.selectorToModuleAndPosition[lastSelector].functionSelectorPosition = uint96(selectorPosition);
         }
-        // delete the last selector
         s.moduleFunctionSelectors[_moduleAddress].functionSelectors.pop();
         delete s.selectorToModuleAndPosition[_selector];
 
-        // if no more selectors for module address then delete the module address
+        /// @dev if no more selectors for module address then delete the module address
         if (lastSelectorPosition == 0) {
-            // replace module address with last module address and delete last module address
             uint256 lastModuleAddressPosition = s.moduleAddresses.length - 1;
             uint256 moduleAddressPosition = s.moduleFunctionSelectors[_moduleAddress].moduleAddressPosition;
             if (moduleAddressPosition != lastModuleAddressPosition) {
@@ -214,7 +208,6 @@ library LibSatellite {
             (bool success, bytes memory error) = _init.delegatecall(_calldata);
             if (!success) {
                 if (error.length > 0) {
-                    // bubble up the error
                     revert(string(error));
                 } else {
                     revert("LibSatelliteMaintenance: _init function reverted");

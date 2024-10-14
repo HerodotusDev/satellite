@@ -14,7 +14,7 @@ library LibSatellite {
     /// @notice empty MMR size
     uint256 constant EMPTY_MMR_SIZE = 1;
     /// @notice diamond storage position
-    bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("satellite.standard.satellite.storage");
+    bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.satellite.storage");
 
     struct ModuleAddressAndPosition {
         address moduleAddress;
@@ -29,6 +29,8 @@ library LibSatellite {
     /// @notice This struct represents a Merkle Mountain Range accumulating provably valid block hashes
     /// @dev each MMR is mapped to a unique ID also referred to as mmrId
     struct MMRInfo {
+        /// @notice isSiblingSynced informs if the MMR has it's siblings and has to be grown in sync with them - used when growing off-chain and growring multiple hashing functions at once, for example, this could be a keccak MMR sibling synced to a poseidon MMR
+        bool isSiblingSynced;
         /// @notice latestSize represents the latest size of the MMR
         uint256 latestSize;
         /// @notice mmrSizeToRoot maps the  MMR size => the MMR root, that way we have automatic versioning

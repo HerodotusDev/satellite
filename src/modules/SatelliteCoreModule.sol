@@ -11,7 +11,7 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
 
     using RLPReader for RLPReader.RLPItem;
 
-    struct MmrUpdateResult {
+    struct MMRUpdateResult {
         uint256 firstAppendedBlock;
         uint256 lastAppendedBlock;
         uint256 newMMRSize;
@@ -43,23 +43,12 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
     /// @param mmrRoots the roots of the MMR -> abi endoded hashing function => MMR root
     event MmrCreatedFromDomestic(uint256 newMmrId, uint256 mmrSize, uint256 accumulatedChainId, uint256 originalMmrId, bytes mmrRoots);
     /// @notice emitted when a batch of blocks is appended to the MMR
-    /// @param firstAppendedBlock the block number of the first block appended - the highest block number in the batch
-    /// @param lastAppendedBlock the block number of the last block appended - the lowest block number in the batch
-    /// @param newMMRSize the new size of the MMR after the batch is appended
+    /// @param result MMRUpdateResult struct containing firstAppendedBlock, lastAppendedBlock, newMMRSize, newMMRRoot
     /// @param mmrId the ID of the MMR that was updated
-    /// @param newMMRRoot the root of the MMR
     /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
     /// @param hashingFunction the hashing function used to calculate the MMR
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
-    event OnchainAppendedBlocksBatch(
-        uint256 firstAppendedBlock,
-        uint256 lastAppendedBlock,
-        uint256 newMMRSize,
-        uint256 mmrId,
-        bytes32 newMMRRoot,
-        bytes32 hashingFunction,
-        uint256 accumulatedChainId
-    );
+    event OnchainAppendedBlocksBatch(MMRUpdateResult result, uint256 mmrId, bytes32 hashingFunction, uint256 accumulatedChainId);
 
     // ========================= Constants ========================= //
 
@@ -73,7 +62,7 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
     // keccak_hash(1, "brave new world")
     bytes32 public constant KECCAK_MMR_INITIAL_ROOT = 0x5d8d23518dd388daa16925ff9475c5d1c06430d21e0422520d6a56402f42937b;
 
-    // ========================= Modules Only Functions ========================= //
+    // ========================= Other Satellite Modules Only Functions ========================= //
 
     /// @notice Receiving a recent block hash obtained on-chain directly on this chain or sent in a message from another one (eg. L1 -> L2)
     /// @notice saves the parent hash of the block number (from a given chain) in the contract storage
@@ -170,9 +159,11 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
         bytes[] calldata headersSerialized
     ) external {
         require(headersSerialized.length > 0, "ERR_EMPTY_BATCH");
-        require(LibSatellite.satelliteStorage().mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize != LibSatellite.NO_MMR_SIZE, "ERR_MMR_DOES_NOT_EXIST");
+        LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
+        require(s.mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize != LibSatellite.NO_MMR_SIZE, "ERR_MMR_DOES_NOT_EXIST");
+        require(s.mmrs[accumulatedChainId][mmrId][hashingFunction].isSiblingSynced == true, "ERR_MMR_IS_SIBLING_SYNCED");
 
-        MmrUpdateResult memory result;
+        MMRUpdateResult memory result;
 
         if (processFromReceivedBlockHash) {
             result = _processBatchFromReceivedBlockHash(mmrId, ctx, headersSerialized, accumulatedChainId, hashingFunction);
@@ -180,7 +171,7 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
             result = _processBatchFromAccumulated(mmrId, ctx, headersSerialized, accumulatedChainId, hashingFunction);
         }
 
-        emit OnchainAppendedBlocksBatch(result.firstAppendedBlock, result.lastAppendedBlock, result.newMMRSize, mmrId, result.newMMRRoot, hashingFunction, accumulatedChainId);
+        emit OnchainAppendedBlocksBatch(result, mmrId, hashingFunction, accumulatedChainId);
     }
 
     /// ========================= Internal functions ========================= //
@@ -191,7 +182,7 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
         bytes[] memory headersSerialized,
         uint256 accumulatedChainId,
         bytes32 hashingFunction
-    ) internal returns (MmrUpdateResult memory result) {
+    ) internal returns (MMRUpdateResult memory result) {
         (uint256 referenceProofLeafIndex, bytes32[] memory referenceProof, bytes32[] memory mmrPeaks, bytes memory referenceHeaderSerialized) = abi.decode(
             ctx,
             (uint256, bytes32[], bytes32[], bytes)
@@ -219,7 +210,7 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
         bytes[] memory headersSerialized,
         uint256 accumulatedChainId,
         bytes32 hashingFunction
-    ) internal returns (MmrUpdateResult memory result) {
+    ) internal returns (MMRUpdateResult memory result) {
         (uint256 blockNumber, bytes32[] memory mmrPeaks) = abi.decode(ctx, (uint256, bytes32[]));
         LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
@@ -261,6 +252,7 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
         // Update the contract storage
         s.mmrs[accumulatedChainId][mmrId][hashingFunction].mmrSizeToRoot[newSize] = newRoot;
         s.mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize = newSize;
+        s.mmrs[accumulatedChainId][mmrId][hashingFunction].isSiblingSynced = false;
     }
 
     function _isHeaderValid(bytes32 hash, bytes memory headerRlp) internal pure returns (bool) {
@@ -317,6 +309,11 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
     function getLatestMMRSize(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (uint256) {
         LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         return s.mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize;
+    }
+
+    function isMMRSiblingSynced(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bool) {
+        LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
+        return s.mmrs[accumulatedChainId][mmrId][hashingFunction].isSiblingSynced;
     }
 
     function getReceivedParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber) external view returns (bytes32) {

@@ -14,7 +14,6 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
     uint256 public constant MINIMUM_BLOCKS_CONFIRMATIONS = 20;
     uint256 public constant MAXIMUM_BLOCKS_CONFIRMATIONS = 255;
 
-    ISatellite public immutable SATELLITE;
     IFactsRegistry public immutable FACTS_REGISTRY;
     uint256 public immutable AGGREGATED_CHAIN_ID;
 
@@ -50,9 +49,8 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
         uint256 chainId
     );
 
-    constructor(uint256 aggregatedChainId, ISatellite satellite, IFactsRegistry factsRegistry) {
+    constructor(uint256 aggregatedChainId, IFactsRegistry factsRegistry) {
         AGGREGATED_CHAIN_ID = aggregatedChainId;
-        SATELLITE = satellite;
         FACTS_REGISTRY = factsRegistry;
     }
 
@@ -66,7 +64,7 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
 
         JobOutputPacked calldata firstOutput = outputs[0];
         // Ensure the first job is continuable
-        _validateOutput(AGGREGATED_CHAIN_ID, mmrId, fromBlockNumber, firstOutput);
+        _validateOutput(mmrId, fromBlockNumber, firstOutput);
 
         uint256 limit = outputs.length - 1;
 
@@ -89,9 +87,11 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
 
         s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
         s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].latestSize = mmrNewSize;
+        s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced = true;
 
         s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootKeccak;
         s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].latestSize = mmrNewSize;
+        s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced = true;
 
         (uint256 fromBlock, ) = firstOutput.blockNumbersPacked.split128();
         (, uint256 toBlock) = lastOutput.blockNumbersPacked.split128();
@@ -102,23 +102,35 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
     /// @notice Ensures the job output is cryptographically sound to continue from
     /// @param fromBlockNumber The parent hash of the block to start from
     /// @param firstOutput The job output to check
-    function _validateOutput(uint256 chainId, uint256 mmrId, uint256 fromBlockNumber, ISharpFactsAggregatorModule.JobOutputPacked memory firstOutput) internal view {
+    function _validateOutput(uint256 mmrId, uint256 fromBlockNumber, ISharpFactsAggregatorModule.JobOutputPacked memory firstOutput) internal view {
+        LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         (uint256 mmrSize, ) = firstOutput.mmrSizesPacked.split128();
-        uint256 actualMmrSizePoseidon = SATELLITE.getLatestMMRSize(mmrId, chainId, POSEIDON_HASHING_FUNCTION);
-        uint256 actualMmrSizeKeccak = SATELLITE.getLatestMMRSize(mmrId, chainId, KECCAK_HASHING_FUNCTION);
+
+        uint256 actualMmrSizePoseidon = s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].latestSize;
+        uint256 actualMmrSizeKeccak = s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].latestSize;
 
         // Check that the job's previous MMR size is the same as the one stored in the contract state
         if (mmrSize != actualMmrSizePoseidon || mmrSize != actualMmrSizeKeccak) {
             revert AggregationError("MMR size mismatch");
         }
 
+        if (s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced == false) {
+            revert AggregationError("Poseidon MMR not sibling synced");
+        }
+
+        if (s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced == false) {
+            revert AggregationError("Keccak MMR not sibling synced");
+        }
+
         // Check that the job's previous Poseidon MMR root is the same as the one stored in the contract state
-        if (firstOutput.mmrPreviousRootPoseidon != SATELLITE.getMMRRoot(mmrId, mmrSize, chainId, POSEIDON_HASHING_FUNCTION)) revert AggregationError("Poseidon root mismatch");
+        if (firstOutput.mmrPreviousRootPoseidon != s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrSize])
+            revert AggregationError("Poseidon root mismatch");
 
         // Check that the job's previous Keccak MMR root is the same as the one stored in the contract state
-        if (firstOutput.mmrPreviousRootKeccak != SATELLITE.getMMRRoot(mmrId, mmrSize, chainId, KECCAK_HASHING_FUNCTION)) revert AggregationError("Keccak root mismatch");
+        if (firstOutput.mmrPreviousRootKeccak != s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrSize])
+            revert AggregationError("Keccak root mismatch");
 
-        bytes32 fromBlockParentHash = SATELLITE.getReceivedParentHash(chainId, KECCAK_HASHING_FUNCTION, fromBlockNumber);
+        bytes32 fromBlockParentHash = s.receivedParentHashes[AGGREGATED_CHAIN_ID][KECCAK_HASHING_FUNCTION][fromBlockNumber];
 
         // If not present in the cache, hash is not authenticated and we cannot continue from it
         if (fromBlockParentHash == bytes32(0)) {

@@ -15,7 +15,7 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
     uint256 public constant MAXIMUM_BLOCKS_CONFIRMATIONS = 255;
 
     IFactsRegistry public immutable FACTS_REGISTRY;
-    uint256 public immutable AGGREGATED_CHAIN_ID;
+    uint256 public immutable AGGREGATED_CHAIN_ID = block.chainid;
 
     // Cairo program hash (i.e., the off-chain block headers accumulator program)
     bytes32 public constant PROGRAM_HASH = bytes32(uint256(0x01eca36d586f5356fba096edbf7414017d51cd0ed24b8fde80f78b61a9216ed2));
@@ -30,8 +30,7 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
     // keccak_hash(1, "brave new world")
     bytes32 public constant KECCAK_MMR_INITIAL_ROOT = 0x5d8d23518dd388daa16925ff9475c5d1c06430d21e0422520d6a56402f42937b;
 
-    constructor(uint256 aggregatedChainId, IFactsRegistry factsRegistry) {
-        AGGREGATED_CHAIN_ID = aggregatedChainId;
+    constructor(IFactsRegistry factsRegistry) {
         FACTS_REGISTRY = factsRegistry;
     }
 

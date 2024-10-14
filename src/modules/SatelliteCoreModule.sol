@@ -3,9 +3,10 @@ pragma solidity ^0.8.27;
 
 import {Lib_RLPReader as RLPReader} from "@optimism/libraries/rlp/Lib_RLPReader.sol";
 import {StatelessMmr} from "solidity-mmr/lib/StatelessMmr.sol";
-import {LibSatellite} from "../libraries/LibSatellite.sol";
+import {LibSatellite} from "libraries/LibSatellite.sol";
+import {ISatelliteCoreModule} from "interfaces/modules/ISatelliteCoreModule.sol";
 
-contract SatelliteCoreModule {
+contract SatelliteCoreModule is ISatelliteCoreModule {
     // ========================= Types ========================= //
 
     using RLPReader for RLPReader.RLPItem;
@@ -16,7 +17,7 @@ contract SatelliteCoreModule {
     /// @param chainId the ID of the chain that the block hash is from
     /// @param blockNumber the block number
     /// @param parentHash the parent hash of the block number
-    event HashReceived(uint256 chainId, uint256 blockNumber, bytes32 parentHash, bytes23 hashingFunction);
+    event HashReceived(uint256 chainId, uint256 blockNumber, bytes32 parentHash, bytes32 hashingFunction);
     /// @notice emitted when a new MMR is created from a foreign source (eg. from another chain, or off-chain computation proven on-chain)
     /// @param newMmrId the ID of the new MMR
     /// @param mmrSize the size of the MMR
@@ -42,13 +43,34 @@ contract SatelliteCoreModule {
     /// @param newMMRRoot the root of the MMR
     /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
     /// @param hashingFunction the hashing function used to calculate the MMR
-    event OnchainAppendedBlocksBatch(uint256 firstAppendedBlock, uint256 lastAppendedBlock, uint256 newMMRSize, uint256 mmrId, bytes32 newMMRRoot, bytes32 hashingFunction);
+    /// @param accumulatedChainId the ID of the chain that the MMR accumulates
+    event OnchainAppendedBlocksBatch(
+        uint256 firstAppendedBlock,
+        uint256 lastAppendedBlock,
+        uint256 newMMRSize,
+        uint256 mmrId,
+        bytes32 newMMRRoot,
+        bytes32 hashingFunction,
+        uint256 accumulatedChainId
+    );
+
+    // ========================= Constants ========================= //
+
+    bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
+    bytes32 public constant POSEIDON_HASHING_FUNCTION = keccak256("poseidon");
+
+    // Default roots for new aggregators:
+    // poseidon_hash(1, "brave new world")
+    bytes32 public constant POSEIDON_MMR_INITIAL_ROOT = 0x06759138078831011e3bc0b4a135af21c008dda64586363531697207fb5a2bae;
+
+    // keccak_hash(1, "brave new world")
+    bytes32 public constant KECCAK_MMR_INITIAL_ROOT = 0x5d8d23518dd388daa16925ff9475c5d1c06430d21e0422520d6a56402f42937b;
 
     // ========================= Modules Only Functions ========================= //
 
     /// @notice Receiving a recent block hash obtained on-chain directly on this chain or sent in a message from another one (eg. L1 -> L2)
     /// @notice saves the parent hash of the block number (from a given chain) in the contract storage
-    function receiveBlockHash(uint256 chainId, uint256 blockNumber, bytes32 parentHash, bytes23 hashingFunction) external {
+    function _receiveBlockHash(uint256 chainId, uint256 blockNumber, bytes32 parentHash, bytes32 hashingFunction) external {
         LibSatellite.enforceIsSatelliteModule();
         LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         s.receivedParentHashes[chainId][hashingFunction][blockNumber] = parentHash;
@@ -62,7 +84,7 @@ contract SatelliteCoreModule {
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
     /// @param originChainId the ID of the chain from which the new MMR will be created
     /// @param originalMmrId the ID of the MMR from which the new MMR will be created
-    function createMmrFromForeign(uint256 newMmrId, bytes calldata mmrRoots, uint256 mmrSize, uint256 accumulatedChainId, uint256 originChainId, uint256 originalMmrId) external {
+    function _createMmrFromForeign(uint256 newMmrId, bytes calldata mmrRoots, uint256 mmrSize, uint256 accumulatedChainId, uint256 originChainId, uint256 originalMmrId) external {
         LibSatellite.enforceIsSatelliteModule();
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
 
@@ -86,9 +108,9 @@ contract SatelliteCoreModule {
 
     // ========================= Core Functions ========================= //
 
-    /// @notice Creates a new MMR that is a clone of an already existing MMR or an empty MMR if mmrId is 0 (in that case mmrSize is ignored)
+    /// @notice Creates a new MMR that is a clone of an already existing MMR or an empty MMR if originalMmrId is 0 (in that case mmrSize is ignored)
     /// @param newMmrId the ID of the new MMR
-    /// @param originalMmrId the ID of the MMR from which the new MMR will be created
+    /// @param originalMmrId the ID of the MMR from which the new MMR will be created - if 0 it means an empty MMR will be created
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
     /// @param mmrSize size at which the MMR will be copied
     function createMmrFromDomestic(uint256 newMmrId, uint256 originalMmrId, uint256 accumulatedChainId, uint256 mmrSize, bytes32[] calldata hashingFunctions) external {
@@ -104,7 +126,7 @@ contract SatelliteCoreModule {
             bytes32 mmrRoot;
             if (originalMmrId == LibSatellite.EMPTY_MMR_ID) {
                 // Create an empty MMR
-                mmrRoot = LibSatellite.EMPTY_MMR_ROOT;
+                mmrRoot = _getInitialMmrRoot(hashingFunctions[i]);
                 mmrSize = LibSatellite.EMPTY_MMR_SIZE;
             } else {
                 // Load existing MMR data
@@ -154,7 +176,7 @@ contract SatelliteCoreModule {
             (firstAppendedBlock, newMMRSize, newMMRRoot) = _processBatchFromAccumulated(mmrId, ctx, headersSerialized, accumulatedChainId, hashingFunction);
         }
 
-        emit OnchainAppendedBlocksBatch(firstAppendedBlock, firstAppendedBlock - headersSerialized.length + 1, newMMRSize, mmrId, newMMRRoot, hashingFunction);
+        emit OnchainAppendedBlocksBatch(firstAppendedBlock, firstAppendedBlock - headersSerialized.length + 1, newMMRSize, mmrId, newMMRRoot, hashingFunction, accumulatedChainId);
     }
 
     /// ========================= Internal functions ========================= //
@@ -261,6 +283,16 @@ contract SatelliteCoreModule {
         uint256 mmrSize = s.mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize;
         bytes32 root = s.mmrs[accumulatedChainId][mmrId][hashingFunction].mmrSizeToRoot[mmrSize];
         StatelessMmr.verifyProof(referenceProofLeafIndex, keccak256(referenceHeaderSerialized), referenceProof, mmrPeaks, mmrSize, root);
+    }
+
+    function _getInitialMmrRoot(bytes32 hashingFunction) internal pure returns (bytes32) {
+        if (hashingFunction == KECCAK_HASHING_FUNCTION) {
+            return KECCAK_MMR_INITIAL_ROOT;
+        } else if (hashingFunction == POSEIDON_HASHING_FUNCTION) {
+            return POSEIDON_MMR_INITIAL_ROOT;
+        } else {
+            revert("INVALID_HASHING_FUNCTION");
+        }
     }
 
     // ========================= View functions ========================= //

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {ISatelliteMaintenance} from "../interfaces/ISatelliteMaintenance.sol";
+import {ISatelliteMaintenanceModule} from "interfaces/modules/ISatelliteMaintenanceModule.sol";
 
 library LibSatellite {
     // ========================= Constants ========================= //
@@ -13,8 +13,6 @@ library LibSatellite {
     uint256 constant EMPTY_MMR_ID = 0;
     /// @notice empty MMR size
     uint256 constant EMPTY_MMR_SIZE = 1;
-    /// @notice empty MMR root - calculated using keccak256
-    bytes32 constant EMPTY_MMR_ROOT = 0x5d8d23518dd388daa16925ff9475c5d1c06430d21e0422520d6a56402f42937b;
     /// @notice diamond storage position
     bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("satellite.standard.satellite.storage");
 
@@ -88,17 +86,17 @@ library LibSatellite {
         revert("LibSatellite: Must be satellite module");
     }
 
-    event SatelliteMaintenance(ISatelliteMaintenance.ModuleMaintenance[] _satelliteMaintenance, address _init, bytes _calldata);
+    event SatelliteMaintenance(ISatelliteMaintenanceModule.ModuleMaintenance[] _satelliteMaintenance, address _init, bytes _calldata);
 
-    function satelliteMaintenance(ISatelliteMaintenance.ModuleMaintenance[] memory _satelliteMaintenance, address _init, bytes memory _calldata) internal {
+    function satelliteMaintenance(ISatelliteMaintenanceModule.ModuleMaintenance[] memory _satelliteMaintenance, address _init, bytes memory _calldata) internal {
         for (uint256 moduleIndex; moduleIndex < _satelliteMaintenance.length; moduleIndex++) {
-            ISatelliteMaintenance.ModuleMaintenance memory moduleMaintenance = _satelliteMaintenance[moduleIndex];
-            ISatelliteMaintenance.ModuleMaintenanceAction action = moduleMaintenance.action;
-            if (action == ISatelliteMaintenance.ModuleMaintenanceAction.Add) {
+            ISatelliteMaintenanceModule.ModuleMaintenance memory moduleMaintenance = _satelliteMaintenance[moduleIndex];
+            ISatelliteMaintenanceModule.ModuleMaintenanceAction action = moduleMaintenance.action;
+            if (action == ISatelliteMaintenanceModule.ModuleMaintenanceAction.Add) {
                 addFunctions(moduleMaintenance.moduleAddress, moduleMaintenance.functionSelectors);
-            } else if (action == ISatelliteMaintenance.ModuleMaintenanceAction.Replace) {
+            } else if (action == ISatelliteMaintenanceModule.ModuleMaintenanceAction.Replace) {
                 replaceFunctions(moduleMaintenance.moduleAddress, moduleMaintenance.functionSelectors);
-            } else if (action == ISatelliteMaintenance.ModuleMaintenanceAction.Remove) {
+            } else if (action == ISatelliteMaintenanceModule.ModuleMaintenanceAction.Remove) {
                 removeFunctions(moduleMaintenance.moduleAddress, moduleMaintenance.functionSelectors);
             } else {
                 revert("LibSatelliteMaintenance: Incorrect ModuleMaintenanceAction");

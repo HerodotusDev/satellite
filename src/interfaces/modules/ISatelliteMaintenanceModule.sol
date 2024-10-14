@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-interface ISatelliteMaintenance {
+interface ISatelliteMaintenanceModule {
     /// @dev Add=0, Replace=1, Remove=2
     enum ModuleMaintenanceAction {
         Add,

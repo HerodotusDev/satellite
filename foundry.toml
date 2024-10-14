@@ -2,6 +2,8 @@
 remappings = [
     "@optimism/libraries=src/libraries/external/optimism",
     "@openzeppelin=lib/openzeppelin-contracts",
+    "libraries=src/libraries",
+    "interfaces=src/interfaces",
 ]
 src = "src"
 out = "out"

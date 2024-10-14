@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import {LibSatellite} from "./libraries/LibSatellite.sol";
-import {ISatelliteMaintenance} from "./interfaces/ISatelliteMaintenance.sol";
+import {ISatelliteMaintenanceModule} from "./interfaces/modules/ISatelliteMaintenanceModule.sol";
 
 /// @dev Shines like a Diamond
 contract Satellite {
@@ -10,12 +10,12 @@ contract Satellite {
         LibSatellite.setContractOwner(_contractOwner);
 
         // Add the satelliteMaintenance external function from the satelliteMaintenanceModule
-        ISatelliteMaintenance.ModuleMaintenance[] memory maintenance = new ISatelliteMaintenance.ModuleMaintenance[](1);
+        ISatelliteMaintenanceModule.ModuleMaintenance[] memory maintenance = new ISatelliteMaintenanceModule.ModuleMaintenance[](1);
         bytes4[] memory functionSelectors = new bytes4[](1);
-        functionSelectors[0] = ISatelliteMaintenance.satelliteMaintenance.selector;
-        maintenance[0] = ISatelliteMaintenance.ModuleMaintenance({
+        functionSelectors[0] = ISatelliteMaintenanceModule.satelliteMaintenance.selector;
+        maintenance[0] = ISatelliteMaintenanceModule.ModuleMaintenance({
             moduleAddress: _satelliteMaintenanceModule,
-            action: ISatelliteMaintenance.ModuleMaintenanceAction.Add,
+            action: ISatelliteMaintenanceModule.ModuleMaintenanceAction.Add,
             functionSelectors: functionSelectors
         });
         LibSatellite.satelliteMaintenance(maintenance, address(0), "");

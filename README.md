@@ -41,6 +41,7 @@ forge test
   - `OwnershipModule`: ERC173 ownership contract for the whole Diamond
 - `SatelliteCoreModule`: contains core logic for MMRs
 - `SharpFactsAggregatorModule`: contains logic for aggregating facts - off-chain proving
+- `L1FactsRegistryModule`: used for storage proofs on-chain based on headers from MMRs from SatelliteCoreModule
 
 - `ISatellite`: an interface joining all interfaces of the Satellite Diamond into one - to be used to interact with the Satellite Diamond
 
@@ -48,7 +49,6 @@ forge test
 
 - Messaging contracts
 - Parent Hash getters
-- Facts Registry
 - Deployment scripts
 - Tests
 

@@ -36,31 +36,40 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
 
     /// @notice Creates a new branch from an L1 message, the sent MMR info comes from an L1 aggregator
     /// @param newMmrId the ID of the MMR to create
-    /// @param mmrRoots the roots of the MMR -> abi endoded hashing function => MMR root
+    /// @param rootsForHashingFunctions the roots of the MMR -> abi endoded hashing function => MMR root
     /// @param mmrSize the size of the MMR
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
     /// @param originChainId the ID of the chain from which the new MMR will be created
     /// @param originalMmrId the ID of the MMR from which the new MMR will be created
-    function _createMmrFromForeign(uint256 newMmrId, bytes calldata mmrRoots, uint256 mmrSize, uint256 accumulatedChainId, uint256 originChainId, uint256 originalMmrId) external {
+    function _createMmrFromForeign(
+        uint256 newMmrId,
+        RootsForHashingFunctions calldata rootsForHashingFunctions,
+        uint256 mmrSize,
+        uint256 accumulatedChainId,
+        uint256 originChainId,
+        uint256 originalMmrId
+    ) external {
         LibSatellite.enforceIsSatelliteModule();
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
 
-        (bytes32[] memory hashingFunctions, bytes32[] memory roots) = abi.decode(mmrRoots, (bytes32[], bytes32[]));
-        require(roots.length >= 1, "INVALID_ROOTS_LENGTH");
-        require(hashingFunctions.length == roots.length, "ROOTS_FUNCTIONS_LENGTH_MISMATCH");
+        require(rootsForHashingFunctions.roots.length >= 1, "INVALID_ROOTS_LENGTH");
+        require(rootsForHashingFunctions.hashingFunctions.length == rootsForHashingFunctions.roots.length, "ROOTS_FUNCTIONS_LENGTH_MISMATCH");
 
         LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
         // Create a new MMR
-        for (uint256 i = 0; i < hashingFunctions.length; i++) {
-            require(roots[i] != LibSatellite.NO_MMR_ROOT, "ROOT_0_NOT_ALLOWED");
-            require(s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize == LibSatellite.NO_MMR_SIZE, "NEW_MMR_ALREADY_EXISTS");
-            s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize = mmrSize;
-            s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize] = roots[i];
+        for (uint256 i = 0; i < rootsForHashingFunctions.hashingFunctions.length; i++) {
+            bytes32 root = rootsForHashingFunctions.roots[i];
+            bytes32 hashingFunction = rootsForHashingFunctions.hashingFunctions[i];
+
+            require(root != LibSatellite.NO_MMR_ROOT, "ROOT_0_NOT_ALLOWED");
+            require(s.mmrs[accumulatedChainId][newMmrId][hashingFunction].latestSize == LibSatellite.NO_MMR_SIZE, "NEW_MMR_ALREADY_EXISTS");
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunction].latestSize = mmrSize;
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunction].mmrSizeToRoot[mmrSize] = root;
         }
 
         // Emit the event
-        emit MmrCreatedFromForeign(newMmrId, mmrSize, accumulatedChainId, originChainId, originalMmrId, mmrRoots);
+        emit MmrCreatedFromForeign(newMmrId, mmrSize, accumulatedChainId, originChainId, originalMmrId, rootsForHashingFunctions);
     }
 
     // ========================= Core Functions ========================= //

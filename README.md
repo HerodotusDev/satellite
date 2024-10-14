@@ -38,7 +38,8 @@ forge test
   - `LibSatellite`: a Diamond library, holds the persistent diamond state and manages Diamond functionalities
   - `SatelliteInspectorModule`: a Diamond Loupe contract
   - `SatelliteMaintenanceModule`: a Diamond Cut contract
-- `SatelliteCoreModule`: contains core logic, emits all indexed events
+  - `OwnershipModule`: ERC173 ownership contract for the whole Diamond
+- `SatelliteCoreModule`: contains core logic for MMRs
 
 ## Next Steps
 

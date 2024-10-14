@@ -30,24 +30,6 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
     // keccak_hash(1, "brave new world")
     bytes32 public constant KECCAK_MMR_INITIAL_ROOT = 0x5d8d23518dd388daa16925ff9475c5d1c06430d21e0422520d6a56402f42937b;
 
-    // Custom errors for better error handling and clarity
-    error NotEnoughJobs();
-    error UnknownParentHash();
-    error AggregationError(string message); // Generic error with a message
-    error AggregationBlockMismatch();
-    error GenesisBlockReached();
-    error InvalidFact();
-
-    event SharpFactsAggregate(
-        uint256 firstAppendedBlock,
-        uint256 lastAppendedBlock,
-        uint256 newMmrSize,
-        uint256 mmrId,
-        bytes32 newPoseidonMmrRoot,
-        bytes32 newKeccakMmrRoot,
-        uint256 chainId
-    );
-
     constructor(uint256 aggregatedChainId, IFactsRegistry factsRegistry) {
         AGGREGATED_CHAIN_ID = aggregatedChainId;
         FACTS_REGISTRY = factsRegistry;

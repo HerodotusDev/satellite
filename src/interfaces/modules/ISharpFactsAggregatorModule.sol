@@ -35,5 +35,23 @@ interface ISharpFactsAggregatorModule {
         uint256 mmrSizesPacked;
     }
 
+    event SharpFactsAggregate(
+        uint256 firstAppendedBlock,
+        uint256 lastAppendedBlock,
+        uint256 newMmrSize,
+        uint256 mmrId,
+        bytes32 newPoseidonMmrRoot,
+        bytes32 newKeccakMmrRoot,
+        uint256 chainId
+    );
+
+    // Custom errors for better error handling and clarity
+    error NotEnoughJobs();
+    error UnknownParentHash();
+    error AggregationError(string message); // Generic error with a message
+    error AggregationBlockMismatch();
+    error GenesisBlockReached();
+    error InvalidFact();
+
     function aggregateSharpJobs(uint256 mmrId, uint256 fromBlockNumber, JobOutputPacked[] calldata outputs) external;
 }

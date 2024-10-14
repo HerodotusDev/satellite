@@ -40,12 +40,12 @@ forge test
   - `SatelliteMaintenanceModule`: a Diamond Cut contract
   - `OwnershipModule`: ERC173 ownership contract for the whole Diamond
 - `SatelliteCoreModule`: contains core logic for MMRs
+- `SharpFactsAggregatorModule`: contains logic for aggregating facts - off-chain proving
 
 ## Next Steps
 
 - Messaging contracts
 - Parent Hash getters
-- Facts aggregators
 
 ## Deployed Contracts
 

@@ -34,7 +34,7 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
         emit HashReceived(chainId, blockNumber, parentHash, hashingFunction);
     }
 
-    /// @notice Creates a new branch from an L1 message, the sent MMR info comes from an L1 aggregator
+    /// @notice Most commonly creates a new branch from an L1 message, the sent MMR info comes from an L1 aggregator
     /// @param newMmrId the ID of the MMR to create
     /// @param rootsForHashingFunctions the roots of the MMR -> abi endoded hashing function => MMR root
     /// @param mmrSize the size of the MMR

@@ -11,6 +11,13 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
 
     using RLPReader for RLPReader.RLPItem;
 
+    struct MmrUpdateResult {
+        uint256 firstAppendedBlock;
+        uint256 lastAppendedBlock;
+        uint256 newMMRSize;
+        bytes32 newMMRRoot;
+    }
+
     // ========================= Events ========================= //
 
     /// @notice emitted when a block hash is received
@@ -163,20 +170,17 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
         bytes[] calldata headersSerialized
     ) external {
         require(headersSerialized.length > 0, "ERR_EMPTY_BATCH");
-        LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        require(s.mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize != LibSatellite.NO_MMR_SIZE, "ERR_MMR_DOES_NOT_EXIST");
+        require(LibSatellite.satelliteStorage().mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize != LibSatellite.NO_MMR_SIZE, "ERR_MMR_DOES_NOT_EXIST");
 
-        uint256 firstAppendedBlock;
-        uint256 newMMRSize;
-        bytes32 newMMRRoot;
+        MmrUpdateResult memory result;
 
         if (processFromReceivedBlockHash) {
-            (firstAppendedBlock, newMMRSize, newMMRRoot) = _processBatchFromReceivedBlockHash(mmrId, ctx, headersSerialized, accumulatedChainId, hashingFunction);
+            result = _processBatchFromReceivedBlockHash(mmrId, ctx, headersSerialized, accumulatedChainId, hashingFunction);
         } else {
-            (firstAppendedBlock, newMMRSize, newMMRRoot) = _processBatchFromAccumulated(mmrId, ctx, headersSerialized, accumulatedChainId, hashingFunction);
+            result = _processBatchFromAccumulated(mmrId, ctx, headersSerialized, accumulatedChainId, hashingFunction);
         }
 
-        emit OnchainAppendedBlocksBatch(firstAppendedBlock, firstAppendedBlock - headersSerialized.length + 1, newMMRSize, mmrId, newMMRRoot, hashingFunction, accumulatedChainId);
+        emit OnchainAppendedBlocksBatch(result.firstAppendedBlock, result.lastAppendedBlock, result.newMMRSize, mmrId, result.newMMRRoot, hashingFunction, accumulatedChainId);
     }
 
     /// ========================= Internal functions ========================= //
@@ -187,7 +191,7 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
         bytes[] memory headersSerialized,
         uint256 accumulatedChainId,
         bytes32 hashingFunction
-    ) internal returns (uint256 firstAppendedBlock, uint256 newMMRSize, bytes32 newMMRRoot) {
+    ) internal returns (MmrUpdateResult memory result) {
         (uint256 referenceProofLeafIndex, bytes32[] memory referenceProof, bytes32[] memory mmrPeaks, bytes memory referenceHeaderSerialized) = abi.decode(
             ctx,
             (uint256, bytes32[], bytes32[], bytes)
@@ -204,8 +208,9 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
             headersHashes[i] = _decodeParentHash(headersSerialized[i - 1]);
             require(_isHeaderValid(headersHashes[i], headersSerialized[i]), "ERR_INVALID_CHAIN_ELEMENT");
         }
-        (newMMRSize, newMMRRoot) = _appendMultipleBlockhashesToMMR(headersHashes, mmrPeaks, treeId, accumulatedChainId, hashingFunction);
-        firstAppendedBlock = _decodeBlockNumber(headersSerialized[0]);
+        (result.newMMRSize, result.newMMRRoot) = _appendMultipleBlockhashesToMMR(headersHashes, mmrPeaks, treeId, accumulatedChainId, hashingFunction);
+        result.firstAppendedBlock = _decodeBlockNumber(headersSerialized[0]);
+        result.lastAppendedBlock = result.firstAppendedBlock - headersSerialized.length + 1;
     }
 
     function _processBatchFromReceivedBlockHash(
@@ -214,7 +219,7 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
         bytes[] memory headersSerialized,
         uint256 accumulatedChainId,
         bytes32 hashingFunction
-    ) internal returns (uint256 firstAppendedBlock, uint256 newMMRSize, bytes32 newMMRRoot) {
+    ) internal returns (MmrUpdateResult memory result) {
         (uint256 blockNumber, bytes32[] memory mmrPeaks) = abi.decode(ctx, (uint256, bytes32[]));
         LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
@@ -228,8 +233,9 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
             expectedHash = _decodeParentHash(headersSerialized[i]);
         }
 
-        (newMMRSize, newMMRRoot) = _appendMultipleBlockhashesToMMR(headersHashes, mmrPeaks, treeId, accumulatedChainId, hashingFunction);
-        firstAppendedBlock = blockNumber;
+        (result.newMMRSize, result.newMMRRoot) = _appendMultipleBlockhashesToMMR(headersHashes, mmrPeaks, treeId, accumulatedChainId, hashingFunction);
+        result.firstAppendedBlock = blockNumber;
+        result.lastAppendedBlock = result.firstAppendedBlock - headersSerialized.length + 1;
     }
 
     function _appendMultipleBlockhashesToMMR(

@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.27;
 
 import {IERC173} from "./modules/IERC173.sol";
 import {ISatelliteCoreModule} from "./modules/ISatelliteCoreModule.sol";

@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.27;
 
 library Uint256Splitter {
     uint256 constant _MASK = type(uint128).max;

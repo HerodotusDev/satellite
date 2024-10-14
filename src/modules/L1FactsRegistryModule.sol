@@ -16,9 +16,6 @@ contract L1FactsRegistryModule is IL1FactsRegistryModule {
     using RLPReader for bytes;
     using RLPReader for RLPReader.RLPItem;
 
-    event L1AccountProven(address account, uint256 blockNumber, uint256 nonce, uint256 balance, bytes32 codeHash, bytes32 storageHash);
-    event L1StorageSlotProven(address account, uint256 blockNumber, bytes32 slot, bytes32 slotValue);
-
     uint8 private constant ACCOUNT_NONCE_INDEX = 0;
     uint8 private constant ACCOUNT_BALANCE_INDEX = 1;
     uint8 private constant ACCOUNT_STORAGE_ROOT_INDEX = 2;

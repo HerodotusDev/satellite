@@ -2,6 +2,9 @@
 pragma solidity ^0.8.27;
 
 interface IL1FactsRegistryModule {
+    event L1AccountProven(address account, uint256 blockNumber, uint256 nonce, uint256 balance, bytes32 codeHash, bytes32 storageHash);
+    event L1StorageSlotProven(address account, uint256 blockNumber, bytes32 slot, bytes32 slotValue);
+
     struct BlockHeaderProof {
         uint256 treeId;
         uint128 mmrTreeSize;

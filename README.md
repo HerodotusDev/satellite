@@ -42,10 +42,15 @@ forge test
 - `SatelliteCoreModule`: contains core logic for MMRs
 - `SharpFactsAggregatorModule`: contains logic for aggregating facts - off-chain proving
 
+- `ISatellite`: an interface joining all interfaces of the Satellite Diamond into one - to be used to interact with the Satellite Diamond
+
 ## Next Steps
 
 - Messaging contracts
 - Parent Hash getters
+- Facts Registry
+- Deployment scripts
+- Tests
 
 ## Deployed Contracts
 

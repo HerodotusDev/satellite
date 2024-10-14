@@ -32,7 +32,6 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
 
     // Custom errors for better error handling and clarity
     error NotEnoughJobs();
-    error TargetBlockInFuture();
     error UnknownParentHash();
     error AggregationError(string message); // Generic error with a message
     error AggregationBlockMismatch();

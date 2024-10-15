@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 
 import {IDeployModule} from "script/deploy/interfaces/IDeployModule.sol";
 
 import {NativeParentHashesFetcherModule} from "src/modules/x-rollup-messaging/parent-hashes-fetchers/NativeParentHashesFetcherModule.sol";
 
-contract DeployNativeParentHashesFetcherModule is Script, IDeployModule {
+contract DeployNativeParentHashesFetcherModule is IDeployModule {
     string contractName = "NativeParentHashesFetcherModule";
 
     function deploy() internal override returns (address moduleAddress) {
+        vm.startBroadcast(getPrivateKey());
         NativeParentHashesFetcherModule module = new NativeParentHashesFetcherModule();
+        vm.stopBroadcast();
+
         moduleAddress = address(module);
     }
 

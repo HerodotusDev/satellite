@@ -22,22 +22,10 @@ import {DeployNativeParentHashesFetcherModule} from "./modules/DeployNativeParen
 
 contract Deploy is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
-
-        SatelliteMaintenanceModule satelliteMaintenanceModule = new SatelliteMaintenanceModule();
-        address satelliteMaintenanceModuleAddress = address(satelliteMaintenanceModule);
-        console.log("SatelliteMaintenanceModule:", address(satelliteMaintenanceModuleAddress));
-        Satellite satelliteDeployment = new Satellite(satelliteMaintenanceModuleAddress);
-
-        ISatellite satellite = ISatellite(address(satelliteDeployment));
-        console.log("Satellite:", address(satellite));
-
         //? -1 because the SatelliteMaintenanceModule is already deployed
         uint256 moduleCount = 7 - 1;
         ISatelliteMaintenanceModule.ModuleMaintenance[] memory maintenances = new ISatelliteMaintenanceModule.ModuleMaintenance[](moduleCount);
         IDeployModule[] memory deployModules = new IDeployModule[](moduleCount);
-
         deployModules[0] = new DeployOwnershipModule();
         deployModules[1] = new DeploySatelliteInspectorModule();
         deployModules[2] = new DeploySatelliteCoreModule();
@@ -45,9 +33,24 @@ contract Deploy is Script {
         deployModules[4] = new DeployNativeFactsRegistryModule();
         deployModules[5] = new DeployNativeParentHashesFetcherModule();
 
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+        SatelliteMaintenanceModule satelliteMaintenanceModule = new SatelliteMaintenanceModule();
+        vm.stopBroadcast();
+        address satelliteMaintenanceModuleAddress = address(satelliteMaintenanceModule);
+        console.log("SatelliteMaintenanceModule:", address(satelliteMaintenanceModuleAddress));
+        vm.startBroadcast(deployerPrivateKey);
+        Satellite satelliteDeployment = new Satellite(satelliteMaintenanceModuleAddress);
+        vm.stopBroadcast();
+
+        ISatellite satellite = ISatellite(address(satelliteDeployment));
+        console.log("Satellite:", address(satellite));
+
         for (uint256 i = 0; i < moduleCount; i++) {
             maintenances[i] = deployModules[i].deployAndPlanMaintenance(ISatelliteMaintenanceModule.ModuleMaintenanceAction.Add);
         }
+
+        vm.startBroadcast(deployerPrivateKey);
         satellite.satelliteMaintenance(maintenances, address(0), "");
         vm.stopBroadcast();
     }

@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 
 import {IDeployModule} from "script/deploy/interfaces/IDeployModule.sol";
 
 import {OwnershipModule} from "src/modules/OwnershipModule.sol";
 
-contract DeployOwnershipModule is Script, IDeployModule {
+contract DeployOwnershipModule is IDeployModule {
     string contractName = "OwnershipModule";
 
     function deploy() internal override returns (address moduleAddress) {
+        vm.startBroadcast(getPrivateKey());
         OwnershipModule module = new OwnershipModule();
+        vm.stopBroadcast();
+
         moduleAddress = address(module);
     }
 

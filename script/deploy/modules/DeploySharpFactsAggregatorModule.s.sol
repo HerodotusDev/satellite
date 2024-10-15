@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 
 import {IDeployModule} from "script/deploy/interfaces/IDeployModule.sol";
@@ -11,12 +10,14 @@ import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
 import {SharpFactsAggregatorModule} from "src/modules/SharpFactsAggregatorModule.sol";
 import {MockFactsRegistry} from "src/mocks/MockFactsRegistry.sol";
 
-contract DeploySharpFactsAggregatorModule is Script, IDeployModule {
+contract DeploySharpFactsAggregatorModule is IDeployModule {
     string contractName = "SharpFactsAggregatorModule";
 
     function deploy() internal override returns (address moduleAddress) {
         IFactsRegistry sharpFactsRegistry = IFactsRegistry(getFactsRegistryAddress());
+        vm.startBroadcast(getPrivateKey());
         SharpFactsAggregatorModule module = new SharpFactsAggregatorModule(sharpFactsRegistry);
+        vm.stopBroadcast();
         moduleAddress = address(module);
     }
 
@@ -30,7 +31,9 @@ contract DeploySharpFactsAggregatorModule is Script, IDeployModule {
     }
 
     function deployMockFactsRegistry() internal returns (address mockFactsRegistryAddress) {
+        vm.startBroadcast(getPrivateKey());
         MockFactsRegistry mockFactsRegistry = new MockFactsRegistry();
+        vm.stopBroadcast();
         mockFactsRegistryAddress = address(mockFactsRegistry);
         console.log("MockFactsRegistry:", mockFactsRegistryAddress);
     }

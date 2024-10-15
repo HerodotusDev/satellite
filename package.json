@@ -12,11 +12,11 @@
     "forge:anvil": "anvil",
     "forge:selectors": "bun ts-helpers/get-all-function-selectors.ts",
     "forge:deploy": "source .env && export PRIVATE_KEY=$ANVIL_PRIVATE_KEY && forge script script/deploy/Satellite.s.sol:Deploy",
-    "forge:deploy:sepolia": "source .env && forge script --chain sepolia script/deploy/Satellite.s.sol:Deploy --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv",
-    "forge:deploy:anvil": "source .env && export PRIVATE_KEY=$ANVIL_PRIVATE_KEY && forge script script/deploy/Satellite.s.sol:Deploy --fork-url $ANVIL_RPC_URL --broadcast",
+    "forge:deploy:anvil": "source .env && export PRIVATE_KEY=$ANVIL_PRIVATE_KEY && forge script script/deploy/Satellite.s.sol:Deploy --fork-url $ANVIL_RPC_URL --broadcast -vvvv",
+    "forge:deploy:sepolia": "source .env && forge script --chain sepolia script/deploy/Satellite.s.sol:Deploy --rpc-url $SEPOLIA_RPC_URL --broadcast --verify",
     "forge:deploy:update": "source .env && export PRIVATE_KEY=$ANVIL_PRIVATE_KEY && forge script",
-    "forge:deploy:update:sepolia": "source .env && forge script --chain sepolia --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv",
-    "forge:deploy:update:anvil": "source .env && export PRIVATE_KEY=$ANVIL_PRIVATE_KEY && forge script --fork-url $ANVIL_RPC_URL --broadcast"
+    "forge:deploy:update:anvil": "source .env && export PRIVATE_KEY=$ANVIL_PRIVATE_KEY && forge script --fork-url $ANVIL_RPC_URL --broadcast -vvvv",
+    "forge:deploy:update:sepolia": "source .env && forge script --chain sepolia --rpc-url $SEPOLIA_RPC_URL --broadcast --verify"
   },
   "devDependencies": {
     "only-allow": "^1.2.1",

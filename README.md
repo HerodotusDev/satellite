@@ -53,7 +53,6 @@ forge test
 
 - Messaging contracts
 - More Parent Hash getters
-- Deployment scripts
 - Tests
 
 ## Deployed Contracts

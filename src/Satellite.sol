@@ -6,10 +6,10 @@ import {ISatelliteMaintenanceModule} from "./interfaces/modules/ISatelliteMainte
 
 /// @dev Shines like a Diamond
 contract Satellite {
-    constructor(address _contractOwner, address _satelliteMaintenanceModule) payable {
-        LibSatellite.setContractOwner(_contractOwner);
+    constructor(address _satelliteMaintenanceModule) payable {
+        LibSatellite.setContractOwner(msg.sender);
 
-        // Add the satelliteMaintenance external function from the satelliteMaintenanceModule
+        // Add the satelliteMaintenance external function from the SatelliteMaintenanceModule
         ISatelliteMaintenanceModule.ModuleMaintenance[] memory maintenance = new ISatelliteMaintenanceModule.ModuleMaintenance[](1);
         bytes4[] memory functionSelectors = new bytes4[](1);
         functionSelectors[0] = ISatelliteMaintenanceModule.satelliteMaintenance.selector;

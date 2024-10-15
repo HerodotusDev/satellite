@@ -2,9 +2,9 @@
 pragma solidity ^0.8.27;
 
 import {LibSatellite} from "libraries/LibSatellite.sol";
-import {IERC173} from "interfaces/modules/IERC173.sol";
+import {IOwnershipModule} from "interfaces/modules/IOwnershipModule.sol";
 
-contract OwnershipModule is IERC173 {
+contract OwnershipModule is IOwnershipModule {
     function transferOwnership(address _newOwner) external override {
         LibSatellite.enforceIsContractOwner();
         LibSatellite.setContractOwner(_newOwner);

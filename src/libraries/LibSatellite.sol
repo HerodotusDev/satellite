@@ -180,8 +180,10 @@ library LibSatellite {
     }
 
     function initializeSatelliteMaintenance(address _init, bytes memory _calldata) internal {
-        if (_init == address(0) && _calldata.length != 0) {
-            revert ILibSatellite.InitAddressZeroButCalldataNotEmpty();
+        if (_init == address(0)) {
+            if (_calldata.length != 0) {
+                revert ILibSatellite.InitAddressZeroButCalldataNotEmpty();
+            }
         } else {
             if (_calldata.length == 0) {
                 revert ILibSatellite.CalldataEmptyButInitNotEmpty();
@@ -192,7 +194,11 @@ library LibSatellite {
             }
             (bool success, bytes memory error) = _init.delegatecall(_calldata);
             if (!success) {
-                revert ILibSatellite.InitFunctionReverted(string(error));
+                if (error.length > 0) {
+                    revert ILibSatellite.InitFunctionReverted(string(error));
+                } else {
+                    revert ILibSatellite.InitFunctionReverted("Init function reverted");
+                }
             }
         }
     }

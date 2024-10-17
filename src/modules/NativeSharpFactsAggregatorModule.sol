@@ -34,6 +34,14 @@ contract NativeSharpFactsAggregatorModule is INativeSharpFactsAggregatorModule {
         FACTS_REGISTRY = factsRegistry;
     }
 
+    function createNativeSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external {
+        bytes32[] memory hashingFunctions = new bytes32[](2);
+        hashingFunctions[0] = KECCAK_HASHING_FUNCTION;
+        hashingFunctions[1] = POSEIDON_HASHING_FUNCTION;
+
+        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, AGGREGATED_CHAIN_ID, mmrSize, hashingFunctions);
+    }
+
     function aggregateNativeSharpJobs(uint256 mmrId, uint256 fromBlockNumber, INativeSharpFactsAggregatorModule.JobOutputPacked[] calldata outputs) external {
         LibSatellite.enforceIsContractOwner();
 

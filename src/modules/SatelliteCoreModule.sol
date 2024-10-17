@@ -80,9 +80,15 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
     /// @param originalMmrId the ID of the MMR from which the new MMR will be created - if 0 it means an empty MMR will be created
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
     /// @param mmrSize size at which the MMR will be copied
+    /// @param hashingFunctions the hashing functions used in the MMR - if more than one, the MMR will be sibling synced and require being a satellite module to call
     function createMmrFromDomestic(uint256 newMmrId, uint256 originalMmrId, uint256 accumulatedChainId, uint256 mmrSize, bytes32[] calldata hashingFunctions) external {
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
         require(hashingFunctions.length >= 1, "INVALID_HASHING_FUNCTIONS_LENGTH");
+
+        bool isSiblingSynced = hashingFunctions.length > 1;
+        if (isSiblingSynced) {
+            LibSatellite.enforceIsSatelliteModule();
+        }
 
         bytes32[] memory roots;
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
@@ -100,11 +106,16 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
                 mmrRoot = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize];
                 // Ensure the given MMR exists
                 require(mmrRoot != LibSatellite.NO_MMR_ROOT, "SRC_MMR_NOT_FOUND");
+
+                if (isSiblingSynced) {
+                    require(s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].isSiblingSynced == isSiblingSynced, "ORIGINAL_MMR_NOT_SIBLING_SYNCED");
+                }
             }
 
             // Copy the MMR data to the new MMR
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize = mmrSize;
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize] = mmrRoot;
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].isSiblingSynced = isSiblingSynced;
             roots[i] = mmrRoot;
         }
 
@@ -121,28 +132,27 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
     ///    If the reference header is accumulated, the context contains the MMR proof and peaks.
     ///    If the reference header is not accumulated, the context contains the block number of the reference header and the MMR peaks.
     /// @param headersSerialized the serialized headers of the batch
-    function onchainAppendBlocksBatch(
+    function onchainNativeAppendBlocksBatch(
         uint256 accumulatedChainId,
         uint256 mmrId,
         bool processFromReceivedBlockHash,
-        bytes32 hashingFunction,
         bytes calldata ctx,
         bytes[] calldata headersSerialized
     ) external {
         require(headersSerialized.length > 0, "ERR_EMPTY_BATCH");
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        require(s.mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize != LibSatellite.NO_MMR_SIZE, "ERR_MMR_DOES_NOT_EXIST");
-        require(s.mmrs[accumulatedChainId][mmrId][hashingFunction].isSiblingSynced == true, "ERR_MMR_IS_SIBLING_SYNCED");
+        require(s.mmrs[accumulatedChainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize != LibSatellite.NO_MMR_SIZE, "ERR_MMR_DOES_NOT_EXIST");
+        require(s.mmrs[accumulatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced == true, "ERR_MMR_IS_SIBLING_SYNCED");
 
         MMRUpdateResult memory result;
 
         if (processFromReceivedBlockHash) {
-            result = _processBatchFromReceivedBlockHash(mmrId, ctx, headersSerialized, accumulatedChainId, hashingFunction);
+            result = _processBatchFromReceivedBlockHash(mmrId, ctx, headersSerialized, accumulatedChainId, KECCAK_HASHING_FUNCTION);
         } else {
-            result = _processBatchFromAccumulated(mmrId, ctx, headersSerialized, accumulatedChainId, hashingFunction);
+            result = _processBatchFromAccumulated(mmrId, ctx, headersSerialized, accumulatedChainId, KECCAK_HASHING_FUNCTION);
         }
 
-        emit OnchainAppendedBlocksBatch(result, mmrId, hashingFunction, accumulatedChainId);
+        emit OnchainAppendedBlocksBatch(result, mmrId, KECCAK_HASHING_FUNCTION, accumulatedChainId);
     }
 
     /// ========================= Internal functions ========================= //

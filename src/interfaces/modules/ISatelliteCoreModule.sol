@@ -36,11 +36,10 @@ interface ISatelliteCoreModule {
 
     function createMmrFromDomestic(uint256 newMmrId, uint256 originalMmrId, uint256 accumulatedChainId, uint256 mmrSize, bytes32[] calldata hashingFunctions) external;
 
-    function onchainAppendBlocksBatch(
+    function onchainNativeAppendBlocksBatch(
         uint256 accumulatedChainId,
         uint256 mmrId,
         bool processFromReceivedBlockHash,
-        bytes32 hashingFunction,
         bytes calldata ctx,
         bytes[] calldata headersSerialized
     ) external;

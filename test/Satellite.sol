@@ -9,6 +9,7 @@ import {console} from "forge-std/console.sol";
 contract Satellite is Test {
     ISatellite satellite;
     uint256 blockNumber;
+    bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
 
     constructor() {
         string memory SEPOLIA_RPC_URL = vm.envString("SEPOLIA_RPC_URL");
@@ -25,8 +26,14 @@ contract Satellite is Test {
 
     function test_native_parent_hashes_fetcher() external {
         satellite.nativeFetchParentHash(blockNumber);
-        bytes32 parentHash = satellite.getReceivedParentHash(block.chainid, keccak256("keccak"), blockNumber);
+        bytes32 parentHash = satellite.getReceivedParentHash(block.chainid, KECCAK_HASHING_FUNCTION, blockNumber);
 
         assertNotEq(parentHash, bytes32(0));
+    }
+
+    function test_enforce_is_satellite_module() external {
+        bytes32 parentHash = blockhash(blockNumber - 1);
+        vm.expectRevert(ISatellite.MustBeSatelliteModule.selector);
+        satellite._receiveBlockHash(block.chainid, KECCAK_HASHING_FUNCTION, blockNumber, parentHash);
     }
 }

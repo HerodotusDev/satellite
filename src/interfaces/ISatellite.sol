@@ -17,4 +17,6 @@ interface ISatellite is
     INativeSharpFactsAggregatorModule,
     INativeFactsRegistryModule,
     INativeParentHashesFetcherModule
-{}
+{
+    error MustBeSatelliteModule();
+}

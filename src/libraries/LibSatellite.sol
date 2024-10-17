@@ -3,6 +3,7 @@ pragma solidity ^0.8.27;
 
 import {ISatelliteMaintenanceModule} from "interfaces/modules/ISatelliteMaintenanceModule.sol";
 import {console} from "forge-std/console.sol";
+import {ISatellite} from "interfaces/ISatellite.sol";
 
 library LibSatellite {
     // ========================= Constants ========================= //
@@ -39,6 +40,8 @@ library LibSatellite {
     }
 
     struct SatelliteStorage {
+        // ========================= Diamond-related storage ========================= //
+
         /// @dev maps function selector to the module address and the position of the selector in the moduleFunctionSelectors.selectors array
         mapping(bytes4 => ModuleAddressAndPosition) selectorToModuleAndPosition;
         /// @dev maps module addresses to function selectors
@@ -47,7 +50,8 @@ library LibSatellite {
         address[] moduleAddresses;
         /// @dev owner of the contract
         address contractOwner;
-        // ========================= Core mappings ========================= //
+        // ========================= Core Satellite storage ========================= //
+
         /// @dev mapping of ChainId => MMR ID => hashing function => MMR info
         /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
         mapping(uint256 => mapping(uint256 => mapping(bytes32 => MMRInfo))) mmrs;
@@ -80,7 +84,9 @@ library LibSatellite {
     }
 
     function enforceIsSatelliteModule() internal view {
-        require(msg.sender == address(this), "LibSatellite: Must be satellite module");
+        if (msg.sender != address(this)) {
+            revert ISatellite.MustBeSatelliteModule();
+        }
     }
 
     event SatelliteMaintenance(ISatelliteMaintenanceModule.ModuleMaintenance[] _satelliteMaintenance, address _init, bytes _calldata);

@@ -37,7 +37,9 @@ library LibSatellite {
     }
 
     function enforceIsContractOwner() internal view {
-        require(msg.sender == satelliteStorage().contractOwner, "LibSatellite: Must be contract owner");
+        if (msg.sender != satelliteStorage().contractOwner) {
+            revert ILibSatellite.MustBeContractOwner();
+        }
     }
 
     function enforceIsSatelliteModule() internal view {
@@ -59,7 +61,7 @@ library LibSatellite {
             } else if (action == ILibSatellite.ModuleMaintenanceAction.Remove) {
                 removeFunctions(moduleMaintenance.moduleAddress, moduleMaintenance.functionSelectors);
             } else {
-                revert("LibSatelliteMaintenance: Incorrect ILibSatellite.ModuleMaintenanceAction");
+                revert ILibSatellite.IncorrectModuleMaintenanceAction(action);
             }
         }
         emit SatelliteMaintenance(_satelliteMaintenance, _init, _calldata);
@@ -67,9 +69,14 @@ library LibSatellite {
     }
 
     function addFunctions(address _moduleAddress, bytes4[] memory _functionSelectors) internal {
-        require(_functionSelectors.length > 0, "LibSatelliteMaintenance: No selectors in module to maintenance");
+        if (_functionSelectors.length == 0) {
+            revert ILibSatellite.NoSelectorsInModuleToMaintenance();
+        }
+        if (_moduleAddress == address(0)) {
+            revert ILibSatellite.AddModuleAddressZero();
+        }
+
         ILibSatellite.SatelliteStorage storage s = satelliteStorage();
-        require(_moduleAddress != address(0), "LibSatelliteMaintenance: Add module can't be address(0)");
         uint96 selectorPosition = uint96(s.moduleFunctionSelectors[_moduleAddress].functionSelectors.length);
         /// @dev add new module address if it does not exist
         if (selectorPosition == 0) {
@@ -78,16 +85,23 @@ library LibSatellite {
         for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {
             bytes4 selector = _functionSelectors[selectorIndex];
             address oldModuleAddress = s.selectorToModuleAndPosition[selector].moduleAddress;
-            require(oldModuleAddress == address(0), "LibSatelliteMaintenance: Can't add function that already exists");
+            if (oldModuleAddress != address(0)) {
+                revert ILibSatellite.AddFunctionAlreadyExists(selector);
+            }
             addFunction(s, selector, selectorPosition, _moduleAddress);
             selectorPosition++;
         }
     }
 
     function replaceFunctions(address _moduleAddress, bytes4[] memory _functionSelectors) internal {
-        require(_functionSelectors.length > 0, "LibSatelliteMaintenance: No selectors in module to maintenance");
+        if (_functionSelectors.length == 0) {
+            revert ILibSatellite.NoSelectorsInModuleToMaintenance();
+        }
+        if (_moduleAddress == address(0)) {
+            revert ILibSatellite.AddModuleAddressZero();
+        }
+
         ILibSatellite.SatelliteStorage storage s = satelliteStorage();
-        require(_moduleAddress != address(0), "LibSatelliteMaintenance: Add module can't be address(0)");
         uint96 selectorPosition = uint96(s.moduleFunctionSelectors[_moduleAddress].functionSelectors.length);
         /// @dev add new module address if it does not exist
         if (selectorPosition == 0) {
@@ -96,7 +110,9 @@ library LibSatellite {
         for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {
             bytes4 selector = _functionSelectors[selectorIndex];
             address oldModuleAddress = s.selectorToModuleAndPosition[selector].moduleAddress;
-            require(oldModuleAddress != _moduleAddress, "LibSatelliteMaintenance: Can't replace function with same function");
+            if (oldModuleAddress == _moduleAddress) {
+                revert ILibSatellite.ReplaceFunctionWithSameFunction(selector);
+            }
             removeFunction(s, oldModuleAddress, selector);
             addFunction(s, selector, selectorPosition, _moduleAddress);
             selectorPosition++;
@@ -104,10 +120,14 @@ library LibSatellite {
     }
 
     function removeFunctions(address _moduleAddress, bytes4[] memory _functionSelectors) internal {
-        require(_functionSelectors.length > 0, "LibSatelliteMaintenance: No selectors in module to maintenance");
+        if (_functionSelectors.length == 0) {
+            revert ILibSatellite.NoSelectorsInModuleToMaintenance();
+        }
+        if (_moduleAddress == address(0)) {
+            revert ILibSatellite.AddModuleAddressZero();
+        }
+
         ILibSatellite.SatelliteStorage storage s = satelliteStorage();
-        /// @dev if function does not exist then do nothing and return
-        require(_moduleAddress == address(0), "LibSatelliteMaintenance: Remove module address must be address(0)");
         for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {
             bytes4 selector = _functionSelectors[selectorIndex];
             address oldModuleAddress = s.selectorToModuleAndPosition[selector].moduleAddress;
@@ -116,7 +136,7 @@ library LibSatellite {
     }
 
     function addModule(ILibSatellite.SatelliteStorage storage s, address _moduleAddress) internal {
-        enforceHasContractCode(_moduleAddress, "LibSatelliteMaintenance: New module has no code");
+        enforceHasContractCode(_moduleAddress, "New module has no code");
         s.moduleFunctionSelectors[_moduleAddress].moduleAddressPosition = s.moduleAddresses.length;
         s.moduleAddresses.push(_moduleAddress);
     }
@@ -128,9 +148,13 @@ library LibSatellite {
     }
 
     function removeFunction(ILibSatellite.SatelliteStorage storage s, address _moduleAddress, bytes4 _selector) internal {
-        require(_moduleAddress != address(0), "LibSatelliteMaintenance: Can't remove function that doesn't exist");
-        /// @dev an immutable function is a function defined directly in a satellite
-        require(_moduleAddress != address(this), "LibSatelliteMaintenance: Can't remove immutable function");
+        if (_moduleAddress == address(0)) {
+            revert ILibSatellite.RemoveFunctionDoesNotExist();
+        }
+        if (_moduleAddress == address(this)) {
+            revert ILibSatellite.RemoveImmutableFunction();
+        }
+
         uint256 selectorPosition = s.selectorToModuleAndPosition[_selector].functionSelectorPosition;
         uint256 lastSelectorPosition = s.moduleFunctionSelectors[_moduleAddress].functionSelectors.length - 1;
         if (selectorPosition != lastSelectorPosition) {
@@ -156,20 +180,19 @@ library LibSatellite {
     }
 
     function initializeSatelliteMaintenance(address _init, bytes memory _calldata) internal {
-        if (_init == address(0)) {
-            require(_calldata.length == 0, "LibSatelliteMaintenance: _init is address(0) but_calldata is not empty");
+        if (_init == address(0) && _calldata.length != 0) {
+            revert ILibSatellite.InitAddressZeroButCalldataNotEmpty();
         } else {
-            require(_calldata.length > 0, "LibSatelliteMaintenance: _calldata is empty but _init is not address(0)");
+            if (_calldata.length == 0) {
+                revert ILibSatellite.CalldataEmptyButInitNotEmpty();
+            }
+
             if (_init != address(this)) {
-                enforceHasContractCode(_init, "LibSatelliteMaintenance: _init address has no code");
+                enforceHasContractCode(_init, "_init address has no code");
             }
             (bool success, bytes memory error) = _init.delegatecall(_calldata);
             if (!success) {
-                if (error.length > 0) {
-                    revert(string(error));
-                } else {
-                    revert("LibSatelliteMaintenance: _init function reverted");
-                }
+                revert ILibSatellite.InitFunctionReverted(string(error));
             }
         }
     }
@@ -179,6 +202,8 @@ library LibSatellite {
         assembly {
             contractSize := extcodesize(_contract)
         }
-        require(contractSize > 0, _errorMessage);
+        if (contractSize == 0) {
+            revert ILibSatellite.AddressHasNoCode(_errorMessage);
+        }
     }
 }

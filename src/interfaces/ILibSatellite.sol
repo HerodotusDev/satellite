@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
+/// @notice This is IMMUTABLE! without re-deploying the whole Satellite Diamond!
 interface ILibSatellite {
     // ========================= Types ========================= //
 
@@ -67,6 +68,30 @@ interface ILibSatellite {
 
     /// @dev Error indicating the caller must be a satellite module
     error MustBeSatelliteModule();
+    /// @dev Error indicating the caller must be the contract owner
+    error MustBeContractOwner();
+    /// @dev Error indicating the module maintenance action is incorrect
+    error IncorrectModuleMaintenanceAction(ModuleMaintenanceAction action);
+    /// @dev Error indicating there are no selectors in the module to maintenance
+    error NoSelectorsInModuleToMaintenance();
+    /// @dev Error indicating the module address is zero
+    error AddModuleAddressZero();
+    /// @dev Error indicating the function already exists
+    error AddFunctionAlreadyExists(bytes4 selector);
+    /// @dev Error indicating the function already exists
+    error ReplaceFunctionWithSameFunction(bytes4 selector);
+    /// @dev Error indicating the function does not exist
+    error RemoveFunctionDoesNotExist();
+    /// @dev Error indicating the function is immutable and cannot be removed
+    error RemoveImmutableFunction();
+    /// @dev Error indicating the init address is zero but calldata is not empty
+    error InitAddressZeroButCalldataNotEmpty();
+    /// @dev Error indicating the calldata is empty but init is not address(0)
+    error CalldataEmptyButInitNotEmpty();
+    /// @dev Error indicating the init function reverted
+    error InitFunctionReverted(string errors);
+    /// @dev Error indicating the address has no code
+    error AddressHasNoCode(string details);
 
     // ========================= Events ========================= //
 

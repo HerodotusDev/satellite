@@ -81,6 +81,8 @@ bun forge:build
 
 This generates the `out/contracts-with-selectors.json` file which is used for deployment
 
+**_Make sure you run `bun forge:build` after every Satellite interface change_**
+
 ### Run tests
 
 - `bun forge:test` - run all tests

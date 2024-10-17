@@ -3,11 +3,11 @@ pragma solidity ^0.8.27;
 
 import {Uint256Splitter} from "libraries/internal/Uint256Splitter.sol";
 import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
-import {ISharpFactsAggregatorModule} from "interfaces/modules/ISharpFactsAggregatorModule.sol";
+import {INativeSharpFactsAggregatorModule} from "interfaces/modules/INativeSharpFactsAggregatorModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 
-contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
+contract NativeSharpFactsAggregatorModule is INativeSharpFactsAggregatorModule {
     // Using inline library for efficient splitting and joining of uint256 values
     using Uint256Splitter for uint256;
 
@@ -34,7 +34,7 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
         FACTS_REGISTRY = factsRegistry;
     }
 
-    function aggregateSharpJobs(uint256 mmrId, uint256 fromBlockNumber, ISharpFactsAggregatorModule.JobOutputPacked[] calldata outputs) external {
+    function aggregateNativeSharpJobs(uint256 mmrId, uint256 fromBlockNumber, INativeSharpFactsAggregatorModule.JobOutputPacked[] calldata outputs) external {
         LibSatellite.enforceIsContractOwner();
 
         // Ensuring at least one job output is provided
@@ -54,12 +54,12 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
             JobOutputPacked calldata curOutput = outputs[i];
             JobOutputPacked calldata nextOutput = outputs[i + 1];
 
-            ensureValidFact(curOutput);
-            ensureConsecutiveJobs(curOutput, nextOutput);
+            _ensureValidFact(curOutput);
+            _ensureConsecutiveJobs(curOutput, nextOutput);
         }
 
         JobOutputPacked calldata lastOutput = outputs[limit];
-        ensureValidFact(lastOutput);
+        _ensureValidFact(lastOutput);
 
         // We save the latest output in the contract state for future calls
         (, uint256 mmrNewSize) = lastOutput.mmrSizesPacked.split128();
@@ -82,7 +82,7 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
     /// @notice Ensures the job output is cryptographically sound to continue from
     /// @param fromBlockNumber The parent hash of the block to start from
     /// @param firstOutput The job output to check
-    function _validateOutput(uint256 mmrId, uint256 fromBlockNumber, ISharpFactsAggregatorModule.JobOutputPacked memory firstOutput) internal view {
+    function _validateOutput(uint256 mmrId, uint256 fromBlockNumber, INativeSharpFactsAggregatorModule.JobOutputPacked memory firstOutput) internal view {
         LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         (uint256 mmrSize, ) = firstOutput.mmrSizesPacked.split128();
 
@@ -132,7 +132,7 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
 
     /// @notice Ensures the fact is registered on SHARP Facts Registry
     /// @param output SHARP job output (packed for Solidity)
-    function ensureValidFact(JobOutputPacked memory output) internal view {
+    function _ensureValidFact(JobOutputPacked memory output) internal view {
         (uint256 fromBlock, uint256 toBlock) = output.blockNumbersPacked.split128();
 
         (uint256 mmrPreviousSize, uint256 mmrNewSize) = output.mmrSizesPacked.split128();
@@ -176,7 +176,7 @@ contract SharpFactsAggregatorModule is ISharpFactsAggregatorModule {
     /// @notice Ensures the job outputs are correctly linked
     /// @param output The job output to check
     /// @param nextOutput The next job output to check
-    function ensureConsecutiveJobs(JobOutputPacked memory output, JobOutputPacked memory nextOutput) internal pure {
+    function _ensureConsecutiveJobs(JobOutputPacked memory output, JobOutputPacked memory nextOutput) internal pure {
         (, uint256 toBlock) = output.blockNumbersPacked.split128();
 
         // We cannot aggregate further past the genesis block

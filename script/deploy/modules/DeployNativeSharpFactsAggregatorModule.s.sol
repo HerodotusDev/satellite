@@ -7,16 +7,16 @@ import {IDeployModule} from "script/deploy/interfaces/IDeployModule.sol";
 
 import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
 
-import {SharpFactsAggregatorModule} from "src/modules/SharpFactsAggregatorModule.sol";
+import {NativeSharpFactsAggregatorModule} from "src/modules/NativeSharpFactsAggregatorModule.sol";
 import {MockFactsRegistry} from "src/mocks/MockFactsRegistry.sol";
 
-contract DeploySharpFactsAggregatorModule is IDeployModule {
-    string contractName = "SharpFactsAggregatorModule";
+contract DeployNativeSharpFactsAggregatorModule is IDeployModule {
+    string contractName = "NativeSharpFactsAggregatorModule";
 
     function deploy() internal override returns (address moduleAddress) {
         IFactsRegistry sharpFactsRegistry = IFactsRegistry(getFactsRegistryAddress());
         vm.startBroadcast(getPrivateKey());
-        SharpFactsAggregatorModule module = new SharpFactsAggregatorModule(sharpFactsRegistry);
+        NativeSharpFactsAggregatorModule module = new NativeSharpFactsAggregatorModule(sharpFactsRegistry);
         vm.stopBroadcast();
         moduleAddress = address(module);
     }

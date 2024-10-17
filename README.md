@@ -41,7 +41,8 @@ forge test
   - `SatelliteMaintenanceModule`: a Diamond Cut contract
   - `OwnershipModule`: ERC173 ownership contract for the whole Diamond
 - `MMRsCoreModule`: contains core logic for MMRs
-- `SharpFactsAggregatorModule`: contains logic for aggregating facts - off-chain proving
+- `NativeSharpMmrGrowingModule`: contains logic for aggregating facts - off-chain proving
+- `NativeOnChainGrowingModule`: contains logic for on-chain growing mmrs with native blocks & hashing function
 - `NativeFactsRegistryModule`: used for storage proofs on-chain based on headers from MMRs from MMRsCoreModule
 
 - `/x-rollup-messaging`: contains contracts for messaging between rollups
@@ -97,9 +98,9 @@ This generates the `out/contracts-with-selectors.json` file which is used for de
 
 Needs `DEPLOYED_SATELLITE_ADDRESS` set in `.env`
 
-- `bun forge:deploy:update script/deploy/modules/Deploy<ModuleName>Module.s.sol`
-- `bun forge:deploy:update:anvil script/deploy/modules/Deploy<ModuleName>Module.s.sol`
-- `bun forge:deploy:update:sepolia script/deploy/modules/Deploy<ModuleName>Module.s.sol`
+- `bun forge:deploy:update script/deploy/modules/Deploy<Name>Module.s.sol`
+- `bun forge:deploy:update:anvil script/deploy/modules/Deploy<Name>Module.s.sol`
+- `bun forge:deploy:update:sepolia script/deploy/modules/Deploy<Name>Module.s.sol`
 
 ## Documentation
 

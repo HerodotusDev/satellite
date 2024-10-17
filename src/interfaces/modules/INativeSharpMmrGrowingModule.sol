@@ -4,7 +4,7 @@ pragma solidity ^0.8.27;
 import {Uint256Splitter} from "libraries/internal/Uint256Splitter.sol";
 import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
 
-interface INativeSharpFactsAggregatorModule {
+interface INativeSharpMmrGrowingModule {
     // Representation of the Cairo program's output (raw unpacked)
     struct JobOutput {
         uint256 fromBlockNumberHigh;

@@ -3,11 +3,11 @@ pragma solidity ^0.8.27;
 
 import {Uint256Splitter} from "libraries/internal/Uint256Splitter.sol";
 import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
-import {INativeSharpFactsAggregatorModule} from "interfaces/modules/INativeSharpFactsAggregatorModule.sol";
+import {INativeSharpMmrGrowingModule} from "interfaces/modules/INativeSharpMmrGrowingModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 
-contract NativeSharpFactsAggregatorModule is INativeSharpFactsAggregatorModule {
+contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
     // Using inline library for efficient splitting and joining of uint256 values
     using Uint256Splitter for uint256;
 
@@ -42,7 +42,7 @@ contract NativeSharpFactsAggregatorModule is INativeSharpFactsAggregatorModule {
         ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, AGGREGATED_CHAIN_ID, mmrSize, hashingFunctions);
     }
 
-    function aggregateNativeSharpJobs(uint256 mmrId, uint256 fromBlockNumber, INativeSharpFactsAggregatorModule.JobOutputPacked[] calldata outputs) external {
+    function aggregateNativeSharpJobs(uint256 mmrId, uint256 fromBlockNumber, INativeSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external {
         LibSatellite.enforceIsContractOwner();
 
         // Ensuring at least one job output is provided
@@ -90,7 +90,7 @@ contract NativeSharpFactsAggregatorModule is INativeSharpFactsAggregatorModule {
     /// @notice Ensures the job output is cryptographically sound to continue from
     /// @param fromBlockNumber The parent hash of the block to start from
     /// @param firstOutput The job output to check
-    function _validateOutput(uint256 mmrId, uint256 fromBlockNumber, INativeSharpFactsAggregatorModule.JobOutputPacked memory firstOutput) internal view {
+    function _validateOutput(uint256 mmrId, uint256 fromBlockNumber, INativeSharpMmrGrowingModule.JobOutputPacked memory firstOutput) internal view {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         (uint256 mmrSize, ) = firstOutput.mmrSizesPacked.split128();
 

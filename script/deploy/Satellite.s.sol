@@ -17,7 +17,7 @@ import {ISatelliteMaintenanceModule} from "interfaces/modules/ISatelliteMaintena
 import {DeployOwnershipModule} from "./modules/DeployOwnershipModule.s.sol";
 import {DeploySatelliteInspectorModule} from "./modules/DeploySatelliteInspectorModule.s.sol";
 import {DeployMMRsCoreModule} from "./modules/DeployMMRsCoreModule.s.sol";
-import {DeployNativeSharpFactsAggregatorModule} from "./modules/DeployNativeSharpFactsAggregatorModule.s.sol";
+import {DeployNativeSharpMmrGrowingModule} from "./modules/DeployNativeSharpMmrGrowingModule.s.sol";
 import {DeployNativeFactsRegistryModule} from "./modules/DeployNativeFactsRegistryModule.s.sol";
 import {DeployNativeParentHashesFetcherModule} from "./modules/DeployNativeParentHashesFetcherModule.s.sol";
 
@@ -30,7 +30,7 @@ contract Deploy is Script {
         deployModules[0] = new DeployOwnershipModule();
         deployModules[1] = new DeploySatelliteInspectorModule();
         deployModules[2] = new DeployMMRsCoreModule();
-        deployModules[3] = new DeployNativeSharpFactsAggregatorModule();
+        deployModules[3] = new DeployNativeSharpMmrGrowingModule();
         deployModules[4] = new DeployNativeFactsRegistryModule();
         deployModules[5] = new DeployNativeParentHashesFetcherModule();
 

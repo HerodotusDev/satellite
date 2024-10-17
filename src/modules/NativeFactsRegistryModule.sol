@@ -9,6 +9,7 @@ import {Bitmap16} from "libraries/internal/Bitmap16.sol";
 import {NullableStorageSlot} from "libraries/internal/NullableStorageSlot.sol";
 import {INativeFactsRegistryModule} from "interfaces/modules/INativeFactsRegistryModule.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
+import {ISatellite} from "interfaces/ISatellite.sol";
 
 contract NativeFactsRegistryModule is INativeFactsRegistryModule {
     using Bitmap16 for uint16;
@@ -111,7 +112,7 @@ contract NativeFactsRegistryModule is INativeFactsRegistryModule {
     }
 
     function _verifyAccumulatedHeaderProof(BlockHeaderProof memory proof) internal view {
-        LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
+        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         bytes32 mmrRoot = s.mmrs[CHAIN_ID][proof.treeId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[proof.mmrTreeSize];
         require(mmrRoot != bytes32(0), "ERR_EMPTY_MMR_ROOT");
 

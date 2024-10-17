@@ -3,7 +3,6 @@ pragma solidity ^0.8.27;
 
 import {Lib_RLPReader as RLPReader} from "@optimism/libraries/rlp/Lib_RLPReader.sol";
 import {StatelessMmr} from "solidity-mmr/lib/StatelessMmr.sol";
-import {LibSatellite} from "libraries/LibSatellite.sol";
 
 interface ISatelliteCoreModule {
     // ========================= Types ========================= //

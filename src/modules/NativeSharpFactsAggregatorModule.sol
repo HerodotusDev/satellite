@@ -63,7 +63,7 @@ contract NativeSharpFactsAggregatorModule is INativeSharpFactsAggregatorModule {
 
         // We save the latest output in the contract state for future calls
         (, uint256 mmrNewSize) = lastOutput.mmrSizesPacked.split128();
-        LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
+        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
         s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
         s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].latestSize = mmrNewSize;
@@ -83,7 +83,7 @@ contract NativeSharpFactsAggregatorModule is INativeSharpFactsAggregatorModule {
     /// @param fromBlockNumber The parent hash of the block to start from
     /// @param firstOutput The job output to check
     function _validateOutput(uint256 mmrId, uint256 fromBlockNumber, INativeSharpFactsAggregatorModule.JobOutputPacked memory firstOutput) internal view {
-        LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
+        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         (uint256 mmrSize, ) = firstOutput.mmrSizesPacked.split128();
 
         uint256 actualMmrSizePoseidon = s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].latestSize;

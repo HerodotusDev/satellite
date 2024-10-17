@@ -4,7 +4,9 @@ pragma solidity ^0.8.27;
 import {Test} from "forge-std/Test.sol";
 import {Deploy} from "script/deploy/Satellite.s.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
+import {ILibSatellite} from "interfaces/ILibSatellite.sol";
 import {console} from "forge-std/console.sol";
+import {LibSatellite} from "libraries/LibSatellite.sol";
 
 contract Satellite is Test {
     ISatellite satellite;
@@ -33,7 +35,7 @@ contract Satellite is Test {
 
     function test_enforce_is_satellite_module() external {
         bytes32 parentHash = blockhash(blockNumber - 1);
-        vm.expectRevert(ISatellite.MustBeSatelliteModule.selector);
+        vm.expectRevert(ILibSatellite.MustBeSatelliteModule.selector);
         satellite._receiveBlockHash(block.chainid, KECCAK_HASHING_FUNCTION, blockNumber, parentHash);
     }
 }

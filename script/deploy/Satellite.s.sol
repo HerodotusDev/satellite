@@ -11,6 +11,7 @@ import {IDeployModule} from "script/deploy/interfaces/IDeployModule.sol";
 import {Satellite} from "src/Satellite.sol";
 import {SatelliteMaintenanceModule} from "src/modules/SatelliteMaintenanceModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
+import {ILibSatellite} from "interfaces/ISatellite.sol";
 import {ISatelliteMaintenanceModule} from "interfaces/modules/ISatelliteMaintenanceModule.sol";
 
 import {DeployOwnershipModule} from "./modules/DeployOwnershipModule.s.sol";
@@ -24,7 +25,7 @@ contract Deploy is Script {
     function run() external returns (address satelliteAddress) {
         //? -1 because the SatelliteMaintenanceModule is already deployed
         uint256 moduleCount = 7 - 1;
-        ISatelliteMaintenanceModule.ModuleMaintenance[] memory maintenances = new ISatelliteMaintenanceModule.ModuleMaintenance[](moduleCount);
+        ISatellite.ModuleMaintenance[] memory maintenances = new ISatellite.ModuleMaintenance[](moduleCount);
         IDeployModule[] memory deployModules = new IDeployModule[](moduleCount);
         deployModules[0] = new DeployOwnershipModule();
         deployModules[1] = new DeploySatelliteInspectorModule();
@@ -48,7 +49,7 @@ contract Deploy is Script {
         console.log("Satellite:", address(satellite));
 
         for (uint256 i = 0; i < moduleCount; i++) {
-            maintenances[i] = deployModules[i].deployAndPlanMaintenance(ISatelliteMaintenanceModule.ModuleMaintenanceAction.Add);
+            maintenances[i] = deployModules[i].deployAndPlanMaintenance(ILibSatellite.ModuleMaintenanceAction.Add);
         }
 
         vm.startBroadcast(deployerPrivateKey);

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {LibSatellite} from "./libraries/LibSatellite.sol";
+import {ILibSatellite} from "interfaces/ILibSatellite.sol";
 import {ISatelliteMaintenanceModule} from "./interfaces/modules/ISatelliteMaintenanceModule.sol";
 
 /// @dev Shines like a Diamond
@@ -10,12 +11,12 @@ contract Satellite {
         LibSatellite.setContractOwner(msg.sender);
 
         // Add the satelliteMaintenance external function from the SatelliteMaintenanceModule
-        ISatelliteMaintenanceModule.ModuleMaintenance[] memory maintenance = new ISatelliteMaintenanceModule.ModuleMaintenance[](1);
+        ILibSatellite.ModuleMaintenance[] memory maintenance = new ILibSatellite.ModuleMaintenance[](1);
         bytes4[] memory functionSelectors = new bytes4[](1);
         functionSelectors[0] = ISatelliteMaintenanceModule.satelliteMaintenance.selector;
-        maintenance[0] = ISatelliteMaintenanceModule.ModuleMaintenance({
+        maintenance[0] = ILibSatellite.ModuleMaintenance({
             moduleAddress: _satelliteMaintenanceModule,
-            action: ISatelliteMaintenanceModule.ModuleMaintenanceAction.Add,
+            action: ILibSatellite.ModuleMaintenanceAction.Add,
             functionSelectors: functionSelectors
         });
         LibSatellite.satelliteMaintenance(maintenance, address(0), "");
@@ -23,7 +24,7 @@ contract Satellite {
 
     // Find module for function; delegate call and return result
     fallback() external payable {
-        LibSatellite.SatelliteStorage storage s;
+        ILibSatellite.SatelliteStorage storage s;
         bytes32 position = LibSatellite.DIAMOND_STORAGE_POSITION;
         assembly {
             s.slot := position

@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-interface ISatelliteInspectorModule {
-    struct Module {
-        address moduleAddress;
-        bytes4[] functionSelectors;
-    }
+import {ILibSatellite} from "interfaces/ILibSatellite.sol";
 
+interface ISatelliteInspectorModule {
     /// @notice Gets all module addresses and their four byte function selectors.
     /// @return modules_ Modules
-    function modules() external view returns (Module[] memory modules_);
+    function modules() external view returns (ILibSatellite.Module[] memory modules_);
 
     /// @notice Gets all the function selectors supported by a specific module.
     /// @param _module The module address.

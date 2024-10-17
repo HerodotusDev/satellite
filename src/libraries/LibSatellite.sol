@@ -2,6 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {ISatelliteMaintenanceModule} from "interfaces/modules/ISatelliteMaintenanceModule.sol";
+import {console} from "forge-std/console.sol";
 
 library LibSatellite {
     // ========================= Constants ========================= //
@@ -79,13 +80,7 @@ library LibSatellite {
     }
 
     function enforceIsSatelliteModule() internal view {
-        LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        for (uint256 i; i < s.moduleAddresses.length; i++) {
-            if (msg.sender == s.moduleAddresses[i]) {
-                return;
-            }
-        }
-        revert("LibSatellite: Must be satellite module");
+        require(msg.sender == address(this), "LibSatellite: Must be satellite module");
     }
 
     event SatelliteMaintenance(ISatelliteMaintenanceModule.ModuleMaintenance[] _satelliteMaintenance, address _init, bytes _calldata);

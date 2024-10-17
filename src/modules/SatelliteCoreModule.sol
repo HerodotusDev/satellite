@@ -27,7 +27,7 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
 
     /// @notice Receiving a recent block hash obtained on-chain directly on this chain or sent in a message from another one (eg. L1 -> L2)
     /// @notice saves the parent hash of the block number (from a given chain) in the contract storage
-    function _receiveBlockHash(uint256 chainId, uint256 blockNumber, bytes32 parentHash, bytes32 hashingFunction) external {
+    function _receiveBlockHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external {
         LibSatellite.enforceIsSatelliteModule();
         LibSatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         s.receivedParentHashes[chainId][hashingFunction][blockNumber] = parentHash;

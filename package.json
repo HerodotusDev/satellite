@@ -9,6 +9,7 @@
     "prettier": "prettier --write --list-different ./*",
     "prettier:check": "prettier --check .",
     "forge:build": "forge build && bun forge:selectors",
+    "forge:test": "forge test",
     "forge:anvil": "anvil",
     "forge:selectors": "bun ts-helpers/get-all-function-selectors.ts",
     "forge:deploy": "source .env && export PRIVATE_KEY=$ANVIL_PRIVATE_KEY && forge script script/deploy/Satellite.s.sol:Deploy",

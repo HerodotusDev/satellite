@@ -14,7 +14,6 @@ contract NativeParentHashesFetcherModule is INativeParentHashesFetcherModule {
         bytes32 parentHash = blockhash(blockNumber - 1);
         require(parentHash != bytes32(0), "ERR_PARENT_HASH_NOT_AVAILABLE");
 
-        // TODO: needs testing or another approach in _receiveBlockHash to make it Diamond-internal
-        ISatellite(address(this))._receiveBlockHash(block.chainid, blockNumber, parentHash, KECCAK_HASHING_FUNCTION);
+        ISatellite(address(this))._receiveBlockHash(block.chainid, KECCAK_HASHING_FUNCTION, blockNumber, parentHash);
     }
 }

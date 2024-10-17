@@ -21,7 +21,7 @@ import {DeployNativeFactsRegistryModule} from "./modules/DeployNativeFactsRegist
 import {DeployNativeParentHashesFetcherModule} from "./modules/DeployNativeParentHashesFetcherModule.s.sol";
 
 contract Deploy is Script {
-    function run() external {
+    function run() external returns (address satelliteAddress) {
         //? -1 because the SatelliteMaintenanceModule is already deployed
         uint256 moduleCount = 7 - 1;
         ISatelliteMaintenanceModule.ModuleMaintenance[] memory maintenances = new ISatelliteMaintenanceModule.ModuleMaintenance[](moduleCount);
@@ -43,7 +43,8 @@ contract Deploy is Script {
         Satellite satelliteDeployment = new Satellite(satelliteMaintenanceModuleAddress);
         vm.stopBroadcast();
 
-        ISatellite satellite = ISatellite(address(satelliteDeployment));
+        satelliteAddress = address(satelliteDeployment);
+        ISatellite satellite = ISatellite(satelliteAddress);
         console.log("Satellite:", address(satellite));
 
         for (uint256 i = 0; i < moduleCount; i++) {

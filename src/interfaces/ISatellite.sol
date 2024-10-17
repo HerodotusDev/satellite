@@ -7,5 +7,14 @@ import {ISatelliteInspectorModule} from "./modules/ISatelliteInspectorModule.sol
 import {ISatelliteMaintenanceModule} from "./modules/ISatelliteMaintenanceModule.sol";
 import {ISharpFactsAggregatorModule} from "./modules/ISharpFactsAggregatorModule.sol";
 import {INativeFactsRegistryModule} from "./modules/INativeFactsRegistryModule.sol";
+import {INativeParentHashesFetcherModule} from "./modules/INativeParentHashesFetcherModule.sol";
 
-interface ISatellite is IOwnershipModule, ISatelliteCoreModule, ISatelliteInspectorModule, ISatelliteMaintenanceModule, ISharpFactsAggregatorModule, INativeFactsRegistryModule {}
+interface ISatellite is
+    IOwnershipModule,
+    ISatelliteCoreModule,
+    ISatelliteInspectorModule,
+    ISatelliteMaintenanceModule,
+    ISharpFactsAggregatorModule,
+    INativeFactsRegistryModule,
+    INativeParentHashesFetcherModule
+{}

@@ -49,11 +49,11 @@ forge test
   - `/parent-hashes-fetchers`: contains contracts for fetching parent hashes from other rollups
     - `NativeParentHashesFetcher`: fetches parent hashes from the Native chain (chain on which this rollup is deployed)
 
-## Next Steps
+## TODOs:
 
 - Messaging contracts
 - More Parent Hash getters
-- Tests
+- More Tests
 
 ## Deployed Contracts
 
@@ -81,6 +81,10 @@ bun forge:build
 
 This generates the `out/contracts-with-selectors.json` file which is used for deployment
 
+### Run tests
+
+- `bun forge:test` - run all tests
+
 ### Deploy everything for the first time
 
 - `bun forge:deploy` - dry run of the deployment
@@ -91,9 +95,9 @@ This generates the `out/contracts-with-selectors.json` file which is used for de
 
 Needs `DEPLOYED_SATELLITE_ADDRESS` set in `.env`
 
-- `bun forge:update script/deploy/modules/Deploy<ModuleName>Module.s.sol`
-- `bun forge:update:anvil script/deploy/modules/Deploy<ModuleName>Module.s.sol`
-- `bun forge:update:sepolia script/deploy/modules/Deploy<ModuleName>Module.s.sol`
+- `bun forge:deploy:update script/deploy/modules/Deploy<ModuleName>Module.s.sol`
+- `bun forge:deploy:update:anvil script/deploy/modules/Deploy<ModuleName>Module.s.sol`
+- `bun forge:deploy:update:sepolia script/deploy/modules/Deploy<ModuleName>Module.s.sol`
 
 ## Documentation
 

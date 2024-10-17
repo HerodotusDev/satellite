@@ -4,10 +4,10 @@ pragma solidity ^0.8.27;
 import {Lib_RLPReader as RLPReader} from "@optimism/libraries/rlp/Lib_RLPReader.sol";
 import {StatelessMmr} from "solidity-mmr/lib/StatelessMmr.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
-import {ISatelliteCoreModule} from "interfaces/modules/ISatelliteCoreModule.sol";
+import {IMMRsCoreModule} from "interfaces/modules/IMMRsCoreModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 
-contract SatelliteCoreModule is ISatelliteCoreModule {
+contract MMRsCoreModule is IMMRsCoreModule {
     // ========================= Types ========================= //
 
     using RLPReader for RLPReader.RLPItem;
@@ -42,18 +42,20 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
     /// @param originChainId the ID of the chain from which the new MMR will be created
     /// @param originalMmrId the ID of the MMR from which the new MMR will be created
+    /// @param isSiblingSynced whether the MMR is sibling synced
     function _createMmrFromForeign(
         uint256 newMmrId,
         RootsForHashingFunctions calldata rootsForHashingFunctions,
         uint256 mmrSize,
         uint256 accumulatedChainId,
         uint256 originChainId,
-        uint256 originalMmrId
+        uint256 originalMmrId,
+        bool isSiblingSynced
     ) external {
         LibSatellite.enforceIsSatelliteModule();
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
 
-        require(rootsForHashingFunctions.roots.length >= 1, "INVALID_ROOTS_LENGTH");
+        require(rootsForHashingFunctions.roots.length > 0, "INVALID_ROOTS_LENGTH");
         require(rootsForHashingFunctions.hashingFunctions.length == rootsForHashingFunctions.roots.length, "ROOTS_FUNCTIONS_LENGTH_MISMATCH");
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
@@ -67,6 +69,7 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
             require(s.mmrs[accumulatedChainId][newMmrId][hashingFunction].latestSize == LibSatellite.NO_MMR_SIZE, "NEW_MMR_ALREADY_EXISTS");
             s.mmrs[accumulatedChainId][newMmrId][hashingFunction].latestSize = mmrSize;
             s.mmrs[accumulatedChainId][newMmrId][hashingFunction].mmrSizeToRoot[mmrSize] = root;
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunction].isSiblingSynced = isSiblingSynced;
         }
 
         // Emit the event
@@ -83,7 +86,7 @@ contract SatelliteCoreModule is ISatelliteCoreModule {
     /// @param hashingFunctions the hashing functions used in the MMR - if more than one, the MMR will be sibling synced and require being a satellite module to call
     function createMmrFromDomestic(uint256 newMmrId, uint256 originalMmrId, uint256 accumulatedChainId, uint256 mmrSize, bytes32[] calldata hashingFunctions) external {
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
-        require(hashingFunctions.length >= 1, "INVALID_HASHING_FUNCTIONS_LENGTH");
+        require(hashingFunctions.length > 0, "INVALID_HASHING_FUNCTIONS_LENGTH");
 
         bool isSiblingSynced = hashingFunctions.length > 1;
         if (isSiblingSynced) {

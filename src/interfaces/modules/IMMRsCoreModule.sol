@@ -4,7 +4,7 @@ pragma solidity ^0.8.27;
 import {Lib_RLPReader as RLPReader} from "@optimism/libraries/rlp/Lib_RLPReader.sol";
 import {StatelessMmr} from "solidity-mmr/lib/StatelessMmr.sol";
 
-interface ISatelliteCoreModule {
+interface IMMRsCoreModule {
     // ========================= Types ========================= //
 
     struct MMRUpdateResult {
@@ -29,7 +29,8 @@ interface ISatelliteCoreModule {
         uint256 mmrSize,
         uint256 accumulatedChainId,
         uint256 originChainId,
-        uint256 originalMmrId
+        uint256 originalMmrId,
+        bool isSiblingSynced
     ) external;
 
     // ========================= Core Functions ========================= //

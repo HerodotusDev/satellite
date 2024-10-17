@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {Test} from "forge-std/Test.sol";
-import {Deploy} from "script/deploy/Satellite.s.sol";
+import {Deploy, numberOfModules} from "script/deploy/Satellite.s.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {ILibSatellite} from "interfaces/ILibSatellite.sol";
 import {console} from "forge-std/console.sol";
@@ -22,8 +22,7 @@ contract Satellite is Test {
     }
 
     function test_have_n_facets() external view {
-        uint256 n = 7;
-        assertEq(satellite.moduleAddresses().length, n);
+        assertEq(satellite.moduleAddresses().length, numberOfModules);
     }
 
     function test_native_parent_hashes_fetcher() external {

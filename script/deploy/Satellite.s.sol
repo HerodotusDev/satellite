@@ -20,11 +20,14 @@ import {DeployMMRsCoreModule} from "./modules/DeployMMRsCoreModule.s.sol";
 import {DeployNativeSharpMmrGrowingModule} from "./modules/DeployNativeSharpMmrGrowingModule.s.sol";
 import {DeployNativeFactsRegistryModule} from "./modules/DeployNativeFactsRegistryModule.s.sol";
 import {DeployNativeParentHashesFetcherModule} from "./modules/DeployNativeParentHashesFetcherModule.s.sol";
+import {DeployNativeOnChainGrowingModule} from "./modules/DeployNativeOnChainGrowingModule.s.sol";
+
+uint256 constant numberOfModules = 8;
 
 contract Deploy is Script {
     function run() external returns (address satelliteAddress) {
         //? -1 because the SatelliteMaintenanceModule is already deployed
-        uint256 moduleCount = 7 - 1;
+        uint256 moduleCount = numberOfModules - 1;
         ISatellite.ModuleMaintenance[] memory maintenances = new ISatellite.ModuleMaintenance[](moduleCount);
         IDeployModule[] memory deployModules = new IDeployModule[](moduleCount);
         deployModules[0] = new DeployOwnershipModule();
@@ -33,6 +36,7 @@ contract Deploy is Script {
         deployModules[3] = new DeployNativeSharpMmrGrowingModule();
         deployModules[4] = new DeployNativeFactsRegistryModule();
         deployModules[5] = new DeployNativeParentHashesFetcherModule();
+        deployModules[6] = new DeployNativeOnChainGrowingModule();
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);

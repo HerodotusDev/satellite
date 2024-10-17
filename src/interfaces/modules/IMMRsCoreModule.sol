@@ -7,13 +7,6 @@ import {StatelessMmr} from "solidity-mmr/lib/StatelessMmr.sol";
 interface IMMRsCoreModule {
     // ========================= Types ========================= //
 
-    struct MMRUpdateResult {
-        uint256 firstAppendedBlock;
-        uint256 lastAppendedBlock;
-        uint256 newMMRSize;
-        bytes32 newMMRRoot;
-    }
-
     struct RootsForHashingFunctions {
         bytes32[] roots;
         bytes32[] hashingFunctions;
@@ -37,14 +30,6 @@ interface IMMRsCoreModule {
 
     function createMmrFromDomestic(uint256 newMmrId, uint256 originalMmrId, uint256 accumulatedChainId, uint256 mmrSize, bytes32[] calldata hashingFunctions) external;
 
-    function onchainNativeAppendBlocksBatch(
-        uint256 accumulatedChainId,
-        uint256 mmrId,
-        bool processFromReceivedBlockHash,
-        bytes calldata ctx,
-        bytes[] calldata headersSerialized
-    ) external;
-
     // ========================= View functions ========================= //
 
     function getMMRRoot(uint256 mmrId, uint256 mmrSize, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bytes32);
@@ -61,7 +46,7 @@ interface IMMRsCoreModule {
     /// @param chainId the ID of the chain that the block hash is from
     /// @param blockNumber the block number
     /// @param parentHash the parent hash of the block number
-    event HashReceived(uint256 chainId, uint256 blockNumber, bytes32 parentHash, bytes32 hashingFunction);
+    event ParentHashReceived(uint256 chainId, uint256 blockNumber, bytes32 parentHash, bytes32 hashingFunction);
     /// @notice emitted when a new MMR is created from a foreign source (eg. from another chain, or off-chain computation proven on-chain)
     /// @param newMmrId the ID of the new MMR
     /// @param mmrSize the size of the MMR
@@ -86,11 +71,4 @@ interface IMMRsCoreModule {
     /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
     /// @param mmrRoots the roots of the MMR -> abi endoded hashing function => MMR root
     event MmrCreatedFromDomestic(uint256 newMmrId, uint256 mmrSize, uint256 accumulatedChainId, uint256 originalMmrId, bytes mmrRoots);
-    /// @notice emitted when a batch of blocks is appended to the MMR
-    /// @param result MMRUpdateResult struct containing firstAppendedBlock, lastAppendedBlock, newMMRSize, newMMRRoot
-    /// @param mmrId the ID of the MMR that was updated
-    /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
-    /// @param hashingFunction the hashing function used to calculate the MMR
-    /// @param accumulatedChainId the ID of the chain that the MMR accumulates
-    event OnchainAppendedBlocksBatch(MMRUpdateResult result, uint256 mmrId, bytes32 hashingFunction, uint256 accumulatedChainId);
 }

@@ -9,6 +9,7 @@ import {ISatelliteMaintenanceModule} from "./modules/ISatelliteMaintenanceModule
 import {INativeSharpMmrGrowingModule} from "./modules/INativeSharpMmrGrowingModule.sol";
 import {INativeFactsRegistryModule} from "./modules/INativeFactsRegistryModule.sol";
 import {INativeParentHashesFetcherModule} from "./modules/INativeParentHashesFetcherModule.sol";
+import {INativeOnChainGrowingModule} from "./modules/INativeOnChainGrowingModule.sol";
 
 interface ISatellite is
     ILibSatellite,
@@ -18,5 +19,6 @@ interface ISatellite is
     ISatelliteMaintenanceModule,
     INativeSharpMmrGrowingModule,
     INativeFactsRegistryModule,
-    INativeParentHashesFetcherModule
+    INativeParentHashesFetcherModule,
+    INativeOnChainGrowingModule
 {}

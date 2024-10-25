@@ -20,7 +20,7 @@ async function main() {
     JSON.stringify(contractsWithSelectors, null, 2),
   );
 
-  console.log(`Successfully generated ${oufFilePath}`);
+  console.log(`\n✅ Successfully generated ${oufFilePath}\n`);
 }
 
 async function getContractsWithSelectors(): Promise<ContractsWithSelectors> {
@@ -36,6 +36,7 @@ async function getContractsWithSelectors(): Promise<ContractsWithSelectors> {
 
   let contractsWithSelectors: ContractsWithSelectors = {};
 
+  console.log(`\n== Detected Satellite Modules' functions with selectors ==\n`);
   // Loop over the filtered files
   for (const folder of targetFolders) {
     const interfaceName = folder.replace(".sol", "");
@@ -44,15 +45,17 @@ async function getContractsWithSelectors(): Promise<ContractsWithSelectors> {
     const data = await fs.readFile(filePath, "utf8");
     const jsonData = JSON.parse(data);
 
+    let contractName = interfaceName.replace("I", "");
+    console.log(`${contractName}`);
     // Check if methodIdentifiers field exists and log it
-    let selectors = Object.values(jsonData.methodIdentifiers).map((s) => {
-      let pure = (s as string).toLowerCase().replace("0x", "");
+    let selectors = Object.entries(jsonData.methodIdentifiers).map(([k, v]) => {
+      console.log(` - ${k} [${v}]`);
+      let pure = (v as string).toLowerCase().replace("0x", "");
       if (pure.length !== 8)
         throw new Error(`Invalid selector length: ${pure.length}`);
       return `0x${pure}`;
     });
 
-    let contractName = interfaceName.replace("I", "");
     contractsWithSelectors[contractName] = selectors;
   }
 

@@ -9,6 +9,7 @@ docs/
 
 # Dotenv file
 .env
+.env.cicd
 
 # Node modules
 node_modules/

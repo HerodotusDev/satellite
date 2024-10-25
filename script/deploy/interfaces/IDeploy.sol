@@ -10,7 +10,7 @@ import {ILibSatellite} from "interfaces/ILibSatellite.sol";
 import {ISatelliteMaintenanceModule} from "interfaces/modules/ISatelliteMaintenanceModule.sol";
 import {ContractsWithSelectors} from "script/helpers/ContractsWithSelectors.s.sol";
 
-abstract contract IDeployModule is Script {
+abstract contract IDeploy is Script {
     function deploy() internal virtual returns (address moduleAddress);
 
     function deployAndPlanMaintenance(ISatellite.ModuleMaintenanceAction action) public returns (ISatellite.ModuleMaintenance memory maintenance) {

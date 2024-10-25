@@ -3,14 +3,14 @@ pragma solidity ^0.8.27;
 
 import {console} from "forge-std/console.sol";
 
-import {IDeployModule} from "script/deploy/interfaces/IDeployModule.sol";
+import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 
 import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
 
 import {NativeSharpMmrGrowingModule} from "src/modules/NativeSharpMmrGrowingModule.sol";
 import {MockFactsRegistry} from "src/mocks/MockFactsRegistry.sol";
 
-contract DeployNativeSharpMmrGrowingModule is IDeployModule {
+contract DeployNativeSharpMmrGrowingModule is IDeploy {
     string contractName = "NativeSharpMmrGrowingModule";
 
     function deploy() internal override returns (address moduleAddress) {

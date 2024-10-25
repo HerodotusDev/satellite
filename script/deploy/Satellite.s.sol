@@ -6,7 +6,7 @@ import {stdJson} from "forge-std/StdJson.sol";
 import {console} from "forge-std/console.sol";
 
 import {ContractsWithSelectors} from "script/helpers/ContractsWithSelectors.s.sol";
-import {IDeployModule} from "script/deploy/interfaces/IDeployModule.sol";
+import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 
 import {Satellite} from "src/Satellite.sol";
 import {SatelliteMaintenanceModule} from "src/modules/SatelliteMaintenanceModule.sol";
@@ -29,7 +29,7 @@ contract Deploy is Script {
         //? -1 because the SatelliteMaintenanceModule is already deployed
         uint256 moduleCount = numberOfModules - 1;
         ISatellite.ModuleMaintenance[] memory maintenances = new ISatellite.ModuleMaintenance[](moduleCount);
-        IDeployModule[] memory deployModules = new IDeployModule[](moduleCount);
+        IDeploy[] memory deployModules = new IDeploy[](moduleCount);
         deployModules[0] = new DeployOwnershipModule();
         deployModules[1] = new DeploySatelliteInspectorModule();
         deployModules[2] = new DeployMMRsCoreModule();

@@ -3,11 +3,11 @@ pragma solidity ^0.8.27;
 
 import {console} from "forge-std/console.sol";
 
-import {IDeployModule} from "script/deploy/interfaces/IDeployModule.sol";
+import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 
 import {SatelliteInspectorModule} from "src/modules/SatelliteInspectorModule.sol";
 
-contract DeploySatelliteInspectorModule is IDeployModule {
+contract DeploySatelliteInspectorModule is IDeploy {
     string contractName = "SatelliteInspectorModule";
 
     function deploy() internal override returns (address moduleAddress) {

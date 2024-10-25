@@ -32,6 +32,14 @@ interface IMMRsCoreModule {
 
     // ========================= View functions ========================= //
 
+    function POSEIDON_HASHING_FUNCTION() external view returns (bytes32);
+
+    function KECCAK_HASHING_FUNCTION() external view returns (bytes32);
+
+    function POSEIDON_MMR_INITIAL_ROOT() external view returns (bytes32);
+
+    function KECCAK_MMR_INITIAL_ROOT() external view returns (bytes32);
+
     function getMMRRoot(uint256 mmrId, uint256 mmrSize, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bytes32);
 
     function getLatestMMRRoot(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bytes32);

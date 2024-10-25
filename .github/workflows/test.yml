@@ -26,6 +26,10 @@ jobs:
         run: |
           forge --version
 
+      - name: Run Bun Install
+        run: |
+          bun install
+
       - name: Run Prettier Check
         run: |
           bun prettier:check
@@ -33,9 +37,7 @@ jobs:
       - name: Run Forge build
         run: |
           bun forge:build
-        id: build
 
       - name: Run Forge tests
         run: |
           bun forge:test -vvv
-        id: test

@@ -26,6 +26,10 @@ jobs:
         run: |
           forge --version
 
+      - name: Run Forge Install
+        run: |
+          forge install
+
       - name: Run Bun Install
         run: |
           bun install

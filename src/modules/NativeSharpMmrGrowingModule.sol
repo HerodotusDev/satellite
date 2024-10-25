@@ -11,14 +11,11 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
     // Using inline library for efficient splitting and joining of uint256 values
     using Uint256Splitter for uint256;
 
-    uint256 public constant MINIMUM_BLOCKS_CONFIRMATIONS = 20;
-    uint256 public constant MAXIMUM_BLOCKS_CONFIRMATIONS = 255;
-
     IFactsRegistry public immutable FACTS_REGISTRY;
     uint256 public immutable AGGREGATED_CHAIN_ID = block.chainid;
 
-    // Cairo program hash (i.e., the off-chain block headers accumulator program)
-    bytes32 public constant PROGRAM_HASH = bytes32(uint256(0x01eca36d586f5356fba096edbf7414017d51cd0ed24b8fde80f78b61a9216ed2));
+    // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
+    bytes32 public constant PROGRAM_HASH = bytes32(uint256(0x65b6e7259ea513e896bc97cbc9445fd71eeb71fb8ce92bad1df9676f97df626));
 
     bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
     bytes32 public constant POSEIDON_HASHING_FUNCTION = keccak256("poseidon");
@@ -42,7 +39,7 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, AGGREGATED_CHAIN_ID, mmrSize, hashingFunctions);
     }
 
-    function aggregateNativeSharpJobs(uint256 mmrId, uint256 fromBlockNumber, INativeSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external {
+    function aggregateNativeSharpJobs(uint256 mmrId, INativeSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external {
         LibSatellite.enforceIsContractOwner();
 
         // Ensuring at least one job output is provided
@@ -51,8 +48,10 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         }
 
         JobOutputPacked calldata firstOutput = outputs[0];
+        (uint256 fromBlock, ) = firstOutput.blockNumbersPacked.split128();
+
         // Ensure the first job is continuable
-        _validateOutput(mmrId, fromBlockNumber, firstOutput);
+        _validateOutput(mmrId, fromBlock, firstOutput);
 
         uint256 limit = outputs.length - 1;
 
@@ -69,8 +68,8 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         JobOutputPacked calldata lastOutput = outputs[limit];
         _ensureValidFact(lastOutput);
 
-        // We save the latest output in the contract state for future calls
         (, uint256 mmrNewSize) = lastOutput.mmrSizesPacked.split128();
+
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
         s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
@@ -81,24 +80,28 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].latestSize = mmrNewSize;
         s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced = true;
 
-        (uint256 fromBlock, ) = firstOutput.blockNumbersPacked.split128();
         (, uint256 toBlock) = lastOutput.blockNumbersPacked.split128();
 
+        ISatellite(address(this))._receiveBlockHash(AGGREGATED_CHAIN_ID, KECCAK_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
         emit SharpFactsAggregate(fromBlock, toBlock, mmrNewSize, mmrId, lastOutput.mmrNewRootPoseidon, lastOutput.mmrNewRootKeccak, AGGREGATED_CHAIN_ID);
     }
 
     /// @notice Ensures the job output is cryptographically sound to continue from
+    /// @param mmrId The MMR ID to validate the output for
     /// @param fromBlockNumber The parent hash of the block to start from
     /// @param firstOutput The job output to check
     function _validateOutput(uint256 mmrId, uint256 fromBlockNumber, INativeSharpMmrGrowingModule.JobOutputPacked memory firstOutput) internal view {
-        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        (uint256 mmrSize, ) = firstOutput.mmrSizesPacked.split128();
+        (uint256 mmrPreviousSize, ) = firstOutput.mmrSizesPacked.split128();
 
+        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
+
+        // Retrieve from cache the parent hash of the block to start from
+        bytes32 fromBlockPlusOneParentHash = s.receivedParentHashes[AGGREGATED_CHAIN_ID][KECCAK_HASHING_FUNCTION][fromBlockNumber + 1];
         uint256 actualMmrSizePoseidon = s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].latestSize;
         uint256 actualMmrSizeKeccak = s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].latestSize;
 
         // Check that the job's previous MMR size is the same as the one stored in the contract state
-        if (mmrSize != actualMmrSizePoseidon || mmrSize != actualMmrSizeKeccak) {
+        if (mmrPreviousSize != actualMmrSizePoseidon || mmrPreviousSize != actualMmrSizeKeccak) {
             revert AggregationError("MMR size mismatch");
         }
 
@@ -111,39 +114,31 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         }
 
         // Check that the job's previous Poseidon MMR root is the same as the one stored in the contract state
-        if (firstOutput.mmrPreviousRootPoseidon != s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrSize])
+        if (firstOutput.mmrPreviousRootPoseidon != s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrPreviousSize])
             revert AggregationError("Poseidon root mismatch");
 
         // Check that the job's previous Keccak MMR root is the same as the one stored in the contract state
-        if (firstOutput.mmrPreviousRootKeccak != s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrSize])
+        if (firstOutput.mmrPreviousRootKeccak != s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrPreviousSize])
             revert AggregationError("Keccak root mismatch");
 
-        bytes32 fromBlockParentHash = s.receivedParentHashes[AGGREGATED_CHAIN_ID][KECCAK_HASHING_FUNCTION][fromBlockNumber];
-
         // If not present in the cache, hash is not authenticated and we cannot continue from it
-        if (fromBlockParentHash == bytes32(0)) {
+        if (fromBlockPlusOneParentHash == bytes32(0)) {
             revert UnknownParentHash();
         }
 
-        // If the right bound start parent hash __is__ specified,
         // we check that the job's `blockN + 1 parent hash` is matching with a previously stored parent hash
-        if (firstOutput.blockNPlusOneParentHash != fromBlockParentHash) {
-            revert AggregationError("Parent hash mismatch");
-        }
-
-        (uint256 fromBlockHighStart, ) = firstOutput.blockNumbersPacked.split128();
-        // We check that block numbers are consecutives
-        if (fromBlockHighStart != fromBlockNumber) {
-            revert AggregationBlockMismatch();
+        if (firstOutput.blockNPlusOneParentHash != fromBlockPlusOneParentHash) {
+            revert AggregationError("Parent hash mismatch: ensureContinuable");
         }
     }
 
-    /// @notice Ensures the fact is registered on SHARP Facts Registry
+    /// @notice Ensures the fact is regisfirstOutputon SHARP Facts Registry
     /// @param output SHARP job output (packed for Solidity)
     function _ensureValidFact(JobOutputPacked memory output) internal view {
         (uint256 fromBlock, uint256 toBlock) = output.blockNumbersPacked.split128();
 
         (uint256 mmrPreviousSize, uint256 mmrNewSize) = output.mmrSizesPacked.split128();
+
         (uint256 blockNPlusOneParentHashLow, uint256 blockNPlusOneParentHashHigh) = uint256(output.blockNPlusOneParentHash).split128();
 
         (uint256 blockNMinusRPlusOneParentHashLow, uint256 blockNMinusRPlusOneParentHashHigh) = uint256(output.blockNMinusRPlusOneParentHash).split128();
@@ -195,7 +190,7 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         (uint256 nextFromBlock, ) = nextOutput.blockNumbersPacked.split128();
 
         // We check that the next job's `from block` is the same as the previous job's `to block + 1`
-        if (toBlock - 1 != nextFromBlock) revert AggregationBlockMismatch();
+        if (toBlock - 1 != nextFromBlock) revert AggregationBlockMismatch("ensureConsecutiveJobs");
 
         (, uint256 outputMmrNewSize) = output.mmrSizesPacked.split128();
         (uint256 nextOutputMmrPreviousSize, ) = nextOutput.mmrSizesPacked.split128();
@@ -210,6 +205,6 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         if (outputMmrNewSize != nextOutputMmrPreviousSize) revert AggregationError("MMR size mismatch");
 
         // We check that the previous job's lowest block hash matches the next job's highest block hash
-        if (output.blockNMinusRPlusOneParentHash != nextOutput.blockNPlusOneParentHash) revert AggregationError("Parent hash mismatch");
+        if (output.blockNMinusRPlusOneParentHash != nextOutput.blockNPlusOneParentHash) revert AggregationError("Parent hash mismatch: ensureConsecutiveJobs");
     }
 }

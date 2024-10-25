@@ -49,9 +49,11 @@ interface INativeSharpMmrGrowingModule {
     error NotEnoughJobs();
     error UnknownParentHash();
     error AggregationError(string message); // Generic error with a message
-    error AggregationBlockMismatch();
+    error AggregationBlockMismatch(string message);
     error GenesisBlockReached();
     error InvalidFact();
 
-    function aggregateNativeSharpJobs(uint256 mmrId, uint256 fromBlockNumber, JobOutputPacked[] calldata outputs) external;
+    function createNativeSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
+
+    function aggregateNativeSharpJobs(uint256 mmrId, JobOutputPacked[] calldata outputs) external;
 }

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {Lib_RLPReader as RLPReader} from "@optimism/libraries/rlp/Lib_RLPReader.sol";
-import {StatelessMmr} from "solidity-mmr/lib/StatelessMmr.sol";
+import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
 
 interface IMMRsCoreModule {
     // ========================= Types ========================= //

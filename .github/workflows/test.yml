@@ -19,42 +19,23 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        with:
-          version: 9
-          run_install: false
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
+      - uses: oven-sh/setup-bun@v2
+      - uses: foundry-rs/foundry-toolchain@v1
 
       - name: Show Forge version
         run: |
           forge --version
 
-      - name: Run Prettier fmt
+      - name: Run Prettier Check
         run: |
-          pnpm prettier:check
-        id: fmt
+          bun prettier:check
 
       - name: Run Forge build
         run: |
-          forge build --sizes
+          bun forge:build
         id: build
 
       - name: Run Forge tests
         run: |
-          forge test -vvv
+          bun forge:test -vvv
         id: test

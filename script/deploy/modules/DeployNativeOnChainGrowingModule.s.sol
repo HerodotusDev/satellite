@@ -5,7 +5,7 @@ import {console} from "forge-std/console.sol";
 
 import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 
-import {NativeOnChainGrowingModule} from "src/modules/NativeOnChainGrowingModule.sol";
+import {NativeOnChainGrowingModule} from "src/modules/growing/NativeOnChainGrowingModule.sol";
 
 contract DeployNativeOnChainGrowingModule is IDeploy {
     string contractName = "NativeOnChainGrowingModule";

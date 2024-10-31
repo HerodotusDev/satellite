@@ -11,6 +11,11 @@ import {ISatelliteMaintenanceModule} from "interfaces/modules/ISatelliteMaintena
 import {ContractsWithSelectors} from "script/helpers/ContractsWithSelectors.s.sol";
 
 abstract contract IDeploy is Script {
+    uint256 constant MAINNET = 1;
+    uint256 constant SEPOLIA = 11155111;
+    uint256 SN_MAINNET = 0x534e5f4d41494e;
+    uint256 SN_SEPOLIA = 0x534e5f5345504f4c4941;
+
     function deploy() internal virtual returns (address moduleAddress);
 
     function deployAndPlanMaintenance(ISatellite.ModuleMaintenanceAction action) public returns (ISatellite.ModuleMaintenance memory maintenance) {
@@ -40,5 +45,11 @@ abstract contract IDeploy is Script {
 
     function getPrivateKey() internal view returns (uint256 privateKey) {
         privateKey = vm.envUint("PRIVATE_KEY");
+    }
+
+    function getStarknetChainId() internal view returns (uint256 chainId) {
+        if (block.chainid == MAINNET) chainId = SN_MAINNET;
+        else if (block.chainid == SEPOLIA) chainId = SN_SEPOLIA;
+        else revert("StarknetSharpMmrGrowingModule doesnt support this chainId");
     }
 }

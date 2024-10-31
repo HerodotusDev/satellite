@@ -3,10 +3,11 @@ pragma solidity ^0.8.27;
 
 import {Uint256Splitter} from "libraries/internal/Uint256Splitter.sol";
 import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
+import {ISharpMmrGrowingCommon} from "interfaces/modules/growing/ISharpMmrGrowingCommon.sol";
 
-interface INativeSharpMmrGrowingModule {
+interface INativeSharpMmrGrowingModule is ISharpMmrGrowingCommon {
     // Representation of the Cairo program's output (raw unpacked)
-    struct JobOutput {
+    struct NativeJobOutput {
         uint256 fromBlockNumberHigh;
         uint256 toBlockNumberLow;
         bytes32 blockNPlusOneParentHashLow;
@@ -44,14 +45,6 @@ interface INativeSharpMmrGrowingModule {
         bytes32 newKeccakMmrRoot,
         uint256 chainId
     );
-
-    // Custom errors for better error handling and clarity
-    error NotEnoughJobs();
-    error UnknownParentHash();
-    error AggregationError(string message); // Generic error with a message
-    error AggregationBlockMismatch(string message);
-    error GenesisBlockReached();
-    error InvalidFact();
 
     function createNativeSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
 

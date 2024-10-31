@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {ISatellite} from "interfaces/ISatellite.sol";
-import {INativeParentHashesFetcherModule} from "interfaces/modules/INativeParentHashesFetcherModule.sol";
+import {INativeParentHashesFetcherModule} from "interfaces/modules/x-rollup-messaging/parent-hashes-fetchers/INativeParentHashesFetcherModule.sol";
 
 /// @title NativeParentHashesFetcher
 /// @notice Fetches parent hashes for the native chain

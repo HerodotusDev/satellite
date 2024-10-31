@@ -3,7 +3,7 @@ pragma solidity ^0.8.27;
 
 import {Uint256Splitter} from "libraries/internal/Uint256Splitter.sol";
 import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
-import {INativeSharpMmrGrowingModule} from "interfaces/modules/INativeSharpMmrGrowingModule.sol";
+import {INativeSharpMmrGrowingModule} from "interfaces/modules/growing/INativeSharpMmrGrowingModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 

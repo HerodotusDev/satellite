@@ -11,10 +11,17 @@ import {ISatelliteMaintenanceModule} from "interfaces/modules/ISatelliteMaintena
 import {ContractsWithSelectors} from "script/helpers/ContractsWithSelectors.s.sol";
 
 abstract contract IDeploy is Script {
+    // ========================= L1 Chain Ids ========================= //
     uint256 constant MAINNET = 1;
     uint256 constant SEPOLIA = 11155111;
-    uint256 SN_MAINNET = 0x534e5f4d41494e;
-    uint256 SN_SEPOLIA = 0x534e5f5345504f4c4941;
+    /// @notice Forge local chain id
+    uint256 constant FORGE = 31337;
+
+    // ========================= L2 Chain Ids ========================= //
+    uint256 constant SN_MAINNET = 0x534e5f4d41494e;
+    uint256 constant SN_SEPOLIA = 0x534e5f5345504f4c4941;
+    /// @notice Made up chain id for local Forge Starknet
+    uint256 constant SN_FORGE = 0x534e5f31337;
 
     function deploy() internal virtual returns (address moduleAddress);
 
@@ -47,9 +54,12 @@ abstract contract IDeploy is Script {
         privateKey = vm.envUint("PRIVATE_KEY");
     }
 
+    error UnsupportedChainId(uint256 chainId);
+
     function getStarknetChainId() internal view returns (uint256 chainId) {
         if (block.chainid == MAINNET) chainId = SN_MAINNET;
         else if (block.chainid == SEPOLIA) chainId = SN_SEPOLIA;
-        else revert("StarknetSharpMmrGrowingModule doesnt support this chainId");
+        else if (block.chainid == FORGE) chainId = SN_FORGE;
+        else revert UnsupportedChainId(block.chainid);
     }
 }

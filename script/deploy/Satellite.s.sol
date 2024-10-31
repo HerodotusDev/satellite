@@ -17,12 +17,12 @@ import {ISatelliteMaintenanceModule} from "interfaces/modules/ISatelliteMaintena
 import {DeployOwnershipModule} from "./modules/DeployOwnershipModule.s.sol";
 import {DeploySatelliteInspectorModule} from "./modules/DeploySatelliteInspectorModule.s.sol";
 import {DeployMMRsCoreModule} from "./modules/DeployMMRsCoreModule.s.sol";
-import {DeployNativeSharpMmrGrowingModule} from "./modules/DeployNativeSharpMmrGrowingModule.s.sol";
+import {DeployNativeSharpMmrGrowingModule} from "./modules/growing/DeployNativeSharpMmrGrowingModule.s.sol";
 import {DeployNativeFactsRegistryModule} from "./modules/DeployNativeFactsRegistryModule.s.sol";
-import {DeployNativeParentHashesFetcherModule} from "./modules/DeployNativeParentHashesFetcherModule.s.sol";
-import {DeployNativeOnChainGrowingModule} from "./modules/DeployNativeOnChainGrowingModule.s.sol";
-import {DeployStarknetSharpMmrGrowingModule} from "./modules/DeployStarknetSharpMmrGrowingModule.s.sol";
-import {DeployStarknetParentHashesFetcherModule} from "./modules/DeployStarknetParentHashesFetcherModule.s.sol";
+import {DeployNativeParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/DeployNativeParentHashesFetcherModule.s.sol";
+import {DeployNativeOnChainGrowingModule} from "./modules/growing/DeployNativeOnChainGrowingModule.s.sol";
+import {DeployStarknetSharpMmrGrowingModule} from "./modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
+import {DeployStarknetParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/DeployStarknetParentHashesFetcherModule.s.sol";
 
 uint256 constant numberOfModules = 10;
 

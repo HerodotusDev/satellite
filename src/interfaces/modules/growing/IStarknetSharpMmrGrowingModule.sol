@@ -3,7 +3,7 @@ pragma solidity ^0.8.27;
 
 import {Uint256Splitter} from "libraries/internal/Uint256Splitter.sol";
 import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
-import {ISharpMmrGrowingCommon} from "interfaces/modules/growing/ISharpMmrGrowingCommon.sol";
+import {ISharpMmrGrowingCommon} from "interfaces/modules/common/ISharpMmrGrowingCommon.sol";
 
 interface IStarknetSharpMmrGrowingModule is ISharpMmrGrowingCommon {
     // Representation of the Cairo program's output

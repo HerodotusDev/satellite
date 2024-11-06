@@ -23,8 +23,9 @@ import {DeployNativeParentHashesFetcherModule} from "./modules/x-rollup-messagin
 import {DeployNativeOnChainGrowingModule} from "./modules/growing/DeployNativeOnChainGrowingModule.s.sol";
 import {DeployStarknetSharpMmrGrowingModule} from "./modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
 import {DeployStarknetParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/DeployStarknetParentHashesFetcherModule.s.sol";
+import {DeployNativeDataProcessorModule} from "./modules/data-processor/DeployNativeDataProcessorModule.s.sol";
 
-uint256 constant numberOfModules = 10;
+uint256 constant numberOfModules = 11;
 
 contract Deploy is Script {
     function run() external returns (address satelliteAddress) {
@@ -41,6 +42,7 @@ contract Deploy is Script {
         deployModules[6] = new DeployNativeOnChainGrowingModule();
         deployModules[7] = new DeployStarknetSharpMmrGrowingModule();
         deployModules[8] = new DeployStarknetParentHashesFetcherModule();
+        deployModules[9] = new DeployNativeDataProcessorModule();
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);

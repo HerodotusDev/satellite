@@ -17,7 +17,9 @@
     "forge:deploy:sepolia": "source .env && forge script --chain sepolia script/deploy/Satellite.s.sol:Deploy --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvv",
     "forge:deploy:update": "source .env && export PRIVATE_KEY=$ANVIL_PRIVATE_KEY && forge script -vvv",
     "forge:deploy:update:anvil": "source .env && export PRIVATE_KEY=$ANVIL_PRIVATE_KEY && forge script --fork-url $ANVIL_RPC_URL --broadcast -vvv",
-    "forge:deploy:update:sepolia": "source .env && forge script --chain sepolia --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvv"
+    "forge:deploy:update:sepolia": "source .env && forge script --chain sepolia --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvv",
+    "clear": "rm -rf out cache",
+    "clear:full": "bun run clear && rm -rf node_modules"
   },
   "devDependencies": {
     "only-allow": "^1.2.1",

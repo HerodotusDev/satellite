@@ -12,6 +12,7 @@ import {INativeFactsRegistryModule} from "./modules/INativeFactsRegistryModule.s
 import {INativeParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/INativeParentHashesFetcherModule.sol";
 import {IStarknetParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/IStarknetParentHashesFetcherModule.sol";
 import {INativeOnChainGrowingModule} from "./modules/growing/INativeOnChainGrowingModule.sol";
+import {INativeDataProcessorModule} from "./modules/data-processor/INativeDataProcessorModule.sol";
 
 interface ISatellite is
     ILibSatellite,
@@ -24,5 +25,6 @@ interface ISatellite is
     INativeParentHashesFetcherModule,
     INativeOnChainGrowingModule,
     IStarknetSharpMmrGrowingModule,
-    IStarknetParentHashesFetcherModule
+    IStarknetParentHashesFetcherModule,
+    INativeDataProcessorModule
 {}

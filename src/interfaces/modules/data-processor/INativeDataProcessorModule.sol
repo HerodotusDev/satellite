@@ -33,11 +33,11 @@ interface INativeDataProcessorModule is IFactsRegistryCommon {
     error NotFinalized();
 
     /// @notice Set the program hash for the HDP program
-    function setProgramHash(bytes32 programHash) external;
+    function setNativeHDPProgramHash(bytes32 programHash) external;
 
     /// @notice Requests the execution of a task with a module
     /// @param moduleTask module task
-    function requestExecutionOfModuleTask(ModuleTask calldata moduleTask) external;
+    function requestNativeHDPExecutionOfModuleTask(ModuleTask calldata moduleTask) external;
 
     /// @notice Authenticates the execution of a task is finalized
     ///     by verifying the FactRegistry and Merkle proofs
@@ -51,7 +51,7 @@ interface INativeDataProcessorModule is IFactsRegistryCommon {
     /// @param resultsInclusionProofs The Merkle proof of the results
     /// @param taskCommitments The commitment of the tasks
     /// @param taskResults The result of the computational tasks
-    function authenticateTaskExecution(
+    function authenticateNativeHDPTaskExecution(
         uint256[] calldata mmrIds,
         uint256[] calldata mmrSizes,
         uint256 taskMerkleRootLow,
@@ -65,11 +65,11 @@ interface INativeDataProcessorModule is IFactsRegistryCommon {
     ) external;
 
     /// @notice Returns the result of a finalized task
-    function getFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32);
+    function getNativeHDPFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32);
 
     /// @notice Returns the status of a task
-    function getTaskStatus(bytes32 taskCommitment) external view returns (TaskStatus);
+    function getNativeHDPTaskStatus(bytes32 taskCommitment) external view returns (TaskStatus);
 
     /// @notice Returns the leaf of standard merkle tree
-    function standardLeafHash(bytes32 value) external pure returns (bytes32);
+    function standardNativeHDPLeafHash(bytes32 value) external pure returns (bytes32);
 }

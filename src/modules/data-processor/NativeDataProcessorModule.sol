@@ -30,21 +30,21 @@ contract NativeDataProcessorModule is INativeDataProcessorModule {
     /// @notice mapping of task result hash => task
     mapping(bytes32 => TaskResult) public cachedTasksResult;
 
-    constructor(IFactsRegistry factsRegistry, uint256 chainId, bytes32 programHash) {
+    constructor(IFactsRegistry factsRegistry, bytes32 programHash) {
+        CHAIN_ID = block.chainid;
         FACTS_REGISTRY = factsRegistry;
-        CHAIN_ID = chainId;
         PROGRAM_HASH = programHash;
     }
 
-    /// @notice Set the program hash for the HDP program
-    function setProgramHash(bytes32 programHash) external {
+    /// @notice setNativeHDPProgramHash hash for the HDP program
+    function setNativeHDPProgramHash(bytes32 programHash) external {
         LibSatellite.enforceIsContractOwner();
         PROGRAM_HASH = programHash;
     }
 
     /// @notice Requests the execution of a task with a module
     /// @param moduleTask module task
-    function requestExecutionOfModuleTask(ModuleTask calldata moduleTask) external {
+    function requestNativeHDPExecutionOfModuleTask(ModuleTask calldata moduleTask) external {
         bytes32 taskCommitment = moduleTask.commit();
 
         if (cachedTasksResult[taskCommitment].status == TaskStatus.FINALIZED) {
@@ -74,7 +74,7 @@ contract NativeDataProcessorModule is INativeDataProcessorModule {
     /// @param resultsInclusionProofs The Merkle proof of the results
     /// @param taskCommitments The commitment of the tasks
     /// @param taskResults The result of the computational tasks
-    function authenticateTaskExecution(
+    function authenticateNativeHDPTaskExecution(
         uint256[] calldata mmrIds,
         uint256[] calldata mmrSizes,
         uint256 taskMerkleRootLow,
@@ -128,7 +128,7 @@ contract NativeDataProcessorModule is INativeDataProcessorModule {
 
             // Compute the Merkle leaf of the task
             bytes32 taskCommitment = taskCommitments[i];
-            bytes32 taskMerkleLeaf = standardLeafHash(taskCommitment);
+            bytes32 taskMerkleLeaf = standardNativeHDPLeafHash(taskCommitment);
             // Ensure that the task is included in the batch, by verifying the Merkle proof
             bool isVerifiedTask = taskInclusionProof.verify(taskMerkleRoot, taskMerkleLeaf);
 
@@ -138,7 +138,7 @@ contract NativeDataProcessorModule is INativeDataProcessorModule {
 
             // Compute the Merkle leaf of the task result
             bytes32 taskResultCommitment = keccak256(abi.encode(taskCommitment, computationalTaskResult));
-            bytes32 taskResultMerkleLeaf = standardLeafHash(taskResultCommitment);
+            bytes32 taskResultMerkleLeaf = standardNativeHDPLeafHash(taskResultCommitment);
             // Ensure that the task result is included in the batch, by verifying the Merkle proof
             bool isVerifiedResult = resultInclusionProof.verify(resultMerkleRoot, taskResultMerkleLeaf);
 
@@ -158,7 +158,7 @@ contract NativeDataProcessorModule is INativeDataProcessorModule {
     }
 
     /// @notice Returns the result of a finalized task
-    function getFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32) {
+    function getNativeHDPFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32) {
         // Ensure task is finalized
         if (cachedTasksResult[taskCommitment].status != TaskStatus.FINALIZED) {
             revert NotFinalized();
@@ -167,12 +167,12 @@ contract NativeDataProcessorModule is INativeDataProcessorModule {
     }
 
     /// @notice Returns the status of a task
-    function getTaskStatus(bytes32 taskCommitment) external view returns (TaskStatus) {
+    function getNativeHDPTaskStatus(bytes32 taskCommitment) external view returns (TaskStatus) {
         return cachedTasksResult[taskCommitment].status;
     }
 
     /// @notice Returns the leaf of standard merkle tree
-    function standardLeafHash(bytes32 value) public pure returns (bytes32) {
+    function standardNativeHDPLeafHash(bytes32 value) public pure returns (bytes32) {
         bytes32 firstHash = keccak256(abi.encode(value));
         bytes32 leaf = keccak256(abi.encode(firstHash));
         return leaf;

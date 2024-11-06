@@ -12,13 +12,12 @@ import {MockFactsRegistry} from "src/mocks/MockFactsRegistry.sol";
 
 contract DeployNativeDataProcessorModule is IDeploy {
     string contractName = "NativeDataProcessorModule";
-    uint256 chainId = block.chainid;
     bytes32 programHash = bytes32(0x0);
 
     function deploy() internal override returns (address moduleAddress) {
         IFactsRegistry sharpFactsRegistry = IFactsRegistry(getFactsRegistryAddress());
         vm.startBroadcast(getPrivateKey());
-        NativeDataProcessorModule module = new NativeDataProcessorModule(sharpFactsRegistry, chainId, programHash);
+        NativeDataProcessorModule module = new NativeDataProcessorModule(sharpFactsRegistry, programHash);
         vm.stopBroadcast();
         moduleAddress = address(module);
     }

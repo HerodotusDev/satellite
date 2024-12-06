@@ -62,6 +62,9 @@ interface ILibSatellite {
         mapping(uint256 => mapping(uint256 => mapping(bytes32 => MMRInfo))) mmrs;
         /// @notice mapping of ChainId => hashing function => block number => block parent hash
         mapping(uint256 => mapping(bytes32 => mapping(uint256 => bytes32))) receivedParentHashes;
+        // SatelliteRegistry storage
+        /// @dev mapping of ChainId => Satellite address
+        mapping(uint256 => address) satelliteRegistry;
     }
 
     // ========================= Errors ========================= //

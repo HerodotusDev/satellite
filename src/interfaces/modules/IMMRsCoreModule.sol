@@ -7,9 +7,9 @@ import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
 interface IMMRsCoreModule {
     // ========================= Types ========================= //
 
-    struct RootsForHashingFunctions {
-        bytes32[] roots;
-        bytes32[] hashingFunctions;
+    struct RootForHashingFunction {
+        bytes32 roots;
+        bytes32 hashingFunctions;
     }
 
     // ========================= Other Satellite Modules Only Functions ========================= //
@@ -18,7 +18,7 @@ interface IMMRsCoreModule {
 
     function _createMmrFromForeign(
         uint256 newMmrId,
-        RootsForHashingFunctions calldata rootsForHashingFunctions,
+        RootForHashingFunction[] calldata rootsForHashingFunctions,
         uint256 mmrSize,
         uint256 accumulatedChainId,
         uint256 originChainId,
@@ -69,7 +69,7 @@ interface IMMRsCoreModule {
         uint256 accumulatedChainId,
         uint256 originChainId,
         uint256 originalMmrId,
-        RootsForHashingFunctions rootsForHashingFunctions
+        RootForHashingFunction[] rootsForHashingFunctions
     );
     /// @notice emitted when a new MMR is created from a domestic source (from another MMR, or a standalone new empty MMR)
     /// @param newMmrId the ID of the new MMR

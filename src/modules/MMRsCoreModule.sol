@@ -39,7 +39,7 @@ contract MMRsCoreModule is IMMRsCoreModule {
     /// @param isSiblingSynced whether the MMR is sibling synced
     function _createMmrFromForeign(
         uint256 newMmrId,
-        RootsForHashingFunctions calldata rootsForHashingFunctions,
+        RootForHashingFunction[] calldata rootsForHashingFunctions,
         uint256 mmrSize,
         uint256 accumulatedChainId,
         uint256 originChainId,
@@ -49,15 +49,14 @@ contract MMRsCoreModule is IMMRsCoreModule {
         LibSatellite.enforceIsSatelliteModule();
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
 
-        require(rootsForHashingFunctions.roots.length > 0, "INVALID_ROOTS_LENGTH");
-        require(rootsForHashingFunctions.hashingFunctions.length == rootsForHashingFunctions.roots.length, "ROOTS_FUNCTIONS_LENGTH_MISMATCH");
+        require(rootsForHashingFunctions.length > 0, "INVALID_ROOTS_LENGTH");
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
         // Create a new MMR
-        for (uint256 i = 0; i < rootsForHashingFunctions.hashingFunctions.length; i++) {
-            bytes32 root = rootsForHashingFunctions.roots[i];
-            bytes32 hashingFunction = rootsForHashingFunctions.hashingFunctions[i];
+        for (uint256 i = 0; i < rootsForHashingFunctions.length; i++) {
+            bytes32 root = rootsForHashingFunctions[i].roots;
+            bytes32 hashingFunction = rootsForHashingFunctions[i].hashingFunctions;
 
             require(root != LibSatellite.NO_MMR_ROOT, "ROOT_0_NOT_ALLOWED");
             require(s.mmrs[accumulatedChainId][newMmrId][hashingFunction].latestSize == LibSatellite.NO_MMR_SIZE, "NEW_MMR_ALREADY_EXISTS");

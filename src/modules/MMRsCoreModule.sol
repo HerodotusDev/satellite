@@ -66,7 +66,7 @@ contract MMRsCoreModule is IMMRsCoreModule {
         }
 
         // Emit the event
-        emit MmrCreatedFromForeign(newMmrId, mmrSize, accumulatedChainId, originChainId, originalMmrId, rootsForHashingFunctions);
+        emit MmrCreatedFromForeign(newMmrId, mmrSize, accumulatedChainId, originChainId, rootsForHashingFunctions, originalMmrId);
     }
 
     // ========================= Core Functions ========================= //
@@ -86,7 +86,7 @@ contract MMRsCoreModule is IMMRsCoreModule {
             LibSatellite.enforceIsSatelliteModule();
         }
 
-        bytes32[] memory roots;
+        RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](hashingFunctions.length);
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
         for (uint256 i = 0; i < hashingFunctions.length; i++) {
@@ -112,11 +112,11 @@ contract MMRsCoreModule is IMMRsCoreModule {
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize = mmrSize;
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize] = mmrRoot;
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].isSiblingSynced = isSiblingSynced;
-            roots[i] = mmrRoot;
+
+            rootsForHashingFunctions[i] = RootForHashingFunction({hashingFunctions: hashingFunctions[i], roots: mmrRoot});
         }
 
-        // Emit the event
-        emit MmrCreatedFromDomestic(newMmrId, mmrSize, accumulatedChainId, originalMmrId, abi.encode(hashingFunctions, roots));
+        emit MmrCreatedFromDomestic(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions);
     }
 
     /// ========================= Internal functions ========================= //

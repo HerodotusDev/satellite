@@ -67,9 +67,9 @@ interface IMMRsCoreModule {
         uint256 newMmrId,
         uint256 mmrSize,
         uint256 accumulatedChainId,
-        uint256 originChainId,
         uint256 originalMmrId,
-        RootForHashingFunction[] rootsForHashingFunctions
+        RootForHashingFunction[] rootsForHashingFunctions,
+        uint256 originChainId
     );
     /// @notice emitted when a new MMR is created from a domestic source (from another MMR, or a standalone new empty MMR)
     /// @param newMmrId the ID of the new MMR
@@ -77,6 +77,6 @@ interface IMMRsCoreModule {
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
     /// @param originalMmrId the ID of the MMR from which the new MMR is created - if 0, it means an new empty MMR was created
     /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
-    /// @param mmrRoots the roots of the MMR -> abi endoded hashing function => MMR root
-    event MmrCreatedFromDomestic(uint256 newMmrId, uint256 mmrSize, uint256 accumulatedChainId, uint256 originalMmrId, bytes mmrRoots);
+    /// @param rootsForHashingFunctions the roots of the MMR -> hashing function => MMR root
+    event MmrCreatedFromDomestic(uint256 newMmrId, uint256 mmrSize, uint256 accumulatedChainId, uint256 originalMmrId, RootForHashingFunction[] rootsForHashingFunctions);
 }

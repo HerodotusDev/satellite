@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {LibSatellite} from "libraries/LibSatellite.sol";
-import {IMMRsCoreModule} from "interfaces/modules/IMMRsCoreModule.sol";
+import {RootForHashingFunction, IMMRsCoreModule} from "interfaces/modules/IMMRsCoreModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 
 contract MMRsCoreModule is IMMRsCoreModule {

@@ -4,14 +4,12 @@ pragma solidity ^0.8.27;
 import {Lib_RLPReader as RLPReader} from "@optimism/libraries/rlp/Lib_RLPReader.sol";
 import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
 
+struct RootForHashingFunction {
+    bytes32 roots;
+    bytes32 hashingFunctions;
+}
+
 interface IMMRsCoreModule {
-    // ========================= Types ========================= //
-
-    struct RootForHashingFunction {
-        bytes32 roots;
-        bytes32 hashingFunctions;
-    }
-
     // ========================= Other Satellite Modules Only Functions ========================= //
 
     function _receiveBlockHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external;

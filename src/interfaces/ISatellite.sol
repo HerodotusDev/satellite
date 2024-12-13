@@ -3,7 +3,7 @@ pragma solidity ^0.8.27;
 
 import {ILibSatellite} from "./ILibSatellite.sol";
 import {IOwnershipModule} from "./modules/IOwnershipModule.sol";
-import {ISatelliteRegistry} from "./modules/ISatelliteRegistry.sol";
+import {ISatelliteRegistryModule} from "./modules/ISatelliteRegistryModule.sol";
 import {IMMRsCoreModule} from "./modules/IMMRsCoreModule.sol";
 import {ISatelliteInspectorModule} from "./modules/ISatelliteInspectorModule.sol";
 import {ISatelliteMaintenanceModule} from "./modules/ISatelliteMaintenanceModule.sol";
@@ -12,13 +12,14 @@ import {IStarknetSharpMmrGrowingModule} from "./modules/growing/IStarknetSharpMm
 import {INativeFactsRegistryModule} from "./modules/INativeFactsRegistryModule.sol";
 import {INativeParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/INativeParentHashesFetcherModule.sol";
 import {IStarknetParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/IStarknetParentHashesFetcherModule.sol";
+import {ISimpleInboxModule} from "./modules/x-rollup-messaging/inbox/ISimpleInboxModule.sol";
 import {INativeOnChainGrowingModule} from "./modules/growing/INativeOnChainGrowingModule.sol";
 import {INativeDataProcessorModule} from "./modules/data-processor/INativeDataProcessorModule.sol";
 
 interface ISatellite is
     ILibSatellite,
     IOwnershipModule,
-    ISatelliteRegistry,
+    ISatelliteRegistryModule,
     IMMRsCoreModule,
     ISatelliteInspectorModule,
     ISatelliteMaintenanceModule,
@@ -27,6 +28,7 @@ interface ISatellite is
     INativeParentHashesFetcherModule,
     INativeOnChainGrowingModule,
     IStarknetSharpMmrGrowingModule,
+    ISimpleInboxModule,
     IStarknetParentHashesFetcherModule,
     INativeDataProcessorModule
 {}

@@ -14,21 +14,21 @@ import {ISatellite} from "interfaces/ISatellite.sol";
 import {ILibSatellite} from "interfaces/ISatellite.sol";
 import {ISatelliteMaintenanceModule} from "interfaces/modules/ISatelliteMaintenanceModule.sol";
 
-import {DeployOwnershipModule} from "./modules/DeployOwnershipModule.s.sol";
-import {DeploySatelliteInspectorModule} from "./modules/DeploySatelliteInspectorModule.s.sol";
-import {DeployMMRsCoreModule} from "./modules/DeployMMRsCoreModule.s.sol";
-import {DeployNativeSharpMmrGrowingModule} from "./modules/growing/DeployNativeSharpMmrGrowingModule.s.sol";
-import {DeployNativeFactsRegistryModule} from "./modules/DeployNativeFactsRegistryModule.s.sol";
-import {DeployNativeParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/DeployNativeParentHashesFetcherModule.s.sol";
-import {DeployNativeOnChainGrowingModule} from "./modules/growing/DeployNativeOnChainGrowingModule.s.sol";
-import {DeployStarknetSharpMmrGrowingModule} from "./modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
-import {DeployStarknetParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/DeployStarknetParentHashesFetcherModule.s.sol";
-import {DeployNativeDataProcessorModule} from "./modules/data-processor/DeployNativeDataProcessorModule.s.sol";
-import {DeploySatelliteRegistryModule} from "./modules/DeploySatelliteRegistryModule.s.sol";
-import {DeploySimpleInboxModule} from "./modules/x-rollup-messaging/inbox/DeploySimpleInboxModule.s.sol";
-import {DeployL1ToArbitrumMessagesSenderModule} from "./modules/x-rollup-messaging/outbox/DeployL1ToArbitrumMessagesSenderModule.s.sol";
+import {DeployOwnershipModule} from "../modules/DeployOwnershipModule.s.sol";
+import {DeploySatelliteInspectorModule} from "../modules/DeploySatelliteInspectorModule.s.sol";
+import {DeployMMRsCoreModule} from "../modules/DeployMMRsCoreModule.s.sol";
+import {DeployNativeSharpMmrGrowingModule} from "../modules/growing/DeployNativeSharpMmrGrowingModule.s.sol";
+import {DeployNativeFactsRegistryModule} from "../modules/DeployNativeFactsRegistryModule.s.sol";
+import {DeployNativeParentHashesFetcherModule} from "../modules/x-rollup-messaging/parent-hashes-fetchers/DeployNativeParentHashesFetcherModule.s.sol";
+import {DeployNativeOnChainGrowingModule} from "../modules/growing/DeployNativeOnChainGrowingModule.s.sol";
+import {DeployStarknetSharpMmrGrowingModule} from "../modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
+import {DeployStarknetParentHashesFetcherModule} from "../modules/x-rollup-messaging/parent-hashes-fetchers/DeployStarknetParentHashesFetcherModule.s.sol";
+import {DeployNativeDataProcessorModule} from "../modules/data-processor/DeployNativeDataProcessorModule.s.sol";
+import {DeploySatelliteRegistryModule} from "../modules/DeploySatelliteRegistryModule.s.sol";
+import {DeploySimpleInboxModule} from "../modules/x-rollup-messaging/inbox/DeploySimpleInboxModule.s.sol";
+import {DeployL1ToArbitrumMessagesSenderModule} from "../modules/x-rollup-messaging/outbox/DeployL1ToArbitrumMessagesSenderModule.s.sol";
 
-uint256 constant numberOfModules = 14;
+uint256 constant numberOfModules = 13;
 
 contract Deploy is Script {
     function run() external returns (address satelliteAddress) {
@@ -47,8 +47,7 @@ contract Deploy is Script {
         deployModules[8] = new DeployStarknetParentHashesFetcherModule();
         deployModules[9] = new DeployNativeDataProcessorModule();
         deployModules[10] = new DeploySatelliteRegistryModule();
-        deployModules[11] = new DeploySimpleInboxModule();
-        deployModules[12] = new DeployL1ToArbitrumMessagesSenderModule();
+        deployModules[11] = new DeployL1ToArbitrumMessagesSenderModule();
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);

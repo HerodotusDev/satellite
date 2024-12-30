@@ -68,6 +68,12 @@ interface ILibSatellite {
         mapping(uint256 => address) satelliteRegistry;
         /// @dev mapping of crossDomainCounterpart => bool
         mapping(address => bool) crossDomainMsgSenders;
+        // =========================== Messengers storage =========================== //
+
+        /// @dev address of the Arbitrum inbox
+        address arbitrumInbox;
+        /// @dev address of satellite deployed on Arbitrum
+        address arbitrumSatellite;
     }
 
     // ========================= Errors ========================= //

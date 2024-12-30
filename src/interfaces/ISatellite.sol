@@ -15,6 +15,7 @@ import {IStarknetParentHashesFetcherModule} from "./modules/x-rollup-messaging/p
 import {ISimpleInboxModule} from "./modules/x-rollup-messaging/inbox/ISimpleInboxModule.sol";
 import {INativeOnChainGrowingModule} from "./modules/growing/INativeOnChainGrowingModule.sol";
 import {INativeDataProcessorModule} from "./modules/data-processor/INativeDataProcessorModule.sol";
+import {IL1ToArbitrumMessagesSenderModule} from "./modules/x-rollup-messaging/outbox/IL1ToArbitrumMessagesSenderModule.sol";
 
 interface ISatellite is
     ILibSatellite,
@@ -29,6 +30,7 @@ interface ISatellite is
     INativeOnChainGrowingModule,
     IStarknetSharpMmrGrowingModule,
     ISimpleInboxModule,
+    IL1ToArbitrumMessagesSenderModule,
     IStarknetParentHashesFetcherModule,
     INativeDataProcessorModule
 {}

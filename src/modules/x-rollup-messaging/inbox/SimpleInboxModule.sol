@@ -51,14 +51,9 @@ contract SimpleInboxModule is ISimpleInboxModule {
         // TODO: should we emit an event?
     }
 
-    // function isCrossdomainCounterpart() public view virtual returns (bool);
-
     modifier onlyCrossdomainCounterpart() {
-        require(isCrossdomainCounterpart(), "Not authorized cross-domain message. Only cross-domain counterpart can call this function.");
-        _;
-    }
-    function isCrossdomainCounterpart() public view returns (bool) {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        return s.crossDomainMsgSenders[msg.sender];
+        require(s.crossDomainMsgSenders[msg.sender], "Not authorized cross-domain message. Only cross-domain counterpart can call this function.");
+        _;
     }
 }

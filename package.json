@@ -15,11 +15,15 @@
     "forge:deploy": "source .env && export PRIVATE_KEY=$ANVIL_PRIVATE_KEY && forge script script/deploy/Satellite.s.sol:Deploy -vvv",
     "forge:deploy:anvil": "source .env && export PRIVATE_KEY=$ANVIL_PRIVATE_KEY && forge script script/deploy/Satellite.s.sol:Deploy --fork-url $ANVIL_RPC_URL --broadcast -vvv",
     "forge:deploy:sepolia": "source .env && forge script --chain sepolia script/deploy/Satellite.s.sol:Deploy --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvv",
+    "test_connection": "source .env && ETHERSCAN_API_KEY=$L1_ETHERSCAN_API_KEY forge script --chain sepolia script/TestConnection.s.sol:TestConnection --rpc-url $SEPOLIA_RPC_URL --broadcast -vvvvv",
     "forge:deploy:update": "source .env && export PRIVATE_KEY=$ANVIL_PRIVATE_KEY && forge script -vvv",
     "forge:deploy:update:anvil": "source .env && export PRIVATE_KEY=$ANVIL_PRIVATE_KEY && forge script --fork-url $ANVIL_RPC_URL --broadcast -vvv",
     "forge:deploy:update:sepolia": "source .env && forge script --chain sepolia --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvv",
     "clear": "rm -rf out cache",
-    "clear:full": "bun run clear && rm -rf node_modules"
+    "clear:full": "bun run clear && rm -rf node_modules",
+    "forge:deploy:11155111": "source .env && ETHERSCAN_API_KEY=$L1_ETHERSCAN_API_KEY forge script --chain sepolia script/deploy/chains/11155111.s.sol:Deploy --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvv --slow",
+    "forge:deploy:421614": "source .env && ETHERSCAN_API_KEY=$ARBITRUM_ETHERSCAN_API_KEY forge script --chain 421614 script/deploy/chains/421614.s.sol:Deploy --rpc-url $ARBITRUM_SEPOLIA_RPC_URL --broadcast --verify -vvv --slow",
+    "forge:connection:11155111_to_421614": "source .env && ETHERSCAN_API_KEY=$ARBITRUM_ETHERSCAN_API_KEY forge script --chain 421614 script/connections/11155111_to_421614.s.sol:SetupArbitrum --rpc-url $ARBITRUM_SEPOLIA_RPC_URL --broadcast -vvv && ETHERSCAN_API_KEY=$L1_ETHERSCAN_API_KEY forge script --chain sepolia script/connections/11155111_to_421614.s.sol:SetupL1 --rpc-url $SEPOLIA_RPC_URL --broadcast -vvv"
   },
   "devDependencies": {
     "only-allow": "^1.2.1",

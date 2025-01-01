@@ -10,25 +10,15 @@ import {LibSatellite} from "../../../libraries/LibSatellite.sol";
 import {IL1ToArbitrumMessagesSenderModule} from "src/interfaces/modules/x-rollup-messaging/outbox/IL1ToArbitrumMessagesSenderModule.sol";
 
 contract L1ToArbitrumMessagesSenderModule is IL1ToArbitrumMessagesSenderModule {
-    // uint256 public constant ORIGIN_CHAIN_ID = 11155111;
-    // bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
+    /// @notice Set the Arbitrum Inbox and Satellite addresses
+    /// @param arbitrumInbox address of Arbitrum Inbox contract deployed on Sepolia
+    /// @param arbitrumSatellite address of Satellite contract deployed on Arbitrum
+    function configure(address arbitrumInbox, address arbitrumSatellite) external {
+        LibSatellite.enforceIsContractOwner();
 
-    // ISharpProofsAggregatorsFactory public immutable proofsAggregatorsFactory;
-    // IParentHashFetcher public immutable parentHashFetcher;
-
-    constructor(address arbitrumInbox) {
-        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        s.arbitrumInbox = arbitrumInbox;
-        // address _l2Target, IArbitrumInbox _arbitrumInbox
-        // l2Target = _l2Target;
-        // arbitrumInbox = _arbitrumInbox;
-        // l2Target = address(0x798E0eE46B18C1FC3862D1B73a1088A2bFa3B34F);
-        // arbitrumInbox = IArbitrumInbox(address(0xaAe29B0366299461418F5324a79Afc425BE5ae21));
-    }
-
-    function setArbitrumSatellite(address arbitrumSatellite) external {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         require(s.arbitrumSatellite == address(0), "ARB_SAT_ALREADY_SET");
+        s.arbitrumInbox = arbitrumInbox;
         s.arbitrumSatellite = arbitrumSatellite;
     }
 

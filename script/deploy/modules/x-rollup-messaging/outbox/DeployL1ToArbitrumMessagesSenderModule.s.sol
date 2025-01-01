@@ -14,9 +14,7 @@ contract DeployL1ToArbitrumMessagesSenderModule is IDeploy {
     function deploy() internal override returns (address moduleAddress) {
         vm.startBroadcast(getPrivateKey());
 
-        address arbitrumInbox = vm.envAddress("SEPOLIA_ARBITRUM_INBOX");
-
-        L1ToArbitrumMessagesSenderModule module = new L1ToArbitrumMessagesSenderModule(arbitrumInbox);
+        L1ToArbitrumMessagesSenderModule module = new L1ToArbitrumMessagesSenderModule();
 
         vm.stopBroadcast();
 

@@ -17,11 +17,11 @@ contract SetupL1 is Script {
         
         address l1SatelliteAddress = vm.envAddress("SATELLITE_ADDRESS_11155111");
         address arbitrumSatelliteAddress = vm.envAddress("SATELLITE_ADDRESS_421614");
+        address arbitrumInbox = vm.envAddress("SEPOLIA_ARBITRUM_INBOX");
 
         ISatellite l1Satellite = ISatellite(l1SatelliteAddress);
         l1Satellite.registerSatellite(421614, arbitrumSatelliteAddress, address(0x0));
-
-        l1Satellite.setArbitrumSatellite(arbitrumSatelliteAddress);
+        l1Satellite.configure(arbitrumInbox, arbitrumSatelliteAddress);
         
         vm.stopBroadcast();
     }

@@ -5,8 +5,8 @@ import {Lib_RLPReader as RLPReader} from "@optimism/libraries/rlp/Lib_RLPReader.
 import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
 
 struct RootForHashingFunction {
-    bytes32 roots;
-    bytes32 hashingFunctions;
+    bytes32 root;
+    bytes32 hashingFunction;
 }
 
 interface IMMRsCoreModule {

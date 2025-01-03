@@ -43,7 +43,7 @@ contract MMRsCoreModule is IMMRsCoreModule {
         uint256 mmrSize,
         uint256 accumulatedChainId,
         uint256 originChainId,
-        uint256 originalMmrId, // TODO: what the f is originMmrId for; are mmrId different on different satellites?
+        uint256 originalMmrId, // TODO: what the f is originMmrId for
         bool isSiblingSynced
     ) external {
         LibSatellite.enforceIsSatelliteModule();
@@ -55,8 +55,8 @@ contract MMRsCoreModule is IMMRsCoreModule {
 
         // Create a new MMR
         for (uint256 i = 0; i < rootsForHashingFunctions.length; i++) {
-            bytes32 root = rootsForHashingFunctions[i].roots;
-            bytes32 hashingFunction = rootsForHashingFunctions[i].hashingFunctions;
+            bytes32 root = rootsForHashingFunctions[i].root;
+            bytes32 hashingFunction = rootsForHashingFunctions[i].hashingFunction;
 
             require(root != LibSatellite.NO_MMR_ROOT, "ROOT_0_NOT_ALLOWED");
             require(s.mmrs[accumulatedChainId][newMmrId][hashingFunction].latestSize == LibSatellite.NO_MMR_SIZE, "NEW_MMR_ALREADY_EXISTS");
@@ -113,7 +113,7 @@ contract MMRsCoreModule is IMMRsCoreModule {
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize] = mmrRoot;
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].isSiblingSynced = isSiblingSynced;
 
-            rootsForHashingFunctions[i] = RootForHashingFunction({hashingFunctions: hashingFunctions[i], roots: mmrRoot});
+            rootsForHashingFunctions[i] = RootForHashingFunction({hashingFunction: hashingFunctions[i], root: mmrRoot});
         }
 
         emit MmrCreatedFromDomestic(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions);

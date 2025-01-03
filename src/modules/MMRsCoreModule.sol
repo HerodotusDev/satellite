@@ -43,7 +43,7 @@ contract MMRsCoreModule is IMMRsCoreModule {
         uint256 mmrSize,
         uint256 accumulatedChainId,
         uint256 originChainId,
-        uint256 originalMmrId, // TODO: what the f is originMmrId for
+        uint256 originalMmrId,
         bool isSiblingSynced
     ) external {
         LibSatellite.enforceIsSatelliteModule();
@@ -66,7 +66,7 @@ contract MMRsCoreModule is IMMRsCoreModule {
         }
 
         // Emit the event
-        emit MmrCreatedFromForeign(newMmrId, mmrSize, accumulatedChainId, originChainId, rootsForHashingFunctions, originalMmrId);
+        emit MmrCreation(newMmrId, mmrSize, accumulatedChainId, originChainId, rootsForHashingFunctions, originalMmrId);
     }
 
     // ========================= Core Functions ========================= //
@@ -116,7 +116,7 @@ contract MMRsCoreModule is IMMRsCoreModule {
             rootsForHashingFunctions[i] = RootForHashingFunction({hashingFunction: hashingFunctions[i], root: mmrRoot});
         }
 
-        emit MmrCreatedFromDomestic(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions);
+        emit MmrCreation(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, accumulatedChainId);
     }
 
     /// ========================= Internal functions ========================= //

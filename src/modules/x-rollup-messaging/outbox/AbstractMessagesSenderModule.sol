@@ -4,15 +4,9 @@ pragma solidity ^0.8.19;
 import {IArbitrumInbox} from "interfaces/external/IArbitrumInbox.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
-import {IMessagesSenderModule} from "src/interfaces/modules/x-rollup-messaging/outbox/IMessagesSenderModule.sol";
 import {RootForHashingFunction} from "interfaces/modules/IMMRsCoreModule.sol";
 
-abstract contract AbstractMessagesSenderModule is IMessagesSenderModule {
-    /// @notice Set the messenger and satellite addresses
-    /// @param chainMessenger address of contract that send messages, e.g. ArbitrumInbox or OptimismCrossDomainMessenger
-    /// @param satellite address of Satellite contract deployed on destination chain
-    function configure(address chainMessenger, address satellite) external virtual;
-
+abstract contract AbstractMessagesSenderModule {
     /// @notice Send parent hash that was registered on L1 to the destination chain
     /// @param satelliteAddress the address of the satellite contract on the destination chain
     /// @param chainId the chain ID of the block whose parent hash is being sent

@@ -9,7 +9,7 @@ interface IL1CrossDomainMessenger {
     function xDomainMessageSender() external view returns (address);
 }
 
-contract SimpleInboxModule is AbstractInboxModule {
+contract OptimismInboxModule is AbstractInboxModule {
     function isCrossdomainCounterpart() internal view override returns (bool) {
         IL1CrossDomainMessenger messenger = IL1CrossDomainMessenger(0x4200000000000000000000000000000000000007);
 

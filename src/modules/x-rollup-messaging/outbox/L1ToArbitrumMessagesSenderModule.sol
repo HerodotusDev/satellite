@@ -4,14 +4,15 @@ pragma solidity ^0.8.19;
 import {IArbitrumInbox} from "interfaces/external/IArbitrumInbox.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
-import {AbstractMessagesSenderModule} from "./AbstractMessagesSenderModule.sol";
+import {IL1ToArbitrumMessagesSenderModule} from "interfaces/modules/x-rollup-messaging/outbox/IL1ToArbitrumMessagesSenderModule.sol";
 import {RootForHashingFunction} from "interfaces/modules/IMMRsCoreModule.sol";
+import {AbstractMessagesSenderModule} from "./AbstractMessagesSenderModule.sol";
 
-contract L1ToArbitrumMessagesSenderModule is AbstractMessagesSenderModule {
+contract L1ToArbitrumMessagesSenderModule is IL1ToArbitrumMessagesSenderModule, AbstractMessagesSenderModule {
     /// @notice Set the Arbitrum Inbox and Satellite addresses
     /// @param arbitrumInbox address of Arbitrum Inbox contract deployed on Sepolia
     /// @param arbitrumSatellite address of Satellite contract deployed on Arbitrum
-    function configure(address arbitrumInbox, address arbitrumSatellite) external override {
+    function configureL1ToArbitrum(address arbitrumInbox, address arbitrumSatellite) external {
         LibSatellite.enforceIsContractOwner();
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
@@ -25,11 +26,11 @@ contract L1ToArbitrumMessagesSenderModule is AbstractMessagesSenderModule {
     /// @param hashingFunction the hashing function used to hash the parent hash
     /// @param blockNumber the number of block being sent
     /// @param _xDomainMsgGasData the gas data for the cross-domain message, depends on the destination L2
-    function sendParentHashL1ToArbitrum(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes calldata _xDomainMsgGasData) external {
+    function sendParentHashL1ToArbitrum(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes calldata _xDomainMsgGasData) external payable {
         _sendParentHash(LibSatellite.satelliteStorage().arbitrumSatellite, chainId, hashingFunction, blockNumber, _xDomainMsgGasData);
     }
 
-    function sendMmrL1ToArbitrum(uint256 accumulatedChainId, uint256 originalMmrId, uint256 newMmrId, bytes32[] calldata hashingFunctions, bytes calldata _xDomainMsgGasData) external {
+    function sendMmrL1ToArbitrum(uint256 accumulatedChainId, uint256 originalMmrId, uint256 newMmrId, bytes32[] calldata hashingFunctions, bytes calldata _xDomainMsgGasData) external payable {
         _sendMmr(LibSatellite.satelliteStorage().arbitrumSatellite, accumulatedChainId, originalMmrId, newMmrId, hashingFunctions, _xDomainMsgGasData);
     }
 

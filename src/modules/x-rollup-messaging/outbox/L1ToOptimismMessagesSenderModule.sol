@@ -10,7 +10,7 @@ import {IOptimismCrossDomainMessenger} from "interfaces/external/IOptimismCrossD
 import {IL1ToOptimismMessagesSenderModule} from "interfaces/modules/x-rollup-messaging/outbox/IL1ToOptimismMessagesSenderModule.sol";
 
 contract L1ToOptimismMessagesSenderModule is AbstractMessagesSenderModule, IL1ToOptimismMessagesSenderModule {
-    function configure(address optimismMessenger, address optimismSatellite) external override {
+    function configureL1ToOptimism(address optimismMessenger, address optimismSatellite) external {
         LibSatellite.enforceIsContractOwner();
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();

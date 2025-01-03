@@ -8,7 +8,7 @@ import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 import {OptimismInboxModule} from "src/modules/x-rollup-messaging/inbox/OptimismInboxModule.sol";
 
 contract DeployOptimismInboxModule is IDeploy {
-    string contractName = "OptimismInboxModule";
+    string contractName = "InboxModule";
 
     function deploy() internal override returns (address moduleAddress) {
         vm.startBroadcast(getPrivateKey());

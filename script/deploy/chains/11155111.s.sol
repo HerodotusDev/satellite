@@ -27,6 +27,7 @@ import {DeployNativeDataProcessorModule} from "../modules/data-processor/DeployN
 import {DeploySatelliteRegistryModule} from "../modules/DeploySatelliteRegistryModule.s.sol";
 import {DeploySimpleInboxModule} from "../modules/x-rollup-messaging/inbox/DeploySimpleInboxModule.s.sol";
 import {DeployL1ToArbitrumMessagesSenderModule} from "../modules/x-rollup-messaging/outbox/DeployL1ToArbitrumMessagesSenderModule.s.sol";
+import {DeployL1ToOptimismMessagesSenderModule} from "../modules/x-rollup-messaging/outbox/DeployL1ToOptimismMessagesSenderModule.s.sol";
 
 uint256 constant numberOfModules = 14;
 

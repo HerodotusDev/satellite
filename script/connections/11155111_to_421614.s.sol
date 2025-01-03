@@ -21,7 +21,7 @@ contract SetupL1 is Script {
 
         ISatellite l1Satellite = ISatellite(l1SatelliteAddress);
         l1Satellite.registerSatellite(421614, arbitrumSatelliteAddress, address(0x0));
-        l1Satellite.configure(arbitrumInbox, arbitrumSatelliteAddress);
+        l1Satellite.configureL1ToArbitrum(arbitrumInbox, arbitrumSatelliteAddress);
         
         vm.stopBroadcast();
     }

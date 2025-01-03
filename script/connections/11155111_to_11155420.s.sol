@@ -21,7 +21,7 @@ contract SetupL1 is Script {
 
         ISatellite l1Satellite = ISatellite(l1SatelliteAddress);
         l1Satellite.registerSatellite(11155420, optimismSatelliteAddress, address(0x0));
-        l1Satellite.configure(optimismCrossDomainMessenger, optimismSatelliteAddress);
+        l1Satellite.configureL1ToOptimism(optimismCrossDomainMessenger, optimismSatelliteAddress);
         
         vm.stopBroadcast();
     }

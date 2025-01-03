@@ -7,7 +7,6 @@ import {console} from "forge-std/console.sol";
 
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {IArbitrumInbox} from "interfaces/external/IArbitrumInbox.sol";
-import {IL1ToArbitrumMessagesSenderModule} from "interfaces/modules/x-rollup-messaging/outbox/IL1ToArbitrumMessagesSenderModule.sol";
 
 bytes32 constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
 uint256 constant ORIGIN_CHAIN_ID = 11155111;
@@ -51,7 +50,7 @@ contract TestConnection is Script {
         // console.log(value); // 11184953281400000
 
         vm.startBroadcast(pk);
-        IL1ToArbitrumMessagesSenderModule(satelliteAddress).sendParentHashL1ToArbitrum{value: value}(ORIGIN_CHAIN_ID, KECCAK_HASHING_FUNCTION, BLOCK_NUMBER, gasData);
+        satellite.sendParentHashL1ToArbitrum{value: value}(ORIGIN_CHAIN_ID, KECCAK_HASHING_FUNCTION, BLOCK_NUMBER, gasData);
         vm.stopBroadcast();
     }
 }

@@ -74,6 +74,10 @@ interface ILibSatellite {
         address arbitrumInbox;
         /// @dev address of satellite deployed on Arbitrum
         address arbitrumSatellite;
+        /// @dev address of the Optimism messenger
+        address optimismMessenger;
+        /// @dev address of satellite deployed on Optimism
+        address optimismSatellite;
     }
 
     // ========================= Errors ========================= //

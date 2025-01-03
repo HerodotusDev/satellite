@@ -5,15 +5,15 @@ import {console} from "forge-std/console.sol";
 
 import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 
-import {L1ToArbitrumMessagesSenderModule} from "src/modules/x-rollup-messaging/outbox/L1ToArbitrumMessagesSenderModule.sol";
+import {L1ToOptimismMessagesSenderModule} from "src/modules/x-rollup-messaging/outbox/L1ToOptimismMessagesSenderModule.sol";
 
-contract DeployL1ToArbitrumMessagesSenderModule is IDeploy {
-    string contractName = "L1ToArbitrumMessagesSenderModule";
+contract DeployL1ToOptimismMessagesSenderModule is IDeploy {
+    string contractName = "L1ToOptimismMessagesSenderModule";
 
     function deploy() internal override returns (address moduleAddress) {
         vm.startBroadcast(getPrivateKey());
 
-        L1ToArbitrumMessagesSenderModule module = new L1ToArbitrumMessagesSenderModule();
+        L1ToOptimismMessagesSenderModule module = new L1ToOptimismMessagesSenderModule();
 
         vm.stopBroadcast();
 

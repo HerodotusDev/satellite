@@ -33,8 +33,8 @@ contract MMRsCoreModule is IMMRsCoreModule {
     /// @param newMmrId the ID of the MMR to create
     /// @param rootsForHashingFunctions the roots of the MMR -> abi endoded hashing function => MMR root
     /// @param mmrSize the size of the MMR
-    /// @param accumulatedChainId the ID of the chain that the MMR accumulates
-    /// @param originChainId the ID of the chain from which the new MMR will be created
+    /// @param accumulatedChainId the ID of the chain that the MMR accumulates (where block is?)
+    /// @param originChainId the ID of the chain from which the new MMR will be created (who is sending msg?)
     /// @param originalMmrId the ID of the MMR from which the new MMR will be created
     /// @param isSiblingSynced whether the MMR is sibling synced
     function _createMmrFromForeign(
@@ -43,7 +43,7 @@ contract MMRsCoreModule is IMMRsCoreModule {
         uint256 mmrSize,
         uint256 accumulatedChainId,
         uint256 originChainId,
-        uint256 originalMmrId,
+        uint256 originalMmrId, // TODO: what the f is originMmrId for; are mmrId different on different satellites?
         bool isSiblingSynced
     ) external {
         LibSatellite.enforceIsSatelliteModule();

@@ -25,10 +25,10 @@ import {DeployStarknetSharpMmrGrowingModule} from "../modules/growing/DeployStar
 import {DeployStarknetParentHashesFetcherModule} from "../modules/x-rollup-messaging/parent-hashes-fetchers/DeployStarknetParentHashesFetcherModule.s.sol";
 import {DeployNativeDataProcessorModule} from "../modules/data-processor/DeployNativeDataProcessorModule.s.sol";
 import {DeploySatelliteRegistryModule} from "../modules/DeploySatelliteRegistryModule.s.sol";
-import {DeploySimpleInboxModule} from "../modules/x-rollup-messaging/inbox/DeploySimpleInboxModule.s.sol";
+import {DeployOptimismInboxModule} from "../modules/x-rollup-messaging/inbox/DeployOptimismInboxModule.s.sol";
 import {DeployL1ToArbitrumMessagesSenderModule} from "../modules/x-rollup-messaging/outbox/DeployL1ToArbitrumMessagesSenderModule.s.sol";
 
-uint256 constant numberOfModules = 14;
+uint256 constant numberOfModules = 10;
 
 contract Deploy is Script {
     function run() external returns (address satelliteAddress) {
@@ -39,16 +39,13 @@ contract Deploy is Script {
         deployModules[0] = new DeployOwnershipModule();
         deployModules[1] = new DeploySatelliteInspectorModule();
         deployModules[2] = new DeployMMRsCoreModule();
-        deployModules[3] = new DeployNativeSharpMmrGrowingModule();
-        deployModules[4] = new DeployNativeFactsRegistryModule();
-        deployModules[5] = new DeployNativeParentHashesFetcherModule();
-        deployModules[6] = new DeployNativeOnChainGrowingModule();
-        deployModules[7] = new DeployStarknetSharpMmrGrowingModule();
-        deployModules[8] = new DeployStarknetParentHashesFetcherModule();
-        deployModules[9] = new DeployNativeDataProcessorModule();
-        deployModules[10] = new DeploySatelliteRegistryModule();
-        deployModules[11] = new DeployL1ToArbitrumMessagesSenderModule();
-        deployModules[12] = new DeployL1ToOptimismMessagesSenderModule();
+        // TODO: which modules should we keep?
+        deployModules[3] = new DeployNativeFactsRegistryModule();
+        deployModules[4] = new DeployNativeParentHashesFetcherModule();
+        deployModules[5] = new DeployNativeOnChainGrowingModule();
+        deployModules[6] = new DeployNativeDataProcessorModule();
+        deployModules[7] = new DeploySatelliteRegistryModule();
+        deployModules[8] = new DeployOptimismInboxModule();
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);

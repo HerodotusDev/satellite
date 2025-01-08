@@ -5,7 +5,7 @@ import {IArbitrumInbox} from "interfaces/external/IArbitrumInbox.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {IL1ToArbitrumMessagesSenderModule} from "interfaces/modules/x-rollup-messaging/outbox/IL1ToArbitrumMessagesSenderModule.sol";
-import {RootForHashingFunction} from "interfaces/modules/IMMRsCoreModule.sol";
+import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
 import {AbstractMessagesSenderModule} from "./AbstractMessagesSenderModule.sol";
 
 contract L1ToArbitrumMessagesSenderModule is IL1ToArbitrumMessagesSenderModule, AbstractMessagesSenderModule {

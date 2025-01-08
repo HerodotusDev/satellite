@@ -2,10 +2,10 @@
 pragma solidity ^0.8.27;
 
 import {LibSatellite} from "libraries/LibSatellite.sol";
-import {RootForHashingFunction, IMMRsCoreModule} from "interfaces/modules/IMMRsCoreModule.sol";
+import {RootForHashingFunction, IMmrCoreModule} from "interfaces/modules/IMmrCoreModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 
-contract MMRsCoreModule is IMMRsCoreModule {
+contract MMRsCoreModule is IMmrCoreModule {
     // ========================= Constants ========================= //
 
     bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");

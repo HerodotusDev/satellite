@@ -3,7 +3,7 @@ pragma solidity ^0.8.27;
 
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
-import {RootForHashingFunction} from "interfaces/modules/IMMRsCoreModule.sol";
+import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
 import {AbstractInboxModule} from "./AbstractInboxModule.sol";
 
 contract SimpleInboxModule is AbstractInboxModule {

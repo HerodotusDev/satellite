@@ -5,14 +5,14 @@ import {console} from "forge-std/console.sol";
 
 import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 
-import {MMRsCoreModule} from "src/modules/MMRsCoreModule.sol";
+import {MmrCoreModule} from "src/modules/MmrCoreModule.sol";
 
-contract DeployMMRsCoreModule is IDeploy {
-    string contractName = "MMRsCoreModule";
+contract DeployMmrCoreModule is IDeploy {
+    string contractName = "MmrCoreModule";
 
     function deploy() internal override returns (address moduleAddress) {
         vm.startBroadcast(getPrivateKey());
-        MMRsCoreModule module = new MMRsCoreModule();
+        MmrCoreModule module = new MmrCoreModule();
         vm.stopBroadcast();
 
         moduleAddress = address(module);

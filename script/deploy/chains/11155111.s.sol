@@ -16,7 +16,7 @@ import {ISatelliteMaintenanceModule} from "interfaces/modules/ISatelliteMaintena
 
 import {DeployOwnershipModule} from "../modules/DeployOwnershipModule.s.sol";
 import {DeploySatelliteInspectorModule} from "../modules/DeploySatelliteInspectorModule.s.sol";
-import {DeployMMRsCoreModule} from "../modules/DeployMMRsCoreModule.s.sol";
+import {DeployMmrCoreModule} from "../modules/DeployMmrCoreModule.s.sol";
 import {DeployNativeSharpMmrGrowingModule} from "../modules/growing/DeployNativeSharpMmrGrowingModule.s.sol";
 import {DeployNativeFactsRegistryModule} from "../modules/DeployNativeFactsRegistryModule.s.sol";
 import {DeployNativeParentHashesFetcherModule} from "../modules/x-rollup-messaging/parent-hashes-fetchers/DeployNativeParentHashesFetcherModule.s.sol";
@@ -39,7 +39,7 @@ contract Deploy is Script {
         IDeploy[] memory deployModules = new IDeploy[](moduleCount);
         deployModules[0] = new DeployOwnershipModule();
         deployModules[1] = new DeploySatelliteInspectorModule();
-        deployModules[2] = new DeployMMRsCoreModule();
+        deployModules[2] = new DeployMmrCoreModule();
         deployModules[3] = new DeployNativeSharpMmrGrowingModule();
         deployModules[4] = new DeployNativeFactsRegistryModule();
         deployModules[5] = new DeployNativeParentHashesFetcherModule();

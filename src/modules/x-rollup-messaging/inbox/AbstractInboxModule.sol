@@ -4,7 +4,7 @@ pragma solidity ^0.8.27;
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {IInboxModule} from "interfaces/modules/x-rollup-messaging/inbox/IInboxModule.sol";
-import {RootForHashingFunction} from "interfaces/modules/IMMRsCoreModule.sol";
+import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
 
 abstract contract AbstractInboxModule is IInboxModule {
     function receiveHashForBlock(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external onlyCrossdomainCounterpart {

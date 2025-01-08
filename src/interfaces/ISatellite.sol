@@ -4,7 +4,7 @@ pragma solidity ^0.8.27;
 import {ILibSatellite} from "./ILibSatellite.sol";
 import {IOwnershipModule} from "./modules/IOwnershipModule.sol";
 import {ISatelliteRegistryModule} from "./modules/ISatelliteRegistryModule.sol";
-import {IMMRsCoreModule} from "./modules/IMMRsCoreModule.sol";
+import {IMmrCoreModule} from "./modules/IMmrCoreModule.sol";
 import {ISatelliteInspectorModule} from "./modules/ISatelliteInspectorModule.sol";
 import {ISatelliteMaintenanceModule} from "./modules/ISatelliteMaintenanceModule.sol";
 import {INativeSharpMmrGrowingModule} from "./modules/growing/INativeSharpMmrGrowingModule.sol";
@@ -22,7 +22,7 @@ interface ISatellite is
     ILibSatellite,
     IOwnershipModule,
     ISatelliteRegistryModule,
-    IMMRsCoreModule,
+    IMmrCoreModule,
     ISatelliteInspectorModule,
     ISatelliteMaintenanceModule,
     INativeSharpMmrGrowingModule,

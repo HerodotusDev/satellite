@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {RootForHashingFunction} from "interfaces/modules/IMMRsCoreModule.sol";
+import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
 
 interface IInboxModule {
     function receiveHashForBlock(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external;

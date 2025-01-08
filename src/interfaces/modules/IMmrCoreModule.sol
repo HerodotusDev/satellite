@@ -15,7 +15,7 @@ enum GrownBy {
     STARKNET_SHARP_GROWER
 }
 
-interface IMMRsCoreModule {
+interface IMmrCoreModule {
     // ========================= Other Satellite Modules Only Functions ========================= //
 
     function _receiveBlockHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external;

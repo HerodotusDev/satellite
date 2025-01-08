@@ -5,7 +5,7 @@ import {IArbitrumInbox} from "interfaces/external/IArbitrumInbox.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {AbstractMessagesSenderModule} from "./AbstractMessagesSenderModule.sol";
-import {RootForHashingFunction} from "interfaces/modules/IMMRsCoreModule.sol";
+import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
 import {IOptimismCrossDomainMessenger} from "interfaces/external/IOptimismCrossDomainMessenger.sol";
 import {IL1ToOptimismMessagesSenderModule} from "interfaces/modules/x-rollup-messaging/outbox/IL1ToOptimismMessagesSenderModule.sol";
 

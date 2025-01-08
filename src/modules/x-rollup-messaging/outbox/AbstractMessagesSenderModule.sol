@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import {IArbitrumInbox} from "interfaces/external/IArbitrumInbox.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
-import {RootForHashingFunction} from "interfaces/modules/IMMRsCoreModule.sol";
+import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
 
 abstract contract AbstractMessagesSenderModule {
     /// @notice Send parent hash that was registered on L1 to the destination chain

@@ -7,16 +7,16 @@ import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 
 import {IStarknet} from "interfaces/external/IStarknet.sol";
 
-import {StarknetParentHashesFetcherModule} from "src/modules/x-rollup-messaging/parent-hashes-fetchers/StarknetParentHashesFetcherModule.sol";
+import {StarknetParentHashFetcherModule} from "src/modules/x-rollup-messaging/parent-hash-fetcher/StarknetParentHashFetcherModule.sol";
 import {MockStarknetCore} from "src/mocks/MockStarknetCore.sol";
 
-contract DeployStarknetParentHashesFetcherModule is IDeploy {
-    string contractName = "StarknetParentHashesFetcherModule";
+contract DeployStarknetParentHashFetcherModule is IDeploy {
+    string contractName = "StarknetParentHashFetcherModule";
 
     function deploy() internal override returns (address moduleAddress) {
         IStarknet starknetCore = IStarknet(getStarknetCoreAddress());
         vm.startBroadcast(getPrivateKey());
-        StarknetParentHashesFetcherModule module = new StarknetParentHashesFetcherModule(starknetCore, getStarknetChainId());
+        StarknetParentHashFetcherModule module = new StarknetParentHashFetcherModule(starknetCore, getStarknetChainId());
         vm.stopBroadcast();
 
         moduleAddress = address(module);

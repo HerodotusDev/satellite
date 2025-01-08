@@ -6,7 +6,7 @@ import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
 interface IInboxModule {
     function receiveHashForBlock(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external;
 
-    function receiveMMR(
+    function receiveMmr(
         uint256 newMmrId,
         RootForHashingFunction[] calldata rootsForHashingFunctions,
         uint256 mmrSize,

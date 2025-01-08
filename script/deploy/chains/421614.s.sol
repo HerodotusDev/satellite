@@ -19,10 +19,10 @@ import {DeploySatelliteInspectorModule} from "../modules/DeploySatelliteInspecto
 import {DeployMmrCoreModule} from "../modules/DeployMmrCoreModule.s.sol";
 import {DeployNativeSharpMmrGrowingModule} from "../modules/growing/DeployNativeSharpMmrGrowingModule.s.sol";
 import {DeployNativeFactsRegistryModule} from "../modules/DeployNativeFactsRegistryModule.s.sol";
-import {DeployNativeParentHashesFetcherModule} from "../modules/x-rollup-messaging/parent-hashes-fetchers/DeployNativeParentHashesFetcherModule.s.sol";
+import {DeployNativeParentHashFetcherModule} from "../modules/x-rollup-messaging/parent-hash-fetcher/DeployNativeParentHashFetcherModule.s.sol";
 import {DeployNativeOnChainGrowingModule} from "../modules/growing/DeployNativeOnChainGrowingModule.s.sol";
 import {DeployStarknetSharpMmrGrowingModule} from "../modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
-import {DeployStarknetParentHashesFetcherModule} from "../modules/x-rollup-messaging/parent-hashes-fetchers/DeployStarknetParentHashesFetcherModule.s.sol";
+import {DeployStarknetParentHashFetcherModule} from "../modules/x-rollup-messaging/parent-hash-fetcher/DeployStarknetParentHashFetcherModule.s.sol";
 import {DeployNativeDataProcessorModule} from "../modules/data-processor/DeployNativeDataProcessorModule.s.sol";
 import {DeploySatelliteRegistryModule} from "../modules/DeploySatelliteRegistryModule.s.sol";
 import {DeploySimpleInboxModule} from "../modules/x-rollup-messaging/inbox/DeploySimpleInboxModule.s.sol";
@@ -41,7 +41,7 @@ contract Deploy is Script {
         deployModules[2] = new DeployMmrCoreModule();
         // TODO: which modules should we keep?
         deployModules[3] = new DeployNativeFactsRegistryModule();
-        deployModules[4] = new DeployNativeParentHashesFetcherModule();
+        deployModules[4] = new DeployNativeParentHashFetcherModule();
         deployModules[5] = new DeployNativeOnChainGrowingModule();
         deployModules[6] = new DeployNativeDataProcessorModule();
         deployModules[7] = new DeploySatelliteRegistryModule();

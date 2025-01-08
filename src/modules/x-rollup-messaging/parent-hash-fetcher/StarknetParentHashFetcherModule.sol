@@ -2,13 +2,13 @@
 pragma solidity ^0.8.27;
 
 import {ISatellite} from "interfaces/ISatellite.sol";
-import {IStarknetParentHashesFetcherModule} from "interfaces/modules/x-rollup-messaging/parent-hashes-fetchers/IStarknetParentHashesFetcherModule.sol";
+import {IStarknetParentHashFetcherModule} from "interfaces/modules/x-rollup-messaging/parent-hash-fetcher/IStarknetParentHashFetcherModule.sol";
 import {IStarknet} from "interfaces/external/IStarknet.sol";
 
-/// @title NativeParentHashesFetcher
+/// @title NativeParentHashFetcher
 /// @notice Fetches parent hashes for the native chain
 /// @notice for example if deployed on Ethereum, it will fetch parent hashes from Ethereum
-contract StarknetParentHashesFetcherModule is IStarknetParentHashesFetcherModule {
+contract StarknetParentHashFetcherModule is IStarknetParentHashFetcherModule {
     IStarknet public immutable STARKNET;
     // Either Starknet or Starknet Sepolia chain ID
     uint256 public immutable CHAIN_ID;

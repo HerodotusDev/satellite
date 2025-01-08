@@ -15,7 +15,7 @@ abstract contract AbstractInboxModule is IInboxModule {
         // event is emitted in HeadersStore so this probably is not needed.
     }
 
-    function receiveMMR(
+    function receiveMmr(
         uint256 newMmrId,
         RootForHashingFunction[] calldata rootsForHashingFunctions,
         uint256 mmrSize,

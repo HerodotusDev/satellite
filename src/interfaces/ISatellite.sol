@@ -10,8 +10,8 @@ import {ISatelliteMaintenanceModule} from "./modules/ISatelliteMaintenanceModule
 import {INativeSharpMmrGrowingModule} from "./modules/growing/INativeSharpMmrGrowingModule.sol";
 import {IStarknetSharpMmrGrowingModule} from "./modules/growing/IStarknetSharpMmrGrowingModule.sol";
 import {INativeFactsRegistryModule} from "./modules/INativeFactsRegistryModule.sol";
-import {INativeParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/INativeParentHashesFetcherModule.sol";
-import {IStarknetParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/IStarknetParentHashesFetcherModule.sol";
+import {INativeParentHashFetcherModule} from "./modules/x-rollup-messaging/parent-hash-fetcher/INativeParentHashFetcherModule.sol";
+import {IStarknetParentHashFetcherModule} from "./modules/x-rollup-messaging/parent-hash-fetcher/IStarknetParentHashFetcherModule.sol";
 import {IInboxModule} from "./modules/x-rollup-messaging/inbox/IInboxModule.sol";
 import {INativeOnChainGrowingModule} from "./modules/growing/INativeOnChainGrowingModule.sol";
 import {INativeDataProcessorModule} from "./modules/data-processor/INativeDataProcessorModule.sol";
@@ -27,12 +27,12 @@ interface ISatellite is
     ISatelliteMaintenanceModule,
     INativeSharpMmrGrowingModule,
     INativeFactsRegistryModule,
-    INativeParentHashesFetcherModule,
+    INativeParentHashFetcherModule,
     INativeOnChainGrowingModule,
     IStarknetSharpMmrGrowingModule,
     IInboxModule,
     IL1ToArbitrumMessagesSenderModule,
     IL1ToOptimismMessagesSenderModule,
-    IStarknetParentHashesFetcherModule,
+    IStarknetParentHashFetcherModule,
     INativeDataProcessorModule
 {}

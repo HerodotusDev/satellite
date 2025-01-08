@@ -19,10 +19,10 @@ import {DeploySatelliteInspectorModule} from "../modules/DeploySatelliteInspecto
 import {DeployMmrCoreModule} from "../modules/DeployMmrCoreModule.s.sol";
 import {DeployNativeSharpMmrGrowingModule} from "../modules/growing/DeployNativeSharpMmrGrowingModule.s.sol";
 import {DeployNativeFactsRegistryModule} from "../modules/DeployNativeFactsRegistryModule.s.sol";
-import {DeployNativeParentHashesFetcherModule} from "../modules/x-rollup-messaging/parent-hashes-fetchers/DeployNativeParentHashesFetcherModule.s.sol";
+import {DeployNativeParentHashFetcherModule} from "../modules/x-rollup-messaging/parent-hash-fetcher/DeployNativeParentHashFetcherModule.s.sol";
 import {DeployNativeOnChainGrowingModule} from "../modules/growing/DeployNativeOnChainGrowingModule.s.sol";
 import {DeployStarknetSharpMmrGrowingModule} from "../modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
-import {DeployStarknetParentHashesFetcherModule} from "../modules/x-rollup-messaging/parent-hashes-fetchers/DeployStarknetParentHashesFetcherModule.s.sol";
+import {DeployStarknetParentHashFetcherModule} from "../modules/x-rollup-messaging/parent-hash-fetcher/DeployStarknetParentHashFetcherModule.s.sol";
 import {DeployNativeDataProcessorModule} from "../modules/data-processor/DeployNativeDataProcessorModule.s.sol";
 import {DeploySatelliteRegistryModule} from "../modules/DeploySatelliteRegistryModule.s.sol";
 import {DeploySimpleInboxModule} from "../modules/x-rollup-messaging/inbox/DeploySimpleInboxModule.s.sol";
@@ -42,10 +42,10 @@ contract Deploy is Script {
         deployModules[2] = new DeployMmrCoreModule();
         deployModules[3] = new DeployNativeSharpMmrGrowingModule();
         deployModules[4] = new DeployNativeFactsRegistryModule();
-        deployModules[5] = new DeployNativeParentHashesFetcherModule();
+        deployModules[5] = new DeployNativeParentHashFetcherModule();
         deployModules[6] = new DeployNativeOnChainGrowingModule();
         deployModules[7] = new DeployStarknetSharpMmrGrowingModule();
-        deployModules[8] = new DeployStarknetParentHashesFetcherModule();
+        deployModules[8] = new DeployStarknetParentHashFetcherModule();
         deployModules[9] = new DeployNativeDataProcessorModule();
         deployModules[10] = new DeploySatelliteRegistryModule();
         deployModules[11] = new DeployL1ToArbitrumMessagesSenderModule();

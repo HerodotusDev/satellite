@@ -5,7 +5,7 @@ import {LibSatellite} from "libraries/LibSatellite.sol";
 import {RootForHashingFunction, IMmrCoreModule} from "interfaces/modules/IMmrCoreModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 
-contract MMRsCoreModule is IMmrCoreModule {
+contract MmrCoreModule is IMmrCoreModule {
     // ========================= Constants ========================= //
 
     bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
@@ -31,7 +31,7 @@ contract MMRsCoreModule is IMmrCoreModule {
 
     /// @notice Most commonly creates a new branch from an L1 message, the sent MMR info comes from an L1 aggregator
     /// @param newMmrId the ID of the MMR to create
-    /// @param rootsForHashingFunctions the roots of the MMR -> abi endoded hashing function => MMR root
+    /// @param rootsForHashingFunctions the roots of the MMR -> ABI encoded hashing function => MMR root
     /// @param mmrSize the size of the MMR
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates (where block is?)
     /// @param originChainId the ID of the chain from which the new MMR will be created (who is sending msg?)

@@ -2,12 +2,12 @@
 pragma solidity ^0.8.27;
 
 import {ISatellite} from "interfaces/ISatellite.sol";
-import {INativeParentHashesFetcherModule} from "interfaces/modules/x-rollup-messaging/parent-hashes-fetchers/INativeParentHashesFetcherModule.sol";
+import {INativeParentHashFetcherModule} from "interfaces/modules/x-rollup-messaging/parent-hash-fetcher/INativeParentHashFetcherModule.sol";
 
-/// @title NativeParentHashesFetcher
+/// @title NativeParentHashFetcher
 /// @notice Fetches parent hashes for the native chain
 /// @notice for example if deployed on Ethereum, it will fetch parent hashes from Ethereum
-contract NativeParentHashesFetcherModule is INativeParentHashesFetcherModule {
+contract NativeParentHashFetcherModule is INativeParentHashFetcherModule {
     bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
 
     function nativeFetchParentHash(uint256 blockNumber) external {

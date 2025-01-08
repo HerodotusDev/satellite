@@ -44,7 +44,7 @@ abstract contract AbstractMessagesSenderModule {
             require(isSiblingSynced == _isSiblingSynced, "MMR isSiblingSynced mismatch");
             rootsForHashingFunctions[i] = RootForHashingFunction(_root, hashingFunctions[i]);
         }
-        _sendMessage(satelliteAddress, abi.encodeWithSignature("receiveMMR(uint256, (bytes32, bytes32)[], uint256, uint256, uint256, uint256, bool)", newMmrId, rootsForHashingFunctions, mmrSize, accumulatedChainId, block.chainid, originalMmrId, isSiblingSynced), _xDomainMsgGasData);
+        _sendMessage(satelliteAddress, abi.encodeWithSignature("receiveMmr(uint256, (bytes32, bytes32)[], uint256, uint256, uint256, uint256, bool)", newMmrId, rootsForHashingFunctions, mmrSize, accumulatedChainId, block.chainid, originalMmrId, isSiblingSynced), _xDomainMsgGasData);
     }
 
     function _sendMessage(address _l2Target, bytes memory _data, bytes memory _xDomainMsgGasData) internal virtual;

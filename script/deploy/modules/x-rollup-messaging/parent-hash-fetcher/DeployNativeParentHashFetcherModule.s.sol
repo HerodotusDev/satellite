@@ -5,14 +5,14 @@ import {console} from "forge-std/console.sol";
 
 import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 
-import {NativeParentHashesFetcherModule} from "src/modules/x-rollup-messaging/parent-hashes-fetchers/NativeParentHashesFetcherModule.sol";
+import {NativeParentHashFetcherModule} from "src/modules/x-rollup-messaging/parent-hash-fetcher/NativeParentHashFetcherModule.sol";
 
-contract DeployNativeParentHashesFetcherModule is IDeploy {
-    string contractName = "NativeParentHashesFetcherModule";
+contract DeployNativeParentHashFetcherModule is IDeploy {
+    string contractName = "NativeParentHashFetcherModule";
 
     function deploy() internal override returns (address moduleAddress) {
         vm.startBroadcast(getPrivateKey());
-        NativeParentHashesFetcherModule module = new NativeParentHashesFetcherModule();
+        NativeParentHashFetcherModule module = new NativeParentHashFetcherModule();
         vm.stopBroadcast();
 
         moduleAddress = address(module);

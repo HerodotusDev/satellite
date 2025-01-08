@@ -47,8 +47,8 @@ forge test
 
 - `/x-rollup-messaging`: contains contracts for messaging between rollups
 
-  - `/parent-hashes-fetchers`: contains contracts for fetching parent hashes from other rollups
-    - `NativeParentHashesFetcher`: fetches parent hashes from the Native chain (chain on which this rollup is deployed)
+  - `/parent-hash-fetcher`: contains contracts for fetching parent hashes from other rollups
+    - `NativeParentHashFetcher`: fetches parent hashes from the Native chain (chain on which this rollup is deployed)
 
 ## TODOs:
 
@@ -69,7 +69,7 @@ MmrCoreModule: 0xfc8ff335a3755cb3118AD378335720a84eD2146f
 MockFactsRegistry: 0xc81B78Ee1636bf5bB09CC150DA15Ca48D0ADC38c
 SharpFactsAggregatorModule: 0x00eD1852C25A87f524605c5AA2eDa120fe09A312
 NativeFactsRegistryModule: 0xB7D90624345a34566829044221396224B08D7655
-NativeParentHashesFetcherModule: 0xCBa5C999B19ebDEc3ABc2f74067f237c6d31Ab20
+NativeParentHashFetcherModule: 0xCBa5C999B19ebDEc3ABc2f74067f237c6d31Ab20
 ```
 
 ## Deployment

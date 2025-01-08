@@ -22,12 +22,22 @@ interface IEVMFactRegistryModule {
         CODE_HASH
     }
 
+    struct StorageSlot {
+        bytes32 value;
+        bool exists;
+    }
+
+    struct Account {
+        uint8 savedFields; // Bitmask of saved fields (4 bits)
+        mapping(AccountFields => bytes32) fields;
+    }
+
     function accountField(uint256 chainId, address account, uint256 blockNumber, AccountFields field) external view returns (bytes32);
 
     function storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bytes32);
 
 
-    function proveAccount(uint256 chainId, address account, uint16 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) external;
+    function proveAccount(uint256 chainId, address account, uint8 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) external;
 
     function proveStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) external;
 

@@ -5,14 +5,14 @@ import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
 import {Lib_SecureMerkleTrie as SecureMerkleTrie} from "@optimism/libraries/trie/Lib_SecureMerkleTrie.sol";
 import {Lib_RLPReader as RLPReader} from "@optimism/libraries/rlp/Lib_RLPReader.sol";
 
-import {Bitmap16} from "libraries/internal/Bitmap16.sol";
+import {Bitmap8} from "libraries/internal/Bitmap8.sol";
 import {NullableStorageSlot} from "libraries/internal/NullableStorageSlot.sol";
 import {IEVMFactRegistryModule} from "interfaces/modules/IEVMFactRegistryModule.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 
 contract EVMFactRegistryModule is IEVMFactRegistryModule {
-    using Bitmap16 for uint16;
+    using Bitmap8 for uint8;
 
     using RLPReader for bytes;
     using RLPReader for RLPReader.RLPItem;
@@ -27,56 +27,50 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
 
     bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
 
-    // chain_id => address => block_number => field => value
-    mapping(uint256 => mapping(address => mapping(uint256 => mapping(AccountFields => bytes32)))) internal _accountField;
+    // chain_id => address => block_number => Account
+    mapping(uint256 => mapping(address => mapping(uint256 => Account))) internal _accountField;
     // chain_id => address => block number => slot => value
-    mapping(uint256 => mapping(address => mapping(uint256 => mapping(bytes32 => bytes32)))) internal _accountStorageSlotValues;
+    mapping(uint256 => mapping(address => mapping(uint256 => mapping(bytes32 => StorageSlot)))) internal _accountStorageSlotValues;
 
     // ===================== Functions for end user ===================== //
 
     function accountField(uint256 chainId, address account, uint256 blockNumber, AccountFields field) external view returns (bytes32) {
-        bytes32 valueRaw = _accountField[chainId][account][blockNumber][field];
-        // If value is null revert
-        if (NullableStorageSlot.isNull(uint256(valueRaw))) {
-            revert("ERR_VALUE_IS_NULL");
-        }
-        return bytes32(NullableStorageSlot.fromNullable(uint256(valueRaw)));
+        Account storage accountData = _accountField[chainId][account][blockNumber];
+        require(accountData.savedFields.readBitAtIndexFromRight(uint8(field)), "ERR_FIELD_NOT_SAVED");
+        return accountData.fields[field];        
     }
 
     function storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bytes32) {
-        bytes32 valueRaw = _accountStorageSlotValues[chainId][account][blockNumber][slot];
-        // If value is null revert
-        if (NullableStorageSlot.isNull(uint256(valueRaw))) {
-            revert("ERR_VALUE_IS_NULL");
-        }
-        return bytes32(NullableStorageSlot.fromNullable(uint256(valueRaw)));
+        StorageSlot storage valueRaw = _accountStorageSlotValues[chainId][account][blockNumber][slot];
+        require(valueRaw.exists, "ERR_SLOT_NOT_SAVED");
+        return bytes32(valueRaw.value);
     }
 
     // ========================= Core Functions ========================= //
 
-    function proveAccount(uint256 chainId, address account, uint16 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) external {
+    function proveAccount(uint256 chainId, address account, uint8 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) external {
         // Verify the proof and decode the account fields
         (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) = verifyAccount(chainId, account, headerProof, accountTrieProof);
 
         // Save the desired account properties to the storage
-        if (accountFieldsToSave.readBitAtIndexFromRight(0)) {
-            uint256 nonceNullable = NullableStorageSlot.toNullable(nonce);
-            _accountField[chainId][account][headerProof.blockNumber][AccountFields.NONCE] = bytes32(nonceNullable);
+        if (accountFieldsToSave.readBitAtIndexFromRight(uint8(AccountFields.NONCE))) {
+            _accountField[chainId][account][headerProof.blockNumber].savedFields |= uint8(1 << uint8(AccountFields.NONCE));
+            _accountField[chainId][account][headerProof.blockNumber].fields[AccountFields.NONCE] = bytes32(nonce);
         }
 
-        if (accountFieldsToSave.readBitAtIndexFromRight(1)) {
-            uint256 accountBalanceNullable = NullableStorageSlot.toNullable(accountBalance);
-            _accountField[chainId][account][headerProof.blockNumber][AccountFields.BALANCE] = bytes32(accountBalanceNullable);
+        if (accountFieldsToSave.readBitAtIndexFromRight(uint8(AccountFields.BALANCE))) {
+            _accountField[chainId][account][headerProof.blockNumber].savedFields |= uint8(1 << uint8(AccountFields.BALANCE));
+            _accountField[chainId][account][headerProof.blockNumber].fields[AccountFields.BALANCE] = bytes32(accountBalance);
         }
 
-        if (accountFieldsToSave.readBitAtIndexFromRight(2)) {
-            uint256 codeHashNullable = NullableStorageSlot.toNullable(uint256(codeHash));
-            _accountField[chainId][account][headerProof.blockNumber][AccountFields.CODE_HASH] = bytes32(codeHashNullable);
+        if (accountFieldsToSave.readBitAtIndexFromRight(uint8(AccountFields.CODE_HASH))) {
+            _accountField[chainId][account][headerProof.blockNumber].savedFields |= uint8(1 << uint8(AccountFields.CODE_HASH));
+            _accountField[chainId][account][headerProof.blockNumber].fields[AccountFields.CODE_HASH] = codeHash;
         }
 
-        if (accountFieldsToSave.readBitAtIndexFromRight(3)) {
-            uint256 storageRootNullable = NullableStorageSlot.toNullable(uint256(storageRoot));
-            _accountField[chainId][account][headerProof.blockNumber][AccountFields.STORAGE_ROOT] = bytes32(storageRootNullable);
+        if (accountFieldsToSave.readBitAtIndexFromRight(uint8(AccountFields.STORAGE_ROOT))) {
+            _accountField[chainId][account][headerProof.blockNumber].savedFields |= uint8(1 << uint8(AccountFields.STORAGE_ROOT));
+            _accountField[chainId][account][headerProof.blockNumber].fields[AccountFields.STORAGE_ROOT] = storageRoot;
         }
 
         emit ProvenAccount(chainId, account, headerProof.blockNumber, nonce, accountBalance, codeHash, storageRoot);
@@ -84,10 +78,10 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
 
     function proveStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) external {
         // Verify the proof and decode the slot value
-        uint256 slotValueNullable = NullableStorageSlot.toNullable(uint256(verifyStorage(chainId, account, blockNumber, slot, storageSlotTrieProof)));
-        _accountStorageSlotValues[chainId][account][blockNumber][slot] = bytes32(slotValueNullable);
+        bytes32 slotValue = verifyStorage(chainId, account, blockNumber, slot, storageSlotTrieProof);
+        _accountStorageSlotValues[chainId][account][blockNumber][slot] = StorageSlot(slotValue, true);
 
-        emit ProvenStorage(chainId, account, blockNumber, slot, bytes32(NullableStorageSlot.fromNullable(slotValueNullable)));
+        emit ProvenStorage(chainId, account, blockNumber, slot, slotValue);
     }
 
     // ========================= View functions ========================= //
@@ -116,9 +110,10 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
         bytes32 slot,
         bytes calldata storageSlotTrieProof
     ) public view returns (bytes32 slotValue) {
-        bytes32 storageRootRaw = _accountField[chainId][account][blockNumber][AccountFields.STORAGE_ROOT];
-        // Convert from nullable
-        bytes32 storageRoot = bytes32(NullableStorageSlot.fromNullable(uint256(storageRootRaw)));
+        Account storage accountData = _accountField[chainId][account][blockNumber];
+        require(accountData.savedFields.readBitAtIndexFromRight(uint8(AccountFields.STORAGE_ROOT)), "ERR_STORAGE_ROOT_NOT_SAVED");
+
+        bytes32 storageRoot = accountData.fields[AccountFields.STORAGE_ROOT];
 
         (, bytes memory slotValueRLP) = SecureMerkleTrie.get(abi.encode(slot), storageSlotTrieProof, storageRoot);
 

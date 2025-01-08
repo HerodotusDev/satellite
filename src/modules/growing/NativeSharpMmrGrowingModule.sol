@@ -6,6 +6,7 @@ import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
 import {INativeSharpMmrGrowingModule} from "interfaces/modules/growing/INativeSharpMmrGrowingModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
+import {IMMRsCoreModule, RootForHashingFunction} from "interfaces/modules/IMMRsCoreModule.sol";
 
 contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
     // Using inline library for efficient splitting and joining of uint256 values
@@ -83,7 +84,21 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         (, uint256 toBlock) = lastOutput.blockNumbersPacked.split128();
 
         ISatellite(address(this))._receiveBlockHash(AGGREGATED_CHAIN_ID, KECCAK_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
-        emit SharpFactsAggregate(fromBlock, toBlock, mmrNewSize, mmrId, lastOutput.mmrNewRootPoseidon, lastOutput.mmrNewRootKeccak, AGGREGATED_CHAIN_ID);
+
+        RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](2);
+        rootsForHashingFunctions[0].root = lastOutput.mmrNewRootPoseidon;
+        rootsForHashingFunctions[0].hashingFunction = POSEIDON_HASHING_FUNCTION;
+        rootsForHashingFunctions[1].root = lastOutput.mmrNewRootKeccak;
+        rootsForHashingFunctions[1].hashingFunction = KECCAK_HASHING_FUNCTION;
+
+        emit IMMRsCoreModule.MmrUpdate(
+            fromBlock,
+            toBlock,
+            rootsForHashingFunctions,
+            mmrNewSize,
+            mmrId,
+            AGGREGATED_CHAIN_ID
+        );
     }
 
     /// @notice Ensures the job output is cryptographically sound to continue from

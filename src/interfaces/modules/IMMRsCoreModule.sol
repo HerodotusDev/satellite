@@ -64,5 +64,5 @@ interface IMMRsCoreModule {
     /// @param originChainId the ID of the chain from which the new MMR comes from
     event MmrCreation(uint256 newMmrId, uint256 mmrSize, uint256 accumulatedChainId, uint256 originalMmrId, RootForHashingFunction[] rootsForHashingFunctions, uint256 originChainId);
 
-    // event MmrUpdate(uint256 firstAppendedBlock, uint256 lastAppendedBlock, );
+    event MmrUpdate(uint256 firstAppendedBlock, uint256 lastAppendedBlock, RootForHashingFunction[] rootsForHashingFunctions, uint256 mmrSize, uint256 mmrId, uint256 accumulatedChainId);
 }

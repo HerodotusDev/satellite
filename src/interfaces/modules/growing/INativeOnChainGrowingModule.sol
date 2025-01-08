@@ -23,14 +23,4 @@ interface INativeOnChainGrowingModule {
         bytes calldata ctx,
         bytes[] calldata headersSerialized
     ) external;
-
-    // ========================= Events ========================= //
-
-    /// @notice emitted when a batch of blocks is appended to the MMR
-    /// @param result MMRGrowResult struct containing firstAppendedBlock, lastAppendedBlock, newMMRSize, newMMRRoot
-    /// @param mmrId the ID of the MMR that was updated
-    /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
-    /// @param hashingFunction the hashing function used to calculate the MMR
-    /// @param accumulatedChainId the ID of the chain that the MMR accumulates
-    event NativeOnChainGrowMMR(MMRGrowResult result, uint256 mmrId, bytes32 hashingFunction, uint256 accumulatedChainId);
 }

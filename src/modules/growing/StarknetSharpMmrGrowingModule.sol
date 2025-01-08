@@ -6,6 +6,7 @@ import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
 import {IStarknetSharpMmrGrowingModule} from "interfaces/modules/growing/IStarknetSharpMmrGrowingModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
+import {IMMRsCoreModule, RootForHashingFunction} from "interfaces/modules/IMMRsCoreModule.sol";
 
 contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule {
     IFactsRegistry public immutable FACTS_REGISTRY;
@@ -73,7 +74,17 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule {
         uint256 toBlock = lastOutput.toBlockNumberLow;
 
         ISatellite(address(this))._receiveBlockHash(AGGREGATED_CHAIN_ID, POSEIDON_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
-        emit StarknetSharpFactsAggregate(fromBlock, toBlock, mmrNewSize, mmrId, lastOutput.mmrNewRootPoseidon, AGGREGATED_CHAIN_ID);
+
+        RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](1);
+        rootsForHashingFunctions[0].root = lastOutput.mmrNewRootPoseidon;
+        rootsForHashingFunctions[0].hashingFunction = POSEIDON_HASHING_FUNCTION;
+
+        emit IMMRsCoreModule.MmrUpdate(
+            fromBlock,
+            toBlock,
+            rootsForHashingFunctions,
+            mmrNewSize, mmrId, AGGREGATED_CHAIN_ID
+        );
     }
 
     /// @notice Ensures the job output is cryptographically sound to continue from

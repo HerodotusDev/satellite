@@ -36,16 +36,6 @@ interface INativeSharpMmrGrowingModule is ISharpMmrGrowingCommon {
         uint256 mmrSizesPacked;
     }
 
-    event SharpFactsAggregate(
-        uint256 firstAppendedBlock,
-        uint256 lastAppendedBlock,
-        uint256 newMmrSize,
-        uint256 mmrId,
-        bytes32 newPoseidonMmrRoot,
-        bytes32 newKeccakMmrRoot,
-        uint256 chainId
-    );
-
     function createNativeSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
 
     function aggregateNativeSharpJobs(uint256 mmrId, JobOutputPacked[] calldata outputs) external;

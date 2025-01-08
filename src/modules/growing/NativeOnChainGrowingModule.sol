@@ -6,8 +6,7 @@ import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {INativeOnChainGrowingModule} from "interfaces/modules/growing/INativeOnChainGrowingModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
-import {RootForHashingFunction} from "interfaces/modules/IMMRsCoreModule.sol";
-import {IMMRsCoreModule} from "interfaces/modules/IMMRsCoreModule.sol";
+import {IMMRsCoreModule, RootForHashingFunction, GrownBy} from "interfaces/modules/IMMRsCoreModule.sol";
 
 contract NativeOnChainGrowingModule is INativeOnChainGrowingModule {
     // ========================= Types ========================= //
@@ -53,7 +52,7 @@ contract NativeOnChainGrowingModule is INativeOnChainGrowingModule {
         rootsForHashingFunctions[0].root = result.newMMRRoot;
         rootsForHashingFunctions[0].hashingFunction = KECCAK_HASHING_FUNCTION;
 
-        emit IMMRsCoreModule.MmrUpdate(result.firstAppendedBlock, result.lastAppendedBlock, rootsForHashingFunctions, result.newMMRSize, mmrId, accumulatedChainId);
+        emit IMMRsCoreModule.GrownMmr(result.firstAppendedBlock, result.lastAppendedBlock, rootsForHashingFunctions, result.newMMRSize, mmrId, accumulatedChainId, GrownBy.NATIVE_ON_CHAIN_GROWER);
     }
 
     /// ========================= Internal functions ========================= //

@@ -26,7 +26,7 @@ contract MMRsCoreModule is IMMRsCoreModule {
         LibSatellite.enforceIsSatelliteModule();
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         s.receivedParentHashes[chainId][hashingFunction][blockNumber] = parentHash;
-        emit ParentHashReceived(chainId, blockNumber, parentHash, hashingFunction);
+        emit ReceivedParentHash(chainId, blockNumber, parentHash, hashingFunction);
     }
 
     /// @notice Most commonly creates a new branch from an L1 message, the sent MMR info comes from an L1 aggregator
@@ -66,7 +66,7 @@ contract MMRsCoreModule is IMMRsCoreModule {
         }
 
         // Emit the event
-        emit MmrCreation(newMmrId, mmrSize, accumulatedChainId, originChainId, rootsForHashingFunctions, originalMmrId);
+        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originChainId, rootsForHashingFunctions, originalMmrId);
     }
 
     // ========================= Core Functions ========================= //
@@ -116,7 +116,7 @@ contract MMRsCoreModule is IMMRsCoreModule {
             rootsForHashingFunctions[i] = RootForHashingFunction({hashingFunction: hashingFunctions[i], root: mmrRoot});
         }
 
-        emit MmrCreation(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, accumulatedChainId);
+        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, accumulatedChainId);
     }
 
     /// ========================= Internal functions ========================= //
@@ -133,18 +133,18 @@ contract MMRsCoreModule is IMMRsCoreModule {
 
     // ========================= View functions ========================= //
 
-    function getMMRRoot(uint256 mmrId, uint256 mmrSize, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bytes32) {
+    function getMmrRoot(uint256 mmrId, uint256 mmrSize, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bytes32) {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         return s.mmrs[accumulatedChainId][mmrId][hashingFunction].mmrSizeToRoot[mmrSize];
     }
 
-    function getLatestMMRRoot(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bytes32) {
+    function getLatestMmrRoot(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bytes32) {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         uint256 latestSize = s.mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize;
         return s.mmrs[accumulatedChainId][mmrId][hashingFunction].mmrSizeToRoot[latestSize];
     }
 
-    function getLatestMMRSize(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (uint256) {
+    function getLatestMmrSize(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (uint256) {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         return s.mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize;
     }

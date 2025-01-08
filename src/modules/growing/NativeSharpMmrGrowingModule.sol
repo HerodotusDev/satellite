@@ -6,7 +6,7 @@ import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
 import {INativeSharpMmrGrowingModule} from "interfaces/modules/growing/INativeSharpMmrGrowingModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
-import {IMMRsCoreModule, RootForHashingFunction} from "interfaces/modules/IMMRsCoreModule.sol";
+import {IMMRsCoreModule, RootForHashingFunction, GrownBy} from "interfaces/modules/IMMRsCoreModule.sol";
 
 contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
     // Using inline library for efficient splitting and joining of uint256 values
@@ -91,13 +91,14 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         rootsForHashingFunctions[1].root = lastOutput.mmrNewRootKeccak;
         rootsForHashingFunctions[1].hashingFunction = KECCAK_HASHING_FUNCTION;
 
-        emit IMMRsCoreModule.MmrUpdate(
+        emit IMMRsCoreModule.GrownMmr(
             fromBlock,
             toBlock,
             rootsForHashingFunctions,
             mmrNewSize,
             mmrId,
-            AGGREGATED_CHAIN_ID
+            AGGREGATED_CHAIN_ID,
+            GrownBy.NATIVE_SHARP_GROWER
         );
     }
 

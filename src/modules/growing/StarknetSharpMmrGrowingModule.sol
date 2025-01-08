@@ -6,7 +6,7 @@ import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
 import {IStarknetSharpMmrGrowingModule} from "interfaces/modules/growing/IStarknetSharpMmrGrowingModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
-import {IMMRsCoreModule, RootForHashingFunction} from "interfaces/modules/IMMRsCoreModule.sol";
+import {IMMRsCoreModule, RootForHashingFunction, GrownBy} from "interfaces/modules/IMMRsCoreModule.sol";
 
 contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule {
     IFactsRegistry public immutable FACTS_REGISTRY;
@@ -79,11 +79,14 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule {
         rootsForHashingFunctions[0].root = lastOutput.mmrNewRootPoseidon;
         rootsForHashingFunctions[0].hashingFunction = POSEIDON_HASHING_FUNCTION;
 
-        emit IMMRsCoreModule.MmrUpdate(
+        emit IMMRsCoreModule.GrownMmr(
             fromBlock,
             toBlock,
             rootsForHashingFunctions,
-            mmrNewSize, mmrId, AGGREGATED_CHAIN_ID
+            mmrNewSize,
+            mmrId,
+            AGGREGATED_CHAIN_ID,
+            GrownBy.STARKNET_SHARP_GROWER
         );
     }
 

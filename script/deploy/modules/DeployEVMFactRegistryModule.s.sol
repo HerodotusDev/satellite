@@ -5,14 +5,14 @@ import {console} from "forge-std/console.sol";
 
 import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 
-import {NativeFactsRegistryModule} from "src/modules/NativeFactsRegistryModule.sol";
+import {EVMFactRegistryModule} from "src/modules/EVMFactRegistryModule.sol";
 
-contract DeployNativeFactsRegistryModule is IDeploy {
-    string contractName = "NativeFactsRegistryModule";
+contract DeployEVMFactRegistryModule is IDeploy {
+    string contractName = "EVMFactRegistryModule";
 
     function deploy() internal override returns (address moduleAddress) {
         vm.startBroadcast(getPrivateKey());
-        NativeFactsRegistryModule module = new NativeFactsRegistryModule();
+        EVMFactRegistryModule module = new EVMFactRegistryModule();
         vm.stopBroadcast();
 
         moduleAddress = address(module);

@@ -43,7 +43,7 @@ forge test
 - `MmrCoreModule`: contains core logic for MMRs
 - `NativeSharpMmrGrowingModule`: contains logic for aggregating facts - off-chain proving
 - `NativeOnChainGrowingModule`: contains logic for on-chain growing mmrs with native blocks & hashing function
-- `NativeFactsRegistryModule`: used for storage proofs on-chain based on headers from MMRs from MmrCoreModule
+- `EVMFactRegistryModule`: used for storage proofs on-chain based on headers from MMRs from MmrCoreModule
 
 - `/x-rollup-messaging`: contains contracts for messaging between rollups
 
@@ -68,7 +68,7 @@ SatelliteInspectorModule: 0x4bd71E988Da55f451008CC81a90d30AA49dF34fc
 MmrCoreModule: 0xfc8ff335a3755cb3118AD378335720a84eD2146f
 MockFactsRegistry: 0xc81B78Ee1636bf5bB09CC150DA15Ca48D0ADC38c
 SharpFactsAggregatorModule: 0x00eD1852C25A87f524605c5AA2eDa120fe09A312
-NativeFactsRegistryModule: 0xB7D90624345a34566829044221396224B08D7655
+EVMFactRegistryModule: 0xB7D90624345a34566829044221396224B08D7655
 NativeParentHashFetcherModule: 0xCBa5C999B19ebDEc3ABc2f74067f237c6d31Ab20
 ```
 

@@ -7,11 +7,11 @@ import {Lib_RLPReader as RLPReader} from "@optimism/libraries/rlp/Lib_RLPReader.
 
 import {Bitmap16} from "libraries/internal/Bitmap16.sol";
 import {NullableStorageSlot} from "libraries/internal/NullableStorageSlot.sol";
-import {INativeFactsRegistryModule} from "interfaces/modules/INativeFactsRegistryModule.sol";
+import {IEVMFactRegistryModule} from "interfaces/modules/IEVMFactRegistryModule.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 
-contract NativeFactsRegistryModule is INativeFactsRegistryModule {
+contract EVMFactRegistryModule is IEVMFactRegistryModule {
     using Bitmap16 for uint16;
 
     using RLPReader for bytes;
@@ -26,54 +26,80 @@ contract NativeFactsRegistryModule is INativeFactsRegistryModule {
     bytes32 private constant EMPTY_CODE_HASH = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
 
     bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
-    uint256 public immutable CHAIN_ID = block.chainid;
 
-    mapping(address => mapping(uint256 => mapping(AccountFields => bytes32))) internal _accountField;
-    // address => block number => slot => value
-    mapping(address => mapping(uint256 => mapping(bytes32 => bytes32))) internal _accountStorageSlotValues;
+    // chain_id => address => block_number => field => value
+    mapping(uint256 => mapping(address => mapping(uint256 => mapping(AccountFields => bytes32)))) internal _accountField;
+    // chain_id => address => block number => slot => value
+    mapping(uint256 => mapping(address => mapping(uint256 => mapping(bytes32 => bytes32)))) internal _accountStorageSlotValues;
 
-    function proveNativeAccount(address account, uint16 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) external {
+    // ===================== Functions for end user ===================== //
+
+    function accountField(uint256 chainId, address account, uint256 blockNumber, AccountFields field) external view returns (bytes32) {
+        bytes32 valueRaw = _accountField[chainId][account][blockNumber][field];
+        // If value is null revert
+        if (NullableStorageSlot.isNull(uint256(valueRaw))) {
+            revert("ERR_VALUE_IS_NULL");
+        }
+        return bytes32(NullableStorageSlot.fromNullable(uint256(valueRaw)));
+    }
+
+    function storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bytes32) {
+        bytes32 valueRaw = _accountStorageSlotValues[chainId][account][blockNumber][slot];
+        // If value is null revert
+        if (NullableStorageSlot.isNull(uint256(valueRaw))) {
+            revert("ERR_VALUE_IS_NULL");
+        }
+        return bytes32(NullableStorageSlot.fromNullable(uint256(valueRaw)));
+    }
+
+    // ========================= Core Functions ========================= //
+
+    function proveAccount(uint256 chainId, address account, uint16 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) external {
         // Verify the proof and decode the account fields
-        (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) = verifyNativeAccount(account, headerProof, accountTrieProof);
+        (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) = verifyAccount(chainId, account, headerProof, accountTrieProof);
 
         // Save the desired account properties to the storage
         if (accountFieldsToSave.readBitAtIndexFromRight(0)) {
             uint256 nonceNullable = NullableStorageSlot.toNullable(nonce);
-            _accountField[account][headerProof.blockNumber][AccountFields.NONCE] = bytes32(nonceNullable);
+            _accountField[chainId][account][headerProof.blockNumber][AccountFields.NONCE] = bytes32(nonceNullable);
         }
 
         if (accountFieldsToSave.readBitAtIndexFromRight(1)) {
             uint256 accountBalanceNullable = NullableStorageSlot.toNullable(accountBalance);
-            _accountField[account][headerProof.blockNumber][AccountFields.BALANCE] = bytes32(accountBalanceNullable);
+            _accountField[chainId][account][headerProof.blockNumber][AccountFields.BALANCE] = bytes32(accountBalanceNullable);
         }
 
         if (accountFieldsToSave.readBitAtIndexFromRight(2)) {
             uint256 codeHashNullable = NullableStorageSlot.toNullable(uint256(codeHash));
-            _accountField[account][headerProof.blockNumber][AccountFields.CODE_HASH] = bytes32(codeHashNullable);
+            _accountField[chainId][account][headerProof.blockNumber][AccountFields.CODE_HASH] = bytes32(codeHashNullable);
         }
 
         if (accountFieldsToSave.readBitAtIndexFromRight(3)) {
             uint256 storageRootNullable = NullableStorageSlot.toNullable(uint256(storageRoot));
-            _accountField[account][headerProof.blockNumber][AccountFields.STORAGE_ROOT] = bytes32(storageRootNullable);
+            _accountField[chainId][account][headerProof.blockNumber][AccountFields.STORAGE_ROOT] = bytes32(storageRootNullable);
         }
 
-        emit NativeAccountProven(account, headerProof.blockNumber, nonce, accountBalance, codeHash, storageRoot);
+        emit ProvenAccount(chainId, account, headerProof.blockNumber, nonce, accountBalance, codeHash, storageRoot);
     }
 
-    function proveNativeStorage(address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) external {
+    function proveStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) external {
         // Verify the proof and decode the slot value
-        uint256 slotValueNullable = NullableStorageSlot.toNullable(uint256(verifyNativeStorage(account, blockNumber, slot, storageSlotTrieProof)));
-        _accountStorageSlotValues[account][blockNumber][slot] = bytes32(slotValueNullable);
-        emit NativeStorageSlotProven(account, blockNumber, slot, bytes32(NullableStorageSlot.fromNullable(slotValueNullable)));
+        uint256 slotValueNullable = NullableStorageSlot.toNullable(uint256(verifyStorage(chainId, account, blockNumber, slot, storageSlotTrieProof)));
+        _accountStorageSlotValues[chainId][account][blockNumber][slot] = bytes32(slotValueNullable);
+
+        emit ProvenStorage(chainId, account, blockNumber, slot, bytes32(NullableStorageSlot.fromNullable(slotValueNullable)));
     }
 
-    function verifyNativeAccount(
+    // ========================= View functions ========================= //
+
+    function verifyAccount(
+        uint256 chainId,
         address account,
         BlockHeaderProof calldata headerProof,
         bytes calldata accountTrieProof
     ) public view returns (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) {
-        // Ensure provided header is a valid one by making sure it is committed in the HeadersStore MMR
-        _verifyAccumulatedHeaderProof(headerProof);
+        // Ensure provided header is a valid one by making sure it is present in saved MMRs
+        _verifyAccumulatedHeaderProof(chainId, headerProof);
 
         // Verify the account state proof
         bytes32 stateRoot = _getStateRoot(headerProof.provenBlockHeader);
@@ -83,8 +109,14 @@ contract NativeFactsRegistryModule is INativeFactsRegistryModule {
         (nonce, accountBalance, storageRoot, codeHash) = _decodeAccountFields(doesAccountExist, accountRLP);
     }
 
-    function verifyNativeStorage(address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) public view returns (bytes32 slotValue) {
-        bytes32 storageRootRaw = _accountField[account][blockNumber][AccountFields.STORAGE_ROOT];
+    function verifyStorage(
+        uint256 chainId,
+        address account,
+        uint256 blockNumber,
+        bytes32 slot,
+        bytes calldata storageSlotTrieProof
+    ) public view returns (bytes32 slotValue) {
+        bytes32 storageRootRaw = _accountField[chainId][account][blockNumber][AccountFields.STORAGE_ROOT];
         // Convert from nullable
         bytes32 storageRoot = bytes32(NullableStorageSlot.fromNullable(uint256(storageRootRaw)));
 
@@ -93,27 +125,11 @@ contract NativeFactsRegistryModule is INativeFactsRegistryModule {
         slotValue = slotValueRLP.toRLPItem().readBytes32();
     }
 
-    function nativeAccountField(address account, uint256 blockNumber, AccountFields field) external view returns (bytes32) {
-        bytes32 valueRaw = _accountField[account][blockNumber][field];
-        // If value is null revert
-        if (NullableStorageSlot.isNull(uint256(valueRaw))) {
-            revert("ERR_VALUE_IS_NULL");
-        }
-        return bytes32(NullableStorageSlot.fromNullable(uint256(valueRaw)));
-    }
+    /// ========================= Internal functions ========================= //
 
-    function nativeAccountStorageSlotValues(address account, uint256 blockNumber, bytes32 slot) external view returns (bytes32) {
-        bytes32 valueRaw = _accountStorageSlotValues[account][blockNumber][slot];
-        // If value is null revert
-        if (NullableStorageSlot.isNull(uint256(valueRaw))) {
-            revert("ERR_VALUE_IS_NULL");
-        }
-        return bytes32(NullableStorageSlot.fromNullable(uint256(valueRaw)));
-    }
-
-    function _verifyAccumulatedHeaderProof(BlockHeaderProof memory proof) internal view {
+    function _verifyAccumulatedHeaderProof(uint256 chainId, BlockHeaderProof memory proof) internal view {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        bytes32 mmrRoot = s.mmrs[CHAIN_ID][proof.treeId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[proof.mmrTreeSize];
+        bytes32 mmrRoot = s.mmrs[chainId][proof.treeId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[proof.mmrTreeSize];
         require(mmrRoot != bytes32(0), "ERR_EMPTY_MMR_ROOT");
 
         bytes32 blockHeaderHash = keccak256(proof.provenBlockHeader);

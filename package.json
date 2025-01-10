@@ -21,11 +21,12 @@
     "forge:deploy:update:sepolia": "source .env && forge script --chain sepolia --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvv",
     "clear": "rm -rf out cache",
     "clear:full": "bun run clear && rm -rf node_modules",
-    "forge:deploy:11155111": "source .env && ETHERSCAN_API_KEY=$L1_ETHERSCAN_API_KEY forge script --chain sepolia script/deploy/chains/11155111.s.sol:Deploy --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvv --slow",
-    "forge:deploy:421614": "source .env && ETHERSCAN_API_KEY=$ARBITRUM_ETHERSCAN_API_KEY forge script --chain 421614 script/deploy/chains/421614.s.sol:Deploy --rpc-url $ARBITRUM_SEPOLIA_RPC_URL --broadcast --verify -vvv --slow",
-    "forge:deploy:11155420": "source .env && ETHERSCAN_API_KEY=$OPTIMISM_ETHERSCAN_API_KEY forge script --chain 11155420 script/deploy/chains/11155420.s.sol:Deploy --rpc-url $OPTIMISM_SEPOLIA_RPC_URL --broadcast --verify -vvv --slow",
-    "forge:connection:11155111_to_421614": "source .env && ETHERSCAN_API_KEY=$ARBITRUM_ETHERSCAN_API_KEY forge script --chain 421614 script/connections/11155111_to_421614.s.sol:SetupArbitrum --rpc-url $ARBITRUM_SEPOLIA_RPC_URL --broadcast -vvv && ETHERSCAN_API_KEY=$L1_ETHERSCAN_API_KEY forge script --chain sepolia script/connections/11155111_to_421614.s.sol:SetupL1 --rpc-url $SEPOLIA_RPC_URL --broadcast -vvv",
-    "forge:connection:11155111_to_11155420": "source .env && ETHERSCAN_API_KEY=$OPTIMISM_ETHERSCAN_API_KEY forge script --chain 11155420 script/connections/11155111_to_11155420.s.sol:SetupOptimism --rpc-url $OPTIMISM_SEPOLIA_RPC_URL --broadcast -vvv && ETHERSCAN_API_KEY=$L1_ETHERSCAN_API_KEY forge script --chain sepolia script/connections/11155111_to_11155420.s.sol:SetupL1 --rpc-url $SEPOLIA_RPC_URL --broadcast -vvv"
+    "deploy:11155111": "source .env && ETHERSCAN_API_KEY=$L1_ETHERSCAN_API_KEY forge script --chain sepolia script/deploy/chains/11155111.s.sol:Deploy --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvv --slow",
+    "deploy:421614": "source .env && ETHERSCAN_API_KEY=$ARBITRUM_ETHERSCAN_API_KEY forge script --chain 421614 script/deploy/chains/421614.s.sol:Deploy --rpc-url $ARBITRUM_SEPOLIA_RPC_URL --broadcast --verify -vvv --slow",
+    "deploy:11155420": "source .env && ETHERSCAN_API_KEY=$OPTIMISM_ETHERSCAN_API_KEY forge script --chain 11155420 script/deploy/chains/11155420.s.sol:Deploy --rpc-url $OPTIMISM_SEPOLIA_RPC_URL --broadcast --verify -vvv --slow",
+    "deploy:300": "source .env && ETHERSCAN_API_KEY=$ZKSYNC_ETHERSCAN_API_KEY forge script --chain 300 script/deploy/chains/300.s.sol:Deploy --rpc-url $ZKSYNC_SEPOLIA_RPC_URL --verifier-url $ZKSYNC_SEPOLIA_VERIFIER --broadcast --verify -vvv --slow",
+    "connection:11155111_to_421614": "source .env && ETHERSCAN_API_KEY=$ARBITRUM_ETHERSCAN_API_KEY forge script --chain 421614 script/connections/11155111_to_421614.s.sol:SetupArbitrum --rpc-url $ARBITRUM_SEPOLIA_RPC_URL --broadcast -vvv && ETHERSCAN_API_KEY=$L1_ETHERSCAN_API_KEY forge script --chain sepolia script/connections/11155111_to_421614.s.sol:SetupL1 --rpc-url $SEPOLIA_RPC_URL --broadcast -vvv",
+    "connection:11155111_to_11155420": "source .env && ETHERSCAN_API_KEY=$OPTIMISM_ETHERSCAN_API_KEY forge script --chain 11155420 script/connections/11155111_to_11155420.s.sol:SetupOptimism --rpc-url $OPTIMISM_SEPOLIA_RPC_URL --broadcast -vvv && ETHERSCAN_API_KEY=$L1_ETHERSCAN_API_KEY forge script --chain sepolia script/connections/11155111_to_11155420.s.sol:SetupL1 --rpc-url $SEPOLIA_RPC_URL --broadcast -vvv"
   },
   "devDependencies": {
     "only-allow": "^1.2.1",

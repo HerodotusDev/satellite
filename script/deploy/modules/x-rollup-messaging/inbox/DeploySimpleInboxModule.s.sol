@@ -8,7 +8,7 @@ import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 import {SimpleInboxModule} from "src/modules/x-rollup-messaging/inbox/SimpleInboxModule.sol";
 
 contract DeploySimpleInboxModule is IDeploy {
-    string contractName = "SimpleInboxModule";
+    string contractName = "InboxModule";
 
     function deploy() internal override returns (address moduleAddress) {
         vm.startBroadcast(getPrivateKey());

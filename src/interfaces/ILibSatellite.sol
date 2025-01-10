@@ -78,6 +78,10 @@ interface ILibSatellite {
         address optimismMessenger;
         /// @dev address of satellite deployed on Optimism
         address optimismSatellite;
+        /// @dev address of the ZkSync mailbox
+        address zkSyncMailbox;
+        /// @dev address of satellite deployed on ZkSync
+        address zkSyncSatellite;
     }
 
     // ========================= Errors ========================= //

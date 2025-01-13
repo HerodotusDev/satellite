@@ -22,10 +22,22 @@ abstract contract AbstractInboxModule is IInboxModule {
         uint256 accumulatedChainId,
         uint256 originChainId,
         uint256 originalMmrId,
-        bool isSiblingSynced
+        bool isSiblingSynced,
+        bool isTimestampRemapper,
+        uint256 firstTimestampsBlock
     ) external onlyCrossdomainCounterpart {
         // headersStore.createBranchFromMessage(keccakMMRRoot, mmrSize, aggregatorId, newMmrId);
-        ISatellite(address(this))._createMmrFromForeign(newMmrId, rootsForHashingFunctions, mmrSize, accumulatedChainId, originChainId, originalMmrId, isSiblingSynced);
+        ISatellite(address(this))._createMmrFromForeign(
+            newMmrId,
+            rootsForHashingFunctions,
+            mmrSize,
+            accumulatedChainId,
+            originChainId,
+            originalMmrId,
+            isSiblingSynced,
+            isTimestampRemapper,
+            firstTimestampsBlock
+        );
         // TODO: should we emit an event?
     }
 

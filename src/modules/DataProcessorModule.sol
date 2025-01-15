@@ -6,57 +6,66 @@ import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {ModuleTask, ModuleCodecs} from "libraries/internal/data-processor/ModuleCodecs.sol";
-import {INativeDataProcessorModule} from "interfaces/modules/data-processor/INativeDataProcessorModule.sol";
+import {IDataProcessorModule} from "interfaces/modules/IDataProcessorModule.sol";
 
-/// @title NativeDataProcessorModule
+/// @title DataProcessorModule
 /// @author Herodotus Dev Ltd
 /// @notice A contract to store the execution results of HDP tasks
-contract NativeDataProcessorModule is INativeDataProcessorModule {
+contract DataProcessorModule is IDataProcessorModule {
+    // ========================= Types ========================= //
+
     using MerkleProof for bytes32[];
     using ModuleCodecs for ModuleTask;
 
-    /// @notice constant representing the pedersen hash of the Cairo HDP program
-    bytes32 public PROGRAM_HASH;
+    // ========================= Constants ========================= //
 
-    /// @notice interface to the facts registry of SHARP
-    IFactsRegistry public FACTS_REGISTRY;
+    bytes32 constant POSEIDON_HASHING_FUNCTION = keccak256("poseidon");
 
-    /// @notice representing the chain id
-    uint256 public CHAIN_ID;
+    // ========================= Satellite Module Storage ========================= //
 
-    /// @notice hashing function used in this contract
-    bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
+    bytes32 constant MODULE_STORAGE_POSITION = keccak256("diamond.standard.satellite.module.storage.data-processor");
 
-    /// @notice mapping of task result hash => task
-    mapping(bytes32 => TaskResult) public cachedTasksResult;
-
-    constructor(IFactsRegistry factsRegistry, bytes32 programHash) {
-        CHAIN_ID = block.chainid;
-        FACTS_REGISTRY = factsRegistry;
-        PROGRAM_HASH = programHash;
+    function moduleStorage() internal pure returns (ModuleStorage storage s) {
+        bytes32 position = MODULE_STORAGE_POSITION;
+        assembly {
+            s.slot := position
+        }
     }
 
-    /// @notice setNativeHDPProgramHash hash for the HDP program
-    function setNativeHDPProgramHash(bytes32 programHash) external {
+    // ========================= Owner-only Functions ========================= //
+
+    /// @notice setDataProcessorProgramHash hash for the HDP program
+    function setDataProcessorProgramHash(bytes32 programHash) external {
         LibSatellite.enforceIsContractOwner();
-        PROGRAM_HASH = programHash;
+        ModuleStorage storage ms = moduleStorage();
+        ms.programHash = programHash;
     }
+
+    /// @notice setDataProcessorFactsRegistry address of the facts registry with verified execution of the HDP program
+    function setDataProcessorFactsRegistry(IFactsRegistry factsRegistry) external {
+        LibSatellite.enforceIsContractOwner();
+        ModuleStorage storage ms = moduleStorage();
+        ms.factsRegistry = factsRegistry;
+    }
+
+    // ========================= Core Functions ========================= //
 
     /// @notice Requests the execution of a task with a module
     /// @param moduleTask module task
-    function requestNativeHDPExecutionOfModuleTask(ModuleTask calldata moduleTask) external {
+    function requestDataProcessorExecutionOfTask(ModuleTask calldata moduleTask) external {
+        ModuleStorage storage ms = moduleStorage();
         bytes32 taskCommitment = moduleTask.commit();
 
-        if (cachedTasksResult[taskCommitment].status == TaskStatus.FINALIZED) {
+        if (ms.cachedTasksResult[taskCommitment].status == TaskStatus.FINALIZED) {
             emit TaskAlreadyStored(taskCommitment);
         } else {
             // Ensure task is not already scheduled
-            if (cachedTasksResult[taskCommitment].status != TaskStatus.NONE) {
+            if (ms.cachedTasksResult[taskCommitment].status != TaskStatus.NONE) {
                 revert DoubleRegistration();
             }
 
             // Store the task result
-            cachedTasksResult[taskCommitment] = TaskResult({status: TaskStatus.SCHEDULED, result: ""});
+            ms.cachedTasksResult[taskCommitment] = TaskResult({status: TaskStatus.SCHEDULED, result: ""});
 
             emit ModuleTaskScheduled(moduleTask);
         }
@@ -74,7 +83,8 @@ contract NativeDataProcessorModule is INativeDataProcessorModule {
     /// @param resultsInclusionProofs The Merkle proof of the results
     /// @param taskCommitments The commitment of the tasks
     /// @param taskResults The result of the computational tasks
-    function authenticateNativeHDPTaskExecution(
+    function authenticateDataProcessorTaskExecution(
+        uint256[] calldata chainIds,
         uint256[] calldata mmrIds,
         uint256[] calldata mmrSizes,
         uint256 taskMerkleRootLow,
@@ -86,8 +96,10 @@ contract NativeDataProcessorModule is INativeDataProcessorModule {
         bytes32[] calldata taskCommitments,
         bytes32[] calldata taskResults
     ) external {
-        assert(mmrIds.length == mmrSizes.length);
+        ModuleStorage storage ms = moduleStorage();
 
+        assert(mmrIds.length == mmrSizes.length);
+        assert(chainIds.length == mmrIds.length);
         // Initialize an array of uint256 to store the program output
         uint256[] memory programOutput = new uint256[](4 + mmrIds.length * 4);
 
@@ -98,10 +110,10 @@ contract NativeDataProcessorModule is INativeDataProcessorModule {
         programOutput[3] = taskMerkleRootHigh;
 
         for (uint8 i = 0; i < mmrIds.length; i++) {
-            bytes32 usedMmrRoot = loadMmrRoot(mmrIds[i], mmrSizes[i]);
+            bytes32 usedMmrRoot = loadMmrRoot(mmrIds[i], mmrSizes[i], chainIds[i]);
             programOutput[4 + i * 4] = mmrIds[i];
             programOutput[4 + i * 4 + 1] = mmrSizes[i];
-            programOutput[4 + i * 4 + 2] = CHAIN_ID;
+            programOutput[4 + i * 4 + 2] = chainIds[i];
             programOutput[4 + i * 4 + 3] = uint256(usedMmrRoot);
         }
 
@@ -109,10 +121,10 @@ contract NativeDataProcessorModule is INativeDataProcessorModule {
         bytes32 programOutputHash = keccak256(abi.encodePacked(programOutput));
 
         // Compute GPS fact hash
-        bytes32 gpsFactHash = keccak256(abi.encode(PROGRAM_HASH, programOutputHash));
+        bytes32 gpsFactHash = keccak256(abi.encode(ms.programHash, programOutputHash));
 
         // Ensure GPS fact is registered
-        if (!FACTS_REGISTRY.isValid(gpsFactHash)) {
+        if (!ms.factsRegistry.isValid(gpsFactHash)) {
             revert InvalidFact();
         }
 
@@ -147,32 +159,38 @@ contract NativeDataProcessorModule is INativeDataProcessorModule {
             }
 
             // Store the task result
-            cachedTasksResult[taskCommitment] = TaskResult({status: TaskStatus.FINALIZED, result: computationalTaskResult});
+            ms.cachedTasksResult[taskCommitment] = TaskResult({status: TaskStatus.FINALIZED, result: computationalTaskResult});
         }
     }
 
-    /// @notice Load MMR root from cache with given mmrId and mmrSize
-    function loadMmrRoot(uint256 mmrId, uint256 mmrSize) internal view returns (bytes32) {
-        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        return s.mmrs[CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrSize];
-    }
+    // ========================= View Functions ========================= //
 
     /// @notice Returns the result of a finalized task
-    function getNativeHDPFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32) {
+    function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32) {
+        ModuleStorage storage ms = moduleStorage();
         // Ensure task is finalized
-        if (cachedTasksResult[taskCommitment].status != TaskStatus.FINALIZED) {
+        if (ms.cachedTasksResult[taskCommitment].status != TaskStatus.FINALIZED) {
             revert NotFinalized();
         }
-        return cachedTasksResult[taskCommitment].result;
+        return ms.cachedTasksResult[taskCommitment].result;
     }
 
     /// @notice Returns the status of a task
-    function getNativeHDPTaskStatus(bytes32 taskCommitment) external view returns (TaskStatus) {
-        return cachedTasksResult[taskCommitment].status;
+    function getDataProcessorTaskStatus(bytes32 taskCommitment) external view returns (TaskStatus) {
+        ModuleStorage storage ms = moduleStorage();
+        return ms.cachedTasksResult[taskCommitment].status;
+    }
+
+    // ========================= Internal Functions ========================= //
+
+    /// @notice Load MMR root from cache with given mmrId and mmrSize
+    function loadMmrRoot(uint256 mmrId, uint256 mmrSize, uint256 chainId) internal view returns (bytes32) {
+        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
+        return s.mmrs[chainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrSize];
     }
 
     /// @notice Returns the leaf of standard merkle tree
-    function standardNativeHDPLeafHash(bytes32 value) public pure returns (bytes32) {
+    function standardNativeHDPLeafHash(bytes32 value) internal pure returns (bytes32) {
         bytes32 firstHash = keccak256(abi.encode(value));
         bytes32 leaf = keccak256(abi.encode(firstHash));
         return leaf;

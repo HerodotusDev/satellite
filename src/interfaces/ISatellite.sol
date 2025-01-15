@@ -14,7 +14,7 @@ import {INativeParentHashFetcherModule} from "./modules/x-rollup-messaging/paren
 import {IStarknetParentHashFetcherModule} from "./modules/x-rollup-messaging/parent-hash-fetcher/IStarknetParentHashFetcherModule.sol";
 import {IInboxModule} from "./modules/x-rollup-messaging/inbox/IInboxModule.sol";
 import {INativeOnChainGrowingModule} from "./modules/growing/INativeOnChainGrowingModule.sol";
-import {INativeDataProcessorModule} from "./modules/data-processor/INativeDataProcessorModule.sol";
+import {IDataProcessorModule} from "./modules/IDataProcessorModule.sol";
 import {IL1ToArbitrumMessagesSenderModule} from "./modules/x-rollup-messaging/outbox/IL1ToArbitrumMessagesSenderModule.sol";
 import {IL1ToOptimismMessagesSenderModule} from "./modules/x-rollup-messaging/outbox/IL1ToOptimismMessagesSenderModule.sol";
 
@@ -34,5 +34,5 @@ interface ISatellite is
     IL1ToArbitrumMessagesSenderModule,
     IL1ToOptimismMessagesSenderModule,
     IStarknetParentHashFetcherModule,
-    INativeDataProcessorModule
+    IDataProcessorModule
 {}

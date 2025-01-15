@@ -9,6 +9,7 @@
     "prettier": "prettier --write --list-different ./*",
     "prettier:check": "prettier --check .",
     "forge:build": "forge build && bun forge:selectors",
+    "forge:build:zksync": "forge build --zksync && bun forge:selectors",
     "forge:test": "forge test",
     "forge:anvil": "anvil",
     "forge:selectors": "bun ts-helpers/get-all-function-selectors.ts",

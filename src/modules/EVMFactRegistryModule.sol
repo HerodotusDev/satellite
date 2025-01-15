@@ -2,18 +2,13 @@
 pragma solidity ^0.8.19;
 
 import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
-import {Lib_SecureMerkleTrie as SecureMerkleTrie} from "@optimism/libraries/trie/Lib_SecureMerkleTrie.sol";
-import {Lib_RLPReader as RLPReader} from "@optimism/libraries/rlp/Lib_RLPReader.sol";
-
-import {Bitmap8} from "libraries/internal/Bitmap8.sol";
-import {NullableStorageSlot} from "libraries/internal/NullableStorageSlot.sol";
+import {Lib_SecureMerkleTrie as SecureMerkleTrie} from "libraries/external/optimism/trie/Lib_SecureMerkleTrie.sol";
+import {Lib_RLPReader as RLPReader} from "libraries/external/optimism/rlp/Lib_RLPReader.sol";
 import {IEVMFactRegistryModule} from "interfaces/modules/IEVMFactRegistryModule.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 
 contract EVMFactRegistryModule is IEVMFactRegistryModule {
-    using Bitmap8 for uint8;
-
     using RLPReader for bytes;
     using RLPReader for RLPReader.RLPItem;
 
@@ -36,8 +31,8 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
 
     function accountField(uint256 chainId, address account, uint256 blockNumber, AccountFields field) external view returns (bytes32) {
         Account storage accountData = _accountField[chainId][account][blockNumber];
-        require(accountData.savedFields.readBitAtIndexFromRight(uint8(field)), "ERR_FIELD_NOT_SAVED");
-        return accountData.fields[field];        
+        require(readBitAtIndexFromRight(accountData.savedFields, uint8(field)), "ERR_FIELD_NOT_SAVED");
+        return accountData.fields[field];
     }
 
     function storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bytes32) {
@@ -53,22 +48,22 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
         (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) = verifyAccount(chainId, account, headerProof, accountTrieProof);
 
         // Save the desired account properties to the storage
-        if (accountFieldsToSave.readBitAtIndexFromRight(uint8(AccountFields.NONCE))) {
+        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountFields.NONCE))) {
             _accountField[chainId][account][headerProof.blockNumber].savedFields |= uint8(1 << uint8(AccountFields.NONCE));
             _accountField[chainId][account][headerProof.blockNumber].fields[AccountFields.NONCE] = bytes32(nonce);
         }
 
-        if (accountFieldsToSave.readBitAtIndexFromRight(uint8(AccountFields.BALANCE))) {
+        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountFields.BALANCE))) {
             _accountField[chainId][account][headerProof.blockNumber].savedFields |= uint8(1 << uint8(AccountFields.BALANCE));
             _accountField[chainId][account][headerProof.blockNumber].fields[AccountFields.BALANCE] = bytes32(accountBalance);
         }
 
-        if (accountFieldsToSave.readBitAtIndexFromRight(uint8(AccountFields.CODE_HASH))) {
+        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountFields.CODE_HASH))) {
             _accountField[chainId][account][headerProof.blockNumber].savedFields |= uint8(1 << uint8(AccountFields.CODE_HASH));
             _accountField[chainId][account][headerProof.blockNumber].fields[AccountFields.CODE_HASH] = codeHash;
         }
 
-        if (accountFieldsToSave.readBitAtIndexFromRight(uint8(AccountFields.STORAGE_ROOT))) {
+        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountFields.STORAGE_ROOT))) {
             _accountField[chainId][account][headerProof.blockNumber].savedFields |= uint8(1 << uint8(AccountFields.STORAGE_ROOT));
             _accountField[chainId][account][headerProof.blockNumber].fields[AccountFields.STORAGE_ROOT] = storageRoot;
         }
@@ -111,7 +106,7 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
         bytes calldata storageSlotTrieProof
     ) public view returns (bytes32 slotValue) {
         Account storage accountData = _accountField[chainId][account][blockNumber];
-        require(accountData.savedFields.readBitAtIndexFromRight(uint8(AccountFields.STORAGE_ROOT)), "ERR_STORAGE_ROOT_NOT_SAVED");
+        require(readBitAtIndexFromRight(accountData.savedFields, uint8(AccountFields.STORAGE_ROOT)), "ERR_STORAGE_ROOT_NOT_SAVED");
 
         bytes32 storageRoot = accountData.fields[AccountFields.STORAGE_ROOT];
 
@@ -154,5 +149,10 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
 
     function _decodeBlockNumber(bytes memory headerRlp) internal pure returns (uint256) {
         return RLPReader.toRLPItem(headerRlp).readList()[8].readUint256();
+    }
+
+    function readBitAtIndexFromRight(uint8 bitmap, uint8 index) internal pure returns (bool value) {
+        require(index < 8, "ERR_OUR_OF_RANGE");
+        return (bitmap & (1 << index)) != 0;
     }
 }

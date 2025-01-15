@@ -44,12 +44,19 @@ contract MmrCoreModule is IMmrCoreModule {
         uint256 accumulatedChainId,
         uint256 originChainId,
         uint256 originalMmrId,
-        bool isSiblingSynced
+        bool isSiblingSynced,
+        bool isTimestampRemapper,
+        uint256 firstTimestampsBlock
     ) external {
         LibSatellite.enforceIsSatelliteModule();
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
-
         require(rootsForHashingFunctions.length > 0, "INVALID_ROOTS_LENGTH");
+
+        if (isTimestampRemapper) {
+            require(isSiblingSynced == false, "INVALID_MMR_CONFIGURATION");
+        } else {
+            require(firstTimestampsBlock == 0, "INVALID_FIRST_TIMESTAMPS_BLOCK");
+        }
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
@@ -63,10 +70,12 @@ contract MmrCoreModule is IMmrCoreModule {
             s.mmrs[accumulatedChainId][newMmrId][hashingFunction].latestSize = mmrSize;
             s.mmrs[accumulatedChainId][newMmrId][hashingFunction].mmrSizeToRoot[mmrSize] = root;
             s.mmrs[accumulatedChainId][newMmrId][hashingFunction].isSiblingSynced = isSiblingSynced;
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunction].isTimestampRemapper = isTimestampRemapper;
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunction].firstTimestampsBlock = firstTimestampsBlock;
         }
 
         // Emit the event
-        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originChainId, rootsForHashingFunctions, originalMmrId);
+        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originChainId, rootsForHashingFunctions, originalMmrId, isTimestampRemapper, firstTimestampsBlock);
     }
 
     // ========================= Core Functions ========================= //
@@ -77,11 +86,28 @@ contract MmrCoreModule is IMmrCoreModule {
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
     /// @param mmrSize size at which the MMR will be copied
     /// @param hashingFunctions the hashing functions used in the MMR - if more than one, the MMR will be sibling synced and require being a satellite module to call
-    function createMmrFromDomestic(uint256 newMmrId, uint256 originalMmrId, uint256 accumulatedChainId, uint256 mmrSize, bytes32[] calldata hashingFunctions) external {
+    /// @param isTimestampRemapper whether the MMR is a timestamp remapper
+    /// @param firstTimestampsBlock the block number of the first timestamp in the timestamp remapper
+    function createMmrFromDomestic(
+        uint256 newMmrId,
+        uint256 originalMmrId,
+        uint256 accumulatedChainId,
+        uint256 mmrSize,
+        bytes32[] calldata hashingFunctions,
+        bool isTimestampRemapper,
+        uint256 firstTimestampsBlock
+    ) external {
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
         require(hashingFunctions.length > 0, "INVALID_HASHING_FUNCTIONS_LENGTH");
 
         bool isSiblingSynced = hashingFunctions.length > 1;
+
+        if (isTimestampRemapper) {
+            require(isSiblingSynced == false, "INVALID_MMR_CONFIGURATION");
+        } else {
+            require(firstTimestampsBlock == 0, "INVALID_FIRST_TIMESTAMPS_BLOCK");
+        }
+
         if (isSiblingSynced) {
             LibSatellite.enforceIsSatelliteModule();
         }
@@ -104,7 +130,14 @@ contract MmrCoreModule is IMmrCoreModule {
                 require(mmrRoot != LibSatellite.NO_MMR_ROOT, "SRC_MMR_NOT_FOUND");
 
                 if (isSiblingSynced) {
-                    require(s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].isSiblingSynced == isSiblingSynced, "ORIGINAL_MMR_NOT_SIBLING_SYNCED");
+                    require(s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].isSiblingSynced == isSiblingSynced, "ORIGINAL_MMR_NOT_SIBLING_SYNCED");
+                }
+
+                if (isTimestampRemapper) {
+                    require(s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].isTimestampRemapper == true, "ORIGINAL_MMR_IS_NOT_TIMESTAMP_REMAPPER");
+                    require(firstTimestampsBlock == 0, "FIRST_TIMESTAMPS_BLOCK_NOT_0_WHEN_BRANCHING");
+
+                    firstTimestampsBlock = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].firstTimestampsBlock;
                 }
             }
 
@@ -112,11 +145,13 @@ contract MmrCoreModule is IMmrCoreModule {
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize = mmrSize;
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize] = mmrRoot;
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].isSiblingSynced = isSiblingSynced;
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].isTimestampRemapper = isTimestampRemapper;
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].firstTimestampsBlock = firstTimestampsBlock;
 
             rootsForHashingFunctions[i] = RootForHashingFunction({hashingFunction: hashingFunctions[i], root: mmrRoot});
         }
 
-        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, accumulatedChainId);
+        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, accumulatedChainId, isTimestampRemapper, firstTimestampsBlock);
     }
 
     /// ========================= Internal functions ========================= //
@@ -158,4 +193,6 @@ contract MmrCoreModule is IMmrCoreModule {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         return s.receivedParentHashes[chainId][hashingFunction][blockNumber];
     }
+
+    // TODO: reconsider view functions, maybe add one to view the whole MMRInfo struct?
 }

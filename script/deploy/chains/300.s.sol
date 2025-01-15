@@ -23,7 +23,7 @@ import {DeployNativeParentHashFetcherModule} from "../modules/x-rollup-messaging
 import {DeployNativeOnChainGrowingModule} from "../modules/growing/DeployNativeOnChainGrowingModule.s.sol";
 import {DeployStarknetSharpMmrGrowingModule} from "../modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
 import {DeployStarknetParentHashFetcherModule} from "../modules/x-rollup-messaging/parent-hash-fetcher/DeployStarknetParentHashFetcherModule.s.sol";
-import {DeployNativeDataProcessorModule} from "../modules/data-processor/DeployNativeDataProcessorModule.s.sol";
+import {DeployDataProcessorModule} from "../modules/DeployDataProcessorModule.s.sol";
 import {DeploySatelliteRegistryModule} from "../modules/DeploySatelliteRegistryModule.s.sol";
 import {DeploySimpleInboxModule} from "../modules/x-rollup-messaging/inbox/DeploySimpleInboxModule.s.sol";
 import {DeployL1ToArbitrumMessagesSenderModule} from "../modules/x-rollup-messaging/outbox/DeployL1ToArbitrumMessagesSenderModule.s.sol";
@@ -43,7 +43,7 @@ contract Deploy is Script {
         deployModules[3] = new DeployEVMFactRegistryModule();
         deployModules[4] = new DeployNativeParentHashFetcherModule();
         deployModules[5] = new DeployNativeOnChainGrowingModule();
-        deployModules[6] = new DeployNativeDataProcessorModule();
+        deployModules[6] = new DeployDataProcessorModule();
         deployModules[7] = new DeploySatelliteRegistryModule();
         deployModules[8] = new DeploySimpleInboxModule();
 

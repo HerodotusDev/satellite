@@ -31,7 +31,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule {
         bytes32[] memory hashingFunctions = new bytes32[](1);
         hashingFunctions[0] = POSEIDON_HASHING_FUNCTION;
 
-        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, AGGREGATED_CHAIN_ID, mmrSize, hashingFunctions);
+        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, AGGREGATED_CHAIN_ID, mmrSize, hashingFunctions, false, 0);
     }
 
     function aggregateStarknetSharpJobs(uint256 mmrId, StarknetJobOutput[] calldata outputs) external {
@@ -79,15 +79,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule {
         rootsForHashingFunctions[0].root = lastOutput.mmrNewRootPoseidon;
         rootsForHashingFunctions[0].hashingFunction = POSEIDON_HASHING_FUNCTION;
 
-        emit IMmrCoreModule.GrownMmr(
-            fromBlock,
-            toBlock,
-            rootsForHashingFunctions,
-            mmrNewSize,
-            mmrId,
-            AGGREGATED_CHAIN_ID,
-            GrownBy.STARKNET_SHARP_GROWER
-        );
+        emit IMmrCoreModule.GrownMmr(fromBlock, toBlock, rootsForHashingFunctions, mmrNewSize, mmrId, AGGREGATED_CHAIN_ID, GrownBy.STARKNET_SHARP_GROWER);
     }
 
     /// @notice Ensures the job output is cryptographically sound to continue from

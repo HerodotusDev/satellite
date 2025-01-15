@@ -7,20 +7,21 @@ import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 
 import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
 
-import {NativeDataProcessorModule} from "src/modules/data-processor/NativeDataProcessorModule.sol";
+import {DataProcessorModule} from "src/modules/DataProcessorModule.sol";
 import {MockFactsRegistry} from "src/mocks/MockFactsRegistry.sol";
 
-contract DeployNativeDataProcessorModule is IDeploy {
-    string contractName = "NativeDataProcessorModule";
+contract DeployDataProcessorModule is IDeploy {
+    string contractName = "DataProcessorModule";
     bytes32 programHash = bytes32(0x0);
 
     function deploy() internal override returns (address moduleAddress) {
-        IFactsRegistry sharpFactsRegistry = IFactsRegistry(getFactsRegistryAddress());
         vm.startBroadcast(getPrivateKey());
-        NativeDataProcessorModule module = new NativeDataProcessorModule(sharpFactsRegistry, programHash);
+        DataProcessorModule module = new DataProcessorModule();
         vm.stopBroadcast();
         moduleAddress = address(module);
     }
+
+    // TODO: we need a way to run some functions after adding to the diamond, some "initialization" standard
 
     function getFactsRegistryAddress() internal returns (address sharpFactsRegistryAddress) {
         address envSharpFactsRegistryAddress = vm.envAddress("SHARP_FACTS_REGISTRY_ADDRESS");

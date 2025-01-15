@@ -5,7 +5,7 @@ import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
 import {ModuleTask} from "libraries/internal/data-processor/ModuleCodecs.sol";
 import {IFactsRegistryCommon} from "interfaces/modules/common/IFactsRegistryCommon.sol";
 
-interface INativeDataProcessorModule is IFactsRegistryCommon {
+interface IDataProcessorModule is IFactsRegistryCommon {
     /// @notice The status of a task
     enum TaskStatus {
         NONE,
@@ -17,6 +17,13 @@ interface INativeDataProcessorModule is IFactsRegistryCommon {
     struct TaskResult {
         TaskStatus status;
         bytes32 result;
+    }
+
+    /// @notice Storage structure for the module
+    struct ModuleStorage {
+        bytes32 programHash;
+        IFactsRegistry factsRegistry;
+        mapping(bytes32 => TaskResult) cachedTasksResult;
     }
 
     /// @notice emitted when a task already stored
@@ -33,14 +40,18 @@ interface INativeDataProcessorModule is IFactsRegistryCommon {
     error NotFinalized();
 
     /// @notice Set the program hash for the HDP program
-    function setNativeHDPProgramHash(bytes32 programHash) external;
+    function setDataProcessorProgramHash(bytes32 programHash) external;
+
+    /// @notice Set the facts registry contract
+    function setDataProcessorFactsRegistry(IFactsRegistry factsRegistry) external;
 
     /// @notice Requests the execution of a task with a module
     /// @param moduleTask module task
-    function requestNativeHDPExecutionOfModuleTask(ModuleTask calldata moduleTask) external;
+    function requestDataProcessorExecutionOfTask(ModuleTask calldata moduleTask) external;
 
     /// @notice Authenticates the execution of a task is finalized
     ///     by verifying the FactRegistry and Merkle proofs
+    /// @param chainIds The chain IDs for the MMRs
     /// @param mmrIds The id of the MMR used to compute task
     /// @param mmrSizes The size of the MMR used to compute task
     /// @param taskMerkleRootLow The low 128 bits of the tasks Merkle root
@@ -51,7 +62,8 @@ interface INativeDataProcessorModule is IFactsRegistryCommon {
     /// @param resultsInclusionProofs The Merkle proof of the results
     /// @param taskCommitments The commitment of the tasks
     /// @param taskResults The result of the computational tasks
-    function authenticateNativeHDPTaskExecution(
+    function authenticateDataProcessorTaskExecution(
+        uint256[] calldata chainIds,
         uint256[] calldata mmrIds,
         uint256[] calldata mmrSizes,
         uint256 taskMerkleRootLow,
@@ -65,11 +77,8 @@ interface INativeDataProcessorModule is IFactsRegistryCommon {
     ) external;
 
     /// @notice Returns the result of a finalized task
-    function getNativeHDPFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32);
+    function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32);
 
     /// @notice Returns the status of a task
-    function getNativeHDPTaskStatus(bytes32 taskCommitment) external view returns (TaskStatus);
-
-    /// @notice Returns the leaf of standard merkle tree
-    function standardNativeHDPLeafHash(bytes32 value) external pure returns (bytes32);
+    function getDataProcessorTaskStatus(bytes32 taskCommitment) external view returns (TaskStatus);
 }

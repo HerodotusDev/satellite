@@ -18,10 +18,10 @@ contract SetupL1 is Script {
         address l1SatelliteAddress = vm.envAddress("SATELLITE_ADDRESS_11155111");
         address arbitrumSatelliteAddress = vm.envAddress("SATELLITE_ADDRESS_421614");
         address arbitrumInbox = vm.envAddress("SEPOLIA_ARBITRUM_INBOX");
+        bytes4 selector = bytes4(keccak256("sendMessageL1ToArbitrum(address,address,bytes,bytes)"));
 
         ISatellite l1Satellite = ISatellite(l1SatelliteAddress);
-        l1Satellite.registerSatellite(421614, arbitrumSatelliteAddress, address(0x0));
-        l1Satellite.configureL1ToArbitrum(arbitrumInbox, arbitrumSatelliteAddress);
+        l1Satellite.registerSatellite(421614, arbitrumSatelliteAddress, arbitrumInbox, address(0x0), selector);
         
         vm.stopBroadcast();
     }
@@ -37,7 +37,7 @@ contract SetupArbitrum is Script {
         address arbitrumSatelliteAddress = vm.envAddress("SATELLITE_ADDRESS_421614");
 
         ISatellite arbitrumSatellite = ISatellite(arbitrumSatelliteAddress);
-        arbitrumSatellite.registerSatellite(11155111, l1SatelliteAddress, l1AliasedAddress);
+        arbitrumSatellite.registerSatellite(11155111, l1SatelliteAddress, address(0x0), l1AliasedAddress, 0);
         
         vm.stopBroadcast();
     }

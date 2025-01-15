@@ -28,8 +28,9 @@ import {DeploySatelliteRegistryModule} from "../modules/DeploySatelliteRegistryM
 import {DeploySimpleInboxModule} from "../modules/x-rollup-messaging/inbox/DeploySimpleInboxModule.s.sol";
 import {DeployL1ToArbitrumMessagesSenderModule} from "../modules/x-rollup-messaging/outbox/DeployL1ToArbitrumMessagesSenderModule.s.sol";
 import {DeployL1ToOptimismMessagesSenderModule} from "../modules/x-rollup-messaging/outbox/DeployL1ToOptimismMessagesSenderModule.s.sol";
+import {DeployUniversalMessagesSenderModule} from "../modules/x-rollup-messaging/outbox/DeployUniversalMessagesSenderModule.s.sol";
 
-uint256 constant numberOfModules = 14;
+uint256 constant numberOfModules = 15;
 
 contract Deploy is Script {
     function run() external returns (address satelliteAddress) {
@@ -48,8 +49,9 @@ contract Deploy is Script {
         deployModules[8] = new DeployStarknetParentHashFetcherModule();
         deployModules[9] = new DeployDataProcessorModule();
         deployModules[10] = new DeploySatelliteRegistryModule();
-        deployModules[11] = new DeployL1ToArbitrumMessagesSenderModule();
-        deployModules[12] = new DeployL1ToOptimismMessagesSenderModule();
+        deployModules[11] = new DeployUniversalMessagesSenderModule();
+        deployModules[12] = new DeployL1ToArbitrumMessagesSenderModule();
+        deployModules[13] = new DeployL1ToOptimismMessagesSenderModule();
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);

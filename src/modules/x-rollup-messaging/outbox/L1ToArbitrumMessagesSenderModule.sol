@@ -1,42 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.19;
 
-import {IArbitrumInbox} from "interfaces/external/IArbitrumInbox.sol";
-import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
+import {IArbitrumInbox} from "interfaces/external/IArbitrumInbox.sol";
 import {IL1ToArbitrumMessagesSenderModule} from "interfaces/modules/x-rollup-messaging/outbox/IL1ToArbitrumMessagesSenderModule.sol";
-import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
-import {AbstractMessagesSenderModule} from "./AbstractMessagesSenderModule.sol";
 
-contract L1ToArbitrumMessagesSenderModule is IL1ToArbitrumMessagesSenderModule, AbstractMessagesSenderModule {
-    /// @notice Set the Arbitrum Inbox and Satellite addresses
-    /// @param arbitrumInbox address of Arbitrum Inbox contract deployed on Sepolia
-    /// @param arbitrumSatellite address of Satellite contract deployed on Arbitrum
-    function configureL1ToArbitrum(address arbitrumInbox, address arbitrumSatellite) external {
-        LibSatellite.enforceIsContractOwner();
+contract L1ToArbitrumMessagesSenderModule is IL1ToArbitrumMessagesSenderModule {
+    function sendMessageL1ToArbitrum(address satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable {
+        LibSatellite.enforceIsSatelliteModule();
 
-        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        require(s.arbitrumSatellite == address(0), "ARB_SAT_ALREADY_SET");
-        s.arbitrumInbox = arbitrumInbox;
-        s.arbitrumSatellite = arbitrumSatellite;
-    }
-
-    /// @notice Send parent hash that was registered on L1 to the Arbitrum
-    /// @param chainId the chain ID of the block whose parent hash is being sent
-    /// @param hashingFunction the hashing function used to hash the parent hash
-    /// @param blockNumber the number of block being sent
-    /// @param _xDomainMsgGasData the gas data for the cross-domain message, depends on the destination L2
-    function sendParentHashL1ToArbitrum(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes calldata _xDomainMsgGasData) external payable {
-        _sendParentHash(LibSatellite.satelliteStorage().arbitrumSatellite, chainId, hashingFunction, blockNumber, _xDomainMsgGasData);
-    }
-
-    function sendMmrL1ToArbitrum(uint256 accumulatedChainId, uint256 originalMmrId, uint256 newMmrId, bytes32[] calldata hashingFunctions, bytes calldata _xDomainMsgGasData) external payable {
-        _sendMmr(LibSatellite.satelliteStorage().arbitrumSatellite, accumulatedChainId, originalMmrId, newMmrId, hashingFunctions, _xDomainMsgGasData);
-    }
-
-    function _sendMessage(address _l2Target, bytes memory _data, bytes memory _xDomainMsgGasData) internal override {
-        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         (uint256 l2GasLimit, uint256 maxFeePerGas, uint256 maxSubmissionCost) = abi.decode(_xDomainMsgGasData, (uint256, uint256, uint256));
-        IArbitrumInbox(s.arbitrumInbox).createRetryableTicket{value: msg.value}(_l2Target, 0, maxSubmissionCost, msg.sender, address(0), l2GasLimit, maxFeePerGas, _data);
+        IArbitrumInbox(inboxAddress).createRetryableTicket{value: msg.value}(satelliteAddress, 0, maxSubmissionCost, msg.sender, address(0), l2GasLimit, maxFeePerGas, _data);
     }
 }

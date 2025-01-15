@@ -48,6 +48,12 @@ interface ILibSatellite {
         mapping(uint256 => bytes32) mmrSizeToRoot;
     }
 
+    struct SatelliteInfo {
+        address satelliteAddress;
+        address inboxAddress;
+        bytes4 sendMessageSelector;
+    }
+
     struct SatelliteStorage {
         // ========================= Diamond-related storage ========================= //
 
@@ -59,6 +65,7 @@ interface ILibSatellite {
         address[] moduleAddresses;
         /// @dev owner of the contract
         address contractOwner;
+        //
         // ========================= Core Satellite storage ========================= //
 
         /// @dev mapping of ChainId => MMR ID => hashing function => MMR info
@@ -66,26 +73,13 @@ interface ILibSatellite {
         mapping(uint256 => mapping(uint256 => mapping(bytes32 => MMRInfo))) mmrs;
         /// @notice mapping of ChainId => hashing function => block number => block parent hash
         mapping(uint256 => mapping(bytes32 => mapping(uint256 => bytes32))) receivedParentHashes;
+        //
         // ======================= Satellite Registry storage ======================= //
 
         /// @dev mapping of ChainId => Satellite address
-        mapping(uint256 => address) satelliteRegistry;
+        mapping(uint256 => SatelliteInfo) satelliteRegistry;
         /// @dev mapping of crossDomainCounterpart => bool
         mapping(address => bool) crossDomainMsgSenders;
-        // =========================== Messengers storage =========================== //
-
-        /// @dev address of the Arbitrum inbox
-        address arbitrumInbox;
-        /// @dev address of satellite deployed on Arbitrum
-        address arbitrumSatellite;
-        /// @dev address of the Optimism messenger
-        address optimismMessenger;
-        /// @dev address of satellite deployed on Optimism
-        address optimismSatellite;
-        /// @dev address of the ZkSync mailbox
-        address zkSyncMailbox;
-        /// @dev address of satellite deployed on ZkSync
-        address zkSyncSatellite;
     }
 
     // ========================= Errors ========================= //

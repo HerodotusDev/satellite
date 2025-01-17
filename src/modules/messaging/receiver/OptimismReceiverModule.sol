@@ -11,6 +11,6 @@ contract OptimismReceiverModule is AbstractReceiverModule {
         IL1CrossDomainMessenger messenger = IL1CrossDomainMessenger(0x4200000000000000000000000000000000000007);
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        return msg.sender == address(messenger) && s.crossDomainMsgSenders[messenger.xDomainMessageSender()];
+        return msg.sender == address(messenger) && s.senderSatellites[messenger.xDomainMessageSender()];
     }
 }

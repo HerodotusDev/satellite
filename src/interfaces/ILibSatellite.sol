@@ -78,8 +78,8 @@ interface ILibSatellite {
 
         /// @dev mapping of ChainId => Satellite address
         mapping(uint256 => SatelliteConnection) SatelliteConnectionRegistry;
-        /// @dev mapping of crossDomainCounterpart => bool
-        mapping(address => bool) crossDomainMsgSenders;
+        /// @dev set of (aliased) addresses of satellites that can send messages to our chain
+        mapping(address => bool) senderSatellites;
     }
 
     // ========================= Errors ========================= //

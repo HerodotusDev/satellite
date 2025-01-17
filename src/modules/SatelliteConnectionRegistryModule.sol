@@ -12,10 +12,10 @@ contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule
     /// @param satellite - address of the satellite deployed on `chainId`
     /// @param inbox - address of the contract deployed on our chain responsible for sending message to `chainId`
     /// @dev message can be sent to `chainId` if and only if `inbox` is set to non-zero address
-    /// @param crossDomainCounterpart - (aliased) address of the satellite deployed on `chainId` that sends message to our chain
-    /// @dev message can be received from `chainId` if and only if `crossDomainCounterpart` is set to non-zero address
+    /// @param senderSatelliteAlias - (aliased) address of the satellite deployed on `chainId` that sends message to our chain
+    /// @dev message can be received from `chainId` if and only if `senderSatelliteAlias` is set to non-zero address
     /// @param sendMessageSelector - selector of the function responsible for sending message to `chainId`, this function should be part of `messaging/sender/*.sol`
-    function registerSatelliteConnection(uint256 chainId, address satellite, address inbox, address crossDomainCounterpart, bytes4 sendMessageSelector) external {
+    function registerSatelliteConnection(uint256 chainId, address satellite, address inbox, address senderSatelliteAlias, bytes4 sendMessageSelector) external {
         LibSatellite.enforceIsContractOwner();
         require(satellite != address(0), "SatelliteConnectionRegistry: invalid satellite");
 
@@ -23,9 +23,9 @@ contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule
         require(s.SatelliteConnectionRegistry[chainId].satelliteAddress == address(0), "SatelliteConnectionRegistry: satellite already registered");
         s.SatelliteConnectionRegistry[chainId] = ILibSatellite.SatelliteConnection(satellite, inbox, sendMessageSelector);
 
-        if (crossDomainCounterpart != address(0)) {
-            require(!s.crossDomainMsgSenders[crossDomainCounterpart], "SatelliteConnectionRegistry: crossDomainCounterpart already registered");
-            s.crossDomainMsgSenders[crossDomainCounterpart] = true;
+        if (senderSatelliteAlias != address(0)) {
+            require(!s.senderSatellites[senderSatelliteAlias], "SatelliteConnectionRegistry: crossDomainCounterpart already registered");
+            s.senderSatellites[senderSatelliteAlias] = true;
         }
     }
 
@@ -35,7 +35,7 @@ contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         delete s.SatelliteConnectionRegistry[chainId];
         if (crossDomainCounterpart != address(0)) {
-            delete s.crossDomainMsgSenders[crossDomainCounterpart];
+            delete s.senderSatellites[crossDomainCounterpart];
         }
     }
 

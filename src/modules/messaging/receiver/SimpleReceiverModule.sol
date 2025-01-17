@@ -9,6 +9,6 @@ import {AbstractReceiverModule} from "./AbstractReceiverModule.sol";
 contract SimpleReceiverModule is AbstractReceiverModule {
     function isCrossdomainCounterpart() internal view override returns (bool) {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        return s.crossDomainMsgSenders[msg.sender];
+        return s.senderSatellites[msg.sender];
     }
 }

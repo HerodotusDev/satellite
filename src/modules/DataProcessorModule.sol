@@ -34,13 +34,13 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
 
     // ========================= Owner-only Functions ========================= //
 
-    /// @notice setDataProcessorProgramHash hash for the HDP program
+    /// @inheritdoc IDataProcessorModule
     function setDataProcessorProgramHash(bytes32 programHash) external onlyOwner {
         ModuleStorage storage ms = moduleStorage();
         ms.programHash = programHash;
     }
 
-    /// @notice setDataProcessorFactsRegistry address of the facts registry with verified execution of the HDP program
+    /// @inheritdoc IDataProcessorModule
     function setDataProcessorFactsRegistry(IFactsRegistry factsRegistry) external onlyOwner {
         ModuleStorage storage ms = moduleStorage();
         ms.factsRegistry = factsRegistry;
@@ -48,8 +48,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
 
     // ========================= Core Functions ========================= //
 
-    /// @notice Requests the execution of a task with a module
-    /// @param moduleTask module task
+    /// @inheritdoc IDataProcessorModule
     function requestDataProcessorExecutionOfTask(ModuleTask calldata moduleTask) external {
         ModuleStorage storage ms = moduleStorage();
         bytes32 taskCommitment = moduleTask.commit();
@@ -69,49 +68,34 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         }
     }
 
-    /// @notice Authenticates the execution of a task is finalized
-    ///     by verifying the FactRegistry and Merkle proofs
-    /// @param mmrIds The id of the MMR used to compute task
-    /// @param mmrSizes The size of the MMR used to compute task
-    /// @param taskMerkleRootLow The low 128 bits of the tasks Merkle root
-    /// @param taskMerkleRootHigh The high 128 bits of the tasks Merkle root
-    /// @param resultMerkleRootLow The low 128 bits of the results Merkle root
-    /// @param resultMerkleRootHigh The high 128 bits of the results Merkle root
-    /// @param tasksInclusionProofs The Merkle proof of the tasks
-    /// @param resultsInclusionProofs The Merkle proof of the results
-    /// @param taskCommitments The commitment of the tasks
-    /// @param taskResults The result of the computational tasks
+    /// @inheritdoc IDataProcessorModule
     function authenticateDataProcessorTaskExecution(
-        uint256[] calldata chainIds,
-        uint256[] calldata mmrIds,
-        uint256[] calldata mmrSizes,
+        MmrData[] calldata mmrData,
         uint256 taskMerkleRootLow,
         uint256 taskMerkleRootHigh,
         uint256 resultMerkleRootLow,
         uint256 resultMerkleRootHigh,
-        bytes32[][] memory tasksInclusionProofs,
-        bytes32[][] memory resultsInclusionProofs,
-        bytes32[] calldata taskCommitments,
-        bytes32[] calldata taskResults
+        TaskData[] calldata taskData
     ) external {
         ModuleStorage storage ms = moduleStorage();
 
-        assert(mmrIds.length == mmrSizes.length);
-        assert(chainIds.length == mmrIds.length);
         // Initialize an array of uint256 to store the program output
-        uint256[] memory programOutput = new uint256[](4 + mmrIds.length * 4);
+        uint256[] memory programOutput = new uint256[](4 + mmrData.length * 4);
 
         // Assign values to the program output array
+        // This needs to be compatible with cairo program
+        // https://github.com/HerodotusDev/hdp-cairo/blob/main/src/utils/utils.cairo#L27-L48
         programOutput[0] = resultMerkleRootLow;
         programOutput[1] = resultMerkleRootHigh;
         programOutput[2] = taskMerkleRootLow;
         programOutput[3] = taskMerkleRootHigh;
 
-        for (uint8 i = 0; i < mmrIds.length; i++) {
-            bytes32 usedMmrRoot = loadMmrRoot(mmrIds[i], mmrSizes[i], chainIds[i]);
-            programOutput[4 + i * 4] = mmrIds[i];
-            programOutput[4 + i * 4 + 1] = mmrSizes[i];
-            programOutput[4 + i * 4 + 2] = chainIds[i];
+        for (uint8 i = 0; i < mmrData.length; i++) {
+            MmrData memory mmr = mmrData[i];
+            bytes32 usedMmrRoot = loadMmrRoot(mmr.mmrId, mmr.mmrSize, mmr.chainId);
+            programOutput[4 + i * 4] = mmr.mmrId;
+            programOutput[4 + i * 4 + 1] = mmr.mmrSize;
+            programOutput[4 + i * 4 + 2] = mmr.chainId;
             programOutput[4 + i * 4 + 3] = uint256(usedMmrRoot);
         }
 
@@ -127,43 +111,41 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         }
 
         // Loop through all the tasks in the batch
-        for (uint256 i = 0; i < taskResults.length; i++) {
-            bytes32 computationalTaskResult = taskResults[i];
-            bytes32[] memory taskInclusionProof = tasksInclusionProofs[i];
-            bytes32[] memory resultInclusionProof = resultsInclusionProofs[i];
+        for (uint256 i = 0; i < taskData.length; i++) {
+            TaskData memory task = taskData[i];
 
             // Convert the low and high 128 bits to a single 256 bit value
             bytes32 resultMerkleRoot = bytes32((resultMerkleRootHigh << 128) | resultMerkleRootLow);
             bytes32 taskMerkleRoot = bytes32((taskMerkleRootHigh << 128) | taskMerkleRootLow);
 
             // Compute the Merkle leaf of the task
-            bytes32 taskCommitment = taskCommitments[i];
-            bytes32 taskMerkleLeaf = standardNativeHDPLeafHash(taskCommitment);
+            bytes32 taskMerkleLeaf = standardNativeHDPLeafHash(task.commitment);
             // Ensure that the task is included in the batch, by verifying the Merkle proof
-            bool isVerifiedTask = taskInclusionProof.verify(taskMerkleRoot, taskMerkleLeaf);
+            bool isVerifiedTask = task.taskInclusionProof.verify(taskMerkleRoot, taskMerkleLeaf);
 
             if (!isVerifiedTask) {
                 revert NotInBatch();
             }
 
             // Compute the Merkle leaf of the task result
-            bytes32 taskResultCommitment = keccak256(abi.encode(taskCommitment, computationalTaskResult));
+            bytes32 taskResultCommitment = keccak256(abi.encode(task.commitment, task.result));
             bytes32 taskResultMerkleLeaf = standardNativeHDPLeafHash(taskResultCommitment);
+
             // Ensure that the task result is included in the batch, by verifying the Merkle proof
-            bool isVerifiedResult = resultInclusionProof.verify(resultMerkleRoot, taskResultMerkleLeaf);
+            bool isVerifiedResult = task.resultInclusionProof.verify(resultMerkleRoot, taskResultMerkleLeaf);
 
             if (!isVerifiedResult) {
                 revert NotInBatch();
             }
 
             // Store the task result
-            ms.cachedTasksResult[taskCommitment] = TaskResult({status: TaskStatus.FINALIZED, result: computationalTaskResult});
+            ms.cachedTasksResult[task.commitment] = TaskResult({status: TaskStatus.FINALIZED, result: task.result});
         }
     }
 
     // ========================= View Functions ========================= //
 
-    /// @notice Returns the result of a finalized task
+    /// @inheritdoc IDataProcessorModule
     function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32) {
         ModuleStorage storage ms = moduleStorage();
         // Ensure task is finalized
@@ -173,7 +155,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         return ms.cachedTasksResult[taskCommitment].result;
     }
 
-    /// @notice Returns the status of a task
+    /// @inheritdoc IDataProcessorModule
     function getDataProcessorTaskStatus(bytes32 taskCommitment) external view returns (TaskStatus) {
         ModuleStorage storage ms = moduleStorage();
         return ms.cachedTasksResult[taskCommitment].status;

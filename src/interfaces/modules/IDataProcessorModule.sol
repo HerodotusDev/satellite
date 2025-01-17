@@ -26,6 +26,23 @@ interface IDataProcessorModule is IFactsRegistryCommon {
         mapping(bytes32 => TaskResult) cachedTasksResult;
     }
 
+    struct MmrData {
+        uint256 chainId;
+        uint256 mmrId;
+        uint256 mmrSize;
+    }
+
+    struct TaskData {
+        /// @dev The Merkle proof of the task
+        bytes32[] taskInclusionProof;
+        /// @dev The Merkle proof of the result
+        bytes32[] resultInclusionProof;
+        /// @dev The commitment of the task
+        bytes32 commitment;
+        /// @dev The result of the computational task
+        bytes32 result;
+    }
+
     /// @notice emitted when a task already stored
     event TaskAlreadyStored(bytes32 result);
 
@@ -51,29 +68,19 @@ interface IDataProcessorModule is IFactsRegistryCommon {
 
     /// @notice Authenticates the execution of a task is finalized
     ///     by verifying the FactRegistry and Merkle proofs
-    /// @param chainIds The chain IDs for the MMRs
-    /// @param mmrIds The id of the MMR used to compute task
-    /// @param mmrSizes The size of the MMR used to compute task
+    /// @param mmrData The chain ID, MMR ID and MMR size
     /// @param taskMerkleRootLow The low 128 bits of the tasks Merkle root
     /// @param taskMerkleRootHigh The high 128 bits of the tasks Merkle root
     /// @param resultMerkleRootLow The low 128 bits of the results Merkle root
     /// @param resultMerkleRootHigh The high 128 bits of the results Merkle root
-    /// @param tasksInclusionProofs The Merkle proof of the tasks
-    /// @param resultsInclusionProofs The Merkle proof of the results
-    /// @param taskCommitments The commitment of the tasks
-    /// @param taskResults The result of the computational tasks
+    /// @param taskData task and result inclusion proofs, commitments and results
     function authenticateDataProcessorTaskExecution(
-        uint256[] calldata chainIds,
-        uint256[] calldata mmrIds,
-        uint256[] calldata mmrSizes,
+        MmrData[] calldata mmrData,
         uint256 taskMerkleRootLow,
         uint256 taskMerkleRootHigh,
         uint256 resultMerkleRootLow,
         uint256 resultMerkleRootHigh,
-        bytes32[][] memory tasksInclusionProofs,
-        bytes32[][] memory resultsInclusionProofs,
-        bytes32[] calldata taskCommitments,
-        bytes32[] calldata taskResults
+        TaskData[] calldata taskData
     ) external;
 
     /// @notice Returns the result of a finalized task

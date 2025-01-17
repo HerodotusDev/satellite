@@ -3,6 +3,7 @@ pragma solidity ^0.8.27;
 
 import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
 
+/// @notice Receives messages from satellites deployed on other chains
 interface IReceiverModule {
     function receiveParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external;
 

@@ -6,8 +6,11 @@ import {ISatellite} from "interfaces/ISatellite.sol";
 import {AbstractReceiverModule} from "./AbstractReceiverModule.sol";
 import {IL1CrossDomainMessenger} from "interfaces/external/IOptimismCrossDomainMessenger.sol";
 
+/// @notice Implementation of the receiver module for Optimism
 contract OptimismReceiverModule is AbstractReceiverModule {
     function isCrossdomainCounterpart() internal view override returns (bool) {
+        /// @dev On Optimism, cross-chain messages always come from the same address (L1CrossDomainMessenger)
+        ///      whose `xDomainMessageSender()` function should be called for retrieving the address of the sender
         IL1CrossDomainMessenger messenger = IL1CrossDomainMessenger(0x4200000000000000000000000000000000000007);
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();

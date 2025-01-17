@@ -10,17 +10,37 @@ struct RootForHashingFunction {
 }
 
 enum GrownBy {
+    /// @dev GrownBy.NATIVE_ON_CHAIN_GROWER - appended by NativeOnChainGrowingModule
     NATIVE_ON_CHAIN_GROWER,
+    /// @dev GrownBy.NATIVE_SHARP_GROWER - appended by NativeSharpGrowingModule
     NATIVE_SHARP_GROWER,
+    /// @dev GrownBy.STARKNET_SHARP_GROWER - appended by StarknetSharpMmrGrowingModule
     STARKNET_SHARP_GROWER,
     TIMESTAMP_REMAPPER
+}
+
+enum CreatedFrom {
+    FOREIGN,
+    DOMESTIC
 }
 
 interface IMmrCoreModule {
     // ========================= Other Satellite Modules Only Functions ========================= //
 
-    function _receiveBlockHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external;
+    /// @notice Receiving a recent parent hash obtained on-chain directly on this chain or sent in a message from another one (eg. L1 -> L2)
+    /// @dev saves the parent hash of the block number (from a given chain) in the contract storage
+    function _receiveParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external;
 
+    /// @notice Creates a new branch from message sent from satellite on another chain
+    /// @param newMmrId the ID of the MMR to create
+    /// @param rootsForHashingFunctions the roots of the MMR -> ABI encoded hashing function => MMR root
+    /// @param mmrSize the size of the MMR
+    /// @param accumulatedChainId the ID of the chain that the MMR accumulates (where block is?)
+    /// @param originChainId the ID of the chain from which the new MMR will be created (who is sending msg?)
+    /// @param originalMmrId the ID of the MMR from which the new MMR will be created
+    /// @param isSiblingSynced whether the MMR is sibling synced
+    /// @param isTimestampRemapper whether the MMR is a timestamp remapper
+    /// @param firstTimestampsBlock the block number of the first timestamp in the timestamp remapper
     function _createMmrFromForeign(
         uint256 newMmrId,
         RootForHashingFunction[] calldata rootsForHashingFunctions,
@@ -36,6 +56,14 @@ interface IMmrCoreModule {
 
     // ========================= Core Functions ========================= //
 
+    /// @notice Creates a new MMR that is a clone of an already existing MMR or an empty MMR if originalMmrId is 0 (in that case mmrSize is ignored)
+    /// @param newMmrId the ID of the new MMR
+    /// @param originalMmrId the ID of the MMR from which the new MMR will be created - if 0 it means an empty MMR will be created
+    /// @param accumulatedChainId the ID of the chain that the MMR accumulates
+    /// @param mmrSize size at which the MMR will be copied
+    /// @param hashingFunctions the hashing functions used in the MMR - if more than one, the MMR will be sibling synced and require being a satellite module to call
+    /// @param isTimestampRemapper whether the MMR is a timestamp remapper
+    /// @param firstTimestampsBlock the block number of the first timestamp in the timestamp remapper
     function createMmrFromDomestic(
         uint256 newMmrId,
         uint256 originalMmrId,
@@ -87,6 +115,7 @@ interface IMmrCoreModule {
     /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
     /// @param originChainId the ID of the chain from which the new MMR comes from
     /// @dev if originChainId equal to accumulatedChainId, it means the MMR is created from domestic source, otherwise it is created from foreign source
+    /// @param createdFrom enum representing the source of the MMR creation - DOMESTIC or FOREIGN
     event CreatedMmr(
         uint256 newMmrId,
         uint256 mmrSize,
@@ -95,7 +124,8 @@ interface IMmrCoreModule {
         RootForHashingFunction[] rootsForHashingFunctions,
         uint256 originChainId,
         bool isTimestampRemapper,
-        uint256 firstTimestampsBlock
+        uint256 firstTimestampsBlock,
+        CreatedFrom createdFrom
     );
 
     /// @notice emitted when a batch of blocks is appended to the MMR
@@ -107,9 +137,6 @@ interface IMmrCoreModule {
     /// @param mmrId the ID of the MMR that was grown
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
     /// @param grownBy enum representing which growing module appended blocks to MMR
-    /// @dev GrownBy.NATIVE_ON_CHAIN_GROWER - appended by NativeOnChainGrowingModule
-    /// @dev GrownBy.NATIVE_SHARP_GROWER - appended by NativeSharpGrowingModule
-    /// @dev GrownBy.STARKNET_SHARP_GROWER - appended by StarknetSharpMmrGrowingModule
     event GrownMmr(
         uint256 firstAppendedBlock,
         uint256 lastAppendedBlock,

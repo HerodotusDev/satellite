@@ -48,6 +48,11 @@ library LibSatellite {
         }
     }
 
+    modifier onlySatelliteModule() {
+        enforceIsSatelliteModule();
+        _;
+    }
+
     event SatelliteMaintenance(ILibSatellite.ModuleMaintenance[] _satelliteMaintenance, address _init, bytes _calldata);
 
     function satelliteMaintenance(ILibSatellite.ModuleMaintenance[] memory _satelliteMaintenance, address _init, bytes memory _calldata) internal {

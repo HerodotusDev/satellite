@@ -5,10 +5,10 @@ import {ISatellite} from "interfaces/ISatellite.sol";
 import {IStarknetParentHashFetcherModule} from "interfaces/modules/parent-hash-fetching/IStarknetParentHashFetcherModule.sol";
 import {IStarknet} from "interfaces/external/IStarknet.sol";
 
-/// @title NativeParentHashFetcher
-/// @notice Fetches parent hashes for the native chain
-/// @notice for example if deployed on Ethereum, it will fetch parent hashes from Ethereum
+/// @notice Fetches parent hashes for Starknet
+/// @notice if deployed on Ethereum Sepolia, it fetches parent hashes from Starknet Sepolia
 contract StarknetParentHashFetcherModule is IStarknetParentHashFetcherModule {
+    // TODO: important: DON'T USE CONSTRUCTOR HERE
     IStarknet public immutable STARKNET;
     // Either Starknet or Starknet Sepolia chain ID
     uint256 public immutable CHAIN_ID;
@@ -26,6 +26,6 @@ contract StarknetParentHashFetcherModule is IStarknetParentHashFetcherModule {
         // Extract its parent hash.
         bytes32 latestSettledStarknetBlockhash = bytes32(STARKNET.stateBlockHash());
 
-        ISatellite(address(this))._receiveBlockHash(CHAIN_ID, POSEIDON_HASHING_FUNCTION, latestSettledStarknetBlock + 1, latestSettledStarknetBlockhash);
+        ISatellite(address(this))._receiveParentHash(CHAIN_ID, POSEIDON_HASHING_FUNCTION, latestSettledStarknetBlock + 1, latestSettledStarknetBlockhash);
     }
 }

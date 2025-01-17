@@ -6,11 +6,13 @@ import {ISatellite} from "interfaces/ISatellite.sol";
 import {IReceiverModule} from "interfaces/modules/messaging/receiver/IReceiverModule.sol";
 import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
 
+/// @notice Abstract contract for receiving messages from satellites deployed on other chains
+/// @notice It checks whether the message is coming from correct address (including aliasing cross-domain counterpart)
 abstract contract AbstractReceiverModule is IReceiverModule {
     function receiveParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external onlyCrossdomainCounterpart {
-        ISatellite(address(this))._receiveBlockHash(chainId, hashingFunction, blockNumber, parentHash);
+        ISatellite(address(this))._receiveParentHash(chainId, hashingFunction, blockNumber, parentHash);
 
-        // _receiveBlockHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash)
+        // _receiveParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash)
         // emit ReceivedHash(messagesOriginChainId, parentHash, blockNumber);
         // event is emitted in HeadersStore so this probably is not needed.
     }
@@ -38,7 +40,6 @@ abstract contract AbstractReceiverModule is IReceiverModule {
             isTimestampRemapper,
             firstTimestampsBlock
         );
-        // TODO: should we emit an event?
     }
 
     modifier onlyCrossdomainCounterpart() {

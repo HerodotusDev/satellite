@@ -6,6 +6,7 @@ import {IOptimismCrossDomainMessenger} from "interfaces/external/IOptimismCrossD
 import {IL1ToOptimismSenderModule} from "interfaces/modules/messaging/sender/IL1ToOptimismSenderModule.sol";
 
 contract L1ToOptimismSenderModule is IL1ToOptimismSenderModule {
+    /// @inheritdoc IL1ToOptimismSenderModule
     function sendMessageL1ToOptimism(address satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable {
         LibSatellite.enforceIsSatelliteModule();
 

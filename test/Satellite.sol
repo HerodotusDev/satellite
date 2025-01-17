@@ -35,6 +35,6 @@ contract Satellite is Test {
     function test_enforce_is_satellite_module() external {
         bytes32 parentHash = blockhash(blockNumber - 1);
         vm.expectRevert(ILibSatellite.MustBeSatelliteModule.selector);
-        satellite._receiveBlockHash(block.chainid, KECCAK_HASHING_FUNCTION, blockNumber, parentHash);
+        satellite._receiveParentHash(block.chainid, KECCAK_HASHING_FUNCTION, blockNumber, parentHash);
     }
 }

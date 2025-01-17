@@ -7,13 +7,10 @@ import {IUniversalSenderModule} from "interfaces/modules/messaging/sender/IUnive
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
 
+/// @notice Sender module that uses appropriate sender module depending on the destination chain
+/// @dev It uses Satellite Connection Registry to find function selector for the destination chain
 contract UniversalSenderModule is IUniversalSenderModule {
-    /// @notice Send parent hash that was registered on L1 to the destination chain
-    /// @param destinationChainId the chain ID of the destination chain
-    /// @param accumulatedChainId the chain ID of the block that is being sent
-    /// @param hashingFunction the hashing function used to hash the parent hash
-    /// @param blockNumber the number of block being sent
-    /// @param _xDomainMsgGasData the gas data for the cross-domain message, depends on the destination L2
+    /// @inheritdoc IUniversalSenderModule
     function sendParentHash(
         uint256 destinationChainId,
         uint256 accumulatedChainId,
@@ -40,6 +37,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
         require(success, "Function call failed");
     }
 
+    /// @inheritdoc IUniversalSenderModule
     function sendMmr(
         uint256 destinationChainId,
         uint256 accumulatedChainId,

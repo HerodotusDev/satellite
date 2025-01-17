@@ -83,7 +83,7 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
 
         (, uint256 toBlock) = lastOutput.blockNumbersPacked.split128();
 
-        ISatellite(address(this))._receiveBlockHash(AGGREGATED_CHAIN_ID, KECCAK_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
+        ISatellite(address(this))._receiveParentHash(AGGREGATED_CHAIN_ID, KECCAK_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
 
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](2);
         rootsForHashingFunctions[0].root = lastOutput.mmrNewRootPoseidon;

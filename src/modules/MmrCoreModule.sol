@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {LibSatellite} from "libraries/LibSatellite.sol";
-import {RootForHashingFunction, IMmrCoreModule} from "interfaces/modules/IMmrCoreModule.sol";
+import {RootForHashingFunction, IMmrCoreModule, CreatedFrom} from "interfaces/modules/IMmrCoreModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 
 contract MmrCoreModule is IMmrCoreModule {
@@ -20,23 +20,15 @@ contract MmrCoreModule is IMmrCoreModule {
 
     // ========================= Other Satellite Modules Only Functions ========================= //
 
-    /// @notice Receiving a recent block hash obtained on-chain directly on this chain or sent in a message from another one (eg. L1 -> L2)
-    /// @notice saves the parent hash of the block number (from a given chain) in the contract storage
-    function _receiveBlockHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external {
+    /// @inheritdoc IMmrCoreModule
+    function _receiveParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external {
         LibSatellite.enforceIsSatelliteModule();
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         s.receivedParentHashes[chainId][hashingFunction][blockNumber] = parentHash;
         emit ReceivedParentHash(chainId, blockNumber, parentHash, hashingFunction);
     }
 
-    /// @notice Most commonly creates a new branch from an L1 message, the sent MMR info comes from an L1 aggregator
-    /// @param newMmrId the ID of the MMR to create
-    /// @param rootsForHashingFunctions the roots of the MMR -> ABI encoded hashing function => MMR root
-    /// @param mmrSize the size of the MMR
-    /// @param accumulatedChainId the ID of the chain that the MMR accumulates (where block is?)
-    /// @param originChainId the ID of the chain from which the new MMR will be created (who is sending msg?)
-    /// @param originalMmrId the ID of the MMR from which the new MMR will be created
-    /// @param isSiblingSynced whether the MMR is sibling synced
+    /// @inheritdoc IMmrCoreModule
     function _createMmrFromForeign(
         uint256 newMmrId,
         RootForHashingFunction[] calldata rootsForHashingFunctions,
@@ -75,19 +67,21 @@ contract MmrCoreModule is IMmrCoreModule {
         }
 
         // Emit the event
-        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originChainId, rootsForHashingFunctions, originalMmrId, isTimestampRemapper, firstTimestampsBlock);
+        emit CreatedMmr(
+            newMmrId,
+            mmrSize,
+            accumulatedChainId,
+            originChainId,
+            rootsForHashingFunctions,
+            originalMmrId,
+            isTimestampRemapper,
+            firstTimestampsBlock,
+            CreatedFrom.FOREIGN
+        );
     }
 
     // ========================= Core Functions ========================= //
 
-    /// @notice Creates a new MMR that is a clone of an already existing MMR or an empty MMR if originalMmrId is 0 (in that case mmrSize is ignored)
-    /// @param newMmrId the ID of the new MMR
-    /// @param originalMmrId the ID of the MMR from which the new MMR will be created - if 0 it means an empty MMR will be created
-    /// @param accumulatedChainId the ID of the chain that the MMR accumulates
-    /// @param mmrSize size at which the MMR will be copied
-    /// @param hashingFunctions the hashing functions used in the MMR - if more than one, the MMR will be sibling synced and require being a satellite module to call
-    /// @param isTimestampRemapper whether the MMR is a timestamp remapper
-    /// @param firstTimestampsBlock the block number of the first timestamp in the timestamp remapper
     function createMmrFromDomestic(
         uint256 newMmrId,
         uint256 originalMmrId,
@@ -151,7 +145,17 @@ contract MmrCoreModule is IMmrCoreModule {
             rootsForHashingFunctions[i] = RootForHashingFunction({hashingFunction: hashingFunctions[i], root: mmrRoot});
         }
 
-        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, accumulatedChainId, isTimestampRemapper, firstTimestampsBlock);
+        emit CreatedMmr(
+            newMmrId,
+            mmrSize,
+            accumulatedChainId,
+            originalMmrId,
+            rootsForHashingFunctions,
+            accumulatedChainId,
+            isTimestampRemapper,
+            firstTimestampsBlock,
+            CreatedFrom.DOMESTIC
+        );
     }
 
     /// ========================= Internal functions ========================= //

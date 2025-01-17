@@ -73,7 +73,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule {
 
         uint256 toBlock = lastOutput.toBlockNumberLow;
 
-        ISatellite(address(this))._receiveBlockHash(AGGREGATED_CHAIN_ID, POSEIDON_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
+        ISatellite(address(this))._receiveParentHash(AGGREGATED_CHAIN_ID, POSEIDON_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
 
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](1);
         rootsForHashingFunctions[0].root = lastOutput.mmrNewRootPoseidon;

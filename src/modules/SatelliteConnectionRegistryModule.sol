@@ -6,15 +6,9 @@ import {ISatelliteConnectionRegistryModule} from "interfaces/modules/ISatelliteC
 import {ILibSatellite} from "interfaces/ILibSatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 
+/// @notice Satellite Connection Registry is responsible for storing information about chains to which message can be sent and from which message can be received
 contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule {
-    /// @notice Satellite Connection Registry is responsible for storing information about chains to which message can be sent and from which message can be received
-    /// @param chainId - chain id of other side of the connection
-    /// @param satellite - address of the satellite deployed on `chainId`
-    /// @param inbox - address of the contract deployed on our chain responsible for sending message to `chainId`
-    /// @dev message can be sent to `chainId` if and only if `inbox` is set to non-zero address
-    /// @param senderSatelliteAlias - (aliased) address of the satellite deployed on `chainId` that sends message to our chain
-    /// @dev message can be received from `chainId` if and only if `senderSatelliteAlias` is set to non-zero address
-    /// @param sendMessageSelector - selector of the function responsible for sending message to `chainId`, this function should be part of `messaging/sender/*.sol`
+    /// @inheritdoc ISatelliteConnectionRegistryModule
     function registerSatelliteConnection(uint256 chainId, address satellite, address inbox, address senderSatelliteAlias, bytes4 sendMessageSelector) external {
         LibSatellite.enforceIsContractOwner();
         require(satellite != address(0), "SatelliteConnectionRegistry: invalid satellite");
@@ -29,6 +23,7 @@ contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule
         }
     }
 
+    /// @inheritdoc ISatelliteConnectionRegistryModule
     function removeSatelliteConnection(uint256 chainId, address crossDomainCounterpart) external {
         LibSatellite.enforceIsContractOwner();
 
@@ -39,6 +34,7 @@ contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule
         }
     }
 
+    /// @inheritdoc ISatelliteConnectionRegistryModule
     function getSatelliteConnection(uint256 chainId) external view returns (ILibSatellite.SatelliteConnection memory) {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         return s.SatelliteConnectionRegistry[chainId];

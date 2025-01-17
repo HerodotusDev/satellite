@@ -19,16 +19,16 @@ import {DeploySatelliteInspectorModule} from "../modules/DeploySatelliteInspecto
 import {DeployMmrCoreModule} from "../modules/DeployMmrCoreModule.s.sol";
 import {DeployNativeSharpMmrGrowingModule} from "../modules/growing/DeployNativeSharpMmrGrowingModule.s.sol";
 import {DeployEVMFactRegistryModule} from "../modules/DeployEVMFactRegistryModule.s.sol";
-import {DeployNativeParentHashFetcherModule} from "../modules/x-rollup-messaging/parent-hash-fetcher/DeployNativeParentHashFetcherModule.s.sol";
+import {DeployNativeParentHashFetcherModule} from "../modules/parent-hash-fetching/DeployNativeParentHashFetcherModule.s.sol";
 import {DeployNativeOnChainGrowingModule} from "../modules/growing/DeployNativeOnChainGrowingModule.s.sol";
 import {DeployStarknetSharpMmrGrowingModule} from "../modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
-import {DeployStarknetParentHashFetcherModule} from "../modules/x-rollup-messaging/parent-hash-fetcher/DeployStarknetParentHashFetcherModule.s.sol";
+import {DeployStarknetParentHashFetcherModule} from "../modules/parent-hash-fetching/DeployStarknetParentHashFetcherModule.s.sol";
 import {DeployDataProcessorModule} from "../modules/DeployDataProcessorModule.s.sol";
 import {DeploySatelliteConnectionRegistryModule} from "../modules/DeploySatelliteConnectionRegistryModule.s.sol";
-import {DeploySimpleInboxModule} from "../modules/x-rollup-messaging/inbox/DeploySimpleInboxModule.s.sol";
-import {DeployL1ToArbitrumMessagesSenderModule} from "../modules/x-rollup-messaging/outbox/DeployL1ToArbitrumMessagesSenderModule.s.sol";
-import {DeployL1ToOptimismMessagesSenderModule} from "../modules/x-rollup-messaging/outbox/DeployL1ToOptimismMessagesSenderModule.s.sol";
-import {DeployUniversalMessagesSenderModule} from "../modules/x-rollup-messaging/outbox/DeployUniversalMessagesSenderModule.s.sol";
+import {DeploySimpleReceiverModule} from "../modules/messaging/receiver/DeploySimpleReceiverModule.s.sol";
+import {DeployL1ToArbitrumSenderModule} from "../modules/messaging/sender/DeployL1ToArbitrumSenderModule.s.sol";
+import {DeployL1ToOptimismSenderModule} from "../modules/messaging/sender/DeployL1ToOptimismSenderModule.s.sol";
+import {DeployUniversalSenderModule} from "../modules/messaging/sender/DeployUniversalSenderModule.s.sol";
 
 uint256 constant numberOfModules = 15;
 
@@ -49,9 +49,9 @@ contract Deploy is Script {
         deployModules[8] = new DeployStarknetParentHashFetcherModule();
         deployModules[9] = new DeployDataProcessorModule();
         deployModules[10] = new DeploySatelliteConnectionRegistryModule();
-        deployModules[11] = new DeployUniversalMessagesSenderModule();
-        deployModules[12] = new DeployL1ToArbitrumMessagesSenderModule();
-        deployModules[13] = new DeployL1ToOptimismMessagesSenderModule();
+        deployModules[11] = new DeployUniversalSenderModule();
+        deployModules[12] = new DeployL1ToArbitrumSenderModule();
+        deployModules[13] = new DeployL1ToOptimismSenderModule();
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);

@@ -7,6 +7,14 @@ import {ILibSatellite} from "interfaces/ILibSatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 
 contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule {
+    /// @notice Satellite Connection Registry is responsible for storing information about chains to which message can be sent and from which message can be received
+    /// @param chainId - chain id of other side of the connection
+    /// @param satellite - address of the satellite deployed on `chainId`
+    /// @param inbox - address of the contract deployed on our chain responsible for sending message to `chainId`
+    /// @dev message can be sent to `chainId` if and only if `inbox` is set to non-zero address
+    /// @param crossDomainCounterpart - (aliased) address of the satellite deployed on `chainId` that sends message to our chain
+    /// @dev message can be received from `chainId` if and only if `crossDomainCounterpart` is set to non-zero address
+    /// @param sendMessageSelector - selector of the function responsible for sending message to `chainId`, this function should be part of `messaging/sender/*.sol`
     function registerSatelliteConnection(uint256 chainId, address satellite, address inbox, address crossDomainCounterpart, bytes4 sendMessageSelector) external {
         LibSatellite.enforceIsContractOwner();
         require(satellite != address(0), "SatelliteConnectionRegistry: invalid satellite");

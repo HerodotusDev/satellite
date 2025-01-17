@@ -10,14 +10,14 @@ import {ISatelliteMaintenanceModule} from "./modules/ISatelliteMaintenanceModule
 import {INativeSharpMmrGrowingModule} from "./modules/growing/INativeSharpMmrGrowingModule.sol";
 import {IStarknetSharpMmrGrowingModule} from "./modules/growing/IStarknetSharpMmrGrowingModule.sol";
 import {IEVMFactRegistryModule} from "./modules/IEVMFactRegistryModule.sol";
-import {INativeParentHashFetcherModule} from "./modules/x-rollup-messaging/parent-hash-fetcher/INativeParentHashFetcherModule.sol";
-import {IStarknetParentHashFetcherModule} from "./modules/x-rollup-messaging/parent-hash-fetcher/IStarknetParentHashFetcherModule.sol";
-import {IInboxModule} from "./modules/x-rollup-messaging/inbox/IInboxModule.sol";
+import {INativeParentHashFetcherModule} from "./modules/parent-hash-fetching/INativeParentHashFetcherModule.sol";
+import {IStarknetParentHashFetcherModule} from "./modules/parent-hash-fetching/IStarknetParentHashFetcherModule.sol";
+import {IReceiverModule} from "./modules/messaging/receiver/IReceiverModule.sol";
 import {INativeOnChainGrowingModule} from "./modules/growing/INativeOnChainGrowingModule.sol";
 import {IDataProcessorModule} from "./modules/IDataProcessorModule.sol";
-import {IUniversalMessagesSenderModule} from "./modules/x-rollup-messaging/outbox/IUniversalMessagesSenderModule.sol";
-import {IL1ToArbitrumMessagesSenderModule} from "./modules/x-rollup-messaging/outbox/IL1ToArbitrumMessagesSenderModule.sol";
-import {IL1ToOptimismMessagesSenderModule} from "./modules/x-rollup-messaging/outbox/IL1ToOptimismMessagesSenderModule.sol";
+import {IUniversalSenderModule} from "./modules/messaging/sender/IUniversalSenderModule.sol";
+import {IL1ToArbitrumSenderModule} from "./modules/messaging/sender/IL1ToArbitrumSenderModule.sol";
+import {IL1ToOptimismSenderModule} from "./modules/messaging/sender/IL1ToOptimismSenderModule.sol";
 interface ISatellite is
     ILibSatellite,
     IOwnershipModule,
@@ -30,10 +30,10 @@ interface ISatellite is
     INativeParentHashFetcherModule,
     INativeOnChainGrowingModule,
     IStarknetSharpMmrGrowingModule,
-    IInboxModule,
-    IUniversalMessagesSenderModule,
-    IL1ToArbitrumMessagesSenderModule,
-    IL1ToOptimismMessagesSenderModule,
+    IReceiverModule,
+    IUniversalSenderModule,
+    IL1ToArbitrumSenderModule,
+    IL1ToOptimismSenderModule,
     IStarknetParentHashFetcherModule,
     IDataProcessorModule
 {}

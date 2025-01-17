@@ -19,14 +19,14 @@ import {DeploySatelliteInspectorModule} from "../modules/DeploySatelliteInspecto
 import {DeployMmrCoreModule} from "../modules/DeployMmrCoreModule.s.sol";
 import {DeployNativeSharpMmrGrowingModule} from "../modules/growing/DeployNativeSharpMmrGrowingModule.s.sol";
 import {DeployEVMFactRegistryModule} from "../modules/DeployEVMFactRegistryModule.s.sol";
-import {DeployNativeParentHashFetcherModule} from "../modules/x-rollup-messaging/parent-hash-fetcher/DeployNativeParentHashFetcherModule.s.sol";
+import {DeployNativeParentHashFetcherModule} from "../modules/parent-hash-fetching/DeployNativeParentHashFetcherModule.s.sol";
 import {DeployNativeOnChainGrowingModule} from "../modules/growing/DeployNativeOnChainGrowingModule.s.sol";
 import {DeployStarknetSharpMmrGrowingModule} from "../modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
-import {DeployStarknetParentHashFetcherModule} from "../modules/x-rollup-messaging/parent-hash-fetcher/DeployStarknetParentHashFetcherModule.s.sol";
+import {DeployStarknetParentHashFetcherModule} from "../modules/parent-hash-fetching/DeployStarknetParentHashFetcherModule.s.sol";
 import {DeployDataProcessorModule} from "../modules/DeployDataProcessorModule.s.sol";
 import {DeploySatelliteConnectionRegistryModule} from "../modules/DeploySatelliteConnectionRegistryModule.s.sol";
-import {DeploySimpleInboxModule} from "../modules/x-rollup-messaging/inbox/DeploySimpleInboxModule.s.sol";
-import {DeployL1ToArbitrumMessagesSenderModule} from "../modules/x-rollup-messaging/outbox/DeployL1ToArbitrumMessagesSenderModule.s.sol";
+import {DeploySimpleReceiverModule} from "../modules/messaging/receiver/DeploySimpleReceiverModule.s.sol";
+import {DeployL1ToArbitrumSenderModule} from "../modules/messaging/sender/DeployL1ToArbitrumSenderModule.s.sol";
 
 uint256 constant numberOfModules = 10;
 
@@ -45,7 +45,7 @@ contract Deploy is Script {
         deployModules[5] = new DeployNativeOnChainGrowingModule();
         deployModules[6] = new DeployDataProcessorModule();
         deployModules[7] = new DeploySatelliteConnectionRegistryModule();
-        deployModules[8] = new DeploySimpleInboxModule();
+        deployModules[8] = new DeploySimpleReceiverModule();
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);

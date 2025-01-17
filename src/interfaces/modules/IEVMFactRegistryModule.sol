@@ -30,6 +30,13 @@ interface IEVMFactRegistryModule {
         mapping(AccountField => bytes32) fields;
     }
 
+    struct ModuleStorage {
+        /// @dev chain_id => address => block_number => Account
+        mapping(uint256 => mapping(address => mapping(uint256 => Account))) accountField;
+        /// @dev chain_id => address => block_number => slot => value
+        mapping(uint256 => mapping(address => mapping(uint256 => mapping(bytes32 => StorageSlot)))) accountStorageSlotValues;
+    }
+
     // ===================== Functions for End Users ===================== //
 
     /// @notice Returns nonce, balance, storage root or code hash of a given account, at a given block number and chainId

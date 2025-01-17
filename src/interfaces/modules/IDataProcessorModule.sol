@@ -20,7 +20,7 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     }
 
     /// @notice Storage structure for the module
-    struct ModuleStorage {
+    struct DataProcessorModuleStorage {
         bytes32 programHash;
         IFactsRegistry factsRegistry;
         mapping(bytes32 => TaskResult) cachedTasksResult;

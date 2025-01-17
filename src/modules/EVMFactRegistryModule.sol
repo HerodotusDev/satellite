@@ -26,7 +26,7 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
 
     bytes32 constant MODULE_STORAGE_POSITION = keccak256("diamond.standard.satellite.module.storage.evm-fact-registry");
 
-    function moduleStorage() internal pure returns (ModuleStorage storage s) {
+    function moduleStorage() internal pure returns (EVMFactRegistryModuleStorage storage s) {
         bytes32 position = MODULE_STORAGE_POSITION;
         assembly {
             s.slot := position
@@ -37,7 +37,7 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
 
     /// @inheritdoc IEVMFactRegistryModule
     function accountField(uint256 chainId, address account, uint256 blockNumber, AccountField field) external view returns (bytes32) {
-        ModuleStorage storage ms = moduleStorage();
+        EVMFactRegistryModuleStorage storage ms = moduleStorage();
 
         Account storage accountData = ms.accountField[chainId][account][blockNumber];
         require(readBitAtIndexFromRight(accountData.savedFields, uint8(field)), "ERR_FIELD_NOT_SAVED");
@@ -46,7 +46,7 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
 
     /// @inheritdoc IEVMFactRegistryModule
     function storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bytes32) {
-        ModuleStorage storage ms = moduleStorage();
+        EVMFactRegistryModuleStorage storage ms = moduleStorage();
 
         StorageSlot storage valueRaw = ms.accountStorageSlotValues[chainId][account][blockNumber][slot];
         require(valueRaw.exists, "ERR_SLOT_NOT_SAVED");
@@ -57,7 +57,7 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
 
     /// @inheritdoc IEVMFactRegistryModule
     function proveAccount(uint256 chainId, address account, uint8 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) external {
-        ModuleStorage storage ms = moduleStorage();
+        EVMFactRegistryModuleStorage storage ms = moduleStorage();
 
         // Verify the proof and decode the account fields
         (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) = verifyAccount(chainId, account, headerProof, accountTrieProof);
@@ -88,7 +88,7 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
 
     /// @inheritdoc IEVMFactRegistryModule
     function proveStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) external {
-        ModuleStorage storage ms = moduleStorage();
+        EVMFactRegistryModuleStorage storage ms = moduleStorage();
 
         // Verify the proof and decode the slot value
         bytes32 slotValue = verifyStorage(chainId, account, blockNumber, slot, storageSlotTrieProof);
@@ -119,7 +119,7 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
 
     /// @inheritdoc IEVMFactRegistryModule
     function verifyStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) public view returns (bytes32 slotValue) {
-        ModuleStorage storage ms = moduleStorage();
+        EVMFactRegistryModuleStorage storage ms = moduleStorage();
 
         Account storage accountData = ms.accountField[chainId][account][blockNumber];
         require(readBitAtIndexFromRight(accountData.savedFields, uint8(AccountField.STORAGE_ROOT)), "ERR_STORAGE_ROOT_NOT_SAVED");

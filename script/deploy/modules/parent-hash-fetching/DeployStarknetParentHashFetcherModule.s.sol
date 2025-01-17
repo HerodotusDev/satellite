@@ -16,7 +16,8 @@ contract DeployStarknetParentHashFetcherModule is IDeploy {
     function deploy() internal override returns (address moduleAddress) {
         IStarknet starknetCore = IStarknet(getStarknetCoreAddress());
         vm.startBroadcast(getPrivateKey());
-        StarknetParentHashFetcherModule module = new StarknetParentHashFetcherModule(starknetCore, getStarknetChainId());
+        StarknetParentHashFetcherModule module = new StarknetParentHashFetcherModule();
+        // TODO: initStarknetParentHashFetcherModule
         vm.stopBroadcast();
 
         moduleAddress = address(module);

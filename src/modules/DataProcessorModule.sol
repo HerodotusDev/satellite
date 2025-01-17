@@ -25,7 +25,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
 
     bytes32 constant MODULE_STORAGE_POSITION = keccak256("diamond.standard.satellite.module.storage.data-processor");
 
-    function moduleStorage() internal pure returns (ModuleStorage storage s) {
+    function moduleStorage() internal pure returns (DataProcessorModuleStorage storage s) {
         bytes32 position = MODULE_STORAGE_POSITION;
         assembly {
             s.slot := position
@@ -36,13 +36,13 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
 
     /// @inheritdoc IDataProcessorModule
     function setDataProcessorProgramHash(bytes32 programHash) external onlyOwner {
-        ModuleStorage storage ms = moduleStorage();
+        DataProcessorModuleStorage storage ms = moduleStorage();
         ms.programHash = programHash;
     }
 
     /// @inheritdoc IDataProcessorModule
     function setDataProcessorFactsRegistry(IFactsRegistry factsRegistry) external onlyOwner {
-        ModuleStorage storage ms = moduleStorage();
+        DataProcessorModuleStorage storage ms = moduleStorage();
         ms.factsRegistry = factsRegistry;
     }
 
@@ -50,7 +50,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
 
     /// @inheritdoc IDataProcessorModule
     function requestDataProcessorExecutionOfTask(ModuleTask calldata moduleTask) external {
-        ModuleStorage storage ms = moduleStorage();
+        DataProcessorModuleStorage storage ms = moduleStorage();
         bytes32 taskCommitment = moduleTask.commit();
 
         if (ms.cachedTasksResult[taskCommitment].status == TaskStatus.FINALIZED) {
@@ -77,7 +77,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         uint256 resultMerkleRootHigh,
         TaskData[] calldata taskData
     ) external {
-        ModuleStorage storage ms = moduleStorage();
+        DataProcessorModuleStorage storage ms = moduleStorage();
 
         // Initialize an array of uint256 to store the program output
         uint256[] memory programOutput = new uint256[](4 + mmrData.length * 4);
@@ -147,7 +147,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
 
     /// @inheritdoc IDataProcessorModule
     function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32) {
-        ModuleStorage storage ms = moduleStorage();
+        DataProcessorModuleStorage storage ms = moduleStorage();
         // Ensure task is finalized
         if (ms.cachedTasksResult[taskCommitment].status != TaskStatus.FINALIZED) {
             revert NotFinalized();
@@ -157,7 +157,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
 
     /// @inheritdoc IDataProcessorModule
     function getDataProcessorTaskStatus(bytes32 taskCommitment) external view returns (TaskStatus) {
-        ModuleStorage storage ms = moduleStorage();
+        DataProcessorModuleStorage storage ms = moduleStorage();
         return ms.cachedTasksResult[taskCommitment].status;
     }
 

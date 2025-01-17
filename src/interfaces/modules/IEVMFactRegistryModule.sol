@@ -30,7 +30,7 @@ interface IEVMFactRegistryModule {
         mapping(AccountField => bytes32) fields;
     }
 
-    struct ModuleStorage {
+    struct EVMFactRegistryModuleStorage {
         /// @dev chain_id => address => block_number => Account
         mapping(uint256 => mapping(address => mapping(uint256 => Account))) accountField;
         /// @dev chain_id => address => block_number => slot => value

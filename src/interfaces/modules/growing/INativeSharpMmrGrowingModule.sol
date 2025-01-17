@@ -36,6 +36,13 @@ interface INativeSharpMmrGrowingModule is ISharpMmrGrowingCommon {
         uint256 mmrSizesPacked;
     }
 
+    struct NativeSharpMmrGrowingModuleStorage {
+        IFactsRegistry factsRegistry;
+        uint256 aggregatedChainId;
+    }
+
+    function initNativeSharpMmrGrowingModule(IFactsRegistry factsRegistry) external;
+
     function createNativeSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
 
     function aggregateNativeSharpJobs(uint256 mmrId, JobOutputPacked[] calldata outputs) external;

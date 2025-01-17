@@ -18,6 +18,14 @@ interface IStarknetSharpMmrGrowingModule is ISharpMmrGrowingCommon {
         uint256 mmrNewSize;
     }
 
+    struct StarknetSharpMmrGrowingModuleStorage {
+        IFactsRegistry factsRegistry;
+        // Either Starknet or Starknet Sepolia chain ID
+        uint256 aggregatedChainId;
+    }
+
+    function initStarknetSharpMmrGrowingModule(IFactsRegistry factsRegistry) external;
+
     function createStarknetSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
 
     function aggregateStarknetSharpJobs(uint256 mmrId, StarknetJobOutput[] calldata outputs) external;

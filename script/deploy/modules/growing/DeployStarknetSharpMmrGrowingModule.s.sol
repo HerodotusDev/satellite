@@ -17,7 +17,8 @@ contract DeployStarknetSharpMmrGrowingModule is IDeploy {
         IFactsRegistry sharpFactsRegistry = IFactsRegistry(getFactsRegistryAddress());
         vm.startBroadcast(getPrivateKey());
 
-        StarknetSharpMmrGrowingModule module = new StarknetSharpMmrGrowingModule(sharpFactsRegistry, getStarknetChainId());
+        StarknetSharpMmrGrowingModule module = new StarknetSharpMmrGrowingModule();
+        // TODO: initStarknetSharpMmrGrowingModule
         vm.stopBroadcast();
         moduleAddress = address(module);
     }

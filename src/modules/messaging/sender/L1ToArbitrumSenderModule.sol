@@ -4,8 +4,9 @@ pragma solidity ^0.8.19;
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {IArbitrumInbox} from "interfaces/external/IArbitrumInbox.sol";
 import {IL1ToArbitrumSenderModule} from "interfaces/modules/messaging/sender/IL1ToArbitrumSenderModule.sol";
+import {AccessController} from "libraries/AccessController.sol";
 
-contract L1ToArbitrumSenderModule is IL1ToArbitrumSenderModule {
+contract L1ToArbitrumSenderModule is IL1ToArbitrumSenderModule, AccessController {
     /// @inheritdoc IL1ToArbitrumSenderModule
     function sendMessageL1ToArbitrum(address satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable onlyModule {
         (uint256 l2GasLimit, uint256 maxFeePerGas, uint256 maxSubmissionCost) = abi.decode(_xDomainMsgGasData, (uint256, uint256, uint256));

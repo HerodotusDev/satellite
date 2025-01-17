@@ -10,13 +10,13 @@ struct RootForHashingFunction {
 }
 
 enum GrownBy {
-    /// @dev GrownBy.NATIVE_ON_CHAIN_GROWER - appended by NativeOnChainGrowingModule
-    NATIVE_ON_CHAIN_GROWER,
-    /// @dev GrownBy.NATIVE_SHARP_GROWER - appended by NativeSharpGrowingModule
-    NATIVE_SHARP_GROWER,
+    /// @dev GrownBy.EVM_ON_CHAIN_GROWER - appended by NativeOnChainGrowingModule
+    EVM_ON_CHAIN_GROWER,
+    /// @dev GrownBy.EVM_SHARP_GROWER - appended by NativeSharpGrowingModule
+    EVM_SHARP_GROWER,
     /// @dev GrownBy.STARKNET_SHARP_GROWER - appended by StarknetSharpMmrGrowingModule
     STARKNET_SHARP_GROWER,
-    TIMESTAMP_REMAPPER
+    EVM_TIMESTAMP_REMAPPER
 }
 
 enum CreatedFrom {

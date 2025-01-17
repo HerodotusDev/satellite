@@ -52,7 +52,15 @@ contract NativeOnChainGrowingModule is INativeOnChainGrowingModule {
         rootsForHashingFunctions[0].root = result.newMMRRoot;
         rootsForHashingFunctions[0].hashingFunction = KECCAK_HASHING_FUNCTION;
 
-        emit IMmrCoreModule.GrownMmr(result.firstAppendedBlock, result.lastAppendedBlock, rootsForHashingFunctions, result.newMMRSize, mmrId, accumulatedChainId, GrownBy.NATIVE_ON_CHAIN_GROWER);
+        emit IMmrCoreModule.GrownMmr(
+            result.firstAppendedBlock,
+            result.lastAppendedBlock,
+            rootsForHashingFunctions,
+            result.newMMRSize,
+            mmrId,
+            accumulatedChainId,
+            GrownBy.EVM_ON_CHAIN_GROWER
+        );
     }
 
     /// ========================= Internal functions ========================= //

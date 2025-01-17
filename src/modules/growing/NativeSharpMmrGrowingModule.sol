@@ -90,7 +90,7 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule, AccessCont
         rootsForHashingFunctions[1].root = lastOutput.mmrNewRootKeccak;
         rootsForHashingFunctions[1].hashingFunction = KECCAK_HASHING_FUNCTION;
 
-        emit IMmrCoreModule.GrownMmr(fromBlock, toBlock, rootsForHashingFunctions, mmrNewSize, mmrId, AGGREGATED_CHAIN_ID, GrownBy.NATIVE_SHARP_GROWER);
+        emit IMmrCoreModule.GrownMmr(fromBlock, toBlock, rootsForHashingFunctions, mmrNewSize, mmrId, AGGREGATED_CHAIN_ID, GrownBy.EVM_SHARP_GROWER);
     }
 
     /// @notice Ensures the job output is cryptographically sound to continue from

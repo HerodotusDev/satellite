@@ -116,7 +116,7 @@ contract TimestampRemapper {
             nextSize,
             remapperId,
             accumulatedChainId,
-            GrownBy.TIMESTAMP_REMAPPER
+            GrownBy.EVM_TIMESTAMP_REMAPPER
         );
     }
 

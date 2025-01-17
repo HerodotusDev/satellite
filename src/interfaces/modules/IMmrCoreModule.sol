@@ -27,9 +27,9 @@ enum CreatedFrom {
 interface IMmrCoreModule {
     // ========================= Other Satellite Modules Only Functions ========================= //
 
-    /// @notice Receiving a recent parent hash obtained on-chain directly on this chain or sent in a message from another one (eg. L1 -> L2)
-    /// @dev saves the parent hash of the block number (from a given chain) in the contract storage
-    function _receiveParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external;
+    /// @notice Receiving a recent block hash obtained on-chain directly on this chain or sent in a message from another one (eg. L1 -> L2)
+    /// @dev saves the block hash for the block number (from a given chain) in the contract storage
+    function _receiveBlockHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 blockHash) external;
 
     /// @notice Creates a new branch from message sent from satellite on another chain
     /// @param newMmrId the ID of the MMR to create
@@ -91,17 +91,17 @@ interface IMmrCoreModule {
 
     function getLatestMmrSize(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (uint256);
 
-    function getReceivedParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber) external view returns (bytes32);
+    function getBlockHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber) external view returns (bytes32);
 
     // ========================= Events ========================= //
 
     /// @notice emitted when a block hash is received
     /// @param chainId the ID of the chain that the block hash is from
     /// @param blockNumber the block number
-    /// @param parentHash the parent hash of the block number
+    /// @param blockHash the block hash
     /// @param hashingFunction the hashing function use to hash the block, e.g. Keccak on Ethereum and Poseidon on Starknet
     /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
-    event ReceivedParentHash(uint256 chainId, uint256 blockNumber, bytes32 parentHash, bytes32 hashingFunction);
+    event ReceivedBlockHash(uint256 chainId, uint256 blockNumber, bytes32 blockHash, bytes32 hashingFunction);
 
     /// @notice emitted when a new MMR is created from a domestic or foreign source
     /// @notice - foreign source - sent from another chain, or off-chain computation proven on-chain

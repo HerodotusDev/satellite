@@ -29,10 +29,10 @@ contract TestConnectionOptimism is Script {
         // satellite.sendMessageL1ToOptimism(
         //     0xB0908Cd18B4A1c37dCab093b63595400aE325e8C,
         //     0x58Cc85b8D04EA49cC6DBd3CbFFd00B4B8D6cb3ef,
-        //     abi.encodeWithSignature("receiveParentHash(uint256,bytes32,uint256,bytes32)", 11155111, 0xdf35a135a69c769066bbb4d17b2fa3ec922c028d4e4bf9d0402e6f7c12b31813, 7498494, 0x123),
+        //     abi.encodeWithSignature("receiveBlockHash(uint256,bytes32,uint256,bytes32)", 11155111, 0xdf35a135a69c769066bbb4d17b2fa3ec922c028d4e4bf9d0402e6f7c12b31813, 7498494, 0x123),
         //     gasData
         // );
-        satellite.sendParentHash(DESTINATION_CHAIN_ID, ORIGIN_CHAIN_ID, KECCAK_HASHING_FUNCTION, BLOCK_NUMBER, gasData);
+        satellite.sendBlockHash(DESTINATION_CHAIN_ID, ORIGIN_CHAIN_ID, KECCAK_HASHING_FUNCTION, BLOCK_NUMBER, gasData);
         vm.stopBroadcast();
     }
 }

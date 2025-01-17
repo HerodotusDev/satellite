@@ -83,7 +83,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
 
         uint256 toBlock = lastOutput.toBlockNumberLow;
 
-        ISatellite(address(this))._receiveParentHash(ms.aggregatedChainId, POSEIDON_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
+        ISatellite(address(this))._receiveBlockHash(ms.aggregatedChainId, POSEIDON_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
 
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](1);
         rootsForHashingFunctions[0].root = lastOutput.mmrNewRootPoseidon;
@@ -101,7 +101,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
         StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
 
         // Retrieve from cache the parent hash of the block to start from
-        bytes32 fromBlockPlusOneParentHash = s.receivedParentHashes[ms.aggregatedChainId][POSEIDON_HASHING_FUNCTION][fromBlockNumber + 1];
+        bytes32 fromBlockPlusOneParentHash = s.blockHashes[ms.aggregatedChainId][POSEIDON_HASHING_FUNCTION][fromBlockNumber];
         uint256 actualMmrSizePoseidon = s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize;
 
         // Check that the job's previous MMR size is the same as the one stored in the contract state

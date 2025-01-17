@@ -71,11 +71,11 @@ interface ILibSatellite {
         //
         // ========================= Core Satellite storage ========================= //
 
-        /// @dev mapping of ChainId => MMR ID => hashing function => MMR info
+        /// @notice mapping of ChainId => MMR ID => hashing function => MMR info
         /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
         mapping(uint256 => mapping(uint256 => mapping(bytes32 => MmrInfo))) mmrs;
-        /// @notice mapping of ChainId => hashing function => block number => block parent hash
-        mapping(uint256 => mapping(bytes32 => mapping(uint256 => bytes32))) receivedParentHashes;
+        /// @notice mapping of ChainId => hashing function => block number => block hash
+        mapping(uint256 => mapping(bytes32 => mapping(uint256 => bytes32))) blockHashes;
         //
         // ======================= Satellite Registry storage ======================= //
 

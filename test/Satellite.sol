@@ -26,15 +26,15 @@ contract Satellite is Test {
     }
 
     function test_native_parent_hashes_fetcher() external {
-        satellite.nativeFetchParentHash(blockNumber);
-        bytes32 parentHash = satellite.getReceivedParentHash(block.chainid, KECCAK_HASHING_FUNCTION, blockNumber);
+        satellite.nativeFetchBlockHash(blockNumber);
+        bytes32 blockHash = satellite.getBlockHash(block.chainid, KECCAK_HASHING_FUNCTION, blockNumber);
 
-        assertNotEq(parentHash, bytes32(0));
+        assertNotEq(blockHash, bytes32(0));
     }
 
     function test_enforce_is_satellite_module() external {
-        bytes32 parentHash = blockhash(blockNumber - 1);
+        bytes32 blockHash = blockhash(blockNumber);
         vm.expectRevert(ILibSatellite.MustBeSatelliteModule.selector);
-        satellite._receiveParentHash(block.chainid, KECCAK_HASHING_FUNCTION, blockNumber, parentHash);
+        satellite._receiveBlockHash(block.chainid, KECCAK_HASHING_FUNCTION, blockNumber, blockHash);
     }
 }

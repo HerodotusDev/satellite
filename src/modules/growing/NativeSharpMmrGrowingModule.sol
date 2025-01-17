@@ -97,7 +97,7 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule, AccessCont
 
         (, uint256 toBlock) = lastOutput.blockNumbersPacked.split128();
 
-        ISatellite(address(this))._receiveParentHash(ms.aggregatedChainId, KECCAK_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
+        ISatellite(address(this))._receiveBlockHash(ms.aggregatedChainId, KECCAK_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
 
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](2);
         rootsForHashingFunctions[0].root = lastOutput.mmrNewRootPoseidon;
@@ -118,7 +118,7 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule, AccessCont
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         NativeSharpMmrGrowingModuleStorage storage ms = moduleStorage();
         // Retrieve from cache the parent hash of the block to start from
-        bytes32 fromBlockPlusOneParentHash = s.receivedParentHashes[ms.aggregatedChainId][KECCAK_HASHING_FUNCTION][fromBlockNumber + 1];
+        bytes32 fromBlockPlusOneParentHash = s.blockHashes[ms.aggregatedChainId][KECCAK_HASHING_FUNCTION][fromBlockNumber];
         uint256 actualMmrSizePoseidon = s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize;
         uint256 actualMmrSizeKeccak = s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize;
 

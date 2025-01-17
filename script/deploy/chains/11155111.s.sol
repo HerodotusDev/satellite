@@ -19,10 +19,10 @@ import {DeploySatelliteInspectorModule} from "../modules/DeploySatelliteInspecto
 import {DeployMmrCoreModule} from "../modules/DeployMmrCoreModule.s.sol";
 import {DeployNativeSharpMmrGrowingModule} from "../modules/growing/DeployNativeSharpMmrGrowingModule.s.sol";
 import {DeployEVMFactRegistryModule} from "../modules/DeployEVMFactRegistryModule.s.sol";
-import {DeployNativeParentHashFetcherModule} from "../modules/parent-hash-fetching/DeployNativeParentHashFetcherModule.s.sol";
+import {DeployNativeBlockHashFetcherModule} from "../modules/block-hash-fetching/DeployNativeBlockHashFetcherModule.s.sol";
 import {DeployNativeOnChainGrowingModule} from "../modules/growing/DeployNativeOnChainGrowingModule.s.sol";
 import {DeployStarknetSharpMmrGrowingModule} from "../modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
-import {DeployStarknetParentHashFetcherModule} from "../modules/parent-hash-fetching/DeployStarknetParentHashFetcherModule.s.sol";
+import {DeployStarknetBlockHashFetcherModule} from "../modules/block-hash-fetching/DeployStarknetBlockHashFetcherModule.s.sol";
 import {DeployDataProcessorModule} from "../modules/DeployDataProcessorModule.s.sol";
 import {DeploySatelliteConnectionRegistryModule} from "../modules/DeploySatelliteConnectionRegistryModule.s.sol";
 import {DeploySimpleReceiverModule} from "../modules/messaging/receiver/DeploySimpleReceiverModule.s.sol";
@@ -43,10 +43,10 @@ contract Deploy is Script {
         deployModules[2] = new DeployMmrCoreModule();
         deployModules[3] = new DeployNativeSharpMmrGrowingModule();
         deployModules[4] = new DeployEVMFactRegistryModule();
-        deployModules[5] = new DeployNativeParentHashFetcherModule();
+        deployModules[5] = new DeployNativeBlockHashFetcherModule();
         deployModules[6] = new DeployNativeOnChainGrowingModule();
         deployModules[7] = new DeployStarknetSharpMmrGrowingModule();
-        deployModules[8] = new DeployStarknetParentHashFetcherModule();
+        deployModules[8] = new DeployStarknetBlockHashFetcherModule();
         deployModules[9] = new DeployDataProcessorModule();
         deployModules[10] = new DeploySatelliteConnectionRegistryModule();
         deployModules[11] = new DeployUniversalSenderModule();

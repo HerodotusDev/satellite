@@ -11,7 +11,7 @@ import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
 /// @dev It uses Satellite Connection Registry to find function selector for the destination chain
 contract UniversalSenderModule is IUniversalSenderModule {
     /// @inheritdoc IUniversalSenderModule
-    function sendParentHash(
+    function sendBlockHash(
         uint256 destinationChainId,
         uint256 accumulatedChainId,
         bytes32 hashingFunction,
@@ -19,9 +19,9 @@ contract UniversalSenderModule is IUniversalSenderModule {
         bytes calldata _xDomainMsgGasData
     ) external payable {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        bytes32 parentHash = s.receivedParentHashes[accumulatedChainId][hashingFunction][blockNumber];
+        bytes32 blockHash = s.blockHashes[accumulatedChainId][hashingFunction][blockNumber];
 
-        require(parentHash != bytes32(0), "ERR_BLOCK_NOT_REGISTERED");
+        require(blockHash != bytes32(0), "ERR_BLOCK_NOT_REGISTERED");
 
         ILibSatellite.SatelliteConnection memory satellite = s.SatelliteConnectionRegistry[destinationChainId];
 
@@ -29,7 +29,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
             satellite.sendMessageSelector,
             satellite.satelliteAddress,
             satellite.inboxAddress,
-            abi.encodeWithSignature("receiveParentHash(uint256,bytes32,uint256,bytes32)", accumulatedChainId, hashingFunction, blockNumber, parentHash),
+            abi.encodeWithSignature("receiveBlockHash(uint256,bytes32,uint256,bytes32)", accumulatedChainId, hashingFunction, blockNumber, blockHash),
             _xDomainMsgGasData
         );
 

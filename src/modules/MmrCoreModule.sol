@@ -22,10 +22,10 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
     // ========================= Other Satellite Modules Only Functions ========================= //
 
     /// @inheritdoc IMmrCoreModule
-    function _receiveParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external onlyModule {
+    function _receiveBlockHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 blockHash) external onlyModule {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        s.receivedParentHashes[chainId][hashingFunction][blockNumber] = parentHash;
-        emit ReceivedParentHash(chainId, blockNumber, parentHash, hashingFunction);
+        s.blockHashes[chainId][hashingFunction][blockNumber] = blockHash;
+        emit ReceivedBlockHash(chainId, blockNumber, blockHash, hashingFunction);
     }
 
     /// @inheritdoc IMmrCoreModule
@@ -192,9 +192,9 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         return s.mmrs[accumulatedChainId][mmrId][hashingFunction].isSiblingSynced;
     }
 
-    function getReceivedParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber) external view returns (bytes32) {
+    function getBlockHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber) external view returns (bytes32) {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        return s.receivedParentHashes[chainId][hashingFunction][blockNumber];
+        return s.blockHashes[chainId][hashingFunction][blockNumber];
     }
 
     // TODO: reconsider view functions, maybe add one to view the whole MMRInfo struct?

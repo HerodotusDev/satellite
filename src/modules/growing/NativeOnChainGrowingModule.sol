@@ -65,6 +65,8 @@ contract NativeOnChainGrowingModule is INativeOnChainGrowingModule {
 
     /// ========================= Internal functions ========================= //
 
+    /// @notice Process blocks sequentially from x-th block to lower block numbers
+    ///         using block from MMR as source of truth
     function _processBatchFromAccumulated(
         uint256 treeId,
         bytes memory ctx,
@@ -93,6 +95,8 @@ contract NativeOnChainGrowingModule is INativeOnChainGrowingModule {
         result.lastAppendedBlock = result.firstAppendedBlock - headersSerialized.length + 1;
     }
 
+    /// @notice Process blocks sequentially from x-th block to lower block numbers
+    ///         using received hash of the first (latest) block as source of truth
     function _processBatchFromReceivedBlockHash(
         uint256 treeId,
         bytes memory ctx,
@@ -103,9 +107,11 @@ contract NativeOnChainGrowingModule is INativeOnChainGrowingModule {
         (uint256 blockNumber, bytes32[] memory mmrPeaks) = abi.decode(ctx, (uint256, bytes32[]));
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
-        bytes32 expectedHash = s.receivedParentHashes[accumulatedChainId][hashingFunction][blockNumber + 1];
+        bytes32 expectedHash = s.blockHashes[accumulatedChainId][hashingFunction][blockNumber];
         require(expectedHash != bytes32(0), "ERR_NO_REFERENCE_HASH");
 
+        // Validate that provided headers create a sequence
+        // i.e. keccak256(header[i]) == header[i-1].parent_hash
         bytes32[] memory headersHashes = new bytes32[](headersSerialized.length);
         for (uint256 i = 0; i < headersSerialized.length; i++) {
             require(_isHeaderValid(expectedHash, headersSerialized[i]), "ERR_INVALID_CHAIN_ELEMENT");

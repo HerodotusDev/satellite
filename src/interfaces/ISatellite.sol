@@ -10,8 +10,8 @@ import {ISatelliteMaintenanceModule} from "./modules/ISatelliteMaintenanceModule
 import {INativeSharpMmrGrowingModule} from "./modules/growing/INativeSharpMmrGrowingModule.sol";
 import {IStarknetSharpMmrGrowingModule} from "./modules/growing/IStarknetSharpMmrGrowingModule.sol";
 import {IEVMFactRegistryModule} from "./modules/IEVMFactRegistryModule.sol";
-import {INativeParentHashFetcherModule} from "./modules/parent-hash-fetching/INativeParentHashFetcherModule.sol";
-import {IStarknetParentHashFetcherModule} from "./modules/parent-hash-fetching/IStarknetParentHashFetcherModule.sol";
+import {INativeBlockHashFetcherModule} from "./modules/block-hash-fetching/INativeBlockHashFetcherModule.sol";
+import {IStarknetBlockHashFetcherModule} from "./modules/block-hash-fetching/IStarknetBlockHashFetcherModule.sol";
 import {IReceiverModule} from "./modules/messaging/receiver/IReceiverModule.sol";
 import {INativeOnChainGrowingModule} from "./modules/growing/INativeOnChainGrowingModule.sol";
 import {IDataProcessorModule} from "./modules/IDataProcessorModule.sol";
@@ -27,13 +27,13 @@ interface ISatellite is
     ISatelliteMaintenanceModule,
     INativeSharpMmrGrowingModule,
     IEVMFactRegistryModule,
-    INativeParentHashFetcherModule,
+    INativeBlockHashFetcherModule,
     INativeOnChainGrowingModule,
     IStarknetSharpMmrGrowingModule,
     IReceiverModule,
     IUniversalSenderModule,
     IL1ToArbitrumSenderModule,
     IL1ToOptimismSenderModule,
-    IStarknetParentHashFetcherModule,
+    IStarknetBlockHashFetcherModule,
     IDataProcessorModule
 {}

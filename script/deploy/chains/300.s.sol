@@ -19,10 +19,10 @@ import {DeploySatelliteInspectorModule} from "../modules/DeploySatelliteInspecto
 import {DeployMmrCoreModule} from "../modules/DeployMmrCoreModule.s.sol";
 import {DeployNativeSharpMmrGrowingModule} from "../modules/growing/DeployNativeSharpMmrGrowingModule.s.sol";
 import {DeployEVMFactRegistryModule} from "../modules/DeployEVMFactRegistryModule.s.sol";
-import {DeployNativeParentHashFetcherModule} from "../modules/parent-hash-fetching/DeployNativeParentHashFetcherModule.s.sol";
+import {DeployNativeBlockHashFetcherModule} from "../modules/block-hash-fetching/DeployNativeBlockHashFetcherModule.s.sol";
 import {DeployNativeOnChainGrowingModule} from "../modules/growing/DeployNativeOnChainGrowingModule.s.sol";
 import {DeployStarknetSharpMmrGrowingModule} from "../modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
-import {DeployStarknetParentHashFetcherModule} from "../modules/parent-hash-fetching/DeployStarknetParentHashFetcherModule.s.sol";
+import {DeployStarknetBlockHashFetcherModule} from "../modules/block-hash-fetching/DeployStarknetBlockHashFetcherModule.s.sol";
 import {DeployDataProcessorModule} from "../modules/DeployDataProcessorModule.s.sol";
 import {DeploySatelliteConnectionRegistryModule} from "../modules/DeploySatelliteConnectionRegistryModule.s.sol";
 import {DeploySimpleReceiverModule} from "../modules/messaging/receiver/DeploySimpleReceiverModule.s.sol";
@@ -41,7 +41,7 @@ contract Deploy is Script {
         deployModules[2] = new DeployMmrCoreModule();
         // TODO: which modules should we keep?
         deployModules[3] = new DeployEVMFactRegistryModule();
-        deployModules[4] = new DeployNativeParentHashFetcherModule();
+        deployModules[4] = new DeployNativeBlockHashFetcherModule();
         deployModules[5] = new DeployNativeOnChainGrowingModule();
         deployModules[6] = new DeployDataProcessorModule();
         deployModules[7] = new DeploySatelliteConnectionRegistryModule();

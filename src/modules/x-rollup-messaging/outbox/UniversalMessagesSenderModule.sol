@@ -14,13 +14,19 @@ contract UniversalMessagesSenderModule is IUniversalMessagesSenderModule {
     /// @param hashingFunction the hashing function used to hash the parent hash
     /// @param blockNumber the number of block being sent
     /// @param _xDomainMsgGasData the gas data for the cross-domain message, depends on the destination L2
-    function sendParentHash(uint256 destinationChainId, uint256 accumulatedChainId, bytes32 hashingFunction, uint256 blockNumber, bytes calldata _xDomainMsgGasData) external payable {
+    function sendParentHash(
+        uint256 destinationChainId,
+        uint256 accumulatedChainId,
+        bytes32 hashingFunction,
+        uint256 blockNumber,
+        bytes calldata _xDomainMsgGasData
+    ) external payable {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         bytes32 parentHash = s.receivedParentHashes[accumulatedChainId][hashingFunction][blockNumber];
 
         require(parentHash != bytes32(0), "ERR_BLOCK_NOT_REGISTERED");
 
-        ILibSatellite.SatelliteInfo memory satellite = s.satelliteRegistry[destinationChainId];
+        ILibSatellite.SatelliteConnection memory satellite = s.SatelliteConnectionRegistry[destinationChainId];
 
         bytes memory data = abi.encodeWithSelector(
             satellite.sendMessageSelector,
@@ -30,11 +36,18 @@ contract UniversalMessagesSenderModule is IUniversalMessagesSenderModule {
             _xDomainMsgGasData
         );
 
-        (bool success,) = address(this).call(data);
+        (bool success, ) = address(this).call(data);
         require(success, "Function call failed");
     }
 
-    function sendMmr(uint256 destinationChainId, uint256 accumulatedChainId, uint256 originalMmrId, uint256 newMmrId, bytes32[] calldata hashingFunctions, bytes calldata _xDomainMsgGasData) external payable {
+    function sendMmr(
+        uint256 destinationChainId,
+        uint256 accumulatedChainId,
+        uint256 originalMmrId,
+        uint256 newMmrId,
+        bytes32[] calldata hashingFunctions,
+        bytes calldata _xDomainMsgGasData
+    ) external payable {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         require(hashingFunctions.length > 0, "hashingFunctions array cannot be empty");
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](hashingFunctions.length);
@@ -53,17 +66,26 @@ contract UniversalMessagesSenderModule is IUniversalMessagesSenderModule {
             rootsForHashingFunctions[i] = RootForHashingFunction(_root, hashingFunctions[i]);
         }
 
-        ILibSatellite.SatelliteInfo memory satellite = s.satelliteRegistry[destinationChainId];
+        ILibSatellite.SatelliteConnection memory satellite = s.SatelliteConnectionRegistry[destinationChainId];
 
         bytes memory data = abi.encodeWithSelector(
             satellite.sendMessageSelector,
             satellite.satelliteAddress,
             satellite.inboxAddress,
-            abi.encodeWithSignature("receiveMmr(uint256, (bytes32, bytes32)[], uint256, uint256, uint256, uint256, bool)", newMmrId, rootsForHashingFunctions, mmrSize, accumulatedChainId, block.chainid, originalMmrId, isSiblingSynced),
+            abi.encodeWithSignature(
+                "receiveMmr(uint256, (bytes32, bytes32)[], uint256, uint256, uint256, uint256, bool)",
+                newMmrId,
+                rootsForHashingFunctions,
+                mmrSize,
+                accumulatedChainId,
+                block.chainid,
+                originalMmrId,
+                isSiblingSynced
+            ),
             _xDomainMsgGasData
         );
 
-        (bool success,) = address(this).call(data);
+        (bool success, ) = address(this).call(data);
         require(success, "Function call failed");
     }
 }

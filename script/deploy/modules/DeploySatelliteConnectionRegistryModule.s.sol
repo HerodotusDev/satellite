@@ -5,14 +5,14 @@ import {console} from "forge-std/console.sol";
 
 import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 
-import {SatelliteRegistryModule} from "src/modules/SatelliteRegistryModule.sol";
+import {SatelliteConnectionRegistryModule} from "src/modules/SatelliteConnectionRegistryModule.sol";
 
-contract DeploySatelliteRegistryModule is IDeploy {
-    string contractName = "SatelliteRegistryModule";
+contract DeploySatelliteConnectionRegistryModule is IDeploy {
+    string contractName = "SatelliteConnectionRegistryModule";
 
     function deploy() internal override returns (address moduleAddress) {
         vm.startBroadcast(getPrivateKey());
-        SatelliteRegistryModule module = new SatelliteRegistryModule();
+        SatelliteConnectionRegistryModule module = new SatelliteConnectionRegistryModule();
         vm.stopBroadcast();
 
         moduleAddress = address(module);

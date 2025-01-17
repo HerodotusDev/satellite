@@ -48,7 +48,7 @@ interface ILibSatellite {
         mapping(uint256 => bytes32) mmrSizeToRoot;
     }
 
-    struct SatelliteInfo {
+    struct SatelliteConnection {
         address satelliteAddress;
         address inboxAddress;
         bytes4 sendMessageSelector;
@@ -77,7 +77,7 @@ interface ILibSatellite {
         // ======================= Satellite Registry storage ======================= //
 
         /// @dev mapping of ChainId => Satellite address
-        mapping(uint256 => SatelliteInfo) satelliteRegistry;
+        mapping(uint256 => SatelliteConnection) SatelliteConnectionRegistry;
         /// @dev mapping of crossDomainCounterpart => bool
         mapping(address => bool) crossDomainMsgSenders;
     }

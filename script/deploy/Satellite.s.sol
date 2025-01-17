@@ -24,7 +24,7 @@ import {DeployNativeOnChainGrowingModule} from "./modules/growing/DeployNativeOn
 import {DeployStarknetSharpMmrGrowingModule} from "./modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
 import {DeployStarknetParentHashFetcherModule} from "./modules/x-rollup-messaging/parent-hash-fetcher/DeployStarknetParentHashFetcherModule.s.sol";
 import {DeployDataProcessorModule} from "./modules/DeployDataProcessorModule.s.sol";
-import {DeploySatelliteRegistryModule} from "./modules/DeploySatelliteRegistryModule.s.sol";
+import {DeploySatelliteConnectionRegistryModule} from "./modules/DeploySatelliteConnectionRegistryModule.s.sol";
 import {DeploySimpleInboxModule} from "./modules/x-rollup-messaging/inbox/DeploySimpleInboxModule.s.sol";
 import {DeployL1ToArbitrumMessagesSenderModule} from "./modules/x-rollup-messaging/outbox/DeployL1ToArbitrumMessagesSenderModule.s.sol";
 
@@ -46,7 +46,7 @@ contract Deploy is Script {
         deployModules[7] = new DeployStarknetSharpMmrGrowingModule();
         deployModules[8] = new DeployStarknetParentHashFetcherModule();
         deployModules[9] = new DeployDataProcessorModule();
-        deployModules[10] = new DeploySatelliteRegistryModule();
+        deployModules[10] = new DeploySatelliteConnectionRegistryModule();
         deployModules[11] = new DeploySimpleInboxModule();
         deployModules[12] = new DeployL1ToArbitrumMessagesSenderModule();
 

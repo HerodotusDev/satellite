@@ -24,7 +24,7 @@ import {DeployNativeOnChainGrowingModule} from "../modules/growing/DeployNativeO
 import {DeployStarknetSharpMmrGrowingModule} from "../modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
 import {DeployStarknetParentHashFetcherModule} from "../modules/x-rollup-messaging/parent-hash-fetcher/DeployStarknetParentHashFetcherModule.s.sol";
 import {DeployDataProcessorModule} from "../modules/DeployDataProcessorModule.s.sol";
-import {DeploySatelliteRegistryModule} from "../modules/DeploySatelliteRegistryModule.s.sol";
+import {DeploySatelliteConnectionRegistryModule} from "../modules/DeploySatelliteConnectionRegistryModule.s.sol";
 import {DeploySimpleInboxModule} from "../modules/x-rollup-messaging/inbox/DeploySimpleInboxModule.s.sol";
 import {DeployL1ToArbitrumMessagesSenderModule} from "../modules/x-rollup-messaging/outbox/DeployL1ToArbitrumMessagesSenderModule.s.sol";
 
@@ -44,7 +44,7 @@ contract Deploy is Script {
         deployModules[4] = new DeployNativeParentHashFetcherModule();
         deployModules[5] = new DeployNativeOnChainGrowingModule();
         deployModules[6] = new DeployDataProcessorModule();
-        deployModules[7] = new DeploySatelliteRegistryModule();
+        deployModules[7] = new DeploySatelliteConnectionRegistryModule();
         deployModules[8] = new DeploySimpleInboxModule();
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");

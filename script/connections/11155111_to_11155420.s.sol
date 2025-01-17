@@ -12,15 +12,15 @@ contract SetupL1 is Script {
     function run() external {
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(privateKey);
-        
+
         address l1SatelliteAddress = vm.envAddress("SATELLITE_ADDRESS_11155111");
         address optimismSatelliteAddress = vm.envAddress("SATELLITE_ADDRESS_11155420");
         address optimismCrossDomainMessenger = vm.envAddress("SEPOLIA_OPTIMISM_CROSS_DOMAIN_MESSENGER");
         bytes4 selector = bytes4(keccak256("sendMessageL1ToOptimism(address,address,bytes,bytes)"));
 
         ISatellite l1Satellite = ISatellite(l1SatelliteAddress);
-        l1Satellite.registerSatellite(11155420, optimismSatelliteAddress, optimismCrossDomainMessenger, address(0x0), selector);
-        
+        l1Satellite.registerSatelliteConnection(11155420, optimismSatelliteAddress, optimismCrossDomainMessenger, address(0x0), selector);
+
         vm.stopBroadcast();
     }
 }
@@ -29,14 +29,14 @@ contract SetupOptimism is Script {
     function run() external {
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(privateKey);
-        
+
         address l1SatelliteAddress = vm.envAddress("SATELLITE_ADDRESS_11155111");
         address optimismSatelliteAddress = vm.envAddress("SATELLITE_ADDRESS_11155420");
 
         ISatellite optimismSatellite = ISatellite(optimismSatelliteAddress);
 
-        optimismSatellite.registerSatellite(11155111, l1SatelliteAddress, address(0x0), l1SatelliteAddress, 0);
-        
+        optimismSatellite.registerSatelliteConnection(11155111, l1SatelliteAddress, address(0x0), l1SatelliteAddress, 0);
+
         vm.stopBroadcast();
     }
 }

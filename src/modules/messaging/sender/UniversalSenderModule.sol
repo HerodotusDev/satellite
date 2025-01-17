@@ -32,7 +32,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
             satellite.sendMessageSelector,
             satellite.satelliteAddress,
             satellite.inboxAddress,
-            abi.encodeWithSignature("receiveHashForBlock(uint256,bytes32,uint256,bytes32)", accumulatedChainId, hashingFunction, blockNumber, parentHash),
+            abi.encodeWithSignature("receiveParentHash(uint256,bytes32,uint256,bytes32)", accumulatedChainId, hashingFunction, blockNumber, parentHash),
             _xDomainMsgGasData
         );
 

@@ -7,7 +7,7 @@ import {IReceiverModule} from "interfaces/modules/messaging/receiver/IReceiverMo
 import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
 
 abstract contract AbstractReceiverModule is IReceiverModule {
-    function receiveHashForBlock(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external onlyCrossdomainCounterpart {
+    function receiveParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external onlyCrossdomainCounterpart {
         ISatellite(address(this))._receiveBlockHash(chainId, hashingFunction, blockNumber, parentHash);
 
         // _receiveBlockHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash)

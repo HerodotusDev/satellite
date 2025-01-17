@@ -4,8 +4,9 @@ pragma solidity ^0.8.27;
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {RootForHashingFunction, IMmrCoreModule, CreatedFrom} from "interfaces/modules/IMmrCoreModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
+import {AccessController} from "libraries/AccessController.sol";
 
-contract MmrCoreModule is IMmrCoreModule {
+contract MmrCoreModule is IMmrCoreModule, AccessController {
     // ========================= Constants ========================= //
 
     bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
@@ -21,8 +22,7 @@ contract MmrCoreModule is IMmrCoreModule {
     // ========================= Other Satellite Modules Only Functions ========================= //
 
     /// @inheritdoc IMmrCoreModule
-    function _receiveParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external {
-        LibSatellite.enforceIsSatelliteModule();
+    function _receiveParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external onlyModule {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         s.receivedParentHashes[chainId][hashingFunction][blockNumber] = parentHash;
         emit ReceivedParentHash(chainId, blockNumber, parentHash, hashingFunction);
@@ -39,8 +39,7 @@ contract MmrCoreModule is IMmrCoreModule {
         bool isSiblingSynced,
         bool isTimestampRemapper,
         uint256 firstTimestampsBlock
-    ) external {
-        LibSatellite.enforceIsSatelliteModule();
+    ) external onlyModule {
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
         require(rootsForHashingFunctions.length > 0, "INVALID_ROOTS_LENGTH");
 

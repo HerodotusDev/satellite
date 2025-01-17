@@ -7,8 +7,9 @@ import {INativeSharpMmrGrowingModule} from "interfaces/modules/growing/INativeSh
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "interfaces/modules/IMmrCoreModule.sol";
+import {AccessController} from "libraries/AccessController.sol";
 
-contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
+contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule, AccessController {
     // Using inline library for efficient splitting and joining of uint256 values
     using Uint256Splitter for uint256;
 
@@ -40,9 +41,7 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, AGGREGATED_CHAIN_ID, mmrSize, hashingFunctions, false, 0);
     }
 
-    function aggregateNativeSharpJobs(uint256 mmrId, INativeSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external {
-        LibSatellite.enforceIsContractOwner();
-
+    function aggregateNativeSharpJobs(uint256 mmrId, INativeSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external onlyOwner {
         // Ensuring at least one job output is provided
         if (outputs.length < 1) {
             revert NotEnoughJobs();

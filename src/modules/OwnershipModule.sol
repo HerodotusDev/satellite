@@ -3,10 +3,10 @@ pragma solidity ^0.8.27;
 
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {IOwnershipModule} from "interfaces/modules/IOwnershipModule.sol";
+import {AccessController} from "libraries/AccessController.sol";
 
-contract OwnershipModule is IOwnershipModule {
-    function transferOwnership(address _newOwner) external override {
-        LibSatellite.enforceIsContractOwner();
+contract OwnershipModule is IOwnershipModule, AccessController {
+    function transferOwnership(address _newOwner) external override onlyOwner {
         LibSatellite.setContractOwner(_newOwner);
     }
 

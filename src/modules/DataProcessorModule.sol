@@ -7,11 +7,11 @@ import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {ModuleTask, ModuleCodecs} from "libraries/internal/data-processor/ModuleCodecs.sol";
 import {IDataProcessorModule} from "interfaces/modules/IDataProcessorModule.sol";
-
+import {AccessController} from "libraries/AccessController.sol";
 /// @title DataProcessorModule
 /// @author Herodotus Dev Ltd
 /// @notice A contract to store the execution results of HDP tasks
-contract DataProcessorModule is IDataProcessorModule {
+contract DataProcessorModule is IDataProcessorModule, AccessController {
     // ========================= Types ========================= //
 
     using MerkleProof for bytes32[];
@@ -35,15 +35,13 @@ contract DataProcessorModule is IDataProcessorModule {
     // ========================= Owner-only Functions ========================= //
 
     /// @notice setDataProcessorProgramHash hash for the HDP program
-    function setDataProcessorProgramHash(bytes32 programHash) external {
-        LibSatellite.enforceIsContractOwner();
+    function setDataProcessorProgramHash(bytes32 programHash) external onlyOwner {
         ModuleStorage storage ms = moduleStorage();
         ms.programHash = programHash;
     }
 
     /// @notice setDataProcessorFactsRegistry address of the facts registry with verified execution of the HDP program
-    function setDataProcessorFactsRegistry(IFactsRegistry factsRegistry) external {
-        LibSatellite.enforceIsContractOwner();
+    function setDataProcessorFactsRegistry(IFactsRegistry factsRegistry) external onlyOwner {
         ModuleStorage storage ms = moduleStorage();
         ms.factsRegistry = factsRegistry;
     }

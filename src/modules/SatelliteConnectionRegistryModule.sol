@@ -5,12 +5,12 @@ import {ISatellite} from "interfaces/ISatellite.sol";
 import {ISatelliteConnectionRegistryModule} from "interfaces/modules/ISatelliteConnectionRegistryModule.sol";
 import {ILibSatellite} from "interfaces/ILibSatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
+import {AccessController} from "libraries/AccessController.sol";
 
 /// @notice Satellite Connection Registry is responsible for storing information about chains to which message can be sent and from which message can be received
-contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule {
+contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule, AccessController {
     /// @inheritdoc ISatelliteConnectionRegistryModule
-    function registerSatelliteConnection(uint256 chainId, address satellite, address inbox, address senderSatelliteAlias, bytes4 sendMessageSelector) external {
-        LibSatellite.enforceIsContractOwner();
+    function registerSatelliteConnection(uint256 chainId, address satellite, address inbox, address senderSatelliteAlias, bytes4 sendMessageSelector) external onlyOwner {
         require(satellite != address(0), "SatelliteConnectionRegistry: invalid satellite");
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
@@ -24,9 +24,7 @@ contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule
     }
 
     /// @inheritdoc ISatelliteConnectionRegistryModule
-    function removeSatelliteConnection(uint256 chainId, address crossDomainCounterpart) external {
-        LibSatellite.enforceIsContractOwner();
-
+    function removeSatelliteConnection(uint256 chainId, address crossDomainCounterpart) external onlyOwner {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         delete s.SatelliteConnectionRegistry[chainId];
         if (crossDomainCounterpart != address(0)) {

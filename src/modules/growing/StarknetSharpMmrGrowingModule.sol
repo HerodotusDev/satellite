@@ -7,8 +7,9 @@ import {IStarknetSharpMmrGrowingModule} from "interfaces/modules/growing/IStarkn
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
 import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "interfaces/modules/IMmrCoreModule.sol";
+import {AccessController} from "libraries/AccessController.sol";
 
-contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule {
+contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, AccessController {
     IFactsRegistry public immutable FACTS_REGISTRY;
     // Either Starknet or Starknet Sepolia chain ID
     uint256 public immutable AGGREGATED_CHAIN_ID;
@@ -34,9 +35,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule {
         ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, AGGREGATED_CHAIN_ID, mmrSize, hashingFunctions, false, 0);
     }
 
-    function aggregateStarknetSharpJobs(uint256 mmrId, StarknetJobOutput[] calldata outputs) external {
-        LibSatellite.enforceIsContractOwner();
-
+    function aggregateStarknetSharpJobs(uint256 mmrId, StarknetJobOutput[] calldata outputs) external onlyOwner {
         // Ensuring at least one job output is provided
         if (outputs.length < 1) {
             revert NotEnoughJobs();

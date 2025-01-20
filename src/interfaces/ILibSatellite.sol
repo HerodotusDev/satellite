@@ -38,10 +38,6 @@ interface ILibSatellite {
     struct MmrInfo {
         /// @notice isSiblingSynced informs if the MMR has it's siblings (MMRs with different hash functions) and has to be grown in sync with them - used when growing off-chain and growing multiple hash functions at once, for example, this could be a keccak MMR sibling synced to a poseidon MMR
         bool isSiblingSynced;
-        /// @notice isTimestampRemapper informs if the MMR is a timestamp remapper - needed because firstTimestampsBlock = 0 is a valid state
-        bool isTimestampRemapper;
-        /// @notice firstTimestampsBlock represents the block number of the first timestamp in timestamp remapper
-        uint256 firstTimestampsBlock;
         /// @notice latestSize represents the latest size of the MMR
         uint256 latestSize;
         /// @notice mmrSizeToRoot maps the  MMR size => the MMR root, that way we have automatic versioning

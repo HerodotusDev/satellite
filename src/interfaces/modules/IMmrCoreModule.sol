@@ -39,8 +39,6 @@ interface IMmrCoreModule {
     /// @param originChainId the ID of the chain from which the new MMR will be created (who is sending msg?)
     /// @param originalMmrId the ID of the MMR from which the new MMR will be created
     /// @param isSiblingSynced whether the MMR is sibling synced
-    /// @param isTimestampRemapper whether the MMR is a timestamp remapper
-    /// @param firstTimestampsBlock the block number of the first timestamp in the timestamp remapper
     function _createMmrFromForeign(
         uint256 newMmrId,
         RootForHashingFunction[] calldata rootsForHashingFunctions,
@@ -48,10 +46,7 @@ interface IMmrCoreModule {
         uint256 accumulatedChainId,
         uint256 originChainId,
         uint256 originalMmrId,
-        bool isSiblingSynced,
-        //! Note: two new fields, might need adding in different places
-        bool isTimestampRemapper,
-        uint256 firstTimestampsBlock
+        bool isSiblingSynced
     ) external;
 
     // ========================= Core Functions ========================= //
@@ -62,18 +57,7 @@ interface IMmrCoreModule {
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
     /// @param mmrSize size at which the MMR will be copied
     /// @param hashingFunctions the hashing functions used in the MMR - if more than one, the MMR will be sibling synced and require being a satellite module to call
-    /// @param isTimestampRemapper whether the MMR is a timestamp remapper
-    /// @param firstTimestampsBlock the block number of the first timestamp in the timestamp remapper
-    function createMmrFromDomestic(
-        uint256 newMmrId,
-        uint256 originalMmrId,
-        uint256 accumulatedChainId,
-        uint256 mmrSize,
-        bytes32[] calldata hashingFunctions,
-        //! Note: two new fields, might need adding in different places
-        bool isTimestampRemapper,
-        uint256 firstTimestampsBlock
-    ) external;
+    function createMmrFromDomestic(uint256 newMmrId, uint256 originalMmrId, uint256 accumulatedChainId, uint256 mmrSize, bytes32[] calldata hashingFunctions) external;
 
     // ========================= View functions ========================= //
 
@@ -123,8 +107,6 @@ interface IMmrCoreModule {
         uint256 originalMmrId,
         RootForHashingFunction[] rootsForHashingFunctions,
         uint256 originChainId,
-        bool isTimestampRemapper,
-        uint256 firstTimestampsBlock,
         CreatedFrom createdFrom
     );
 

@@ -14,8 +14,6 @@ interface IReceiverModule {
         uint256 accumulatedChainId,
         uint256 originChainId,
         uint256 originalMmrId,
-        bool isSiblingSynced,
-        bool isTimestampRemapper,
-        uint256 firstTimestampsBlock
+        bool isSiblingSynced
     ) external;
 }

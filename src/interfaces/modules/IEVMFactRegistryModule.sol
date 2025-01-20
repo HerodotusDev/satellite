@@ -35,6 +35,8 @@ interface IEVMFactRegistryModule {
         mapping(uint256 => mapping(address => mapping(uint256 => Account))) accountField;
         /// @dev chain_id => address => block_number => slot => value
         mapping(uint256 => mapping(address => mapping(uint256 => mapping(bytes32 => StorageSlot)))) accountStorageSlotValues;
+        /// @dev chain_id => timestamp => block_number + 1 (0 means no data)
+        mapping(uint256 => mapping(uint256 => uint256)) timestampToBlockNumber;
     }
 
     // ===================== Functions for End Users ===================== //
@@ -45,17 +47,52 @@ interface IEVMFactRegistryModule {
     /// @notice Returns value of a given storage slot of a given account, at a given block number and chainId
     function storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bytes32);
 
+    /// @notice Returns block number of the closest block with timestamp less than or equal to the given timestamp
+    function timestamp(uint256 chainId, uint256 timestamp) external view returns (uint256);
+
     // ========================= Core Functions ========================= //
 
     /// @notice Stores account fields after verifying the headerProof against saved MMRs
+    /// @param chainId Chain ID where the account lives
+    /// @param account Address of the account
+    /// @param headerProof Header proof of the block that contains the account
+    /// @param accountTrieProof MPT proof for the account (has to hash to the state root)
+    /// @return nonce
+    /// @return accountBalance
+    /// @return codeHash
+    /// @return storageRoot
     function proveAccount(uint256 chainId, address account, uint8 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) external;
 
     /// @notice Stores storage slot value after verifying the storageSlotTrieProof against saved MMRs
+    /// @notice Account's storage root has to be proven before calling this function
+    /// @param chainId Chain ID where the queried block lives
+    /// @param account Address of the account that contains the storage slot
+    /// @param blockNumber Block number at which the storage slot is stored
+    /// @param slot Index of the storage slot
+    /// @param storageSlotTrieProof MPT proof for the storage slot (has to hash to the storage root)
+    /// @return slotValue Value of the storage slot
     function proveStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) external;
+
+    /// @notice Stores closest timestamp to a block after verifying header proofs of two consecutive blocks,
+    /// @notice where the first block is the closest block with timestamp less than or equal to the given timestamp
+    /// @param chainId Chain ID where the queried block lives
+    /// @param timestamp Timestamp for which you are looking for the closest block
+    /// @param headerProof Header proof of the block that is the answer for the given timestamp
+    /// @param headerProofNext Header proof of the next block
+    /// @return blockNumber Block number of the closest block with timestamp that is less than or equal to the given timestamp
+    function proveTimestamp(uint256 chainId, uint256 timestamp, BlockHeaderProof calldata headerProof, BlockHeaderProof calldata headerProofNext) external;
 
     // ========================= View functions ========================= //
 
     /// @notice Verifies the headerProof against saved MMRs
+    /// @param chainId Chain ID where the account lives
+    /// @param account Address of the account
+    /// @param headerProof Header proof of the block that contains the account
+    /// @param accountTrieProof MPT proof for the account (has to hash to the state root)
+    /// @return nonce
+    /// @return accountBalance
+    /// @return codeHash
+    /// @return storageRoot
     function verifyAccount(
         uint256 chainId,
         address account,
@@ -64,7 +101,22 @@ interface IEVMFactRegistryModule {
     ) external view returns (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot);
 
     /// @notice Verifies the storageSlotTrieProof against saved MMRs
+    /// @notice Account's storage root has to be proven before calling this function
+    /// @param chainId Chain ID where the queried block lives
+    /// @param account Address of the account that contains the storage slot
+    /// @param blockNumber Block number at which the storage slot is stored
+    /// @param slot Index of the storage slot
+    /// @param storageSlotTrieProof MPT proof for the storage slot (has to hash to the storage root)
+    /// @return slotValue Value of the storage slot
     function verifyStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) external view returns (bytes32 slotValue);
+
+    /// @notice Verifies header proofs of two consecutive blocks, where the first block is the closest block with timestamp less than or equal to the given timestamp
+    /// @param chainId Chain ID where the queried block lives
+    /// @param timestamp Timestamp for which you are looking for the closest block
+    /// @param headerProof Header proof of the block that is the answer for the given timestamp
+    /// @param headerProofNext Header proof of the next block
+    /// @return blockNumber Block number of the closest block with timestamp that is less than or equal to the given timestamp
+    function verifyTimestamp(uint256 chainId, uint256 timestamp, BlockHeaderProof calldata headerProof, BlockHeaderProof calldata headerProofNext) external view returns (uint256);
 
     // ========================= Events ========================= //
 
@@ -73,4 +125,7 @@ interface IEVMFactRegistryModule {
 
     /// @notice Emitted when storage slot value is proven
     event ProvenStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes32 slotValue);
+
+    /// @notice Emitted when timestamp is proven
+    event ProvenTimestamp(uint256 chainId, uint256 timestamp, uint256 blockNumber);
 }

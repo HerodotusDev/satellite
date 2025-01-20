@@ -24,22 +24,10 @@ abstract contract AbstractReceiverModule is IReceiverModule {
         uint256 accumulatedChainId,
         uint256 originChainId,
         uint256 originalMmrId,
-        bool isSiblingSynced,
-        bool isTimestampRemapper,
-        uint256 firstTimestampsBlock
+        bool isSiblingSynced
     ) external onlyCrossdomainCounterpart {
         // headersStore.createBranchFromMessage(keccakMMRRoot, mmrSize, aggregatorId, newMmrId);
-        ISatellite(address(this))._createMmrFromForeign(
-            newMmrId,
-            rootsForHashingFunctions,
-            mmrSize,
-            accumulatedChainId,
-            originChainId,
-            originalMmrId,
-            isSiblingSynced,
-            isTimestampRemapper,
-            firstTimestampsBlock
-        );
+        ISatellite(address(this))._createMmrFromForeign(newMmrId, rootsForHashingFunctions, mmrSize, accumulatedChainId, originChainId, originalMmrId, isSiblingSynced);
     }
 
     modifier onlyCrossdomainCounterpart() {

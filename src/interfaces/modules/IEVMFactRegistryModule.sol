@@ -57,10 +57,6 @@ interface IEVMFactRegistryModule {
     /// @param account Address of the account
     /// @param headerProof Header proof of the block that contains the account
     /// @param accountTrieProof MPT proof for the account (has to hash to the state root)
-    /// @return nonce
-    /// @return accountBalance
-    /// @return codeHash
-    /// @return storageRoot
     function proveAccount(uint256 chainId, address account, uint8 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) external;
 
     /// @notice Stores storage slot value after verifying the storageSlotTrieProof against saved MMRs
@@ -70,7 +66,6 @@ interface IEVMFactRegistryModule {
     /// @param blockNumber Block number at which the storage slot is stored
     /// @param slot Index of the storage slot
     /// @param storageSlotTrieProof MPT proof for the storage slot (has to hash to the storage root)
-    /// @return slotValue Value of the storage slot
     function proveStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) external;
 
     /// @notice Stores closest timestamp to a block after verifying header proofs of two consecutive blocks,
@@ -79,7 +74,6 @@ interface IEVMFactRegistryModule {
     /// @param timestamp Timestamp for which you are looking for the closest block
     /// @param headerProof Header proof of the block that is the answer for the given timestamp
     /// @param headerProofNext Header proof of the next block
-    /// @return blockNumber Block number of the closest block with timestamp that is less than or equal to the given timestamp
     function proveTimestamp(uint256 chainId, uint256 timestamp, BlockHeaderProof calldata headerProof, BlockHeaderProof calldata headerProofNext) external;
 
     // ========================= View functions ========================= //

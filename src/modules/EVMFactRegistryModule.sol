@@ -112,8 +112,7 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
         EVMFactRegistryModuleStorage storage ms = moduleStorage();
 
         uint256 blockNumber = verifyTimestamp(chainId, timestamp, headerProof, headerProofNext);
-        // blockNumber + 1 is stored, so uint256.max cannot be stored
-        require(blockNumber != type(uint256).max, "ERR_BLOCK_NUMBER_TOO_HIGH");
+        // blockNumber + 1 is stored, blockNumber cannot overflow because of check in verifyTimestamp
         ms.timestampToBlockNumber[chainId][timestamp] = blockNumber + 1;
 
         emit ProvenTimestamp(chainId, timestamp, blockNumber);
@@ -161,6 +160,7 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
         uint256 blockNumber = _decodeBlockNumber(headerProof.provenBlockHeader);
         uint256 blockNumberNext = _decodeBlockNumber(headerProofNext.provenBlockHeader);
 
+        require(blockNumber != type(uint256).max, "ERR_BLOCK_NUMBER_TOO_HIGH");
         require(blockNumber + 1 == blockNumberNext, "ERR_INVALID_BLOCK_NUMBER_NEXT");
 
         uint256 blockTimestamp = _decodeBlockTimestamp(headerProof.provenBlockHeader);

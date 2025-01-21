@@ -16,16 +16,19 @@ import {ISatelliteMaintenanceModule} from "interfaces/modules/ISatelliteMaintena
 
 import {DeployOwnershipModule} from "./modules/DeployOwnershipModule.s.sol";
 import {DeploySatelliteInspectorModule} from "./modules/DeploySatelliteInspectorModule.s.sol";
-import {DeployMMRsCoreModule} from "./modules/DeployMMRsCoreModule.s.sol";
+import {DeployMmrCoreModule} from "./modules/DeployMmrCoreModule.s.sol";
 import {DeployNativeSharpMmrGrowingModule} from "./modules/growing/DeployNativeSharpMmrGrowingModule.s.sol";
-import {DeployNativeFactsRegistryModule} from "./modules/DeployNativeFactsRegistryModule.s.sol";
-import {DeployNativeParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/DeployNativeParentHashesFetcherModule.s.sol";
+import {DeployEVMFactRegistryModule} from "./modules/DeployEVMFactRegistryModule.s.sol";
+import {DeployNativeParentHashFetcherModule} from "./modules/parent-hash-fetching/DeployNativeParentHashFetcherModule.s.sol";
 import {DeployNativeOnChainGrowingModule} from "./modules/growing/DeployNativeOnChainGrowingModule.s.sol";
 import {DeployStarknetSharpMmrGrowingModule} from "./modules/growing/DeployStarknetSharpMmrGrowingModule.s.sol";
-import {DeployStarknetParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/DeployStarknetParentHashesFetcherModule.s.sol";
-import {DeployNativeDataProcessorModule} from "./modules/data-processor/DeployNativeDataProcessorModule.s.sol";
+import {DeployStarknetParentHashFetcherModule} from "./modules/parent-hash-fetching/DeployStarknetParentHashFetcherModule.s.sol";
+import {DeployDataProcessorModule} from "./modules/DeployDataProcessorModule.s.sol";
+import {DeploySatelliteConnectionRegistryModule} from "./modules/DeploySatelliteConnectionRegistryModule.s.sol";
+import {DeploySimpleReceiverModule} from "./modules/messaging/receiver/DeploySimpleReceiverModule.s.sol";
+import {DeployL1ToArbitrumSenderModule} from "./modules/messaging/sender/DeployL1ToArbitrumSenderModule.s.sol";
 
-uint256 constant numberOfModules = 11;
+uint256 constant numberOfModules = 14;
 
 contract Deploy is Script {
     function run() external returns (address satelliteAddress) {
@@ -35,14 +38,17 @@ contract Deploy is Script {
         IDeploy[] memory deployModules = new IDeploy[](moduleCount);
         deployModules[0] = new DeployOwnershipModule();
         deployModules[1] = new DeploySatelliteInspectorModule();
-        deployModules[2] = new DeployMMRsCoreModule();
+        deployModules[2] = new DeployMmrCoreModule();
         deployModules[3] = new DeployNativeSharpMmrGrowingModule();
-        deployModules[4] = new DeployNativeFactsRegistryModule();
-        deployModules[5] = new DeployNativeParentHashesFetcherModule();
+        deployModules[4] = new DeployEVMFactRegistryModule();
+        deployModules[5] = new DeployNativeParentHashFetcherModule();
         deployModules[6] = new DeployNativeOnChainGrowingModule();
         deployModules[7] = new DeployStarknetSharpMmrGrowingModule();
-        deployModules[8] = new DeployStarknetParentHashesFetcherModule();
-        deployModules[9] = new DeployNativeDataProcessorModule();
+        deployModules[8] = new DeployStarknetParentHashFetcherModule();
+        deployModules[9] = new DeployDataProcessorModule();
+        deployModules[10] = new DeploySatelliteConnectionRegistryModule();
+        deployModules[11] = new DeploySimpleReceiverModule();
+        deployModules[12] = new DeployL1ToArbitrumSenderModule();
 
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);

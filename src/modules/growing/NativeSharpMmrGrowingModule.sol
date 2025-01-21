@@ -6,13 +6,12 @@ import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
 import {INativeSharpMmrGrowingModule} from "interfaces/modules/growing/INativeSharpMmrGrowingModule.sol";
 import {ISatellite} from "interfaces/ISatellite.sol";
 import {LibSatellite} from "libraries/LibSatellite.sol";
+import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "interfaces/modules/IMmrCoreModule.sol";
+import {AccessController} from "libraries/AccessController.sol";
 
-contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
+contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule, AccessController {
     // Using inline library for efficient splitting and joining of uint256 values
     using Uint256Splitter for uint256;
-
-    IFactsRegistry public immutable FACTS_REGISTRY;
-    uint256 public immutable AGGREGATED_CHAIN_ID = block.chainid;
 
     // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
     bytes32 public constant PROGRAM_HASH = bytes32(uint256(0x65b6e7259ea513e896bc97cbc9445fd71eeb71fb8ce92bad1df9676f97df626));
@@ -27,8 +26,23 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
     // keccak_hash(1, "brave new world")
     bytes32 public constant KECCAK_MMR_INITIAL_ROOT = 0x5d8d23518dd388daa16925ff9475c5d1c06430d21e0422520d6a56402f42937b;
 
-    constructor(IFactsRegistry factsRegistry) {
-        FACTS_REGISTRY = factsRegistry;
+    // ========================= Satellite Module Storage ========================= //
+
+    bytes32 constant MODULE_STORAGE_POSITION = keccak256("diamond.standard.satellite.module.storage.native-sharp-mmr-growing");
+
+    function moduleStorage() internal pure returns (NativeSharpMmrGrowingModuleStorage storage s) {
+        bytes32 position = MODULE_STORAGE_POSITION;
+        assembly {
+            s.slot := position
+        }
+    }
+
+    // ========================= Core Functions ========================= //
+
+    function initNativeSharpMmrGrowingModule(IFactsRegistry factsRegistry) external onlyOwner {
+        NativeSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        ms.factsRegistry = factsRegistry;
+        ms.aggregatedChainId = block.chainid;
     }
 
     function createNativeSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external {
@@ -36,12 +50,12 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         hashingFunctions[0] = KECCAK_HASHING_FUNCTION;
         hashingFunctions[1] = POSEIDON_HASHING_FUNCTION;
 
-        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, AGGREGATED_CHAIN_ID, mmrSize, hashingFunctions);
+        NativeSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+
+        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions, false, 0);
     }
 
-    function aggregateNativeSharpJobs(uint256 mmrId, INativeSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external {
-        LibSatellite.enforceIsContractOwner();
-
+    function aggregateNativeSharpJobs(uint256 mmrId, INativeSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external onlyOwner {
         // Ensuring at least one job output is provided
         if (outputs.length < 1) {
             revert NotEnoughJobs();
@@ -71,19 +85,27 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         (, uint256 mmrNewSize) = lastOutput.mmrSizesPacked.split128();
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
+        NativeSharpMmrGrowingModuleStorage storage ms = moduleStorage();
 
-        s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
-        s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].latestSize = mmrNewSize;
-        s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced = true;
+        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
+        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize = mmrNewSize;
+        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced = true;
 
-        s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootKeccak;
-        s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].latestSize = mmrNewSize;
-        s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced = true;
+        s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootKeccak;
+        s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize = mmrNewSize;
+        s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced = true;
 
         (, uint256 toBlock) = lastOutput.blockNumbersPacked.split128();
 
-        ISatellite(address(this))._receiveBlockHash(AGGREGATED_CHAIN_ID, KECCAK_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
-        emit SharpFactsAggregate(fromBlock, toBlock, mmrNewSize, mmrId, lastOutput.mmrNewRootPoseidon, lastOutput.mmrNewRootKeccak, AGGREGATED_CHAIN_ID);
+        ISatellite(address(this))._receiveParentHash(ms.aggregatedChainId, KECCAK_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
+
+        RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](2);
+        rootsForHashingFunctions[0].root = lastOutput.mmrNewRootPoseidon;
+        rootsForHashingFunctions[0].hashingFunction = POSEIDON_HASHING_FUNCTION;
+        rootsForHashingFunctions[1].root = lastOutput.mmrNewRootKeccak;
+        rootsForHashingFunctions[1].hashingFunction = KECCAK_HASHING_FUNCTION;
+
+        emit IMmrCoreModule.GrownMmr(fromBlock, toBlock, rootsForHashingFunctions, mmrNewSize, mmrId, ms.aggregatedChainId, GrownBy.EVM_SHARP_GROWER);
     }
 
     /// @notice Ensures the job output is cryptographically sound to continue from
@@ -94,31 +116,31 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         (uint256 mmrPreviousSize, ) = firstOutput.mmrSizesPacked.split128();
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-
+        NativeSharpMmrGrowingModuleStorage storage ms = moduleStorage();
         // Retrieve from cache the parent hash of the block to start from
-        bytes32 fromBlockPlusOneParentHash = s.receivedParentHashes[AGGREGATED_CHAIN_ID][KECCAK_HASHING_FUNCTION][fromBlockNumber + 1];
-        uint256 actualMmrSizePoseidon = s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].latestSize;
-        uint256 actualMmrSizeKeccak = s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].latestSize;
+        bytes32 fromBlockPlusOneParentHash = s.receivedParentHashes[ms.aggregatedChainId][KECCAK_HASHING_FUNCTION][fromBlockNumber + 1];
+        uint256 actualMmrSizePoseidon = s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize;
+        uint256 actualMmrSizeKeccak = s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize;
 
         // Check that the job's previous MMR size is the same as the one stored in the contract state
         if (mmrPreviousSize != actualMmrSizePoseidon || mmrPreviousSize != actualMmrSizeKeccak) {
             revert AggregationError("MMR size mismatch");
         }
 
-        if (s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced == false) {
+        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced == false) {
             revert AggregationError("Poseidon MMR not sibling synced");
         }
 
-        if (s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced == false) {
+        if (s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced == false) {
             revert AggregationError("Keccak MMR not sibling synced");
         }
 
         // Check that the job's previous Poseidon MMR root is the same as the one stored in the contract state
-        if (firstOutput.mmrPreviousRootPoseidon != s.mmrs[AGGREGATED_CHAIN_ID][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrPreviousSize])
+        if (firstOutput.mmrPreviousRootPoseidon != s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrPreviousSize])
             revert AggregationError("Poseidon root mismatch");
 
         // Check that the job's previous Keccak MMR root is the same as the one stored in the contract state
-        if (firstOutput.mmrPreviousRootKeccak != s.mmrs[AGGREGATED_CHAIN_ID][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrPreviousSize])
+        if (firstOutput.mmrPreviousRootKeccak != s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrPreviousSize])
             revert AggregationError("Keccak root mismatch");
 
         // If not present in the cache, hash is not authenticated and we cannot continue from it
@@ -170,8 +192,10 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule {
         // We compute the deterministic fact bytes32 value
         bytes32 fact = keccak256(abi.encode(PROGRAM_HASH, outputHash));
 
+        NativeSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+
         // We ensure this fact has been registered on SHARP Facts Registry
-        if (!FACTS_REGISTRY.isValid(fact)) {
+        if (!ms.factsRegistry.isValid(fact)) {
             revert InvalidFact();
         }
     }

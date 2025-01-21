@@ -16,7 +16,8 @@ contract DeployNativeSharpMmrGrowingModule is IDeploy {
     function deploy() internal override returns (address moduleAddress) {
         IFactsRegistry sharpFactsRegistry = IFactsRegistry(getFactsRegistryAddress());
         vm.startBroadcast(getPrivateKey());
-        NativeSharpMmrGrowingModule module = new NativeSharpMmrGrowingModule(sharpFactsRegistry);
+        NativeSharpMmrGrowingModule module = new NativeSharpMmrGrowingModule();
+        // TODO: initNativeSharpMmrGrowingModule
         vm.stopBroadcast();
         moduleAddress = address(module);
     }

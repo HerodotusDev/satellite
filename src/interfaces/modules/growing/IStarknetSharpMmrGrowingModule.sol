@@ -18,8 +18,13 @@ interface IStarknetSharpMmrGrowingModule is ISharpMmrGrowingCommon {
         uint256 mmrNewSize;
     }
 
-    // Event emitted when __at least__ one SHARP job is aggregated
-    event StarknetSharpFactsAggregate(uint256 firstAppendedBlock, uint256 lastAppendedBlock, uint256 newMmrSize, uint256 mmrId, bytes32 newPoseidonMmrRoot, uint256 chainId);
+    struct StarknetSharpMmrGrowingModuleStorage {
+        IFactsRegistry factsRegistry;
+        // Either Starknet or Starknet Sepolia chain ID
+        uint256 aggregatedChainId;
+    }
+
+    function initStarknetSharpMmrGrowingModule(IFactsRegistry factsRegistry) external;
 
     function createStarknetSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
 

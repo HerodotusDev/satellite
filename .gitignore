@@ -1,6 +1,7 @@
 # Compiler files
 cache/
 out/
+zkout/
 
 broadcast
 
@@ -13,3 +14,8 @@ docs/
 
 # Node modules
 node_modules/
+
+# Bun
+pnpm-lock.yaml
+yarn.lock
+package-lock.json

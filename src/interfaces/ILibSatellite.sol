@@ -35,13 +35,26 @@ interface ILibSatellite {
 
     /// @notice This struct represents a Merkle Mountain Range accumulating provably valid block hashes
     /// @dev each MMR is mapped to a unique ID also referred to as mmrId
-    struct MMRInfo {
-        /// @notice isSiblingSynced informs if the MMR has it's siblings and has to be grown in sync with them - used when growing off-chain and growring multiple hashing functions at once, for example, this could be a keccak MMR sibling synced to a poseidon MMR
+    struct MmrInfo {
+        /// @notice isSiblingSynced informs if the MMR has it's siblings (MMRs with different hash functions) and has to be grown in sync with them - used when growing off-chain and growing multiple hash functions at once, for example, this could be a keccak MMR sibling synced to a poseidon MMR
         bool isSiblingSynced;
+        /// @notice isTimestampRemapper informs if the MMR is a timestamp remapper - needed because firstTimestampsBlock = 0 is a valid state
+        bool isTimestampRemapper;
+        /// @notice firstTimestampsBlock represents the block number of the first timestamp in timestamp remapper
+        uint256 firstTimestampsBlock;
         /// @notice latestSize represents the latest size of the MMR
         uint256 latestSize;
         /// @notice mmrSizeToRoot maps the  MMR size => the MMR root, that way we have automatic versioning
         mapping(uint256 => bytes32) mmrSizeToRoot;
+    }
+
+    struct SatelliteConnection {
+        /// @notice satelliteAddress is the address of the satellite deployed on the destination chain
+        address satelliteAddress;
+        /// @notice inboxAddress is the address of the contract that sends messages from our chain to the chain of the satellite
+        address inboxAddress;
+        /// @notice sendMessageSelector is the selector of the satellite's function that sends message to the destination chain
+        bytes4 sendMessageSelector;
     }
 
     struct SatelliteStorage {
@@ -55,47 +68,56 @@ interface ILibSatellite {
         address[] moduleAddresses;
         /// @dev owner of the contract
         address contractOwner;
+        //
         // ========================= Core Satellite storage ========================= //
 
         /// @dev mapping of ChainId => MMR ID => hashing function => MMR info
         /// @dev hashingFunction is a 32 byte keccak hash of the hashing function name, eg: keccak256("keccak256"), keccak256("poseidon")
-        mapping(uint256 => mapping(uint256 => mapping(bytes32 => MMRInfo))) mmrs;
+        mapping(uint256 => mapping(uint256 => mapping(bytes32 => MmrInfo))) mmrs;
         /// @notice mapping of ChainId => hashing function => block number => block parent hash
         mapping(uint256 => mapping(bytes32 => mapping(uint256 => bytes32))) receivedParentHashes;
+        //
+        // ======================= Satellite Registry storage ======================= //
+
+        /// @dev mapping of ChainId => SatelliteConnection struct
+        mapping(uint256 => SatelliteConnection) SatelliteConnectionRegistry;
+        /// @dev set of (aliased) addresses of satellites that can send messages to our chain
+        mapping(address => bool) senderSatellites;
     }
 
     // ========================= Errors ========================= //
 
-    /// @dev Error indicating the caller must be a satellite module
+    /// @notice Error indicating the caller must be a satellite module
     error MustBeSatelliteModule();
-    /// @dev Error indicating the caller must be the contract owner
+    /// @notice Error indicating the caller must be the contract owner
     error MustBeContractOwner();
-    /// @dev Error indicating the module maintenance action is incorrect
+    /// @notice Error indicating the module maintenance action is incorrect
     error IncorrectModuleMaintenanceAction(ModuleMaintenanceAction action);
-    /// @dev Error indicating there are no selectors in the module to maintenance
+    /// @notice Error indicating there are no selectors in the module to maintenance
     error NoSelectorsInModuleToMaintenance();
-    /// @dev Error indicating the module address is zero
+    /// @notice Error indicating the module address is zero
     error AddModuleAddressZero();
-    /// @dev Error indicating the function already exists
+    /// @notice Error indicating the function already exists
     error AddFunctionAlreadyExists(bytes4 selector);
-    /// @dev Error indicating the function already exists
+    /// @notice Error indicating the function already exists
     error ReplaceFunctionWithSameFunction(bytes4 selector);
-    /// @dev Error indicating the function does not exist
+    /// @notice Error indicating the function does not exist
     error RemoveFunctionDoesNotExist();
-    /// @dev Error indicating the function is immutable and cannot be removed
+    /// @notice Error indicating the function is immutable and cannot be removed
     error RemoveImmutableFunction();
-    /// @dev Error indicating the init address is zero but calldata is not empty
+    /// @notice Error indicating the init address is zero but calldata is not empty
     error InitAddressZeroButCalldataNotEmpty();
-    /// @dev Error indicating the calldata is empty but init is not address(0)
+    /// @notice Error indicating the calldata is empty but init is not address(0)
     error CalldataEmptyButInitNotEmpty();
-    /// @dev Error indicating the init function reverted
+    /// @notice Error indicating the init function reverted
     error InitFunctionReverted(string errors);
-    /// @dev Error indicating the address has no code
+    /// @notice Error indicating the address has no code
     error AddressHasNoCode(string details);
 
     // ========================= Events ========================= //
 
-    /// @dev Event emitted when satellite maintenance occurs
+    /// @notice Event emitted when satellite maintenance occurs
     event SatelliteMaintenance(ModuleMaintenance[] _satelliteMaintenance, address _init, bytes _calldata);
+    /// @notice Event emitted when ownership is transferred
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 }

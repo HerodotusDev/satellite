@@ -3,28 +3,37 @@ pragma solidity ^0.8.27;
 
 import {ILibSatellite} from "./ILibSatellite.sol";
 import {IOwnershipModule} from "./modules/IOwnershipModule.sol";
-import {IMMRsCoreModule} from "./modules/IMMRsCoreModule.sol";
+import {ISatelliteConnectionRegistryModule} from "./modules/ISatelliteConnectionRegistryModule.sol";
+import {IMmrCoreModule} from "./modules/IMmrCoreModule.sol";
 import {ISatelliteInspectorModule} from "./modules/ISatelliteInspectorModule.sol";
 import {ISatelliteMaintenanceModule} from "./modules/ISatelliteMaintenanceModule.sol";
 import {INativeSharpMmrGrowingModule} from "./modules/growing/INativeSharpMmrGrowingModule.sol";
 import {IStarknetSharpMmrGrowingModule} from "./modules/growing/IStarknetSharpMmrGrowingModule.sol";
-import {INativeFactsRegistryModule} from "./modules/INativeFactsRegistryModule.sol";
-import {INativeParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/INativeParentHashesFetcherModule.sol";
-import {IStarknetParentHashesFetcherModule} from "./modules/x-rollup-messaging/parent-hashes-fetchers/IStarknetParentHashesFetcherModule.sol";
+import {IEVMFactRegistryModule} from "./modules/IEVMFactRegistryModule.sol";
+import {INativeParentHashFetcherModule} from "./modules/parent-hash-fetching/INativeParentHashFetcherModule.sol";
+import {IStarknetParentHashFetcherModule} from "./modules/parent-hash-fetching/IStarknetParentHashFetcherModule.sol";
+import {IReceiverModule} from "./modules/messaging/receiver/IReceiverModule.sol";
 import {INativeOnChainGrowingModule} from "./modules/growing/INativeOnChainGrowingModule.sol";
-import {INativeDataProcessorModule} from "./modules/data-processor/INativeDataProcessorModule.sol";
-
+import {IDataProcessorModule} from "./modules/IDataProcessorModule.sol";
+import {IUniversalSenderModule} from "./modules/messaging/sender/IUniversalSenderModule.sol";
+import {IL1ToArbitrumSenderModule} from "./modules/messaging/sender/IL1ToArbitrumSenderModule.sol";
+import {IL1ToOptimismSenderModule} from "./modules/messaging/sender/IL1ToOptimismSenderModule.sol";
 interface ISatellite is
     ILibSatellite,
     IOwnershipModule,
-    IMMRsCoreModule,
+    ISatelliteConnectionRegistryModule,
+    IMmrCoreModule,
     ISatelliteInspectorModule,
     ISatelliteMaintenanceModule,
     INativeSharpMmrGrowingModule,
-    INativeFactsRegistryModule,
-    INativeParentHashesFetcherModule,
+    IEVMFactRegistryModule,
+    INativeParentHashFetcherModule,
     INativeOnChainGrowingModule,
     IStarknetSharpMmrGrowingModule,
-    IStarknetParentHashesFetcherModule,
-    INativeDataProcessorModule
+    IReceiverModule,
+    IUniversalSenderModule,
+    IL1ToArbitrumSenderModule,
+    IL1ToOptimismSenderModule,
+    IStarknetParentHashFetcherModule,
+    IDataProcessorModule
 {}

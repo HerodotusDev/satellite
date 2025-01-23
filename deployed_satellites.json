@@ -1,0 +1,26 @@
+{
+    "satellites": [
+        {
+            "chainId": "11155111",
+            "contractAddress": "0xF8610dc31a448E954cA8bbC8972150BF89930237"
+        },
+        {
+            "chainId": "300",
+            "contractAddress": "0xB23F476b6B73845d3E1d9715650b42Ca2EbdEe38"
+        },
+        {
+            "chainId": "11155420",
+            "contractAddress": "0x7580f5Bd869B90685E8412382BCA1e0999AA9bd0"
+        }
+    ],
+    "connections": [
+        {
+            "from": "11155111",
+            "to": "300"
+        },
+        {
+            "from": "11155111",
+            "to": "11155420"
+        }
+    ]
+}

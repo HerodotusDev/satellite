@@ -54,11 +54,11 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
     }
 
     /// @inheritdoc IEVMFactRegistryModule
-    function timestamp(uint256 chainId, uint256 timestamp) external view returns (uint256) {
+    function timestamp(uint256 chainId, uint256 timestamp_) external view returns (uint256) {
         EVMFactRegistryModuleStorage storage ms = moduleStorage();
 
         // block number stored is blockNumber + 1 and 0 means no data
-        uint256 blockNumberStored = ms.timestampToBlockNumber[chainId][timestamp];
+        uint256 blockNumberStored = ms.timestampToBlockNumber[chainId][timestamp_];
         require(blockNumberStored != 0, "ERR_NO_BLOCK_STORED_FOR_TIMESTAMP");
         return blockNumberStored - 1;
     }
@@ -108,15 +108,15 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
     }
 
     /// @inheritdoc IEVMFactRegistryModule
-    function proveTimestamp(uint256 chainId, uint256 timestamp, BlockHeaderProof calldata headerProof, BlockHeaderProof calldata headerProofNext) external {
+    function proveTimestamp(uint256 chainId, uint256 timestamp_, BlockHeaderProof calldata headerProof, BlockHeaderProof calldata headerProofNext) external {
         EVMFactRegistryModuleStorage storage ms = moduleStorage();
 
-        uint256 blockNumber = verifyTimestamp(chainId, timestamp, headerProof, headerProofNext);
+        uint256 blockNumber = verifyTimestamp(chainId, timestamp_, headerProof, headerProofNext);
         // blockNumber + 1 is stored, so uint256.max cannot be stored
         require(blockNumber != type(uint256).max, "ERR_BLOCK_NUMBER_TOO_HIGH");
-        ms.timestampToBlockNumber[chainId][timestamp] = blockNumber + 1;
+        ms.timestampToBlockNumber[chainId][timestamp_] = blockNumber + 1;
 
-        emit ProvenTimestamp(chainId, timestamp, blockNumber);
+        emit ProvenTimestamp(chainId, timestamp_, blockNumber);
     }
 
     // ========================= View functions ========================= //
@@ -154,7 +154,7 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
     }
 
     /// @inheritdoc IEVMFactRegistryModule
-    function verifyTimestamp(uint256 chainId, uint256 timestamp, BlockHeaderProof calldata headerProof, BlockHeaderProof calldata headerProofNext) public view returns (uint256) {
+    function verifyTimestamp(uint256 chainId, uint256 timestamp_, BlockHeaderProof calldata headerProof, BlockHeaderProof calldata headerProofNext) public view returns (uint256) {
         _verifyAccumulatedHeaderProof(chainId, headerProof);
         _verifyAccumulatedHeaderProof(chainId, headerProofNext);
 
@@ -166,7 +166,7 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
         uint256 blockTimestamp = _decodeBlockTimestamp(headerProof.provenBlockHeader);
         uint256 blockTimestampNext = _decodeBlockTimestamp(headerProofNext.provenBlockHeader);
 
-        require(blockTimestamp <= timestamp && timestamp < blockTimestampNext, "ERR_TIMESTAMP_NOT_IN_RANGE");
+        require(blockTimestamp <= timestamp_ && timestamp_ < blockTimestampNext, "ERR_TIMESTAMP_NOT_IN_RANGE");
 
         return blockNumber;
     }

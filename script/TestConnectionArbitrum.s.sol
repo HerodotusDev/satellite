@@ -5,8 +5,8 @@ import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {console} from "forge-std/console.sol";
 
-import {ISatellite} from "interfaces/ISatellite.sol";
-import {IArbitrumInbox} from "interfaces/external/IArbitrumInbox.sol";
+import {ISatellite} from "src/interfaces/ISatellite.sol";
+import {IArbitrumInbox} from "src/interfaces/external/IArbitrumInbox.sol";
 
 bytes32 constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
 uint256 constant ORIGIN_CHAIN_ID = 11155111;

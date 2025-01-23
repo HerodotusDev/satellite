@@ -5,20 +5,20 @@ import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {console} from "forge-std/console.sol";
 
-import {ISatellite} from "interfaces/ISatellite.sol";
-import {IArbitrumInbox} from "interfaces/external/IArbitrumInbox.sol";
-import {IL1ToArbitrumSenderModule} from "interfaces/modules/messaging/sender/IL1ToArbitrumSenderModule.sol";
+import {ISatellite} from "src/interfaces/ISatellite.sol";
+import {IArbitrumInbox} from "src/interfaces/external/IArbitrumInbox.sol";
+import {IL1ToArbitrumSenderModule} from "src/interfaces/modules/messaging/sender/IL1ToArbitrumSenderModule.sol";
 
 bytes32 constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
 uint256 constant ORIGIN_CHAIN_ID = 11155111;
 uint256 constant DESTINATION_CHAIN_ID = 11155420;
-uint256 constant BLOCK_NUMBER = 7498494;
+uint256 constant BLOCK_NUMBER = 7556382;
 
 contract TestConnectionOptimism is Script {
     function run() external {
         uint256 pk = vm.envUint("PRIVATE_KEY");
 
-        address satelliteAddress = vm.envAddress("SATELLITE_ADDRESS_11155111");
+        address satelliteAddress = address(0xF8610dc31a448E954cA8bbC8972150BF89930237);
         ISatellite satellite = ISatellite(satelliteAddress); // l1
 
         uint256 l2GasLimit = 170422 * 2;

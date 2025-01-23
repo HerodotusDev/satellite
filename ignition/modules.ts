@@ -1,6 +1,7 @@
 import settings from "../settings.json";
 
-const DATA_PROCESSOR_PROGRAM_HASH = "0x0";
+const DATA_PROCESSOR_PROGRAM_HASH =
+  "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 interface InitFunction {
   name: string;

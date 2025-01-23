@@ -42,4 +42,22 @@ contract SatelliteInspectorModule is ISatelliteInspectorModule {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         moduleAddress_ = s.selectorToModuleAndPosition[_functionSelector].moduleAddress;
     }
+
+    // Facet versions for compatibility
+
+    function facets() external view returns (ISatellite.Module[] memory facets_) {
+        facets_ = ISatelliteInspectorModule(this).modules();
+    }
+
+    function facetFunctionSelectors(address _facet) external view returns (bytes4[] memory facetFunctionSelectors_) {
+        facetFunctionSelectors_ = ISatelliteInspectorModule(this).moduleFunctionSelectors(_facet);
+    }
+
+    function facetAddresses() external view returns (address[] memory facetAddresses_) {
+        facetAddresses_ = ISatelliteInspectorModule(this).moduleAddresses();
+    }
+
+    function facetAddress(bytes4 _functionSelector) external view returns (address facetAddress_) {
+        facetAddress_ = ISatelliteInspectorModule(this).moduleAddress(_functionSelector);
+    }
 }

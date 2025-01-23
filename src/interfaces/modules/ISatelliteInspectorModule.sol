@@ -22,4 +22,11 @@ interface ISatelliteInspectorModule {
     /// @param _functionSelector The function selector.
     /// @return moduleAddress_ The module address.
     function moduleAddress(bytes4 _functionSelector) external view returns (address moduleAddress_);
+
+    // Facet versions for compatibility
+
+    function facets() external view returns (ILibSatellite.Module[] memory facets_);
+    function facetFunctionSelectors(address _facet) external view returns (bytes4[] memory facetFunctionSelectors_);
+    function facetAddresses() external view returns (address[] memory facetAddresses_);
+    function facetAddress(bytes4 _functionSelector) external view returns (address facetAddress_);
 }

@@ -42,12 +42,6 @@ const buildSatelliteDeployment = (name: string, modules: Module[]) =>
 
     for (const module of modules) {
       if (module.initFunction) {
-        console.log(
-          "calling",
-          satelliteInterface,
-          module.initFunction.name,
-          module.initFunction.args,
-        );
         m.call(
           satelliteInterface,
           module.initFunction.name,
@@ -58,8 +52,6 @@ const buildSatelliteDeployment = (name: string, modules: Module[]) =>
         );
       }
     }
-
-    // console.log(m.call(satelliteInterface, "owner", []));
 
     return { satellite, satelliteMaintenanceModule };
   });

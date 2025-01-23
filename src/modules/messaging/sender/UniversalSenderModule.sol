@@ -23,7 +23,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
 
         require(parentHash != bytes32(0), "ERR_BLOCK_NOT_REGISTERED");
 
-        ILibSatellite.SatelliteConnection memory satellite = s.SatelliteConnectionRegistry[destinationChainId];
+        ILibSatellite.SatelliteConnection memory satellite = s.satelliteConnectionRegistry[destinationChainId];
 
         bytes memory data = abi.encodeWithSelector(
             satellite.sendMessageSelector,
@@ -64,7 +64,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
             rootsForHashingFunctions[i] = RootForHashingFunction(_root, hashingFunctions[i]);
         }
 
-        ILibSatellite.SatelliteConnection memory satellite = s.SatelliteConnectionRegistry[destinationChainId];
+        ILibSatellite.SatelliteConnection memory satellite = s.satelliteConnectionRegistry[destinationChainId];
 
         bytes memory data = abi.encodeWithSelector(
             satellite.sendMessageSelector,

@@ -76,7 +76,7 @@ interface ILibSatellite {
         // ======================= Satellite Registry storage ======================= //
 
         /// @dev mapping of ChainId => SatelliteConnection struct
-        mapping(uint256 => SatelliteConnection) SatelliteConnectionRegistry;
+        mapping(uint256 => SatelliteConnection) satelliteConnectionRegistry;
         /// @dev set of (aliased) addresses of satellites that can send messages to our chain
         mapping(address => bool) senderSatellites;
     }

@@ -14,8 +14,8 @@ contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule
         require(satellite != address(0), "SatelliteConnectionRegistry: invalid satellite");
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        require(s.SatelliteConnectionRegistry[chainId].satelliteAddress == address(0), "SatelliteConnectionRegistry: satellite already registered");
-        s.SatelliteConnectionRegistry[chainId] = ILibSatellite.SatelliteConnection(satellite, inbox, sendMessageSelector);
+        require(s.satelliteConnectionRegistry[chainId].satelliteAddress == address(0), "SatelliteConnectionRegistry: satellite already registered");
+        s.satelliteConnectionRegistry[chainId] = ILibSatellite.SatelliteConnection(satellite, inbox, sendMessageSelector);
 
         if (senderSatelliteAlias != address(0)) {
             require(!s.senderSatellites[senderSatelliteAlias], "SatelliteConnectionRegistry: crossDomainCounterpart already registered");
@@ -26,7 +26,7 @@ contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule
     /// @inheritdoc ISatelliteConnectionRegistryModule
     function removeSatelliteConnection(uint256 chainId, address crossDomainCounterpart) external onlyOwner {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        delete s.SatelliteConnectionRegistry[chainId];
+        delete s.satelliteConnectionRegistry[chainId];
         if (crossDomainCounterpart != address(0)) {
             delete s.senderSatellites[crossDomainCounterpart];
         }
@@ -35,6 +35,6 @@ contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule
     /// @inheritdoc ISatelliteConnectionRegistryModule
     function getSatelliteConnection(uint256 chainId) external view returns (ILibSatellite.SatelliteConnection memory) {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        return s.SatelliteConnectionRegistry[chainId];
+        return s.satelliteConnectionRegistry[chainId];
     }
 }

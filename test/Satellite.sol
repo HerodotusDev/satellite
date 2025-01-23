@@ -3,10 +3,10 @@ pragma solidity ^0.8.27;
 
 import {Test} from "forge-std/Test.sol";
 import {Deploy, numberOfModules} from "script/deploy/Satellite.s.sol";
-import {ISatellite} from "interfaces/ISatellite.sol";
-import {ILibSatellite} from "interfaces/ILibSatellite.sol";
+import {ISatellite} from "src/interfaces/ISatellite.sol";
+import {ILibSatellite} from "src/interfaces/ILibSatellite.sol";
 import {console} from "forge-std/console.sol";
-import {LibSatellite} from "libraries/LibSatellite.sol";
+import {LibSatellite} from "src/libraries/LibSatellite.sol";
 
 contract Satellite is Test {
     ISatellite satellite;

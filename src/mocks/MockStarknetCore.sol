@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {IStarknet} from "interfaces/external/IStarknet.sol";
+import {IStarknet} from "src/interfaces/external/IStarknet.sol";
 
 contract MockStarknetCore is IStarknet {
     int256 blockNumber = 0;

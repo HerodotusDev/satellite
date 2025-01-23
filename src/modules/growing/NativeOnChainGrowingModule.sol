@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {Lib_RLPReader as RLPReader} from "@optimism/libraries/rlp/Lib_RLPReader.sol";
+import {Lib_RLPReader as RLPReader} from "src/libraries/external/optimism/rlp/Lib_RLPReader.sol";
 import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
-import {LibSatellite} from "libraries/LibSatellite.sol";
-import {INativeOnChainGrowingModule} from "interfaces/modules/growing/INativeOnChainGrowingModule.sol";
-import {ISatellite} from "interfaces/ISatellite.sol";
-import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "interfaces/modules/IMmrCoreModule.sol";
+import {LibSatellite} from "src/libraries/LibSatellite.sol";
+import {INativeOnChainGrowingModule} from "src/interfaces/modules/growing/INativeOnChainGrowingModule.sol";
+import {ISatellite} from "src/interfaces/ISatellite.sol";
+import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "src/interfaces/modules/IMmrCoreModule.sol";
 
 contract NativeOnChainGrowingModule is INativeOnChainGrowingModule {
     // ========================= Types ========================= //

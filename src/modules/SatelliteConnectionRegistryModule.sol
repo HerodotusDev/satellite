@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {ISatellite} from "interfaces/ISatellite.sol";
-import {ISatelliteConnectionRegistryModule} from "interfaces/modules/ISatelliteConnectionRegistryModule.sol";
-import {ILibSatellite} from "interfaces/ILibSatellite.sol";
-import {LibSatellite} from "libraries/LibSatellite.sol";
-import {AccessController} from "libraries/AccessController.sol";
+import {ISatellite} from "src/interfaces/ISatellite.sol";
+import {ISatelliteConnectionRegistryModule} from "src/interfaces/modules/ISatelliteConnectionRegistryModule.sol";
+import {ILibSatellite} from "src/interfaces/ILibSatellite.sol";
+import {LibSatellite} from "src/libraries/LibSatellite.sol";
+import {AccessController} from "src/libraries/AccessController.sol";
 
 /// @notice Satellite Connection Registry is responsible for storing information about chains to which message can be sent and from which message can be received
 contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule, AccessController {

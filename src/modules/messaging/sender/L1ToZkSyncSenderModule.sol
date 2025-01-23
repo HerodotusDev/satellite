@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.19;
 
-import {LibSatellite} from "libraries/LibSatellite.sol";
-import {IZkSyncMailbox} from "interfaces/external/IZkSyncMailbox.sol";
-import {IL1ToZkSyncSenderModule} from "interfaces/modules/messaging/sender/IL1ToZkSyncSenderModule.sol";
-import {AccessController} from "libraries/AccessController.sol";
+import {LibSatellite} from "src/libraries/LibSatellite.sol";
+import {IZkSyncMailbox} from "src/interfaces/external/IZkSyncMailbox.sol";
+import {IL1ToZkSyncSenderModule} from "src/interfaces/modules/messaging/sender/IL1ToZkSyncSenderModule.sol";
+import {AccessController} from "src/libraries/AccessController.sol";
 contract L1ToZkSyncSenderModule is IL1ToZkSyncSenderModule, AccessController {
     /// @inheritdoc IL1ToZkSyncSenderModule
     function sendMessageL1ToZkSync(address satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable onlyModule {

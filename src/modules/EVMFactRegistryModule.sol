@@ -2,11 +2,11 @@
 pragma solidity ^0.8.19;
 
 import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
-import {Lib_SecureMerkleTrie as SecureMerkleTrie} from "libraries/external/optimism/trie/Lib_SecureMerkleTrie.sol";
-import {Lib_RLPReader as RLPReader} from "libraries/external/optimism/rlp/Lib_RLPReader.sol";
-import {IEVMFactRegistryModule} from "interfaces/modules/IEVMFactRegistryModule.sol";
-import {LibSatellite} from "libraries/LibSatellite.sol";
-import {ISatellite} from "interfaces/ISatellite.sol";
+import {Lib_SecureMerkleTrie as SecureMerkleTrie} from "src/libraries/external/optimism/trie/Lib_SecureMerkleTrie.sol";
+import {Lib_RLPReader as RLPReader} from "src/libraries/external/optimism/rlp/Lib_RLPReader.sol";
+import {IEVMFactRegistryModule} from "src/interfaces/modules/IEVMFactRegistryModule.sol";
+import {LibSatellite} from "src/libraries/LibSatellite.sol";
+import {ISatellite} from "src/interfaces/ISatellite.sol";
 
 contract EVMFactRegistryModule is IEVMFactRegistryModule {
     using RLPReader for bytes;

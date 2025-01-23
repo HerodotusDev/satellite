@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {LibSatellite} from "./libraries/LibSatellite.sol";
-import {ILibSatellite} from "interfaces/ILibSatellite.sol";
+import {ILibSatellite} from "src/interfaces/ILibSatellite.sol";
 import {ISatelliteMaintenanceModule} from "./interfaces/modules/ISatelliteMaintenanceModule.sol";
 
 /// @dev Shines like a Diamond

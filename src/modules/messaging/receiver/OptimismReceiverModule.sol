@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {LibSatellite} from "libraries/LibSatellite.sol";
-import {ISatellite} from "interfaces/ISatellite.sol";
+import {LibSatellite} from "src/libraries/LibSatellite.sol";
+import {ISatellite} from "src/interfaces/ISatellite.sol";
 import {AbstractReceiverModule} from "./AbstractReceiverModule.sol";
-import {IL1CrossDomainMessenger} from "interfaces/external/IOptimismCrossDomainMessenger.sol";
+import {IL1CrossDomainMessenger} from "src/interfaces/external/IOptimismCrossDomainMessenger.sol";
 
 /// @notice Implementation of the receiver module for Optimism
 contract OptimismReceiverModule is AbstractReceiverModule {

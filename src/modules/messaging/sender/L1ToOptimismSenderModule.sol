@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.19;
 
-import {LibSatellite} from "libraries/LibSatellite.sol";
-import {IOptimismCrossDomainMessenger} from "interfaces/external/IOptimismCrossDomainMessenger.sol";
-import {IL1ToOptimismSenderModule} from "interfaces/modules/messaging/sender/IL1ToOptimismSenderModule.sol";
-import {AccessController} from "libraries/AccessController.sol";
+import {LibSatellite} from "src/libraries/LibSatellite.sol";
+import {IOptimismCrossDomainMessenger} from "src/interfaces/external/IOptimismCrossDomainMessenger.sol";
+import {IL1ToOptimismSenderModule} from "src/interfaces/modules/messaging/sender/IL1ToOptimismSenderModule.sol";
+import {AccessController} from "src/libraries/AccessController.sol";
 
 contract L1ToOptimismSenderModule is IL1ToOptimismSenderModule, AccessController {
     /// @inheritdoc IL1ToOptimismSenderModule

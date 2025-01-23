@@ -1,10 +1,9 @@
 [profile.default]
 remappings = [
-    "@optimism/libraries=src/libraries/external/optimism",
     "@openzeppelin=lib/openzeppelin-contracts",
     "@solidity-mmr=lib/solidity-mmr/src",
-    "libraries=src/libraries",
-    "interfaces=src/interfaces",
+    # "libraries=src/libraries",
+    # "interfaces=src/interfaces",
 ]
 src = "src"
 out = "out"

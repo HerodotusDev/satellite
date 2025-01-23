@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import {MerkleProof} from "openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol";
-import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
-import {ISatellite} from "interfaces/ISatellite.sol";
-import {LibSatellite} from "libraries/LibSatellite.sol";
-import {ModuleTask, ModuleCodecs} from "libraries/internal/data-processor/ModuleCodecs.sol";
-import {IDataProcessorModule} from "interfaces/modules/IDataProcessorModule.sol";
-import {AccessController} from "libraries/AccessController.sol";
+import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import {IFactsRegistry} from "src/interfaces/external/IFactsRegistry.sol";
+import {ISatellite} from "src/interfaces/ISatellite.sol";
+import {LibSatellite} from "src/libraries/LibSatellite.sol";
+import {ModuleTask, ModuleCodecs} from "src/libraries/internal/data-processor/ModuleCodecs.sol";
+import {IDataProcessorModule} from "src/interfaces/modules/IDataProcessorModule.sol";
+import {AccessController} from "src/libraries/AccessController.sol";
 /// @title DataProcessorModule
 /// @author Herodotus Dev Ltd
 /// @notice A contract to store the execution results of HDP tasks

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {ILibSatellite} from "interfaces/ILibSatellite.sol";
+import {ILibSatellite} from "src/interfaces/ILibSatellite.sol";
 
 interface ISatelliteInspectorModule {
     /// @notice Gets all module addresses and their four byte function selectors.

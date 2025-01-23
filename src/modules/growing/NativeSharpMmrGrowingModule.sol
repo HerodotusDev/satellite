@@ -52,7 +52,7 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule, AccessCont
 
         NativeSharpMmrGrowingModuleStorage storage ms = moduleStorage();
 
-        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions, false, 0);
+        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions);
     }
 
     function aggregateNativeSharpJobs(uint256 mmrId, INativeSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external onlyOwner {

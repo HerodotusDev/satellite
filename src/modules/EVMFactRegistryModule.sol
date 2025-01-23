@@ -53,6 +53,16 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
         return bytes32(valueRaw.value);
     }
 
+    /// @inheritdoc IEVMFactRegistryModule
+    function timestamp(uint256 chainId, uint256 timestamp) external view returns (uint256) {
+        EVMFactRegistryModuleStorage storage ms = moduleStorage();
+
+        // block number stored is blockNumber + 1 and 0 means no data
+        uint256 blockNumberStored = ms.timestampToBlockNumber[chainId][timestamp];
+        require(blockNumberStored != 0, "ERR_NO_BLOCK_STORED_FOR_TIMESTAMP");
+        return blockNumberStored - 1;
+    }
+
     // ========================= Core Functions ========================= //
 
     /// @inheritdoc IEVMFactRegistryModule
@@ -97,6 +107,17 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
         emit ProvenStorage(chainId, account, blockNumber, slot, slotValue);
     }
 
+    /// @inheritdoc IEVMFactRegistryModule
+    function proveTimestamp(uint256 chainId, uint256 timestamp, BlockHeaderProof calldata headerProof, BlockHeaderProof calldata headerProofNext) external {
+        EVMFactRegistryModuleStorage storage ms = moduleStorage();
+
+        uint256 blockNumber = verifyTimestamp(chainId, timestamp, headerProof, headerProofNext);
+        // blockNumber + 1 is stored, blockNumber cannot overflow because of check in verifyTimestamp
+        ms.timestampToBlockNumber[chainId][timestamp] = blockNumber + 1;
+
+        emit ProvenTimestamp(chainId, timestamp, blockNumber);
+    }
+
     // ========================= View functions ========================= //
 
     /// @inheritdoc IEVMFactRegistryModule
@@ -129,6 +150,25 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
         (, bytes memory slotValueRLP) = SecureMerkleTrie.get(abi.encode(slot), storageSlotTrieProof, storageRoot);
 
         slotValue = slotValueRLP.toRLPItem().readBytes32();
+    }
+
+    /// @inheritdoc IEVMFactRegistryModule
+    function verifyTimestamp(uint256 chainId, uint256 timestamp, BlockHeaderProof calldata headerProof, BlockHeaderProof calldata headerProofNext) public view returns (uint256) {
+        _verifyAccumulatedHeaderProof(chainId, headerProof);
+        _verifyAccumulatedHeaderProof(chainId, headerProofNext);
+
+        uint256 blockNumber = _decodeBlockNumber(headerProof.provenBlockHeader);
+        uint256 blockNumberNext = _decodeBlockNumber(headerProofNext.provenBlockHeader);
+
+        require(blockNumber != type(uint256).max, "ERR_BLOCK_NUMBER_TOO_HIGH");
+        require(blockNumber + 1 == blockNumberNext, "ERR_INVALID_BLOCK_NUMBER_NEXT");
+
+        uint256 blockTimestamp = _decodeBlockTimestamp(headerProof.provenBlockHeader);
+        uint256 blockTimestampNext = _decodeBlockTimestamp(headerProofNext.provenBlockHeader);
+
+        require(blockTimestamp <= timestamp && timestamp < blockTimestampNext, "ERR_TIMESTAMP_NOT_IN_RANGE");
+
+        return blockNumber;
     }
 
     // ========================= Internal functions ========================= //
@@ -165,6 +205,10 @@ contract EVMFactRegistryModule is IEVMFactRegistryModule {
 
     function _decodeBlockNumber(bytes memory headerRlp) internal pure returns (uint256) {
         return RLPReader.toRLPItem(headerRlp).readList()[8].readUint256();
+    }
+
+    function _decodeBlockTimestamp(bytes memory headerRlp) internal pure returns (uint256) {
+        return RLPReader.toRLPItem(headerRlp).readList()[11].readUint256();
     }
 
     function readBitAtIndexFromRight(uint8 bitmap, uint8 index) internal pure returns (bool value) {

@@ -3,13 +3,13 @@ pragma solidity ^0.8.27;
 
 import {Uint256Splitter} from "src/libraries/internal/Uint256Splitter.sol";
 import {IFactsRegistry} from "src/interfaces/external/IFactsRegistry.sol";
-import {INativeSharpMmrGrowingModule} from "src/interfaces/modules/growing/INativeSharpMmrGrowingModule.sol";
+import {IEvmSharpMmrGrowingModule} from "src/interfaces/modules/growing/IEvmSharpMmrGrowingModule.sol";
 import {ISatellite} from "src/interfaces/ISatellite.sol";
 import {LibSatellite} from "src/libraries/LibSatellite.sol";
 import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "src/interfaces/modules/IMmrCoreModule.sol";
 import {AccessController} from "src/libraries/AccessController.sol";
 
-contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule, AccessController {
+contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController {
     // Using inline library for efficient splitting and joining of uint256 values
     using Uint256Splitter for uint256;
 
@@ -28,9 +28,9 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule, AccessCont
 
     // ========================= Satellite Module Storage ========================= //
 
-    bytes32 constant MODULE_STORAGE_POSITION = keccak256("diamond.standard.satellite.module.storage.native-sharp-mmr-growing");
+    bytes32 constant MODULE_STORAGE_POSITION = keccak256("diamond.standard.satellite.module.storage.evm-sharp-mmr-growing");
 
-    function moduleStorage() internal pure returns (NativeSharpMmrGrowingModuleStorage storage s) {
+    function moduleStorage() internal pure returns (EvmSharpMmrGrowingModuleStorage storage s) {
         bytes32 position = MODULE_STORAGE_POSITION;
         assembly {
             s.slot := position
@@ -39,23 +39,23 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule, AccessCont
 
     // ========================= Core Functions ========================= //
 
-    function initNativeSharpMmrGrowingModule(IFactsRegistry factsRegistry) external onlyOwner {
-        NativeSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+    function initEvmSharpMmrGrowingModule(IFactsRegistry factsRegistry) external onlyOwner {
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
         ms.factsRegistry = factsRegistry;
         ms.aggregatedChainId = block.chainid;
     }
 
-    function createNativeSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external {
+    function createEvmSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external {
         bytes32[] memory hashingFunctions = new bytes32[](2);
         hashingFunctions[0] = KECCAK_HASHING_FUNCTION;
         hashingFunctions[1] = POSEIDON_HASHING_FUNCTION;
 
-        NativeSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
 
         ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions);
     }
 
-    function aggregateNativeSharpJobs(uint256 mmrId, INativeSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external onlyOwner {
+    function aggregateEvmSharpJobs(uint256 mmrId, IEvmSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external onlyOwner {
         // Ensuring at least one job output is provided
         if (outputs.length < 1) {
             revert NotEnoughJobs();
@@ -85,7 +85,7 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule, AccessCont
         (, uint256 mmrNewSize) = lastOutput.mmrSizesPacked.split128();
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        NativeSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
 
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize = mmrNewSize;
@@ -112,11 +112,11 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule, AccessCont
     /// @param mmrId The MMR ID to validate the output for
     /// @param fromBlockNumber The parent hash of the block to start from
     /// @param firstOutput The job output to check
-    function _validateOutput(uint256 mmrId, uint256 fromBlockNumber, INativeSharpMmrGrowingModule.JobOutputPacked memory firstOutput) internal view {
+    function _validateOutput(uint256 mmrId, uint256 fromBlockNumber, IEvmSharpMmrGrowingModule.JobOutputPacked memory firstOutput) internal view {
         (uint256 mmrPreviousSize, ) = firstOutput.mmrSizesPacked.split128();
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        NativeSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
         // Retrieve from cache the parent hash of the block to start from
         bytes32 fromBlockPlusOneParentHash = s.receivedParentHashes[ms.aggregatedChainId][KECCAK_HASHING_FUNCTION][fromBlockNumber + 1];
         uint256 actualMmrSizePoseidon = s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize;
@@ -192,7 +192,7 @@ contract NativeSharpMmrGrowingModule is INativeSharpMmrGrowingModule, AccessCont
         // We compute the deterministic fact bytes32 value
         bytes32 fact = keccak256(abi.encode(PROGRAM_HASH, outputHash));
 
-        NativeSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
 
         // We ensure this fact has been registered on SHARP Facts Registry
         if (!ms.factsRegistry.isValid(fact)) {

@@ -4,11 +4,11 @@ pragma solidity ^0.8.27;
 import {Lib_RLPReader as RLPReader} from "src/libraries/external/optimism/rlp/Lib_RLPReader.sol";
 import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
 import {LibSatellite} from "src/libraries/LibSatellite.sol";
-import {INativeOnChainGrowingModule} from "src/interfaces/modules/growing/INativeOnChainGrowingModule.sol";
+import {IEvmOnChainGrowingModule} from "src/interfaces/modules/growing/IEvmOnChainGrowingModule.sol";
 import {ISatellite} from "src/interfaces/ISatellite.sol";
 import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "src/interfaces/modules/IMmrCoreModule.sol";
 
-contract NativeOnChainGrowingModule is INativeOnChainGrowingModule {
+contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
     // ========================= Types ========================= //
 
     using RLPReader for RLPReader.RLPItem;
@@ -28,7 +28,7 @@ contract NativeOnChainGrowingModule is INativeOnChainGrowingModule {
     ///    If the reference header is accumulated, the context contains the MMR proof and peaks.
     ///    If the reference header is not accumulated, the context contains the block number of the reference header and the MMR peaks.
     /// @param headersSerialized the serialized headers of the batch
-    function onchainNativeAppendBlocksBatch(
+    function onchainEvmAppendBlocksBatch(
         uint256 accumulatedChainId,
         uint256 mmrId,
         bool processFromReceivedBlockHash,

@@ -4,7 +4,7 @@ pragma solidity ^0.8.27;
 import {Lib_RLPReader as RLPReader} from "src/libraries/external/optimism/rlp/Lib_RLPReader.sol";
 import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
 
-interface INativeOnChainGrowingModule {
+interface IEvmOnChainGrowingModule {
     // ========================= Types ========================= //
 
     struct MMRGrowResult {
@@ -16,7 +16,7 @@ interface INativeOnChainGrowingModule {
 
     // ========================= Functions ========================= //
 
-    function onchainNativeAppendBlocksBatch(
+    function onchainEvmAppendBlocksBatch(
         uint256 accumulatedChainId,
         uint256 mmrId,
         bool processFromReceivedBlockHash,

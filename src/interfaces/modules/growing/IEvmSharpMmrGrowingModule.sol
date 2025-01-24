@@ -5,9 +5,9 @@ import {Uint256Splitter} from "src/libraries/internal/Uint256Splitter.sol";
 import {IFactsRegistry} from "src/interfaces/external/IFactsRegistry.sol";
 import {ISharpMmrGrowingCommon} from "src/interfaces/modules/common/ISharpMmrGrowingCommon.sol";
 
-interface INativeSharpMmrGrowingModule is ISharpMmrGrowingCommon {
+interface IEvmSharpMmrGrowingModule is ISharpMmrGrowingCommon {
     // Representation of the Cairo program's output (raw unpacked)
-    struct NativeJobOutput {
+    struct EvmJobOutput {
         uint256 fromBlockNumberHigh;
         uint256 toBlockNumberLow;
         bytes32 blockNPlusOneParentHashLow;
@@ -36,14 +36,14 @@ interface INativeSharpMmrGrowingModule is ISharpMmrGrowingCommon {
         uint256 mmrSizesPacked;
     }
 
-    struct NativeSharpMmrGrowingModuleStorage {
+    struct EvmSharpMmrGrowingModuleStorage {
         IFactsRegistry factsRegistry;
         uint256 aggregatedChainId;
     }
 
-    function initNativeSharpMmrGrowingModule(IFactsRegistry factsRegistry) external;
+    function initEvmSharpMmrGrowingModule(IFactsRegistry factsRegistry) external;
 
-    function createNativeSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
+    function createEvmSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
 
-    function aggregateNativeSharpJobs(uint256 mmrId, JobOutputPacked[] calldata outputs) external;
+    function aggregateEvmSharpJobs(uint256 mmrId, JobOutputPacked[] calldata outputs) external;
 }

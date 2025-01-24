@@ -45,14 +45,14 @@ export const modules = (chainId: keyof typeof settings) =>
       ],
     },
 
-    NativeOnChainGrowingModule: {
-      interfaceName: "INativeOnChainGrowingModule",
+    EvmOnChainGrowingModule: {
+      interfaceName: "IEvmOnChainGrowingModule",
     },
-    NativeSharpMmrGrowingModule: {
-      interfaceName: "INativeSharpMmrGrowingModule",
+    EvmSharpMmrGrowingModule: {
+      interfaceName: "IEvmSharpMmrGrowingModule",
       initFunctions: [
         {
-          name: "initNativeSharpMmrGrowingModule",
+          name: "initEvmSharpMmrGrowingModule",
           args: [(settings[chainId] as any)?.SHARP_FACT_REGISTRY],
         },
       ],

@@ -119,7 +119,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
             bytes32 taskMerkleRoot = bytes32((taskMerkleRootHigh << 128) | taskMerkleRootLow);
 
             // Compute the Merkle leaf of the task
-            bytes32 taskMerkleLeaf = standardNativeHDPLeafHash(task.commitment);
+            bytes32 taskMerkleLeaf = standardEvmHDPLeafHash(task.commitment);
             // Ensure that the task is included in the batch, by verifying the Merkle proof
             bool isVerifiedTask = task.taskInclusionProof.verify(taskMerkleRoot, taskMerkleLeaf);
 
@@ -129,7 +129,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
 
             // Compute the Merkle leaf of the task result
             bytes32 taskResultCommitment = keccak256(abi.encode(task.commitment, task.result));
-            bytes32 taskResultMerkleLeaf = standardNativeHDPLeafHash(taskResultCommitment);
+            bytes32 taskResultMerkleLeaf = standardEvmHDPLeafHash(taskResultCommitment);
 
             // Ensure that the task result is included in the batch, by verifying the Merkle proof
             bool isVerifiedResult = task.resultInclusionProof.verify(resultMerkleRoot, taskResultMerkleLeaf);
@@ -170,7 +170,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
     }
 
     /// @notice Returns the leaf of standard merkle tree
-    function standardNativeHDPLeafHash(bytes32 value) internal pure returns (bytes32) {
+    function standardEvmHDPLeafHash(bytes32 value) internal pure returns (bytes32) {
         bytes32 firstHash = keccak256(abi.encode(value));
         bytes32 leaf = keccak256(abi.encode(firstHash));
         return leaf;

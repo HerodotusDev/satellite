@@ -6,7 +6,7 @@ export const modules = [
   "SatelliteInspectorModule",
   "MmrCoreModule",
   "EVMFactRegistryModule",
-  "NativeOnChainGrowingModule",
+  "EvmOnChainGrowingModule",
   "NativeParentHashFetcherModule",
   "SimpleReceiverModule",
 ] as const;

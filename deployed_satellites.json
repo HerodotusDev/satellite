@@ -15,6 +15,14 @@
         {
             "chainId": "4801",
             "contractAddress": "0x798E0eE46B18C1FC3862D1B73a1088A2bFa3B34F"
+        },
+        {
+            "chainId": "421614",
+            "contractAddress": "0x0270FF2747992C0EA88A7067f5E00c58b7912f9F"
+        },
+        {
+            "chainId": "33111",
+            "contractAddress": "0xF78bd92f9C38eceED6b3ED1a17B48FCdD41ed452"
         }
     ],
     "connections": [
@@ -29,6 +37,14 @@
         {
             "from": "11155111",
             "to": "4801"
+        },
+        {
+            "from": "11155111",
+            "to": "421614"
+        },
+        {
+            "from": "421614",
+            "to": "33111"
         }
     ]
 }

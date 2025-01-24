@@ -44,7 +44,7 @@
     "connections": [
       {
         "to": "33111",
-        "inboxAddress": "0x990A3402F3358A1Ac9886c42d12A5C47aD97cb94",
+        "inboxContract": "0x990A3402F3358A1Ac9886c42d12A5C47aD97cb94",
         "sendFunction": "sendMessageArbitrumToApeChain",
         "L2Alias": "0x1111000000000000000000000000000000001111"
       }

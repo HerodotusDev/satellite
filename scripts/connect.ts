@@ -15,7 +15,8 @@ function alias(address: string, shift: string) {
 
 async function main() {
   if (Bun.argv.length != 4) {
-    throw new Error("Usage: bun connect.ts <senderChainId> <receiverChainId>");
+    console.error("Usage: bun connect.ts <senderChainId> <receiverChainId>");
+    process.exit(1);
   }
 
   const senderChainId = Bun.argv[2] as keyof typeof settings;

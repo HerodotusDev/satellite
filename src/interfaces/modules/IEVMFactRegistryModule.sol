@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-interface IEVMFactRegistryModule {
+interface IEvmFactRegistryModule {
     struct BlockHeaderProof {
         uint256 treeId;
         uint128 mmrTreeSize;
@@ -30,7 +30,7 @@ interface IEVMFactRegistryModule {
         mapping(AccountField => bytes32) fields;
     }
 
-    struct EVMFactRegistryModuleStorage {
+    struct EvmFactRegistryModuleStorage {
         /// @dev chain_id => address => block_number => Account
         mapping(uint256 => mapping(address => mapping(uint256 => Account))) accountField;
         /// @dev chain_id => address => block_number => slot => value

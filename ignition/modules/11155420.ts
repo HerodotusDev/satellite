@@ -5,7 +5,7 @@ export default buildSatelliteDeployment("11155420", [
   "SatelliteConnectionRegistryModule",
   "SatelliteInspectorModule",
   "MmrCoreModule",
-  "EVMFactRegistryModule",
+  "EvmFactRegistryModule",
   "EvmOnChainGrowingModule",
   "NativeParentHashFetcherModule",
   "OptimismReceiverModule",

@@ -28,8 +28,8 @@ export const modules = (chainId: keyof typeof settings) =>
     MmrCoreModule: {
       interfaceName: "IMmrCoreModule",
     },
-    EVMFactRegistryModule: {
-      interfaceName: "IEVMFactRegistryModule",
+    EvmFactRegistryModule: {
+      interfaceName: "IEvmFactRegistryModule",
     },
     DataProcessorModule: {
       interfaceName: "IDataProcessorModule",

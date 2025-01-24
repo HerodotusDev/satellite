@@ -11,6 +11,10 @@
         {
             "chainId": "11155420",
             "contractAddress": "0x8C1917E7ad1DAE52870FB7671f7Fe7f7acC68D28"
+        },
+        {
+            "chainId": "4801",
+            "contractAddress": "0x798E0eE46B18C1FC3862D1B73a1088A2bFa3B34F"
         }
     ],
     "connections": [
@@ -21,6 +25,10 @@
         {
             "from": "11155111",
             "to": "300"
+        },
+        {
+            "from": "11155111",
+            "to": "4801"
         }
     ]
 }

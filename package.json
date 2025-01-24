@@ -29,7 +29,8 @@
     "deploy:11155420": "bun hardhat ignition deploy ./ignition/modules/11155420.ts --network optimismSepolia --verify",
     "deploy:421614": "bun hardhat ignition deploy ./ignition/modules/421614.ts --network arbitrumSepolia --verify",
     "deploy:33111": "bun hardhat ignition deploy ./ignition/modules/33111.ts --network curtis --verify",
-    "deploy:300": "bun run build:zksync && bun hardhat deploy-zksync --script deploy.ts --network zkSyncSepolia",
+    "deploy:4801": "bun hardhat ignition deploy ./ignition/modules/4801.ts --network worldChainSepolia --verify",
+    "deploy:300": "bun run compile:zksync && bun hardhat deploy-zksync --script deploy.ts --network zkSyncSepolia",
     "connection:register": "bun run scripts/connect.ts"
   },
   "devDependencies": {

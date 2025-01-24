@@ -55,6 +55,10 @@ const config: HardhatUserConfig = {
       url: "https://curtis.rpc.caldera.xyz/http",
       accounts: [process.env.PRIVATE_KEY as string],
     },
+    worldChainSepolia: {
+      url: `https://worldchain-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      accounts: [process.env.PRIVATE_KEY as string],
+    },
   },
   etherscan: {
     apiKey: {
@@ -63,6 +67,7 @@ const config: HardhatUserConfig = {
       optimismSepolia: process.env.OPTIMISM_ETHERSCAN_API_KEY as string,
       arbitrumSepolia: process.env.ARBITRUM_ETHERSCAN_API_KEY as string,
       curtis: process.env.CURTIS_ETHERSCAN_API_KEY as string,
+      worldChainSepolia: process.env.WORLDCHAIN_ETHERSCAN_API_KEY as string,
     },
     customChains: [
       {
@@ -70,7 +75,7 @@ const config: HardhatUserConfig = {
         chainId: 11155420,
         urls: {
           apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
-          browserURL: "https://sepolia-optimism.etherscan.io/",
+          browserURL: "https://sepolia-optimism.etherscan.io",
         },
       },
       {
@@ -78,7 +83,7 @@ const config: HardhatUserConfig = {
         chainId: 421614,
         urls: {
           apiURL: "https://api-sepolia.arbiscan.io/api",
-          browserURL: "https://sepolia.arbiscan.io/",
+          browserURL: "https://sepolia.arbiscan.io",
         },
       },
       {
@@ -86,7 +91,15 @@ const config: HardhatUserConfig = {
         chainId: 33111,
         urls: {
           apiURL: "https://curtis.explorer.caldera.xyz/api",
-          browserURL: "https://curtis.explorer.caldera.xyz/",
+          browserURL: "https://curtis.explorer.caldera.xyz",
+        },
+      },
+      {
+        network: "worldChainSepolia",
+        chainId: 4801,
+        urls: {
+          apiURL: "https://api-sepolia.worldscan.org/api",
+          browserURL: "https://sepolia.worldscan.org",
         },
       },
     ],

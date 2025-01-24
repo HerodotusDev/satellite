@@ -51,6 +51,10 @@ const config: HardhatUserConfig = {
       url: `https://arb-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY as string],
     },
+    curtis: {
+      url: "https://curtis.rpc.caldera.xyz/http",
+      accounts: [process.env.PRIVATE_KEY as string],
+    },
   },
   etherscan: {
     apiKey: {
@@ -58,6 +62,7 @@ const config: HardhatUserConfig = {
       zksyncsepolia: process.env.ZKSYNC_ETHERSCAN_API_KEY as string,
       optimismSepolia: process.env.OPTIMISM_ETHERSCAN_API_KEY as string,
       arbitrumSepolia: process.env.ARBITRUM_ETHERSCAN_API_KEY as string,
+      curtis: process.env.CURTIS_ETHERSCAN_API_KEY as string,
     },
     customChains: [
       {
@@ -74,6 +79,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-sepolia.arbiscan.io/api",
           browserURL: "https://sepolia.arbiscan.io/",
+        },
+      },
+      {
+        network: "curtis", // ApeChain sepolia
+        chainId: 33111,
+        urls: {
+          apiURL: "https://curtis.explorer.caldera.xyz/api",
+          browserURL: "https://curtis.explorer.caldera.xyz/",
         },
       },
     ],

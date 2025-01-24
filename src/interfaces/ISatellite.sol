@@ -18,6 +18,8 @@ import {IDataProcessorModule} from "./modules/IDataProcessorModule.sol";
 import {IUniversalSenderModule} from "./modules/messaging/sender/IUniversalSenderModule.sol";
 import {IL1ToArbitrumSenderModule} from "./modules/messaging/sender/IL1ToArbitrumSenderModule.sol";
 import {IL1ToOptimismSenderModule} from "./modules/messaging/sender/IL1ToOptimismSenderModule.sol";
+import {IArbitrumToApeChainSenderModule} from "./modules/messaging/sender/IArbitrumToApeChainSenderModule.sol";
+
 interface ISatellite is
     ILibSatellite,
     IOwnershipModule,
@@ -35,5 +37,6 @@ interface ISatellite is
     IL1ToArbitrumSenderModule,
     IL1ToOptimismSenderModule,
     IStarknetParentHashFetcherModule,
-    IDataProcessorModule
+    IDataProcessorModule,
+    IArbitrumToApeChainSenderModule
 {}

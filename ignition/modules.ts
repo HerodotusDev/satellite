@@ -95,6 +95,15 @@ export const modules = (chainId: keyof typeof settings) =>
     L1ToZkSyncSenderModule: {
       interfaceName: "IL1ToZkSyncSenderModule",
     },
+    ArbitrumToApeChainSenderModule: {
+      interfaceName: "IArbitrumToApeChainSenderModule",
+      initFunctions: [
+        {
+          name: "setApeChainTokenAddress",
+          args: [(settings[chainId] as any)?.APE_CHAIN_TOKEN_ADDRESS],
+        },
+      ],
+    },
 
     SimpleReceiverModule: {
       interfaceName: "IReceiverModule",

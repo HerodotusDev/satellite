@@ -30,10 +30,10 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
         }
     }
 
-    function initStarknetSharpMmrGrowingModule(IFactsRegistry factsRegistry) external onlyOwner {
+    function initStarknetSharpMmrGrowingModule(IFactsRegistry factsRegistry, uint256 chainId) external onlyOwner {
         StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
         ms.factsRegistry = factsRegistry;
-        ms.aggregatedChainId = block.chainid;
+        ms.aggregatedChainId = chainId;
     }
 
     function createStarknetSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external {

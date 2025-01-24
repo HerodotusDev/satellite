@@ -24,7 +24,7 @@ interface IStarknetSharpMmrGrowingModule is ISharpMmrGrowingCommon {
         uint256 aggregatedChainId;
     }
 
-    function initStarknetSharpMmrGrowingModule(IFactsRegistry factsRegistry) external;
+    function initStarknetSharpMmrGrowingModule(IFactsRegistry factsRegistry, uint256 chainId) external;
 
     function createStarknetSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
 

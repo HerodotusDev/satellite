@@ -1,6 +1,6 @@
 import buildSatelliteDeployment from "../SatelliteDeployment";
 
-export default buildSatelliteDeployment("11155420", [
+export default buildSatelliteDeployment("421614", [
   "OwnershipModule",
   "SatelliteConnectionRegistryModule",
   "SatelliteInspectorModule",
@@ -9,5 +9,5 @@ export default buildSatelliteDeployment("11155420", [
   // "DataProcessorModule",
   "EvmOnChainGrowingModule",
   "NativeParentHashFetcherModule",
-  "OptimismReceiverModule",
+  "SimpleReceiverModule",
 ]);

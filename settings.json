@@ -36,5 +36,10 @@
     "network": "optimismSepolia",
 
     "connections": []
+  },
+  "421614": {
+    "network": "arbitrumSepolia",
+
+    "connections": []
   }
 }

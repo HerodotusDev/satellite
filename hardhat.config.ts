@@ -47,12 +47,17 @@ const config: HardhatUserConfig = {
       url: `https://opt-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY as string],
     },
+    arbitrumSepolia: {
+      url: `https://arb-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      accounts: [process.env.PRIVATE_KEY as string],
+    },
   },
   etherscan: {
     apiKey: {
       sepolia: process.env.L1_ETHERSCAN_API_KEY as string,
       zksyncsepolia: process.env.ZKSYNC_ETHERSCAN_API_KEY as string,
       optimismSepolia: process.env.OPTIMISM_ETHERSCAN_API_KEY as string,
+      arbitrumSepolia: process.env.ARBITRUM_ETHERSCAN_API_KEY as string,
     },
     customChains: [
       {
@@ -61,6 +66,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
           browserURL: "https://sepolia-optimism.etherscan.io/",
+        },
+      },
+      {
+        network: "arbitrumSepolia",
+        chainId: 421614,
+        urls: {
+          apiURL: "https://api-sepolia.arbiscan.io/api",
+          browserURL: "https://sepolia.arbiscan.io/",
         },
       },
     ],

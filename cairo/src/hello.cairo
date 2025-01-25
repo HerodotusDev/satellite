@@ -1,11 +1,12 @@
 #[starknet::interface]
 pub trait IHello<TContractState> {
-    fn increase_balance(ref self: TContractState, amount: felt252);
-    fn get_balance(self: @TContractState) -> felt252;
+    fn write(ref self: TContractState, value: felt252);
 }
 
 #[starknet::component]
 pub mod hello_component {
+    use herodotus_starknet::state::state_component;
+
     #[storage]
     struct Storage {
         balance: felt252, 
@@ -13,15 +14,14 @@ pub mod hello_component {
 
     #[embeddable_as(Hello)]
     impl HelloImpl<
-        TContractState, +HasComponent<TContractState>,
+        TContractState,
+        +HasComponent<TContractState>,
+        +Drop<TContractState>,
+        impl State: state_component::HasComponent<TContractState>,
     > of super::IHello<ComponentState<TContractState>> {
-        fn increase_balance(ref self: ComponentState<TContractState>, amount: felt252) {
-            assert(amount != 0, 'Amount cannot be 0');
-            self.balance.write(self.balance.read() + amount);
-        }
-    
-        fn get_balance(self: @ComponentState<TContractState>) -> felt252 {
-            self.balance.read()
+        fn write(ref self: ComponentState<TContractState>, value: felt252) {
+            let mut state = get_dep_component_mut!(ref self, State);
+            state.testvar.write(value);
         }
     }
 }

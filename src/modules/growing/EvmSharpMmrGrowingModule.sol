@@ -55,7 +55,7 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
         ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions);
     }
 
-    function aggregateEvmSharpJobs(uint256 mmrId, IEvmSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external onlyOwner {
+    function aggregateEvmSharpJobs(uint256 mmrId, IEvmSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external {
         // Ensuring at least one job output is provided
         if (outputs.length < 1) {
             revert NotEnoughJobs();

@@ -1,7 +1,5 @@
 {
-  "plugins": [
-    "prettier-plugin-solidity"
-  ],
+  "plugins": ["prettier-plugin-solidity"],
   "overrides": [
     {
       "files": "*.sol",

@@ -11,7 +11,7 @@ import {AccessController} from "src/libraries/AccessController.sol";
 
 contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, AccessController {
     // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
-    bytes32 public constant PROGRAM_HASH = bytes32(uint256(0x17994b1262fdd2be20da502c739e210ce1d38e7b0610a211adf055f20ecafda));
+    bytes32 public constant PROGRAM_HASH = bytes32(uint256(0x5dc00f4bec4077d7f511008cff02c0688efb11cfabb6029d084e5e309dcf014));
 
     bytes32 public constant POSEIDON_HASHING_FUNCTION = keccak256("poseidon");
 

@@ -1,50 +1,50 @@
 {
-    "satellites": [
-        {
-            "chainId": "11155111",
-            "contractAddress": "0x80B180312B98b8acD341B28C0736659E01BcFD35"
-        },
-        {
-            "chainId": "300",
-            "contractAddress": "0xc157a87d49A0C65605f93B9A9272c1400e69c2F4"
-        },
-        {
-            "chainId": "11155420",
-            "contractAddress": "0x8C1917E7ad1DAE52870FB7671f7Fe7f7acC68D28"
-        },
-        {
-            "chainId": "4801",
-            "contractAddress": "0x798E0eE46B18C1FC3862D1B73a1088A2bFa3B34F"
-        },
-        {
-            "chainId": "421614",
-            "contractAddress": "0x0270FF2747992C0EA88A7067f5E00c58b7912f9F"
-        },
-        {
-            "chainId": "33111",
-            "contractAddress": "0xF78bd92f9C38eceED6b3ED1a17B48FCdD41ed452"
-        }
-    ],
-    "connections": [
-        {
-            "from": "11155111",
-            "to": "11155420"
-        },
-        {
-            "from": "11155111",
-            "to": "300"
-        },
-        {
-            "from": "11155111",
-            "to": "4801"
-        },
-        {
-            "from": "11155111",
-            "to": "421614"
-        },
-        {
-            "from": "421614",
-            "to": "33111"
-        }
-    ]
+  "satellites": [
+    {
+      "chainId": "11155111",
+      "contractAddress": "0x80B180312B98b8acD341B28C0736659E01BcFD35"
+    },
+    {
+      "chainId": "300",
+      "contractAddress": "0xc157a87d49A0C65605f93B9A9272c1400e69c2F4"
+    },
+    {
+      "chainId": "11155420",
+      "contractAddress": "0x8C1917E7ad1DAE52870FB7671f7Fe7f7acC68D28"
+    },
+    {
+      "chainId": "4801",
+      "contractAddress": "0x798E0eE46B18C1FC3862D1B73a1088A2bFa3B34F"
+    },
+    {
+      "chainId": "421614",
+      "contractAddress": "0x0270FF2747992C0EA88A7067f5E00c58b7912f9F"
+    },
+    {
+      "chainId": "33111",
+      "contractAddress": "0xF78bd92f9C38eceED6b3ED1a17B48FCdD41ed452"
+    }
+  ],
+  "connections": [
+    {
+      "from": "11155111",
+      "to": "11155420"
+    },
+    {
+      "from": "11155111",
+      "to": "300"
+    },
+    {
+      "from": "11155111",
+      "to": "4801"
+    },
+    {
+      "from": "11155111",
+      "to": "421614"
+    },
+    {
+      "from": "421614",
+      "to": "33111"
+    }
+  ]
 }

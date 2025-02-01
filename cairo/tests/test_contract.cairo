@@ -31,13 +31,11 @@ fn test_increase_balance() {
     dispatcher.write(12);
 
     assert(dispatcher2.read() == 12, 'Invalid value');
-
     // dispatcher.increase_balance(42);
 
     // let balance_after = dispatcher.get_balance();
-    // assert(balance_after == 42, 'Invalid balance');
+// assert(balance_after == 42, 'Invalid balance');
 }
-
 // #[test]
 // #[feature("safe_dispatcher")]
 // fn test_cannot_increase_balance_with_zero_value() {
@@ -55,3 +53,5 @@ fn test_increase_balance() {
 //         }
 //     };
 // }
+
+

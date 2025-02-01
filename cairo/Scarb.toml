@@ -7,6 +7,7 @@ edition = "2023_11"
 
 [dependencies]
 starknet = "2.9.2"
+cairo_lib = { git = "https://github.com/HerodotusDev/cairo-lib.git", branch = "update-cairo" }
 
 [dev-dependencies]
 snforge_std = "0.36.0"

@@ -18,8 +18,7 @@ pub mod hello_component2 {
         impl State: state_component::HasComponent<TContractState>,
     > of super::IHello2<ComponentState<TContractState>> {
         fn read(self: @ComponentState<TContractState>) -> felt252 {
-            let state = get_dep_component!(self, State);
-            state.testvar.read()
+            0
         }
     }
 }

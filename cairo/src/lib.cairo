@@ -1,19 +1,20 @@
 mod state;
-pub mod hello;
+pub mod evm_fact_registry;
 pub mod hello2;
 
 #[starknet::contract]
-mod HelloStarknet {
+mod EvmFactRegistry {
     use herodotus_starknet::{
-        hello::hello_component,
-        hello2::hello_component2,
+        evm_fact_registry::evm_fact_registry_component, hello2::hello_component2,
         state::state_component,
     };
 
     #[abi(embed_v0)]
     component!(path: state_component, storage: state, event: StateEvent);
     #[abi(embed_v0)]
-    component!(path: hello_component, storage: hello, event: HelloEvent);
+    component!(
+        path: evm_fact_registry_component, storage: evm_fact_registry, event: EvmFactRegistryEvent,
+    );
     #[abi(embed_v0)]
     component!(path: hello_component2, storage: hello2, event: Hello2Event);
 
@@ -22,7 +23,7 @@ mod HelloStarknet {
         #[substorage(v0)]
         state: state_component::Storage,
         #[substorage(v0)]
-        hello: hello_component::Storage,
+        evm_fact_registry: evm_fact_registry_component::Storage,
         #[substorage(v0)]
         hello2: hello_component2::Storage,
     }
@@ -31,13 +32,13 @@ mod HelloStarknet {
     #[derive(Drop, starknet::Event)]
     enum Event {
         StateEvent: state_component::Event,
-        HelloEvent: hello_component::Event,
+        EvmFactRegistryEvent: evm_fact_registry_component::Event,
         Hello2Event: hello_component2::Event,
     }
 
     #[abi(embed_v0)]
-    impl HelloImpl = hello_component::Hello<ContractState>;
+    impl EvmFactRegistryImpl =
+        evm_fact_registry_component::EvmFactRegistry<ContractState>;
     #[abi(embed_v0)]
     impl Hello2Impl = hello_component2::Hello2<ContractState>;
-
 }

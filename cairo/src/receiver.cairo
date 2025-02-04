@@ -1,16 +1,32 @@
-pub trait IReceiver {
+#[starknet::interface]
+pub trait IReceiver<TContractState> {
     fn setL1MessageSender(
+        ref self: TContractState,
         l1_address: felt252,
     );
 }
 
 #[starknet::contract]
 pub mod HerodotusStarknet {
+    use openzeppelin::{
+        access::ownable::OwnableComponent,
+        upgrades::{UpgradeableComponent, interface::IUpgradeable},
+    };
     use herodotus_starknet::{
-        evm_fact_registry::evm_fact_registry_component, mmr_core::mmr_core_component,
+        evm_fact_registry::evm_fact_registry_component, mmr_core::{mmr_core_component, RootForHashingFunction},
         state::state_component,
     };
-    use herodotus_starknet::mmr_core::RootForHashingFunction;
+    use starknet::{ClassHash, ContractAddress};
+    use super::*;
+
+    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
+    component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
+
+    #[abi(embed_v0)]
+    impl OwnableMixinImpl = OwnableComponent::OwnableMixinImpl<ContractState>;
+
+    impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
+    impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
 
     component!(path: state_component, storage: state, event: StateEvent);
     component!(
@@ -21,6 +37,10 @@ pub mod HerodotusStarknet {
     #[storage]
     struct Storage {
         l1_message_sender: felt252,
+        #[substorage(v0)]
+        ownable: OwnableComponent::Storage,
+        #[substorage(v0)]
+        upgradeable: UpgradeableComponent::Storage,
         #[substorage(v0)]
         state: state_component::Storage,
         #[substorage(v0)]
@@ -66,13 +86,13 @@ pub mod HerodotusStarknet {
         );
     }
 
-    #[external(v0)]
-    impl IReceiverImpl of IReceiver {
+    #[abi(embed_v0)]
+    impl IReceiverImpl of IReceiver<ContractState> {
         fn setL1MessageSender(
             ref self: ContractState,
             l1_address: felt252,
         ) {
-            // TODO: owner only
+            self.ownable.assert_only_owner();
             self.l1_message_sender.write(l1_address);
         }
     }
@@ -80,9 +100,21 @@ pub mod HerodotusStarknet {
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
+        #[flat]
+        OwnableEvent: OwnableComponent::Event,
+        #[flat]
+        UpgradeableEvent: UpgradeableComponent::Event,
+        #[flat]
         StateEvent: state_component::Event,
+        #[flat]
         EvmFactRegistryEvent: evm_fact_registry_component::Event,
+        #[flat]
         MmrCoreEvent: mmr_core_component::Event,
+    }
+
+    #[constructor]
+    fn constructor(ref self: ContractState, owner: ContractAddress) {
+        self.ownable.initializer(owner);
     }
 
     #[abi(embed_v0)]

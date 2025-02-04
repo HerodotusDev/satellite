@@ -17,6 +17,6 @@ pub mod state_component {
         /// ChainId => MMR ID => hashing function => MMR info
         mmrs: Map<u256, Map<u256, Map<u256, MmrInfo>>>,
         /// ChainId => hashing function => block number => parent hash
-        receivedParentHashes: Map<u256, Map<u256, Map<u256, u256>>>,
+        received_parent_hashes: Map<u256, Map<u256, Map<u256, u256>>>,
     }
 }

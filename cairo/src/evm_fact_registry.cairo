@@ -171,7 +171,7 @@ pub mod evm_fact_registry_component {
         +HasComponent<TContractState>,
         +Drop<TContractState>,
         impl State: state_component::HasComponent<TContractState>,
-    > of super::IEvmFactRegistry<ComponentState<TContractState>> {
+    > of IEvmFactRegistry<ComponentState<TContractState>> {
         // @inheritdoc IEVMFactsRegistry
         fn accountField(
             self: @ComponentState<TContractState>,

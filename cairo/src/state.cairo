@@ -2,9 +2,9 @@ use starknet::storage::Map;
 
 #[starknet::storage_node]
 pub struct MmrInfo {
-    isSiblingSynced: bool,
-    latestSize: u256,
-    mmrSizeToRoot: Map<u256, felt252>,
+    is_sibling_synced: bool,
+    latest_size: u256,
+    mmr_size_to_root: Map<u256, u256>,
 }
 
 #[starknet::component]
@@ -14,6 +14,7 @@ pub mod state_component {
 
     #[storage]
     struct Storage {
+        chain_id: u256,
         /// ChainId => MMR ID => hashing function => MMR info
         mmrs: Map<u256, Map<u256, Map<u256, MmrInfo>>>,
         /// ChainId => hashing function => block number => parent hash

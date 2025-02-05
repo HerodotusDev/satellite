@@ -1,9 +1,6 @@
 #[starknet::interface]
 pub trait IReceiver<TContractState> {
-    fn setL1MessageSender(
-        ref self: TContractState,
-        l1_address: felt252,
-    );
+    fn setL1MessageSender(ref self: TContractState, l1_address: felt252);
 }
 
 #[starknet::contract]
@@ -13,26 +10,21 @@ pub mod HerodotusStarknet {
         upgrades::{UpgradeableComponent, interface::IUpgradeable},
     };
     use herodotus_starknet::{
-        evm_fact_registry::evm_fact_registry_component, mmr_core::{mmr_core_component, RootForHashingFunction},
-        state::state_component,
+        evm_fact_registry::evm_fact_registry_component,
+        mmr_core::{mmr_core_component, RootForHashingFunction}, state::state_component,
     };
     use starknet::{ClassHash, ContractAddress};
     use super::*;
-
-    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
-    component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
-
-    #[abi(embed_v0)]
-    impl OwnableMixinImpl = OwnableComponent::OwnableMixinImpl<ContractState>;
-
-    impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
-    impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
 
     component!(path: state_component, storage: state, event: StateEvent);
     component!(
         path: evm_fact_registry_component, storage: evm_fact_registry, event: EvmFactRegistryEvent,
     );
     component!(path: mmr_core_component, storage: mmr_core, event: MmrCoreEvent);
+
+    // Ownable / Upgradeable
+    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
+    component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
 
     #[storage]
     struct Storage {
@@ -49,52 +41,56 @@ pub mod HerodotusStarknet {
         mmr_core: mmr_core_component::Storage,
     }
 
+    #[constructor]
+    fn constructor(ref self: ContractState, chain_id: u256, owner: ContractAddress) {
+        self.state.chain_id.write(chain_id);
+        self.ownable.initializer(owner);
+    }
+
+    #[abi(embed_v0)]
+    impl IReceiverImpl of IReceiver<ContractState> {
+        fn setL1MessageSender(ref self: ContractState, l1_address: felt252) {
+            self.ownable.assert_only_owner();
+            self.l1_message_sender.write(l1_address);
+        }
+    }
+
     #[l1_handler]
     fn receiveParentHash(
         ref self: ContractState,
         from_address: felt252,
-        chainId: u256,
-        hashingFunction: u256,
-        blockNumber: u256,
-        parentHash: u256,
+        chain_id: u256,
+        hashing_function: u256,
+        block_number: u256,
+        parent_hash: u256,
     ) {
         assert(from_address == self.l1_message_sender.read(), 'ONLY_L1_MESSAGE_SENDER');
-        self._receiveParentHash(chainId, hashingFunction, blockNumber, parentHash);
+        self._receiveParentHash(chain_id, hashing_function, block_number, parent_hash);
     }
 
     #[l1_handler]
     fn receive_mmr(
         ref self: ContractState,
         from_address: felt252,
-        newMmrId: u256,
-        rootsForHashingFunctions: Span<RootForHashingFunction>,
-        mmrSize: u256,
-        accumulatedChainId: u256,
-        originChainId: u256,
-        originalMmrId: u256,
-        isSiblingSynced: bool,
+        new_mmr_id: u256,
+        roots_for_hashing_functions: Span<RootForHashingFunction>,
+        mmr_size: u256,
+        accumulated_chain_id: u256,
+        origin_chain_id: u256,
+        original_mmr_id: u256,
+        is_sibling_synced: bool,
     ) {
         assert(from_address == self.l1_message_sender.read(), 'ONLY_L1_MESSAGE_SENDER');
-        self._createMmrFromForeign(
-            newMmrId,
-            rootsForHashingFunctions,
-            mmrSize,
-            accumulatedChainId,
-            originChainId,
-            originalMmrId,
-            isSiblingSynced,
-        );
-    }
-
-    #[abi(embed_v0)]
-    impl IReceiverImpl of IReceiver<ContractState> {
-        fn setL1MessageSender(
-            ref self: ContractState,
-            l1_address: felt252,
-        ) {
-            self.ownable.assert_only_owner();
-            self.l1_message_sender.write(l1_address);
-        }
+        self
+            ._createMmrFromForeign(
+                new_mmr_id,
+                roots_for_hashing_functions,
+                mmr_size,
+                accumulated_chain_id,
+                origin_chain_id,
+                original_mmr_id,
+                is_sibling_synced,
+            );
     }
 
     #[event]
@@ -112,14 +108,18 @@ pub mod HerodotusStarknet {
         MmrCoreEvent: mmr_core_component::Event,
     }
 
-    #[constructor]
-    fn constructor(ref self: ContractState, owner: ContractAddress) {
-        self.ownable.initializer(owner);
-    }
-
     #[abi(embed_v0)]
     impl EvmFactRegistryImpl =
         evm_fact_registry_component::EvmFactRegistry<ContractState>;
 
     impl MmrCoreInternalImpl = mmr_core_component::MmrCoreInternal<ContractState>;
+    #[abi(embed_v0)]
+    impl MmrCoreExternalImpl = mmr_core_component::MmrCoreExternal<ContractState>;
+
+    // Ownable / Upgradeable
+    #[abi(embed_v0)]
+    impl OwnableMixinImpl = OwnableComponent::OwnableMixinImpl<ContractState>;
+
+    impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
+    impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
 }

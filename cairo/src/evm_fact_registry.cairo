@@ -151,7 +151,10 @@ pub trait IEvmFactRegistry<TContractState> {
 
 #[starknet::component]
 pub mod evm_fact_registry_component {
-    use herodotus_starknet::state::state_component;
+    use herodotus_starknet::{
+        state::state_component, mmr_core::mmr_core_component,
+        mmr_core::mmr_core_component::MmrCoreExternalImpl,
+    };
     use starknet::storage::{
         StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map,
     };
@@ -171,6 +174,7 @@ pub mod evm_fact_registry_component {
         +HasComponent<TContractState>,
         +Drop<TContractState>,
         impl State: state_component::HasComponent<TContractState>,
+        impl MmrCore: mmr_core_component::HasComponent<TContractState>,
     > of IEvmFactRegistry<ComponentState<TContractState>> {
         // @inheritdoc IEVMFactsRegistry
         fn accountField(
@@ -227,12 +231,18 @@ pub mod evm_fact_registry_component {
         ) -> [u256; 4] {
             let blockhash = hash_words64(header_proof.block_header_rlp);
 
-            // TODO: verify inclusion proof
-            // let mmr_inclusion = IHeadersStoreDispatcher { contract_address }
-            //     .verify_historical_mmr_inclusion(
-            //         mmr_index, blockhash, mmr_peaks, mmr_proof, mmr_id, last_pos
-            //     );
-            // assert(mmr_inclusion, 'INVALID_MMR_PROOF');
+            let mmr_core = get_dep_component!(self, MmrCore);
+            let mmr_inclusion = mmr_core
+                .verify_historical_mmr_inclusion(
+                    chain_id,
+                    header_proof.mmr_id,
+                    header_proof.mmr_size,
+                    header_proof.leaf_index,
+                    blockhash,
+                    header_proof.mmr_proof,
+                    header_proof.mmr_peaks,
+                );
+            assert(mmr_inclusion, 'INVALID_MMR_PROOF');
 
             let (decoded_rlp, _) = rlp_decode_list_lazy(
                 header_proof.block_header_rlp, array![3, 8].span(),
@@ -432,7 +442,8 @@ pub mod evm_fact_registry_component {
                 .entry(block_number)
                 .entry(slot_index)
                 .write(Option::Some(value));
-            // self.emit(Event::StorageProven(StorageProven { account, block, slot, value: value
+            // TODO: emit event
+        // self.emit(Event::StorageProven(StorageProven { account, block, slot, value: value
         // }));
         }
     }

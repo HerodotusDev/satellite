@@ -1,5 +1,14 @@
 use cairo_lib::data_structures::mmr::mmr::{MMR, MMRImpl, MmrElement, MmrSize, Proof, Peaks};
 
+pub const POSEIDON_HASHING_FUNCTION: u256 =
+    0xd3764378578a6e2b5a09713c3e8d5015a802d8de808c962ff5c53384ac7b1450;
+pub const POSEIDON_INITIAL_ROOT: u256 =
+    0x06759138078831011e3bc0b4a135af21c008dda64586363531697207fb5a2bae;
+pub const KECCAK_HASHING_FUNCTION: u256 =
+    0xdf35a135a69c769066bbb4d17b2fa3ec922c028d4e4bf9d0402e6f7c12b31813;
+pub const KECCAK_INITIAL_ROOT: u256 =
+    0x5d8d23518dd388daa16925ff9475c5d1c06430d21e0422520d6a56402f42937b;
+
 #[derive(Drop, Serde)]
 pub struct RootForHashingFunction {
     hashing_function: u256,
@@ -74,9 +83,7 @@ pub trait ICoreMmrExternal<TContractState> {
 #[starknet::component]
 pub mod mmr_core_component {
     use herodotus_starknet::state::state_component;
-    use starknet::storage::{
-        StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map,
-    };
+    use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry};
     use super::*;
 
     #[storage]
@@ -114,16 +121,6 @@ pub mod mmr_core_component {
         CreatedMmr: CreatedMmr,
     }
 
-    const POSEIDON_HASHING_FUNCTION: u256 =
-        0xd3764378578a6e2b5a09713c3e8d5015a802d8de808c962ff5c53384ac7b1450;
-    const POSEIDON_INITIAL_ROOT: u256 =
-        0x06759138078831011e3bc0b4a135af21c008dda64586363531697207fb5a2bae;
-    const KECCAK_HASHING_FUNCTION: u256 =
-        0xdf35a135a69c769066bbb4d17b2fa3ec922c028d4e4bf9d0402e6f7c12b31813;
-    const KECCAK_INITIAL_ROOT: u256 =
-        0x5d8d23518dd388daa16925ff9475c5d1c06430d21e0422520d6a56402f42937b;
-
-    #[embeddable_as(MmrCoreInternal)]
     #[embeddable_as(MmrCoreInternal)]
     pub impl MmrCoreInternalImpl<
         TContractState,

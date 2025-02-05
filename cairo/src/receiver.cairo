@@ -5,15 +5,13 @@ pub trait IReceiver<TContractState> {
 
 #[starknet::contract]
 pub mod HerodotusStarknet {
-    use openzeppelin::{
-        access::ownable::OwnableComponent,
-        upgrades::{UpgradeableComponent, interface::IUpgradeable},
-    };
+    use openzeppelin::{access::ownable::OwnableComponent, upgrades::UpgradeableComponent};
     use herodotus_starknet::{
         evm_fact_registry::evm_fact_registry_component,
         mmr_core::{mmr_core_component, RootForHashingFunction}, state::state_component,
+        on_chain_growing::on_chain_growing_component,
     };
-    use starknet::{ClassHash, ContractAddress};
+    use starknet::ContractAddress;
     use super::*;
 
     component!(path: state_component, storage: state, event: StateEvent);
@@ -21,6 +19,9 @@ pub mod HerodotusStarknet {
         path: evm_fact_registry_component, storage: evm_fact_registry, event: EvmFactRegistryEvent,
     );
     component!(path: mmr_core_component, storage: mmr_core, event: MmrCoreEvent);
+    component!(
+        path: on_chain_growing_component, storage: on_chain_growing, event: OnChainGrowingEvent,
+    );
 
     // Ownable / Upgradeable
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
@@ -39,6 +40,8 @@ pub mod HerodotusStarknet {
         evm_fact_registry: evm_fact_registry_component::Storage,
         #[substorage(v0)]
         mmr_core: mmr_core_component::Storage,
+        #[substorage(v0)]
+        on_chain_growing: on_chain_growing_component::Storage,
     }
 
     #[constructor]
@@ -106,6 +109,8 @@ pub mod HerodotusStarknet {
         EvmFactRegistryEvent: evm_fact_registry_component::Event,
         #[flat]
         MmrCoreEvent: mmr_core_component::Event,
+        #[flat]
+        OnChainGrowingEvent: on_chain_growing_component::Event,
     }
 
     #[abi(embed_v0)]
@@ -115,6 +120,10 @@ pub mod HerodotusStarknet {
     impl MmrCoreInternalImpl = mmr_core_component::MmrCoreInternal<ContractState>;
     #[abi(embed_v0)]
     impl MmrCoreExternalImpl = mmr_core_component::MmrCoreExternal<ContractState>;
+
+    #[abi(embed_v0)]
+    impl OnChainGrowingImpl =
+        on_chain_growing_component::OnChainGrowing<ContractState>;
 
     // Ownable / Upgradeable
     #[abi(embed_v0)]

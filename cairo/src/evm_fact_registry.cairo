@@ -1,12 +1,10 @@
 use starknet::EthAddress;
 use cairo_lib::{
-    data_structures::{
-        mmr::{mmr::{MMR, MMRTrait, MmrSize}, peaks::Peaks, proof::Proof}, eth_mpt::MPTTrait,
-    },
+    data_structures::{mmr::{mmr::MmrSize, peaks::Peaks, proof::Proof}, eth_mpt::MPTTrait},
     hashing::{poseidon::hash_words64, keccak::keccak_cairo_words64},
     encoding::rlp::{RLPItem, rlp_decode, rlp_decode_list_lazy},
     utils::{
-        types::words64::{Words64, Words64Trait, reverse_endianness_u64, bytes_used_u64},
+        types::words64::{Words64, Words64Trait, reverse_endianness_u64},
         bitwise::reverse_endianness_u256,
     },
 };

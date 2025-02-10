@@ -166,6 +166,34 @@ pub mod evm_fact_registry_component {
         account_storage_slot_values: Map<u256, Map<EthAddress, Map<u256, Map<u256, Option<u256>>>>>,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct ProvenAccount {
+        chain_id: u256,
+        account: EthAddress,
+        block_number: u256,
+        account_fields_to_save: u8,
+        nonce: u256,
+        balance: u256,
+        code_hash: u256,
+        storage_hash: u256,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct ProvenStorage {
+        chain_id: u256,
+        account: EthAddress,
+        block_number: u256,
+        slot_index: u256,
+        slot_value: u256,
+    }
+
+    #[event]
+    #[derive(Drop, starknet::Event)]
+    pub enum Event {
+        ProvenAccount: ProvenAccount,
+        ProvenStorage: ProvenStorage,
+    }
+
     #[embeddable_as(EvmFactRegistry)]
     impl EvmFactRegistryImpl<
         TContractState,
@@ -389,11 +417,8 @@ pub mod evm_fact_registry_component {
             header_proof: BlockHeaderProof,
             account_mpt_proof: Span<Words64>,
         ) {
-            let mut entry = self
-                .account_fields
-                .entry(chain_id)
-                .entry(account)
-                .entry(header_proof.block_number);
+            let block_number = header_proof.block_number;
+            let mut entry = self.account_fields.entry(chain_id).entry(account).entry(block_number);
 
             let field_values = self
                 .verifyAccount(chain_id, account, header_proof, account_mpt_proof);
@@ -416,9 +441,24 @@ pub mod evm_fact_registry_component {
                 new_account_fields.append(value);
                 account_fields_to_save = new_account_fields_to_save;
             };
-            entry.write(new_account_fields.span().try_into().unwrap())
-            // TODO: emit event
-        // self.emit(Event::AccountProven(AccountProven { account, block, fields }));
+            entry.write(new_account_fields.span().try_into().unwrap());
+
+            let [nonce, balance, code_hash, storage_hash] = field_values;
+            self
+                .emit(
+                    Event::ProvenAccount(
+                        ProvenAccount {
+                            chain_id,
+                            account,
+                            block_number,
+                            account_fields_to_save,
+                            nonce,
+                            balance,
+                            code_hash,
+                            storage_hash,
+                        },
+                    ),
+                );
         }
 
         // @inheritdoc IEVMFactsRegistry
@@ -440,9 +480,16 @@ pub mod evm_fact_registry_component {
                 .entry(block_number)
                 .entry(slot_index)
                 .write(Option::Some(value));
-            // TODO: emit event
-        // self.emit(Event::StorageProven(StorageProven { account, block, slot, value: value
-        // }));
+
+            self
+                .emit(
+                    Event::ProvenStorage(
+                        ProvenStorage {
+                            chain_id, account, block_number, slot_index, slot_value: value,
+                        },
+                    ),
+                );
         }
     }
 }
+

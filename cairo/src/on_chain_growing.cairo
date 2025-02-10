@@ -9,7 +9,7 @@ use cairo_lib::encoding::rlp::{RLPItem, rlp_decode_list_lazy};
 
 #[starknet::interface]
 pub trait IOnChainGrowing<TContractState> {
-    fn process_batch(
+    fn onchainStarknetAppendBlocksBatch(
         ref self: TContractState,
         headers_rlp: Span<Words64>,
         mmr_peaks: Peaks,
@@ -51,7 +51,7 @@ pub mod on_chain_growing_component {
         +Drop<TContractState>,
         impl State: state_component::HasComponent<TContractState>,
     > of IOnChainGrowing<ComponentState<TContractState>> {
-        fn process_batch(
+        fn onchainStarknetAppendBlocksBatch(
             ref self: ComponentState<TContractState>,
             headers_rlp: Span<Words64>,
             mmr_peaks: Peaks,

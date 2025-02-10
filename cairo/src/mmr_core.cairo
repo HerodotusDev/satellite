@@ -206,7 +206,7 @@ pub mod mmr_core_component {
             } else if hashing_function == KECCAK_HASHING_FUNCTION {
                 KECCAK_INITIAL_ROOT
             } else {
-                assert(false, 'INVALID_HASHING_FUNCTION');
+                panic!("INVALID_HASHING_FUNCTION");
                 0
             }
         }
@@ -323,10 +323,9 @@ pub mod mmr_core_component {
             }
 
             let is_sibling_synced = hashing_functions.len() != 1;
-            // TODO: what with
-            // if (isSiblingSynced) {
-            //     LibSatellite.enforceIsSatelliteModule();
-            // }
+
+            // TODO: is this right
+            assert(!is_sibling_synced, 'SIBLING_SYNCED_NOT_SUPPORTED');
 
             let mut state = get_dep_component_mut!(ref self, State);
             let old_mmrs = state.mmrs.entry(accumulated_chain_id).entry(original_mmr_id);
@@ -368,7 +367,7 @@ pub mod mmr_core_component {
                             accumulated_chain_id,
                             original_mmr_id,
                             roots_for_hashing_functions: roots_for_hashing_functions.span(),
-                            origin_chain_id: 0, // TODO: what here?
+                            origin_chain_id: state.chain_id.read(),
                             created_from: CreatedFrom::DOMESTIC,
                         },
                     ),

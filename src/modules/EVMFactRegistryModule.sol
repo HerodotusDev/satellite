@@ -93,7 +93,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
             ms.accountField[chainId][account][headerProof.blockNumber].fields[AccountField.STORAGE_ROOT] = storageRoot;
         }
 
-        emit ProvenAccount(chainId, account, headerProof.blockNumber, nonce, accountBalance, codeHash, storageRoot);
+        emit ProvenAccount(chainId, account, headerProof.blockNumber, accountFieldsToSave, nonce, accountBalance, codeHash, storageRoot);
     }
 
     /// @inheritdoc IEvmFactRegistryModule

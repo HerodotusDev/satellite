@@ -115,7 +115,7 @@ interface IEvmFactRegistryModule {
     // ========================= Events ========================= //
 
     /// @notice Emitted when account fields are proven
-    event ProvenAccount(uint256 chainId, address account, uint256 blockNumber, uint256 nonce, uint256 balance, bytes32 codeHash, bytes32 storageHash);
+    event ProvenAccount(uint256 chainId, address account, uint256 blockNumber, uint8 savedFields, uint256 nonce, uint256 balance, bytes32 codeHash, bytes32 storageHash);
 
     /// @notice Emitted when storage slot value is proven
     event ProvenStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes32 slotValue);

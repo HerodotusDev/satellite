@@ -13,8 +13,8 @@ contract L1ToOptimismSenderModule is IL1ToStarknetSenderModule, AccessController
 
     bytes4 public constant RECEIVE_MMR_L1_SELECTOR = bytes4(0xa6964aac);
     bytes4 public constant RECEIVE_PARENT_HASH_L1_SELECTOR = bytes4(0x1c843daa);
-    uint256 public constant RECEIVE_MMR_L2_SELECTOR = 0x0;
-    uint256 public constant RECEIVE_PARENT_HASH_L2_SELECTOR = 0x0;
+    uint256 public constant RECEIVE_MMR_L2_SELECTOR = 0x03b0888423d829a33dcfd4acf7bfe4d08132cdd35debb0e74af5f0f3a395d2e6;
+    uint256 public constant RECEIVE_PARENT_HASH_L2_SELECTOR = 0x03e956c16ad6daeda6a681c48ddd8b98ae1b6b9d03e7618decfb89d1646b6911;
 
     /// @inheritdoc IL1ToStarknetSenderModule
     function sendMessageL1ToStarknet(uint256 satelliteAddress, address inboxAddress, bytes calldata _data, bytes memory) external payable onlyModule {

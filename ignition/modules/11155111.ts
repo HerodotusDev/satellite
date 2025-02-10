@@ -16,4 +16,5 @@ export default buildSatelliteDeployment("11155111", [
   "L1ToArbitrumSenderModule",
   "L1ToOptimismSenderModule",
   "L1ToZkSyncSenderModule",
+  "L1ToStarknetSenderModule",
 ]);

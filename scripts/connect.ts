@@ -46,7 +46,9 @@ async function main() {
 
   if (
     deployedSatellites.connections.find(
-      (c) => c.from === senderChainId && c.to === receiverChainId,
+      (c) =>
+        parseInt(c.from) === parseInt(senderChainId) &&
+        parseInt(c.to) === parseInt(receiverChainId),
     )
   ) {
     throw new Error(
@@ -69,7 +71,7 @@ async function main() {
     connectionData.inboxContract,
     "0x0000000000000000000000000000000000000000",
     ethers.FunctionFragment.getSelector(connectionData.sendFunction, [
-      "address",
+      "uint256",
       "address",
       "bytes",
       "bytes",

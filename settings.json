@@ -30,6 +30,12 @@
         "inboxContract": "0x7768c821200554d8F359A8902905Ba9eDe5659a9",
         "sendFunction": "sendMessageL1ToOptimism",
         "L2Alias": "0x0"
+      },
+      {
+        "to": "0x534e5f5345504f4c4941",
+        "inboxContract": "0xE2Bb56ee936fd6433DC0F6e7e3b8365C906AA057",
+        "sendFunction": "sendMessageL1ToStarknet",
+        "L2Alias": "0x0"
       }
     ]
   },

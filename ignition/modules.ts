@@ -114,4 +114,7 @@ export const modules = (chainId: keyof typeof settings) =>
     OptimismReceiverModule: {
       interfaceName: "IReceiverModule",
     },
+    L1ToStarknetSenderModule: {
+      interfaceName: "IL1ToStarknetSenderModule",
+    },
   }) satisfies Record<string, Module>;

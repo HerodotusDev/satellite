@@ -259,7 +259,7 @@ pub mod evm_fact_registry_component {
 
             let mmr_core = get_dep_component!(self, MmrCore);
             let mmr_inclusion = mmr_core
-                .verify_historical_mmr_inclusion(
+                .verifyHistoricalMmrInclusion(
                     chain_id,
                     header_proof.mmr_id,
                     header_proof.mmr_size,

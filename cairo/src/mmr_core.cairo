@@ -41,15 +41,15 @@ pub trait ICoreMmrInternal<TContractState> {
 
 #[starknet::interface]
 pub trait ICoreMmrExternal<TContractState> {
-    fn get_mmr(self: @TContractState, chain_id: u256, mmr_id: u256) -> MMR;
+    fn getMmr(self: @TContractState, chain_id: u256, mmr_id: u256) -> MMR;
 
-    fn get_historical_root(self: @TContractState, chain_id: u256, mmr_id: u256, size: u256) -> u256;
+    fn getHistoricalRoot(self: @TContractState, chain_id: u256, mmr_id: u256, size: u256) -> u256;
 
-    fn get_parent_hash(
+    fn getParentHash(
         self: @TContractState, chain_id: u256, hashing_function: u256, block_number: u256,
     ) -> u256;
 
-    fn verify_mmr_inclusion(
+    fn verifyMmrInclusion(
         self: @TContractState,
         chain_id: u256,
         mmr_id: u256,
@@ -59,7 +59,7 @@ pub trait ICoreMmrExternal<TContractState> {
         proof: Proof,
     ) -> bool;
 
-    fn verify_historical_mmr_inclusion(
+    fn verifyHistoricalMmrInclusion(
         self: @TContractState,
         chain_id: u256,
         mmr_id: u256,
@@ -219,7 +219,7 @@ pub mod mmr_core_component {
         +Drop<TContractState>,
         impl State: state_component::HasComponent<TContractState>,
     > of ICoreMmrExternal<ComponentState<TContractState>> {
-        fn get_mmr(self: @ComponentState<TContractState>, chain_id: u256, mmr_id: u256) -> MMR {
+        fn getMmr(self: @ComponentState<TContractState>, chain_id: u256, mmr_id: u256) -> MMR {
             let state = get_dep_component!(self, State);
             let mmr = state.mmrs.entry(chain_id).entry(mmr_id).entry(POSEIDON_HASHING_FUNCTION);
             let size = mmr.latest_size.read();
@@ -229,7 +229,7 @@ pub mod mmr_core_component {
             }
         }
 
-        fn get_historical_root(
+        fn getHistoricalRoot(
             self: @ComponentState<TContractState>, chain_id: u256, mmr_id: u256, size: u256,
         ) -> u256 {
             let state = get_dep_component!(self, State);
@@ -237,7 +237,7 @@ pub mod mmr_core_component {
             mmr.mmr_size_to_root.read(size)
         }
 
-        fn get_parent_hash(
+        fn getParentHash(
             self: @ComponentState<TContractState>,
             chain_id: u256,
             hashing_function: u256,
@@ -252,7 +252,7 @@ pub mod mmr_core_component {
                 .read()
         }
 
-        fn verify_mmr_inclusion(
+        fn verifyMmrInclusion(
             self: @ComponentState<TContractState>,
             chain_id: u256,
             mmr_id: u256,
@@ -281,7 +281,7 @@ pub mod mmr_core_component {
             mmr.verify_proof(index, leaf_value, peaks, proof).is_ok()
         }
 
-        fn verify_historical_mmr_inclusion(
+        fn verifyHistoricalMmrInclusion(
             self: @ComponentState<TContractState>,
             chain_id: u256,
             mmr_id: u256,

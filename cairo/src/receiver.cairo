@@ -5,13 +5,14 @@ pub trait IReceiver<TContractState> {
 
 #[starknet::contract]
 pub mod HerodotusStarknet {
-    use openzeppelin::{access::ownable::OwnableComponent, upgrades::UpgradeableComponent};
+    use openzeppelin::{access::ownable::OwnableComponent, upgrades::{UpgradeableComponent, interface::IUpgradeable}};
     use herodotus_starknet::{
         evm_fact_registry::evm_fact_registry_component,
         mmr_core::{mmr_core_component, RootForHashingFunction}, state::state_component,
         on_chain_growing::on_chain_growing_component,
     };
-    use starknet::ContractAddress;
+    use starknet::{ClassHash, ContractAddress, get_caller_address};
+    use core::num::traits::Zero;
     use super::*;
 
     component!(path: state_component, storage: state, event: StateEvent);
@@ -46,6 +47,7 @@ pub mod HerodotusStarknet {
 
     #[constructor]
     fn constructor(ref self: ContractState, chain_id: u256, owner: ContractAddress) {
+        let owner = if owner.is_non_zero() { owner } else { get_caller_address() };
         self.state.chain_id.write(chain_id);
         self.ownable.initializer(owner);
     }
@@ -131,4 +133,12 @@ pub mod HerodotusStarknet {
 
     impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
+
+    #[abi(embed_v0)]
+    impl UpgradeableImpl of IUpgradeable<ContractState> {
+        fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
+            self.ownable.assert_only_owner();
+            self.upgradeable.upgrade(new_class_hash);
+        }
+    }
 }

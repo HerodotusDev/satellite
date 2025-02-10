@@ -72,7 +72,7 @@ pub mod HerodotusStarknet {
     }
 
     #[l1_handler]
-    fn receive_mmr(
+    fn receiveMmr(
         ref self: ContractState,
         from_address: felt252,
         new_mmr_id: u256,

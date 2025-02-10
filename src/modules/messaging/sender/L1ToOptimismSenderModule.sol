@@ -8,10 +8,10 @@ import {AccessController} from "src/libraries/AccessController.sol";
 
 contract L1ToOptimismSenderModule is IL1ToOptimismSenderModule, AccessController {
     /// @inheritdoc IL1ToOptimismSenderModule
-    function sendMessageL1ToOptimism(address satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable onlyModule {
+    function sendMessageL1ToOptimism(uint256 satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable onlyModule {
         IOptimismCrossDomainMessenger optimismMessenger = IOptimismCrossDomainMessenger(inboxAddress);
         uint32 l2GasLimit = abi.decode(_xDomainMsgGasData, (uint32));
 
-        optimismMessenger.sendMessage{value: msg.value}(satelliteAddress, _data, l2GasLimit);
+        optimismMessenger.sendMessage{value: msg.value}(address(uint160(satelliteAddress)), _data, l2GasLimit);
     }
 }

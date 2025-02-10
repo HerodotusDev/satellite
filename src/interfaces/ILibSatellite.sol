@@ -46,7 +46,8 @@ interface ILibSatellite {
 
     struct SatelliteConnection {
         /// @notice satelliteAddress is the address of the satellite deployed on the destination chain
-        address satelliteAddress;
+        /// @dev it is uint256 because Starknet addresses must fit
+        uint256 satelliteAddress;
         /// @notice inboxAddress is the address of the contract that sends messages from our chain to the chain of the satellite
         address inboxAddress;
         /// @notice sendMessageSelector is the selector of the satellite's function that sends message to the destination chain

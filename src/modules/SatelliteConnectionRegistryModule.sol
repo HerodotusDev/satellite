@@ -10,11 +10,11 @@ import {AccessController} from "src/libraries/AccessController.sol";
 /// @notice Satellite Connection Registry is responsible for storing information about chains to which message can be sent and from which message can be received
 contract SatelliteConnectionRegistryModule is ISatelliteConnectionRegistryModule, AccessController {
     /// @inheritdoc ISatelliteConnectionRegistryModule
-    function registerSatelliteConnection(uint256 chainId, address satellite, address inbox, address senderSatelliteAlias, bytes4 sendMessageSelector) external onlyOwner {
-        require(satellite != address(0), "SatelliteConnectionRegistry: invalid satellite");
+    function registerSatelliteConnection(uint256 chainId, uint256 satellite, address inbox, address senderSatelliteAlias, bytes4 sendMessageSelector) external onlyOwner {
+        require(satellite != 0, "SatelliteConnectionRegistry: invalid satellite");
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        require(s.satelliteConnectionRegistry[chainId].satelliteAddress == address(0), "SatelliteConnectionRegistry: satellite already registered");
+        require(s.satelliteConnectionRegistry[chainId].satelliteAddress == 0, "SatelliteConnectionRegistry: satellite already registered");
         s.satelliteConnectionRegistry[chainId] = ILibSatellite.SatelliteConnection(satellite, inbox, sendMessageSelector);
 
         if (senderSatelliteAlias != address(0)) {

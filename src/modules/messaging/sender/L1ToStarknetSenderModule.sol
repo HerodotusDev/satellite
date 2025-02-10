@@ -17,7 +17,7 @@ contract L1ToOptimismSenderModule is IL1ToStarknetSenderModule, AccessController
     uint256 public constant RECEIVE_PARENT_HASH_L2_SELECTOR = 0x0;
 
     /// @inheritdoc IL1ToStarknetSenderModule
-    function sendMessageL1ToStarknet(address satelliteAddress, address inboxAddress, bytes calldata _data, bytes memory _xDomainMsgGasData) external payable onlyModule {
+    function sendMessageL1ToStarknet(uint256 satelliteAddress, address inboxAddress, bytes calldata _data, bytes memory) external payable onlyModule {
         bytes4 selector = bytes4(_data[:4]);
         bytes memory encodedParams = new bytes(_data.length - 4);
         for (uint i = 4; i < _data.length; i++) {
@@ -30,7 +30,6 @@ contract L1ToOptimismSenderModule is IL1ToStarknetSenderModule, AccessController
         else if (selector == RECEIVE_PARENT_HASH_L1_SELECTOR) (starknetData, l2Selector) = _receiveParentHash(encodedParams);
         else revert("Invalid selector");
 
-        // TODO: make satelliteAddress uin256
         IStarknetCore(inboxAddress).sendMessageToL2{value: msg.value}(satelliteAddress, l2Selector, starknetData);
     }
 

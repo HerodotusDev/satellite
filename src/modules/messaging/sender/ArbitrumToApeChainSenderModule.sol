@@ -30,7 +30,7 @@ contract ArbitrumToApeChainSenderModule is IArbitrumToApeChainSenderModule, Acce
     // ========================= Module-only Functions ======================== //
 
     /// @inheritdoc IArbitrumToApeChainSenderModule
-    function sendMessageArbitrumToApeChain(address satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable onlyModule {
+    function sendMessageArbitrumToApeChain(uint256 satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable onlyModule {
         ArbitrumToApeChainSenderModuleStorage storage ms = moduleStorage();
         address tokenAddress = ms.apeChainTokenAddress;
 
@@ -42,7 +42,7 @@ contract ArbitrumToApeChainSenderModule is IArbitrumToApeChainSenderModule, Acce
         IERC20(tokenAddress).approve(inboxAddress, tokenTotalFeeAmount);
 
         IApeChainInbox(inboxAddress).createRetryableTicket(
-            satelliteAddress,
+            address(uint160(satelliteAddress)),
             0,
             l3MaxSubmissionCost,
             address(this),

@@ -15,5 +15,5 @@ interface IArbitrumToApeChainSenderModule {
     /// @param satelliteAddress the address of the satellite on ApeChain
     /// @param inboxAddress the address of the ApeChain Inbox
     /// @dev inboxAddress - Inbox in https://docs.apechain.com/contracts/Testnet/contract-information#corecontracts
-    function sendMessageArbitrumToApeChain(address satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable;
+    function sendMessageArbitrumToApeChain(uint256 satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable;
 }

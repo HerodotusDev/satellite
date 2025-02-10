@@ -7,10 +7,10 @@ import {IL1ToZkSyncSenderModule} from "src/interfaces/modules/messaging/sender/I
 import {AccessController} from "src/libraries/AccessController.sol";
 contract L1ToZkSyncSenderModule is IL1ToZkSyncSenderModule, AccessController {
     /// @inheritdoc IL1ToZkSyncSenderModule
-    function sendMessageL1ToZkSync(address satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable onlyModule {
+    function sendMessageL1ToZkSync(uint256 satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable onlyModule {
         IZkSyncMailbox zkSyncMailbox = IZkSyncMailbox(inboxAddress);
         (uint256 l2GasLimit, uint256 l2GasPerPubdataByteLimit) = abi.decode(_xDomainMsgGasData, (uint256, uint256));
 
-        zkSyncMailbox.requestL2Transaction{value: msg.value}(satelliteAddress, 0, _data, l2GasLimit, l2GasPerPubdataByteLimit, new bytes[](0), msg.sender);
+        zkSyncMailbox.requestL2Transaction{value: msg.value}(address(uint160(satelliteAddress)), 0, _data, l2GasLimit, l2GasPerPubdataByteLimit, new bytes[](0), msg.sender);
     }
 }

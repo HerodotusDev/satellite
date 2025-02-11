@@ -22,26 +22,35 @@ pub trait IOnChainGrowing<TContractState> {
 
 #[starknet::component]
 pub mod on_chain_growing_component {
-    use herodotus_starknet::{state::state_component, mmr_core::POSEIDON_HASHING_FUNCTION};
+    use herodotus_starknet::{
+        state::state_component, mmr_core::{POSEIDON_HASHING_FUNCTION, RootForHashingFunction},
+    };
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry};
     use super::*;
 
     #[storage]
     struct Storage {}
 
+    #[derive(Drop, Serde)]
+    enum GrownBy {
+        StarknetOnChainGrowing,
+    }
+
     #[derive(Drop, starknet::Event)]
-    struct ProcessedBatch {
-        block_start: u256,
-        block_end: u256,
-        new_root: u256,
-        new_size: u256,
+    struct GrownMmr {
+        first_appended_block: u256,
+        last_appended_block: u256,
+        roots_for_hashing_functions: Span<RootForHashingFunction>,
+        mmr_size: u256,
         mmr_id: u256,
+        accumulated_chain_id: u256,
+        grown_by: GrownBy,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     pub enum Event {
-        ProcessedBatch: ProcessedBatch,
+        GrownMmr: GrownMmr,
     }
 
     #[embeddable_as(OnChainGrowing)]
@@ -61,9 +70,10 @@ pub mod on_chain_growing_component {
             mmr_proof: Option<Proof>,
         ) {
             let mut state = get_dep_component_mut!(ref self, State);
+            let chain_id = state.chain_id.read();
             let mut mmr_data = state
                 .mmrs
-                .entry(state.chain_id.read())
+                .entry(chain_id)
                 .entry(mmr_id)
                 .entry(POSEIDON_HASHING_FUNCTION);
 
@@ -135,7 +145,7 @@ pub mod on_chain_growing_component {
 
                 let initial_blockhash = state
                     .received_parent_hashes
-                    .entry(state.chain_id.read())
+                    .entry(chain_id)
                     .entry(POSEIDON_HASHING_FUNCTION)
                     .entry(reference_block)
                     .read();
@@ -201,13 +211,21 @@ pub mod on_chain_growing_component {
 
             self
                 .emit(
-                    Event::ProcessedBatch(
-                        ProcessedBatch {
-                            block_start: start_block,
-                            block_end: end_block,
-                            new_root: mmr.root.into(),
-                            new_size: mmr.last_pos,
+                    Event::GrownMmr(
+                        GrownMmr {
+                            first_appended_block: start_block,
+                            last_appended_block: end_block,
+                            roots_for_hashing_functions: [
+                                RootForHashingFunction {
+                                    hashing_function: POSEIDON_HASHING_FUNCTION,
+                                    root: mmr.root.into(),
+                                }
+                            ]
+                                .span(),
+                            mmr_size: mmr.last_pos,
                             mmr_id,
+                            accumulated_chain_id: chain_id,
+                            grown_by: GrownBy::StarknetOnChainGrowing,
                         },
                     ),
                 );

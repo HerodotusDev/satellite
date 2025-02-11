@@ -1,0 +1,5 @@
+[[call]]
+call_type = "invoke"
+contract_address = "0x032d260a653bd1ee1c07b33b770aa32c7ab9fabde8bd74b47cc0ef4e5e472792"
+function = "upgrade"
+inputs = ["0x03b14c471f53a8aa2995a5e002001426c790c02a974136756d14acde4d0696cd"]

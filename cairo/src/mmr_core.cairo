@@ -11,8 +11,8 @@ pub const KECCAK_INITIAL_ROOT: u256 =
 
 #[derive(Drop, Serde)]
 pub struct RootForHashingFunction {
-    hashing_function: u256,
-    root: u256,
+    pub hashing_function: u256,
+    pub root: u256,
 }
 
 #[starknet::interface]

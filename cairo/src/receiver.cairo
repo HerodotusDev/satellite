@@ -5,14 +5,16 @@ pub trait IReceiver<TContractState> {
 
 #[starknet::contract]
 pub mod HerodotusStarknet {
-    use openzeppelin::{access::ownable::OwnableComponent, upgrades::{UpgradeableComponent, interface::IUpgradeable}};
+    use openzeppelin::{
+        access::ownable::OwnableComponent,
+        upgrades::{UpgradeableComponent, interface::IUpgradeable},
+    };
     use herodotus_starknet::{
         evm_fact_registry::evm_fact_registry_component,
         mmr_core::{mmr_core_component, RootForHashingFunction}, state::state_component,
         on_chain_growing::on_chain_growing_component,
     };
-    use starknet::{ClassHash, ContractAddress, get_caller_address};
-    use core::num::traits::Zero;
+    use starknet::{ClassHash, ContractAddress};
     use super::*;
 
     component!(path: state_component, storage: state, event: StateEvent);

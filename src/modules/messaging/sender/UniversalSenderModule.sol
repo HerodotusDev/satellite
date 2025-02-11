@@ -71,7 +71,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
             satellite.satelliteAddress,
             satellite.inboxAddress,
             abi.encodeWithSignature(
-                "receiveMmr(uint256, (bytes32, bytes32)[], uint256, uint256, uint256, uint256, bool)",
+                "receiveMmr(uint256,(bytes32,bytes32)[],uint256,uint256,uint256,uint256,bool)",
                 newMmrId,
                 rootsForHashingFunctions,
                 mmrSize,

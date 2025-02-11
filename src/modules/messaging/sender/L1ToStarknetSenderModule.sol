@@ -11,8 +11,8 @@ import {Uint256Splitter} from "src/libraries/internal/Uint256Splitter.sol";
 contract L1ToOptimismSenderModule is IL1ToStarknetSenderModule, AccessController {
     using Uint256Splitter for uint256;
 
-    bytes4 public constant RECEIVE_MMR_L1_SELECTOR = bytes4(0xa6964aac);
-    bytes4 public constant RECEIVE_PARENT_HASH_L1_SELECTOR = bytes4(0x1c843daa);
+    bytes4 public constant RECEIVE_MMR_L1_SELECTOR = bytes4(keccak256("receiveMmr(uint256,(bytes32,bytes32)[],uint256,uint256,uint256,uint256,bool)"));
+    bytes4 public constant RECEIVE_PARENT_HASH_L1_SELECTOR = bytes4(keccak256("receiveParentHash(uint256,bytes32,uint256,bytes32)"));
     uint256 public constant RECEIVE_MMR_L2_SELECTOR = 0x03b0888423d829a33dcfd4acf7bfe4d08132cdd35debb0e74af5f0f3a395d2e6;
     uint256 public constant RECEIVE_PARENT_HASH_L2_SELECTOR = 0x03e956c16ad6daeda6a681c48ddd8b98ae1b6b9d03e7618decfb89d1646b6911;
 

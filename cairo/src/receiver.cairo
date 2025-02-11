@@ -47,7 +47,6 @@ pub mod HerodotusStarknet {
 
     #[constructor]
     fn constructor(ref self: ContractState, chain_id: u256, owner: ContractAddress) {
-        let owner = if owner.is_non_zero() { owner } else { get_caller_address() };
         self.state.chain_id.write(chain_id);
         self.ownable.initializer(owner);
     }
@@ -129,7 +128,7 @@ pub mod HerodotusStarknet {
 
     // Ownable / Upgradeable
     #[abi(embed_v0)]
-    impl OwnableMixinImpl = OwnableComponent::OwnableMixinImpl<ContractState>;
+    impl OwnableMixinImpl = OwnableComponent::OwnableCamelOnlyImpl<ContractState>;
 
     impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;

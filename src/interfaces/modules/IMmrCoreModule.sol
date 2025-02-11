@@ -15,8 +15,7 @@ enum GrownBy {
     /// @dev GrownBy.EVM_SHARP_GROWER - appended by EvmSharpGrowingModule
     EVM_SHARP_GROWER,
     /// @dev GrownBy.STARKNET_SHARP_GROWER - appended by StarknetSharpMmrGrowingModule
-    STARKNET_SHARP_GROWER,
-    EVM_TIMESTAMP_REMAPPER
+    STARKNET_SHARP_GROWER
 }
 
 enum CreatedFrom {

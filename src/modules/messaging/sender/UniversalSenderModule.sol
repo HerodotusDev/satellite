@@ -33,7 +33,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
             _xDomainMsgGasData
         );
 
-        (bool success, ) = address(this).call(data);
+        (bool success, ) = address(this).call{value: msg.value}(data);
         require(success, "Function call failed");
     }
 
@@ -83,7 +83,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
             _xDomainMsgGasData
         );
 
-        (bool success, ) = address(this).call(data);
+        (bool success, ) = address(this).call{value: msg.value}(data);
         require(success, "Function call failed");
     }
 }

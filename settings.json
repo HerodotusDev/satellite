@@ -71,5 +71,10 @@
     "network": "worldChainSepolia",
 
     "connections": []
+  },
+  "0x534e5f5345504f4c4941": {
+    "network": "starknetSepolia",
+
+    "connections": []
   }
 }

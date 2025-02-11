@@ -2,37 +2,41 @@
   "satellites": [
     {
       "chainId": "11155111",
-      "contractAddress": "0x80B180312B98b8acD341B28C0736659E01BcFD35"
+      "contractAddress": "0x59c0B3D09151aA2C0201808fEC0860f1168A4173"
     },
     {
       "chainId": "300",
-      "contractAddress": "0xc157a87d49A0C65605f93B9A9272c1400e69c2F4"
+      "contractAddress": "0x791E69C08Db10dd4D39588121f876A30C0d521dd"
     },
     {
       "chainId": "11155420",
-      "contractAddress": "0x8C1917E7ad1DAE52870FB7671f7Fe7f7acC68D28"
+      "contractAddress": "0xd1794CE14360fcC7d5dc51B889835c8b5Bdf4cB4"
     },
     {
       "chainId": "4801",
-      "contractAddress": "0x798E0eE46B18C1FC3862D1B73a1088A2bFa3B34F"
+      "contractAddress": "0x03a80459734A98f8DbFC6d5f1B0EB04F84CA87A4"
     },
     {
       "chainId": "421614",
-      "contractAddress": "0x0270FF2747992C0EA88A7067f5E00c58b7912f9F"
+      "contractAddress": "0xE8c8E43eF7ebF52De69dd8e10479F607E1A493C5"
     },
     {
       "chainId": "33111",
-      "contractAddress": "0xF78bd92f9C38eceED6b3ED1a17B48FCdD41ed452"
+      "contractAddress": "0xc9854fd6034fbc41B65b454919a48a5a9b342fa8"
+    },
+    {
+      "chainId": "0x534e5f5345504f4c4941",
+      "contractAddress": "0x032d260a653bd1ee1c07b33b770aa32c7ab9fabde8bd74b47cc0ef4e5e472792"
     }
   ],
   "connections": [
     {
       "from": "11155111",
-      "to": "11155420"
+      "to": "300"
     },
     {
       "from": "11155111",
-      "to": "300"
+      "to": "11155420"
     },
     {
       "from": "11155111",
@@ -45,6 +49,10 @@
     {
       "from": "421614",
       "to": "33111"
+    },
+    {
+      "from": "11155111",
+      "to": "0x534e5f5345504f4c4941"
     }
   ]
 }

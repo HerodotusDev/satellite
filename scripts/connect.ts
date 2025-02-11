@@ -80,15 +80,18 @@ async function main() {
 
   await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${senderSatellite.contractAddress} ARGS=${senderArgs.join(",")} bun hardhat --network ${settings[senderChainId].network} run scripts/registerSatelliteConnection.ts`;
 
-  const receiverArgs = [
-    senderChainId,
-    senderSatellite.contractAddress,
-    "0x0000000000000000000000000000000000000000",
-    alias(senderSatellite.contractAddress, connectionData.L2Alias),
-    "0x00000000",
-  ];
+  // TODO: handle starknet
+  if (settings[receiverChainId].network != "starknetSepolia") {
+    const receiverArgs = [
+      senderChainId,
+      senderSatellite.contractAddress,
+      "0x0000000000000000000000000000000000000000",
+      alias(senderSatellite.contractAddress, connectionData.L2Alias),
+      "0x00000000",
+    ];
 
-  await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${receiverSatellite.contractAddress} ARGS=${receiverArgs.join(",")} bun hardhat --network ${settings[receiverChainId].network} run scripts/registerSatelliteConnection.ts`;
+    await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${receiverSatellite.contractAddress} ARGS=${receiverArgs.join(",")} bun hardhat --network ${settings[receiverChainId].network} run scripts/registerSatelliteConnection.ts`;
+  }
 
   deployedSatellites.connections.push({
     from: senderChainId,
@@ -97,7 +100,7 @@ async function main() {
 
   fs.writeFileSync(
     "deployed_satellites.json",
-    JSON.stringify(deployedSatellites, null, 4),
+    JSON.stringify(deployedSatellites, null, 2),
   );
 }
 

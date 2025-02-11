@@ -8,7 +8,7 @@ import {AccessController} from "src/libraries/AccessController.sol";
 import {RootForHashingFunction} from "src/interfaces/modules/IMmrCoreModule.sol";
 import {Uint256Splitter} from "src/libraries/internal/Uint256Splitter.sol";
 
-contract L1ToOptimismSenderModule is IL1ToStarknetSenderModule, AccessController {
+contract L1ToStarknetSenderModule is IL1ToStarknetSenderModule, AccessController {
     using Uint256Splitter for uint256;
 
     bytes4 public constant RECEIVE_MMR_L1_SELECTOR = bytes4(keccak256("receiveMmr(uint256,(bytes32,bytes32)[],uint256,uint256,uint256,uint256,bool)"));

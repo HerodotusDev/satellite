@@ -56,7 +56,7 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         }
 
         // Emit the event
-        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originChainId, rootsForHashingFunctions, originalMmrId, CreatedFrom.FOREIGN);
+        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, originChainId, CreatedFrom.FOREIGN);
     }
 
     // ========================= Core Functions ========================= //

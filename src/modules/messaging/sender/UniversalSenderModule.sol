@@ -44,35 +44,32 @@ contract UniversalSenderModule is IUniversalSenderModule {
         uint256 originalMmrId,
         uint256 newMmrId,
         bytes32[] calldata hashingFunctions,
-        bytes calldata _xDomainMsgGasData,
-        bool isSiblingSynced
+        bool isSiblingSyncedForSending,
+        bytes calldata _xDomainMsgGasData
     ) external payable {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         require(hashingFunctions.length > 0, "hashingFunctions array cannot be empty");
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](hashingFunctions.length);
 
-        uint256 mmrSize = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].latestSize;
-        bytes32 root = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].mmrSizeToRoot[mmrSize];
-
-        if (isSiblingSynced) {
-            bool _isSiblingSynced = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].isSiblingSynced;
-            require(isSiblingSynced == _isSiblingSynced, "MMR isSiblingSynced mismatch");
+        if (isSiblingSyncedForSending) {
             require(hashingFunctions.length > 1, "Sibling synced MMRs must have at least 2 hashing functions");
         }
 
-        rootsForHashingFunctions[0] = RootForHashingFunction(root, hashingFunctions[0]);
+        uint256 commonMmrSize = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].latestSize;
 
-        for (uint256 i = 1; i < hashingFunctions.length; i++) {
-            uint256 _mmrSize = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].latestSize;
-            bytes32 _root = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].mmrSizeToRoot[_mmrSize];
-            bool _isSiblingSynced = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].isSiblingSynced;
+        for (uint256 i = 0; i < hashingFunctions.length; i++) {
+            uint256 mmrSize = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].latestSize;
+            bytes32 root = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize];
+            bool isSiblingSynced = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].isSiblingSynced;
 
-            if (isSiblingSynced) {
-                require(mmrSize == _mmrSize, "MMR size mismatch");
-                require(isSiblingSynced == _isSiblingSynced, "MMR isSiblingSynced mismatch");
+            // MMRs with all hashing functions must have the same size
+            require(mmrSize == commonMmrSize, "MMR size mismatch");
+
+            if (isSiblingSyncedForSending) {
+                require(isSiblingSynced, "MMR isSiblingSynced mismatch");
             }
 
-            rootsForHashingFunctions[i] = RootForHashingFunction(_root, hashingFunctions[i]);
+            rootsForHashingFunctions[i] = RootForHashingFunction(root, hashingFunctions[i]);
         }
 
         ILibSatellite.SatelliteConnection memory satellite = s.satelliteConnectionRegistry[destinationChainId];
@@ -85,11 +82,13 @@ contract UniversalSenderModule is IUniversalSenderModule {
                 "receiveMmr(uint256,(bytes32,bytes32)[],uint256,uint256,uint256,uint256,bool)",
                 newMmrId,
                 rootsForHashingFunctions,
-                mmrSize,
+                commonMmrSize,
                 accumulatedChainId,
                 block.chainid,
                 originalMmrId,
-                isSiblingSynced
+                // Even if MMRs were sibling synced, it will be sent with whatever user asked (synced or not)
+                // Of course, if user had requested sibling synced version, it was validated that original MMRs were sibling synced
+                isSiblingSyncedForSending
             ),
             _xDomainMsgGasData
         );

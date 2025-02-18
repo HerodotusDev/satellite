@@ -25,8 +25,8 @@
       "contractAddress": "0xc9854fd6034fbc41B65b454919a48a5a9b342fa8"
     },
     {
-      "chainId": "0x534e5f5345504f4c4941",
-      "contractAddress": "0x032d260a653bd1ee1c07b33b770aa32c7ab9fabde8bd74b47cc0ef4e5e472792"
+      "chainId": "393402133025997798000961",
+      "contractAddress": "0x06d523b16d7f6f71e250fc7f8d95df3e9e987a120878ea1a25ff312d92f42c8e"
     }
   ],
   "connections": [
@@ -52,7 +52,7 @@
     },
     {
       "from": "11155111",
-      "to": "0x534e5f5345504f4c4941"
+      "to": "393402133025997798000961"
     }
   ]
 }

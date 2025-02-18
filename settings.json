@@ -4,7 +4,7 @@
     "SHARP_FACT_REGISTRY": "0x0ed8c44415e882F3033B4F3AFF916BbB4997f915",
     "STARKNET_CORE": "0xE2Bb56ee936fd6433DC0F6e7e3b8365C906AA057",
     "DATA_PROCESSOR_FACTS_REGISTRY": "0x0000000000000000000000000000000000000000",
-    "STARKNET_CHAIN_ID": "0x534e5f5345504f4c4941",
+    "STARKNET_CHAIN_ID": "393402133025997798000961",
 
     "connections": [
       {
@@ -32,7 +32,7 @@
         "L2Alias": "0x0"
       },
       {
-        "to": "0x534e5f5345504f4c4941",
+        "to": "393402133025997798000961",
         "inboxContract": "0xE2Bb56ee936fd6433DC0F6e7e3b8365C906AA057",
         "sendFunction": "sendMessageL1ToStarknet",
         "L2Alias": "0x0"
@@ -72,7 +72,7 @@
 
     "connections": []
   },
-  "0x534e5f5345504f4c4941": {
+  "393402133025997798000961": {
     "network": "starknetSepolia",
 
     "connections": []

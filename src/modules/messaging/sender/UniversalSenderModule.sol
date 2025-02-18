@@ -44,7 +44,8 @@ contract UniversalSenderModule is IUniversalSenderModule {
         uint256 originalMmrId,
         uint256 newMmrId,
         bytes32[] calldata hashingFunctions,
-        bytes calldata _xDomainMsgGasData
+        bytes calldata _xDomainMsgGasData,
+        bool isSiblingSynced
     ) external payable {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         require(hashingFunctions.length > 0, "hashingFunctions array cannot be empty");
@@ -52,15 +53,25 @@ contract UniversalSenderModule is IUniversalSenderModule {
 
         uint256 mmrSize = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].latestSize;
         bytes32 root = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].mmrSizeToRoot[mmrSize];
-        bool isSiblingSynced = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].isSiblingSynced;
+
+        if (isSiblingSynced) {
+            bool _isSiblingSynced = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].isSiblingSynced;
+            require(isSiblingSynced == _isSiblingSynced, "MMR isSiblingSynced mismatch");
+            require(hashingFunctions.length > 1, "Sibling synced MMRs must have at least 2 hashing functions");
+        }
+
         rootsForHashingFunctions[0] = RootForHashingFunction(root, hashingFunctions[0]);
 
         for (uint256 i = 1; i < hashingFunctions.length; i++) {
             uint256 _mmrSize = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].latestSize;
             bytes32 _root = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].mmrSizeToRoot[_mmrSize];
             bool _isSiblingSynced = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].isSiblingSynced;
-            require(mmrSize == _mmrSize, "MMR size mismatch");
-            require(isSiblingSynced == _isSiblingSynced, "MMR isSiblingSynced mismatch");
+
+            if (isSiblingSynced) {
+                require(mmrSize == _mmrSize, "MMR size mismatch");
+                require(isSiblingSynced == _isSiblingSynced, "MMR isSiblingSynced mismatch");
+            }
+
             rootsForHashingFunctions[i] = RootForHashingFunction(_root, hashingFunctions[i]);
         }
 

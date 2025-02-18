@@ -57,6 +57,8 @@ contract L1ToStarknetSenderModule is IL1ToStarknetSenderModule, AccessController
         starknetData[pos++] = newMmrIdLow;
         starknetData[pos++] = newMmrIdHigh;
 
+        starknetData[pos++] = rootsForHashingFunctions.length;
+
         for (uint256 i = 0; i < rootsForHashingFunctions.length; i++) {
             (uint256 hashingFunctionLow, uint256 hashingFunctionHigh) = uint256(rootsForHashingFunctions[i].hashingFunction).split128();
             starknetData[pos++] = hashingFunctionLow;

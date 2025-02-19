@@ -5,8 +5,6 @@ import {console} from "forge-std/console.sol";
 
 import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 
-import {IStarknet} from "interfaces/external/IStarknet.sol";
-
 import {StarknetParentHashFetcherModule} from "src/modules/parent-hash-fetching/StarknetParentHashFetcherModule.sol";
 import {MockStarknetCore} from "src/mocks/MockStarknetCore.sol";
 
@@ -14,7 +12,6 @@ contract DeployStarknetParentHashFetcherModule is IDeploy {
     string contractName = "StarknetParentHashFetcherModule";
 
     function deploy() internal override returns (address moduleAddress) {
-        IStarknet starknetCore = IStarknet(getStarknetCoreAddress());
         vm.startBroadcast(getPrivateKey());
         StarknetParentHashFetcherModule module = new StarknetParentHashFetcherModule();
         // TODO: initStarknetParentHashFetcherModule

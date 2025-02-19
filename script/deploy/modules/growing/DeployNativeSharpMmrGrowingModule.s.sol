@@ -5,8 +5,6 @@ import {console} from "forge-std/console.sol";
 
 import {IDeploy} from "script/deploy/interfaces/IDeploy.sol";
 
-import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
-
 import {NativeSharpMmrGrowingModule} from "src/modules/growing/NativeSharpMmrGrowingModule.sol";
 import {MockFactsRegistry} from "src/mocks/MockFactsRegistry.sol";
 
@@ -14,7 +12,6 @@ contract DeployNativeSharpMmrGrowingModule is IDeploy {
     string contractName = "NativeSharpMmrGrowingModule";
 
     function deploy() internal override returns (address moduleAddress) {
-        IFactsRegistry sharpFactsRegistry = IFactsRegistry(getFactsRegistryAddress());
         vm.startBroadcast(getPrivateKey());
         NativeSharpMmrGrowingModule module = new NativeSharpMmrGrowingModule();
         // TODO: initNativeSharpMmrGrowingModule

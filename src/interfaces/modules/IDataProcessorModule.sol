@@ -67,21 +67,13 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     function requestDataProcessorExecutionOfTask(ModuleTask calldata moduleTask) external;
 
     /// @notice Authenticates the execution of a task is finalized
-    ///     by verifying the FactRegistry and Merkle proofs
-    /// @param mmrData The chain ID, MMR ID and MMR size
-    /// @param taskMerkleRootLow The low 128 bits of the tasks Merkle root
-    /// @param taskMerkleRootHigh The high 128 bits of the tasks Merkle root
-    /// @param resultMerkleRootLow The low 128 bits of the results Merkle root
-    /// @param resultMerkleRootHigh The high 128 bits of the results Merkle root
-    /// @param taskData task and result inclusion proofs, commitments and results
-    function authenticateDataProcessorTaskExecution(
-        MmrData[] calldata mmrData,
-        uint256 taskMerkleRootLow,
-        uint256 taskMerkleRootHigh,
-        uint256 resultMerkleRootLow,
-        uint256 resultMerkleRootHigh,
-        TaskData[] calldata taskData
-    ) external;
+    ///         by verifying the locally computed fact with the FactsRegistry
+    /// @param mmrData For each used MMR, its chain ID, ID and size
+    /// @param taskResultLow The low part of the task result
+    /// @param taskResultHigh The high part of the task result
+    /// @param taskHashLow The low part of the task hash
+    /// @param taskHashHigh The high part of the task hash
+    function authenticateDataProcessorTaskExecution(MmrData[] calldata mmrData, uint256 taskResultLow, uint256 taskResultHigh, uint256 taskHashLow, uint256 taskHashHigh) external;
 
     /// @notice Returns the result of a finalized task
     function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32);

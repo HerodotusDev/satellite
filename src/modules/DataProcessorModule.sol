@@ -69,34 +69,27 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
     }
 
     /// @inheritdoc IDataProcessorModule
-    function authenticateDataProcessorTaskExecution(
-        MmrData[] calldata mmrData,
-        uint256 taskMerkleRootLow,
-        uint256 taskMerkleRootHigh,
-        uint256 resultMerkleRootLow,
-        uint256 resultMerkleRootHigh,
-        TaskData[] calldata taskData
-    ) external {
+    function authenticateDataProcessorTaskExecution(MmrData[] calldata mmrData, uint256 taskResultLow, uint256 taskResultHigh, uint256 taskHashLow, uint256 taskHashHigh) external {
         DataProcessorModuleStorage storage ms = moduleStorage();
 
         // Initialize an array of uint256 to store the program output
-        uint256[] memory programOutput = new uint256[](4 + mmrData.length * 4);
+        uint256[] memory programOutput = new uint256[](3 + mmrData.length * 4);
 
         // Assign values to the program output array
         // This needs to be compatible with cairo program
         // https://github.com/HerodotusDev/hdp-cairo/blob/main/src/utils/utils.cairo#L27-L48
-        programOutput[0] = resultMerkleRootLow;
-        programOutput[1] = resultMerkleRootHigh;
-        programOutput[2] = taskMerkleRootLow;
-        programOutput[3] = taskMerkleRootHigh;
+        programOutput[0] = uint256(ms.programHash);
+        programOutput[1] = taskResultLow;
+        programOutput[2] = taskResultHigh;
 
         for (uint8 i = 0; i < mmrData.length; i++) {
             MmrData memory mmr = mmrData[i];
             bytes32 usedMmrRoot = loadMmrRoot(mmr.mmrId, mmr.mmrSize, mmr.chainId);
-            programOutput[4 + i * 4] = mmr.mmrId;
-            programOutput[4 + i * 4 + 1] = mmr.mmrSize;
-            programOutput[4 + i * 4 + 2] = mmr.chainId;
-            programOutput[4 + i * 4 + 3] = uint256(usedMmrRoot);
+            require(usedMmrRoot != bytes32(0), "Could not retrieve MMR root");
+            programOutput[3 + i * 4] = mmr.mmrId;
+            programOutput[3 + i * 4 + 1] = mmr.mmrSize;
+            programOutput[3 + i * 4 + 2] = mmr.chainId;
+            programOutput[3 + i * 4 + 3] = uint256(usedMmrRoot);
         }
 
         // Compute program output hash
@@ -110,37 +103,11 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
             revert InvalidFact();
         }
 
-        // Loop through all the tasks in the batch
-        for (uint256 i = 0; i < taskData.length; i++) {
-            TaskData memory task = taskData[i];
+        bytes32 taskHash = bytes32((taskHashHigh << 128) | taskHashLow);
+        bytes32 taskResult = bytes32((taskResultHigh << 128) | taskResultLow);
 
-            // Convert the low and high 128 bits to a single 256 bit value
-            bytes32 resultMerkleRoot = bytes32((resultMerkleRootHigh << 128) | resultMerkleRootLow);
-            bytes32 taskMerkleRoot = bytes32((taskMerkleRootHigh << 128) | taskMerkleRootLow);
-
-            // Compute the Merkle leaf of the task
-            bytes32 taskMerkleLeaf = standardNativeHDPLeafHash(task.commitment);
-            // Ensure that the task is included in the batch, by verifying the Merkle proof
-            bool isVerifiedTask = task.taskInclusionProof.verify(taskMerkleRoot, taskMerkleLeaf);
-
-            if (!isVerifiedTask) {
-                revert NotInBatch();
-            }
-
-            // Compute the Merkle leaf of the task result
-            bytes32 taskResultCommitment = keccak256(abi.encode(task.commitment, task.result));
-            bytes32 taskResultMerkleLeaf = standardNativeHDPLeafHash(taskResultCommitment);
-
-            // Ensure that the task result is included in the batch, by verifying the Merkle proof
-            bool isVerifiedResult = task.resultInclusionProof.verify(resultMerkleRoot, taskResultMerkleLeaf);
-
-            if (!isVerifiedResult) {
-                revert NotInBatch();
-            }
-
-            // Store the task result
-            ms.cachedTasksResult[task.commitment] = TaskResult({status: TaskStatus.FINALIZED, result: task.result});
-        }
+        // Store the task result
+        ms.cachedTasksResult[taskHash] = TaskResult({status: TaskStatus.FINALIZED, result: taskResult});
     }
 
     // ========================= View Functions ========================= //

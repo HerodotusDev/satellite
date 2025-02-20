@@ -151,7 +151,7 @@ pub trait IEvmFactRegistry<TContractState> {
 pub mod evm_fact_registry_component {
     use herodotus_starknet::{
         state::state_component, mmr_core::mmr_core_component,
-        mmr_core::mmr_core_component::MmrCoreExternalImpl,
+        mmr_core::mmr_core_component::MmrCoreExternalImpl, utils::header_rlp_index,
     };
     use starknet::storage::{
         StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map,
@@ -271,7 +271,8 @@ pub mod evm_fact_registry_component {
             assert(mmr_inclusion, 'INVALID_MMR_PROOF');
 
             let (decoded_rlp, _) = rlp_decode_list_lazy(
-                header_proof.block_header_rlp, array![3, 8].span(),
+                header_proof.block_header_rlp,
+                [header_rlp_index::STATE_ROOT, header_rlp_index::BLOCK_NUMBER].span(),
             )
                 .expect('INVALID_HEADER_RLP');
             let mut state_root: u256 = 0;

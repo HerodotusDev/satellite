@@ -23,7 +23,9 @@ pub trait IOnChainGrowing<TContractState> {
 #[starknet::component]
 pub mod on_chain_growing_component {
     use herodotus_starknet::{
-        state::state_component, mmr_core::{POSEIDON_HASHING_FUNCTION, RootForHashingFunction},
+        state::state_component,
+        mmr_core::{POSEIDON_HASHING_FUNCTION, KECCAK_HASHING_FUNCTION, RootForHashingFunction},
+        utils::header_rlp_index,
     };
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry};
     use super::*;
@@ -96,10 +98,16 @@ pub mod on_chain_growing_component {
             let mut rlp_byte_len = 0;
 
             if mmr_proof.is_some() {
+                // Start from block that is present in different mmr
+                // requires mmr_proof and mmr_index, reference_block to be None
+
                 assert(reference_block.is_none(), 'PROOF_AND_REF_BLOCK_NOT_ALLOWED');
                 assert(headers_rlp.len() >= 2, 'INVALID_HEADER_RLP');
 
-                match rlp_decode_list_lazy(*headers_rlp.at(0), array![0, 8].span()) {
+                match rlp_decode_list_lazy(
+                    *headers_rlp.at(0),
+                    [header_rlp_index::PARENT_HASH, header_rlp_index::BLOCK_NUMBER].span(),
+                ) {
                     Result::Ok((d, d_l)) => {
                         decoded_rlp = d;
                         rlp_byte_len = d_l;
@@ -129,9 +137,13 @@ pub mod on_chain_growing_component {
                     },
                 };
             } else {
+                // Start from block for which we know the parent hash
+
                 assert(headers_rlp.len() >= 1, 'INVALID_HEADER_RLP');
 
-                match rlp_decode_list_lazy(*headers_rlp.at(0), array![0].span()) {
+                match rlp_decode_list_lazy(
+                    *headers_rlp.at(0), [header_rlp_index::PARENT_HASH].span(),
+                ) {
                     Result::Ok((d, d_l)) => {
                         decoded_rlp = d;
                         rlp_byte_len = d_l;
@@ -146,7 +158,7 @@ pub mod on_chain_growing_component {
                 let initial_blockhash = state
                     .received_parent_hashes
                     .entry(chain_id)
-                    .entry(POSEIDON_HASHING_FUNCTION)
+                    .entry(KECCAK_HASHING_FUNCTION) //! changed to keccak
                     .entry(reference_block)
                     .read();
                 assert(initial_blockhash != 0, 'BLOCK_NOT_RECEIVED');
@@ -181,7 +193,7 @@ pub mod on_chain_growing_component {
 
                 let current_rlp = *headers_rlp.at(i);
 
-                match rlp_decode_list_lazy(current_rlp, array![0].span()) {
+                match rlp_decode_list_lazy(current_rlp, [header_rlp_index::PARENT_HASH].span()) {
                     Result::Ok((d, d_l)) => {
                         decoded_rlp = d;
                         rlp_byte_len = d_l;

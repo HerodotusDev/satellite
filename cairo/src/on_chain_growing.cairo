@@ -1,11 +1,10 @@
 use cairo_lib::{
     data_structures::{mmr::{mmr::{MMR, MMRTrait, MmrSize}, peaks::Peaks, proof::Proof}},
-    utils::{types::words64::{Words64, Words64Trait, reverse_endianness_u64}},
+    utils::{types::words64::Words64},
 };
 use cairo_lib::hashing::keccak::keccak_cairo_words64;
 use cairo_lib::hashing::poseidon::hash_words64;
 use cairo_lib::utils::bitwise::reverse_endianness_u256;
-use cairo_lib::encoding::rlp::{RLPItem, rlp_decode_list_lazy};
 
 #[starknet::interface]
 pub trait IOnChainGrowing<TContractState> {
@@ -25,7 +24,7 @@ pub mod on_chain_growing_component {
     use herodotus_starknet::{
         state::state_component,
         mmr_core::{POSEIDON_HASHING_FUNCTION, KECCAK_HASHING_FUNCTION, RootForHashingFunction},
-        utils::header_rlp_index,
+        utils::{header_rlp_index, decoders::{decode_rlp, decode_block_number, decode_parent_hash}},
     };
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry};
     use super::*;
@@ -94,8 +93,7 @@ pub mod on_chain_growing_component {
             let mut start_block: u256 = 0;
             let mut end_block: u256 = 0;
 
-            let mut decoded_rlp = RLPItem::Bytes((array![].span(), 0));
-            let mut rlp_byte_len = 0;
+            let mut previous_parent_hash: u256 = 0;
 
             if mmr_proof.is_some() {
                 // Start from block that is present in different mmr
@@ -104,52 +102,27 @@ pub mod on_chain_growing_component {
                 assert(reference_block.is_none(), 'PROOF_AND_REF_BLOCK_NOT_ALLOWED');
                 assert(headers_rlp.len() >= 2, 'INVALID_HEADER_RLP');
 
-                match rlp_decode_list_lazy(
+                let (d, _) = decode_rlp(
                     *headers_rlp.at(0),
                     [header_rlp_index::PARENT_HASH, header_rlp_index::BLOCK_NUMBER].span(),
-                ) {
-                    Result::Ok((d, d_l)) => {
-                        decoded_rlp = d;
-                        rlp_byte_len = d_l;
-                    },
-                    Result::Err(_) => { panic!("INVALID_HEADER_RLP"); },
-                };
+                );
+                previous_parent_hash = decode_parent_hash(*d.at(0));
+                start_block = decode_block_number(*d.at(1)) - 1;
 
                 mmr
                     .verify_proof(mmr_index.unwrap(), poseidon_hash, mmr_peaks, mmr_proof.unwrap())
                     .expect('INVALID_MMR_PROOF');
 
-                match @decoded_rlp {
-                    RLPItem::Bytes(_) => panic!("INVALID_HEADER_RLP"),
-                    RLPItem::List(l) => {
-                        let (start_block_words, start_block_byte_len) = *(*l).at(1);
-                        assert(start_block_words.len() == 1, 'INVALID_START_BLOCK');
-
-                        let start_block_le = *start_block_words.at(0);
-                        start_block =
-                            reverse_endianness_u64(
-                                start_block_le, Option::Some(start_block_byte_len),
-                            )
-                            .into()
-                            - 1;
-
-                        end_block = (start_block + 2) - headers_rlp.len().into();
-                    },
-                };
+                end_block = (start_block + 2) - headers_rlp.len().into();
             } else {
                 // Start from block for which we know the parent hash
 
                 assert(headers_rlp.len() >= 1, 'INVALID_HEADER_RLP');
 
-                match rlp_decode_list_lazy(
+                let (d, last_word_byte_len) = decode_rlp(
                     *headers_rlp.at(0), [header_rlp_index::PARENT_HASH].span(),
-                ) {
-                    Result::Ok((d, d_l)) => {
-                        decoded_rlp = d;
-                        rlp_byte_len = d_l;
-                    },
-                    Result::Err(_) => { panic!("INVALID_HEADER_RLP"); },
-                };
+                );
+                previous_parent_hash = decode_parent_hash(*d.at(0));
 
                 let reference_block = reference_block.unwrap();
                 start_block = reference_block - 1;
@@ -163,10 +136,6 @@ pub mod on_chain_growing_component {
                     .read();
                 assert(initial_blockhash != 0, 'BLOCK_NOT_RECEIVED');
 
-                let mut last_word_byte_len = rlp_byte_len % 8;
-                if last_word_byte_len == 0 {
-                    last_word_byte_len = 8;
-                }
                 let rlp_hash = InternalFunctions::keccak_hash_rlp(
                     *headers_rlp.at(0), last_word_byte_len, true,
                 );
@@ -182,29 +151,13 @@ pub mod on_chain_growing_component {
                     break ();
                 }
 
-                let parent_hash: u256 = match decoded_rlp {
-                    RLPItem::Bytes(_) => panic!("INVALID_HEADER_RLP"),
-                    RLPItem::List(l) => {
-                        let (words, words_byte_len) = *l.at(0);
-                        assert(words.len() == 4 && words_byte_len == 32, 'INVALID_PARENT_HASH_RLP');
-                        words.as_u256_le().unwrap()
-                    },
-                };
+                let parent_hash = previous_parent_hash;
 
                 let current_rlp = *headers_rlp.at(i);
 
-                match rlp_decode_list_lazy(current_rlp, [header_rlp_index::PARENT_HASH].span()) {
-                    Result::Ok((d, d_l)) => {
-                        decoded_rlp = d;
-                        rlp_byte_len = d_l;
-                    },
-                    Result::Err(_) => { panic!("INVALID_HEADER_RLP"); },
-                };
+                let (d, last_word_byte_len) = decode_rlp(current_rlp, [header_rlp_index::PARENT_HASH].span());
+                previous_parent_hash = decode_parent_hash(*d.at(0));
 
-                let mut last_word_byte_len = rlp_byte_len % 8;
-                if last_word_byte_len == 0 {
-                    last_word_byte_len = 8;
-                }
                 let current_hash = InternalFunctions::keccak_hash_rlp(
                     current_rlp, last_word_byte_len, false,
                 );

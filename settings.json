@@ -1,0 +1,80 @@
+{
+  "11155111": {
+    "network": "sepolia",
+    "SHARP_FACT_REGISTRY": "0x0ed8c44415e882F3033B4F3AFF916BbB4997f915",
+    "STARKNET_CORE": "0xE2Bb56ee936fd6433DC0F6e7e3b8365C906AA057",
+    "DATA_PROCESSOR_FACTS_REGISTRY": "0x0000000000000000000000000000000000000000",
+    "STARKNET_CHAIN_ID": "393402133025997798000961",
+
+    "connections": [
+      {
+        "to": "11155420",
+        "inboxContract": "0x58Cc85b8D04EA49cC6DBd3CbFFd00B4B8D6cb3ef",
+        "sendFunction": "sendMessageL1ToOptimism",
+        "L2Alias": "0x0"
+      },
+      {
+        "to": "421614",
+        "inboxContract": "0xaAe29B0366299461418F5324a79Afc425BE5ae21",
+        "sendFunction": "sendMessageL1ToArbitrum",
+        "L2Alias": "0x1111000000000000000000000000000000001111"
+      },
+      {
+        "to": "300",
+        "inboxContract": "0x9A6DE0f62Aa270A8bCB1e2610078650D539B1Ef9",
+        "sendFunction": "sendMessageL1ToZkSync",
+        "L2Alias": "0x1111000000000000000000000000000000001111"
+      },
+      {
+        "to": "4801",
+        "inboxContract": "0x7768c821200554d8F359A8902905Ba9eDe5659a9",
+        "sendFunction": "sendMessageL1ToOptimism",
+        "L2Alias": "0x0"
+      },
+      {
+        "to": "393402133025997798000961",
+        "inboxContract": "0xE2Bb56ee936fd6433DC0F6e7e3b8365C906AA057",
+        "sendFunction": "sendMessageL1ToStarknet",
+        "L2Alias": "0x0"
+      }
+    ]
+  },
+  "300": {
+    "network": "zkSyncSepolia",
+
+    "connections": []
+  },
+  "11155420": {
+    "network": "optimismSepolia",
+
+    "connections": []
+  },
+  "421614": {
+    "network": "arbitrumSepolia",
+    "APE_CHAIN_TOKEN_ADDRESS": "0x6Cb8Cc1e323357Af5da49d90FCb7160B7f09e6Cd",
+
+    "connections": [
+      {
+        "to": "33111",
+        "inboxContract": "0x990A3402F3358A1Ac9886c42d12A5C47aD97cb94",
+        "sendFunction": "sendMessageArbitrumToApeChain",
+        "L2Alias": "0x1111000000000000000000000000000000001111"
+      }
+    ]
+  },
+  "33111": {
+    "network": "curtis",
+
+    "connections": []
+  },
+  "4801": {
+    "network": "worldChainSepolia",
+
+    "connections": []
+  },
+  "393402133025997798000961": {
+    "network": "starknetSepolia",
+
+    "connections": []
+  }
+}

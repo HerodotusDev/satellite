@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import {MerkleProof} from "openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol";
-import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
-import {ISatellite} from "interfaces/ISatellite.sol";
-import {LibSatellite} from "libraries/LibSatellite.sol";
-import {ModuleTask, ModuleCodecs} from "libraries/internal/data-processor/ModuleCodecs.sol";
-import {IDataProcessorModule} from "interfaces/modules/IDataProcessorModule.sol";
-import {AccessController} from "libraries/AccessController.sol";
+import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import {IFactsRegistry} from "src/interfaces/external/IFactsRegistry.sol";
+import {ISatellite} from "src/interfaces/ISatellite.sol";
+import {LibSatellite} from "src/libraries/LibSatellite.sol";
+import {ModuleTask, ModuleCodecs} from "src/libraries/internal/data-processor/ModuleCodecs.sol";
+import {IDataProcessorModule} from "src/interfaces/modules/IDataProcessorModule.sol";
+import {AccessController} from "src/libraries/AccessController.sol";
 /// @title DataProcessorModule
 /// @author Herodotus Dev Ltd
 /// @notice A contract to store the execution results of HDP tasks
@@ -106,8 +106,33 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         bytes32 taskHash = bytes32((taskHashHigh << 128) | taskHashLow);
         bytes32 taskResult = bytes32((taskResultHigh << 128) | taskResultLow);
 
-        // Store the task result
-        ms.cachedTasksResult[taskHash] = TaskResult({status: TaskStatus.FINALIZED, result: taskResult});
+            // Convert the low and high 128 bits to a single 256 bit value
+            bytes32 resultMerkleRoot = bytes32((resultMerkleRootHigh << 128) | resultMerkleRootLow);
+            bytes32 taskMerkleRoot = bytes32((taskMerkleRootHigh << 128) | taskMerkleRootLow);
+
+            // Compute the Merkle leaf of the task
+            bytes32 taskMerkleLeaf = standardEvmHDPLeafHash(task.commitment);
+            // Ensure that the task is included in the batch, by verifying the Merkle proof
+            bool isVerifiedTask = task.taskInclusionProof.verify(taskMerkleRoot, taskMerkleLeaf);
+
+            if (!isVerifiedTask) {
+                revert NotInBatch();
+            }
+
+            // Compute the Merkle leaf of the task result
+            bytes32 taskResultCommitment = keccak256(abi.encode(task.commitment, task.result));
+            bytes32 taskResultMerkleLeaf = standardEvmHDPLeafHash(taskResultCommitment);
+
+            // Ensure that the task result is included in the batch, by verifying the Merkle proof
+            bool isVerifiedResult = task.resultInclusionProof.verify(resultMerkleRoot, taskResultMerkleLeaf);
+
+            if (!isVerifiedResult) {
+                revert NotInBatch();
+            }
+
+            // Store the task result
+            ms.cachedTasksResult[task.commitment] = TaskResult({status: TaskStatus.FINALIZED, result: task.result});
+        }
     }
 
     // ========================= View Functions ========================= //
@@ -137,7 +162,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
     }
 
     /// @notice Returns the leaf of standard merkle tree
-    function standardNativeHDPLeafHash(bytes32 value) internal pure returns (bytes32) {
+    function standardEvmHDPLeafHash(bytes32 value) internal pure returns (bytes32) {
         bytes32 firstHash = keccak256(abi.encode(value));
         bytes32 leaf = keccak256(abi.encode(firstHash));
         return leaf;

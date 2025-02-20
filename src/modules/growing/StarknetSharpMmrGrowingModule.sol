@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {Uint256Splitter} from "libraries/internal/Uint256Splitter.sol";
-import {IFactsRegistry} from "interfaces/external/IFactsRegistry.sol";
-import {IStarknetSharpMmrGrowingModule} from "interfaces/modules/growing/IStarknetSharpMmrGrowingModule.sol";
-import {ISatellite} from "interfaces/ISatellite.sol";
-import {LibSatellite} from "libraries/LibSatellite.sol";
-import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "interfaces/modules/IMmrCoreModule.sol";
-import {AccessController} from "libraries/AccessController.sol";
+import {Uint256Splitter} from "src/libraries/internal/Uint256Splitter.sol";
+import {IFactsRegistry} from "src/interfaces/external/IFactsRegistry.sol";
+import {IStarknetSharpMmrGrowingModule} from "src/interfaces/modules/growing/IStarknetSharpMmrGrowingModule.sol";
+import {ISatellite} from "src/interfaces/ISatellite.sol";
+import {LibSatellite} from "src/libraries/LibSatellite.sol";
+import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "src/interfaces/modules/IMmrCoreModule.sol";
+import {AccessController} from "src/libraries/AccessController.sol";
 
 contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, AccessController {
     // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
-    bytes32 public constant PROGRAM_HASH = bytes32(uint256(0x17994b1262fdd2be20da502c739e210ce1d38e7b0610a211adf055f20ecafda));
+    bytes32 public constant PROGRAM_HASH = bytes32(uint256(0x5dc00f4bec4077d7f511008cff02c0688efb11cfabb6029d084e5e309dcf014));
 
     bytes32 public constant POSEIDON_HASHING_FUNCTION = keccak256("poseidon");
 
@@ -30,10 +30,10 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
         }
     }
 
-    function initStarknetSharpMmrGrowingModule(IFactsRegistry factsRegistry) external onlyOwner {
+    function initStarknetSharpMmrGrowingModule(IFactsRegistry factsRegistry, uint256 chainId) external onlyOwner {
         StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
         ms.factsRegistry = factsRegistry;
-        ms.aggregatedChainId = block.chainid;
+        ms.aggregatedChainId = chainId;
     }
 
     function createStarknetSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external {
@@ -45,7 +45,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
         ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions);
     }
 
-    function aggregateStarknetSharpJobs(uint256 mmrId, StarknetJobOutput[] calldata outputs) external onlyOwner {
+    function aggregateStarknetSharpJobs(uint256 mmrId, StarknetJobOutput[] calldata outputs) external {
         // Ensuring at least one job output is provided
         if (outputs.length < 1) {
             revert NotEnoughJobs();

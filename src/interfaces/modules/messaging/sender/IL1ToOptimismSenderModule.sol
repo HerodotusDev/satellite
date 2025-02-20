@@ -6,5 +6,5 @@ interface IL1ToOptimismSenderModule {
     /// @param satelliteAddress the address of the satellite on Arbitrum
     /// @param inboxAddress the address of the Arbitrum Inbox
     /// @dev inboxAddress - L1CrossDomainMessengerProxy in https://docs.optimism.io/chain/addresses
-    function sendMessageL1ToOptimism(address satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable;
+    function sendMessageL1ToOptimism(uint256 satelliteAddress, address inboxAddress, bytes memory _data, bytes memory _xDomainMsgGasData) external payable;
 }

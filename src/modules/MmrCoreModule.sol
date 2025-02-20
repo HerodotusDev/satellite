@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {LibSatellite} from "libraries/LibSatellite.sol";
-import {RootForHashingFunction, IMmrCoreModule, CreatedFrom} from "interfaces/modules/IMmrCoreModule.sol";
-import {ISatellite} from "interfaces/ISatellite.sol";
-import {AccessController} from "libraries/AccessController.sol";
+import {LibSatellite} from "src/libraries/LibSatellite.sol";
+import {RootForHashingFunction, IMmrCoreModule, CreatedFrom} from "src/interfaces/modules/IMmrCoreModule.sol";
+import {ISatellite} from "src/interfaces/ISatellite.sol";
+import {AccessController} from "src/libraries/AccessController.sol";
 
 contract MmrCoreModule is IMmrCoreModule, AccessController {
     // ========================= Constants ========================= //
@@ -56,7 +56,7 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         }
 
         // Emit the event
-        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originChainId, rootsForHashingFunctions, originalMmrId, CreatedFrom.FOREIGN);
+        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, originChainId, CreatedFrom.FOREIGN);
     }
 
     // ========================= Core Functions ========================= //
@@ -101,7 +101,7 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
             rootsForHashingFunctions[i] = RootForHashingFunction({hashingFunction: hashingFunctions[i], root: mmrRoot});
         }
 
-        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, accumulatedChainId, CreatedFrom.DOMESTIC);
+        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, block.chainid, CreatedFrom.DOMESTIC);
     }
 
     /// ========================= Internal functions ========================= //

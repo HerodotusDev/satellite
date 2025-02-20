@@ -6,7 +6,7 @@
   "license": "GPL-3.0",
   "scripts": {
     "preinstall": "npx only-allow bun",
-    "prettier": "prettier --write --list-different ./*",
+    "prettier": "prettier --write --list-different .",
     "prettier:check": "prettier --check .",
     "forge:build": "forge build && bun forge:selectors",
     "forge:build:zksync": "forge build --zksync && bun forge:selectors",
@@ -23,20 +23,49 @@
     "forge:deploy:update:sepolia": "source .env && forge script --chain sepolia --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvv",
     "clear": "rm -rf out cache",
     "clear:full": "bun run clear && rm -rf node_modules",
-    "deploy:11155111": "source .env && ETHERSCAN_API_KEY=$L1_ETHERSCAN_API_KEY forge script --chain sepolia script/deploy/chains/11155111.s.sol:Deploy --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvv --slow",
-    "deploy:421614": "source .env && ETHERSCAN_API_KEY=$ARBITRUM_ETHERSCAN_API_KEY forge script --chain 421614 script/deploy/chains/421614.s.sol:Deploy --rpc-url $ARBITRUM_SEPOLIA_RPC_URL --broadcast --verify -vvv --slow",
-    "deploy:11155420": "source .env && ETHERSCAN_API_KEY=$OPTIMISM_ETHERSCAN_API_KEY forge script --chain 11155420 script/deploy/chains/11155420.s.sol:Deploy --rpc-url $OPTIMISM_SEPOLIA_RPC_URL --broadcast --verify -vvv --slow",
-    "deploy:300": "source .env && ETHERSCAN_API_KEY=$ZKSYNC_ETHERSCAN_API_KEY forge script --zksync --chain 300 script/deploy/chains/300.s.sol:Deploy --rpc-url $ZKSYNC_SEPOLIA_RPC_URL --verifier-url $ZKSYNC_SEPOLIA_VERIFIER --broadcast --verify -vvv --slow",
-    "connection:11155111_to_421614": "source .env && ETHERSCAN_API_KEY=$ARBITRUM_ETHERSCAN_API_KEY forge script --chain 421614 script/connections/11155111_to_421614.s.sol:SetupArbitrum --rpc-url $ARBITRUM_SEPOLIA_RPC_URL --broadcast -vvv && ETHERSCAN_API_KEY=$L1_ETHERSCAN_API_KEY forge script --chain sepolia script/connections/11155111_to_421614.s.sol:SetupL1 --rpc-url $SEPOLIA_RPC_URL --broadcast -vvv",
-    "connection:11155111_to_11155420": "source .env && ETHERSCAN_API_KEY=$OPTIMISM_ETHERSCAN_API_KEY forge script --chain 11155420 script/connections/11155111_to_11155420.s.sol:SetupOptimism --rpc-url $OPTIMISM_SEPOLIA_RPC_URL --broadcast -vvv && ETHERSCAN_API_KEY=$L1_ETHERSCAN_API_KEY forge script --chain sepolia script/connections/11155111_to_11155420.s.sol:SetupL1 --rpc-url $SEPOLIA_RPC_URL --broadcast -vvv"
+    "compile": "bun hardhat compile",
+    "compile:zksync": "bun hardhat compile --network zkSyncSepolia",
+    "deploy:11155111": "bun hardhat ignition deploy ./ignition/modules/11155111.ts --network sepolia --verify",
+    "deploy:11155420": "bun hardhat ignition deploy ./ignition/modules/11155420.ts --network optimismSepolia --verify",
+    "deploy:421614": "bun hardhat ignition deploy ./ignition/modules/421614.ts --network arbitrumSepolia --verify",
+    "deploy:33111": "bun hardhat ignition deploy ./ignition/modules/33111.ts --network curtis --verify",
+    "deploy:4801": "bun hardhat ignition deploy ./ignition/modules/4801.ts --network worldChainSepolia --verify",
+    "deploy:300": "bun run compile:zksync && bun hardhat deploy-zksync --script deploy.ts --network zkSyncSepolia",
+    "connection:register": "bun run scripts/connect.ts"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-foundry": "^1.1.3",
+    "@nomicfoundation/hardhat-ignition": "^0.15.9",
+    "@nomicfoundation/hardhat-ignition-ethers": "^0.15.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@typechain/ethers-v6": "^0.5.0",
+    "@typechain/hardhat": "^9.0.0",
+    "@types/chai": "^4.2.0",
+    "@types/mocha": ">=9.1.0",
+    "@types/node": ">=18.0.0",
+    "bun-types": "latest",
+    "chai": "^4.2.0",
+    "ethers": "^6.4.0",
+    "hardhat-gas-reporter": "^1.0.8",
     "only-allow": "^1.2.1",
     "prettier": "^3.4.2",
     "prettier-plugin-solidity": "^1.4.1",
-    "bun-types": "latest"
+    "solidity-coverage": "^0.8.0",
+    "ts-node": ">=8.0.0",
+    "typechain": "^8.3.0",
+    "typescript": ">=4.5.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@matterlabs/hardhat-zksync": "^1.3.0",
+    "@matterlabs/hardhat-zksync-verify": "^1.7.1",
+    "dotenv": "^16.4.7",
+    "hardhat": "^2.22.18"
   }
 }

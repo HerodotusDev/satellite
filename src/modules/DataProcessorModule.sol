@@ -113,6 +113,12 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
     // ========================= View Functions ========================= //
 
     /// @inheritdoc IDataProcessorModule
+    function getDataProcessorProgramHash() external view returns (bytes32) {
+        DataProcessorModuleStorage storage ms = moduleStorage();
+        return ms.programHash;
+    }
+
+    /// @inheritdoc IDataProcessorModule
     function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32) {
         DataProcessorModuleStorage storage ms = moduleStorage();
         // Ensure task is finalized

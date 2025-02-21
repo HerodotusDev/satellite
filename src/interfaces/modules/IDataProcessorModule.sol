@@ -62,6 +62,9 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     /// @notice Set the facts registry contract
     function setDataProcessorFactsRegistry(IFactsRegistry factsRegistry) external;
 
+    /// @notice Get the program hash
+    function getDataProcessorProgramHash() external view returns (bytes32);
+
     /// @notice Requests the execution of a task with a module
     /// @param moduleTask module task
     function requestDataProcessorExecutionOfTask(ModuleTask calldata moduleTask) external;

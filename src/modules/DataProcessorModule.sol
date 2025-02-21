@@ -106,33 +106,8 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         bytes32 taskHash = bytes32((taskHashHigh << 128) | taskHashLow);
         bytes32 taskResult = bytes32((taskResultHigh << 128) | taskResultLow);
 
-            // Convert the low and high 128 bits to a single 256 bit value
-            bytes32 resultMerkleRoot = bytes32((resultMerkleRootHigh << 128) | resultMerkleRootLow);
-            bytes32 taskMerkleRoot = bytes32((taskMerkleRootHigh << 128) | taskMerkleRootLow);
-
-            // Compute the Merkle leaf of the task
-            bytes32 taskMerkleLeaf = standardEvmHDPLeafHash(task.commitment);
-            // Ensure that the task is included in the batch, by verifying the Merkle proof
-            bool isVerifiedTask = task.taskInclusionProof.verify(taskMerkleRoot, taskMerkleLeaf);
-
-            if (!isVerifiedTask) {
-                revert NotInBatch();
-            }
-
-            // Compute the Merkle leaf of the task result
-            bytes32 taskResultCommitment = keccak256(abi.encode(task.commitment, task.result));
-            bytes32 taskResultMerkleLeaf = standardEvmHDPLeafHash(taskResultCommitment);
-
-            // Ensure that the task result is included in the batch, by verifying the Merkle proof
-            bool isVerifiedResult = task.resultInclusionProof.verify(resultMerkleRoot, taskResultMerkleLeaf);
-
-            if (!isVerifiedResult) {
-                revert NotInBatch();
-            }
-
-            // Store the task result
-            ms.cachedTasksResult[task.commitment] = TaskResult({status: TaskStatus.FINALIZED, result: task.result});
-        }
+        // Store the task result
+        ms.cachedTasksResult[taskHash] = TaskResult({status: TaskStatus.FINALIZED, result: taskResult});
     }
 
     // ========================= View Functions ========================= //

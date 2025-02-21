@@ -12,7 +12,7 @@ pub mod HerodotusStarknet {
     use herodotus_starknet::{
         evm_fact_registry::evm_fact_registry_component,
         mmr_core::{mmr_core_component, RootForHashingFunction}, state::state_component,
-        on_chain_growing::on_chain_growing_component,
+        evm_growing::evm_growing_component,
     };
     use starknet::{ClassHash, ContractAddress};
     use super::*;
@@ -23,7 +23,7 @@ pub mod HerodotusStarknet {
     );
     component!(path: mmr_core_component, storage: mmr_core, event: MmrCoreEvent);
     component!(
-        path: on_chain_growing_component, storage: on_chain_growing, event: OnChainGrowingEvent,
+        path: evm_growing_component, storage: evm_growing, event: EvmGrowingEvent,
     );
 
     // Ownable / Upgradeable
@@ -44,7 +44,7 @@ pub mod HerodotusStarknet {
         #[substorage(v0)]
         mmr_core: mmr_core_component::Storage,
         #[substorage(v0)]
-        on_chain_growing: on_chain_growing_component::Storage,
+        evm_growing: evm_growing_component::Storage,
     }
 
     #[constructor]
@@ -113,7 +113,7 @@ pub mod HerodotusStarknet {
         #[flat]
         MmrCoreEvent: mmr_core_component::Event,
         #[flat]
-        OnChainGrowingEvent: on_chain_growing_component::Event,
+        EvmGrowingEvent: evm_growing_component::Event,
     }
 
     #[abi(embed_v0)]
@@ -125,8 +125,7 @@ pub mod HerodotusStarknet {
     impl MmrCoreExternalImpl = mmr_core_component::MmrCoreExternal<ContractState>;
 
     #[abi(embed_v0)]
-    impl OnChainGrowingImpl =
-        on_chain_growing_component::OnChainGrowing<ContractState>;
+    impl EvmGrowingImpl = evm_growing_component::EvmGrowing<ContractState>;
 
     // Ownable / Upgradeable
     #[abi(embed_v0)]

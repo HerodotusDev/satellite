@@ -2,4 +2,4 @@
 call_type = "invoke"
 contract_address = "0x032d260a653bd1ee1c07b33b770aa32c7ab9fabde8bd74b47cc0ef4e5e472792"
 function = "upgrade"
-inputs = ["0x00e25006045ab9d183ccfd4f18623ac5d2acd4e82a0df475796e76f7f2f8e13a"]
+inputs = ["0x076f45fef6b9e540e65a7e6756a59ca9d6c72620662ae4cb043e8d7f793c8404"]

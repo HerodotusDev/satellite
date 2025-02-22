@@ -24,7 +24,7 @@ pub mod decoders {
                             last_word_byte_len = 8;
                         }
                         (l, last_word_byte_len)
-                    }
+                    },
                 }
             },
         }

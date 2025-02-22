@@ -22,9 +22,7 @@ pub mod HerodotusStarknet {
         path: evm_fact_registry_component, storage: evm_fact_registry, event: EvmFactRegistryEvent,
     );
     component!(path: mmr_core_component, storage: mmr_core, event: MmrCoreEvent);
-    component!(
-        path: evm_growing_component, storage: evm_growing, event: EvmGrowingEvent,
-    );
+    component!(path: evm_growing_component, storage: evm_growing, event: EvmGrowingEvent);
 
     // Ownable / Upgradeable
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);

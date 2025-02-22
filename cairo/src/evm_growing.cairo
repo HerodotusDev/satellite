@@ -4,7 +4,6 @@ use cairo_lib::{
 };
 use cairo_lib::hashing::keccak::keccak_cairo_words64;
 use cairo_lib::hashing::poseidon::hash_words64;
-use cairo_lib::utils::bitwise::reverse_endianness_u256;
 
 #[starknet::interface]
 pub trait IEvmGrowing<TContractState> {
@@ -23,8 +22,7 @@ pub trait IEvmGrowing<TContractState> {
 #[starknet::component]
 pub mod evm_growing_component {
     use herodotus_starknet::{
-        state::state_component,
-        mmr_core::{POSEIDON_HASHING_FUNCTION, KECCAK_HASHING_FUNCTION, RootForHashingFunction},
+        state::state_component, mmr_core::{POSEIDON_HASHING_FUNCTION, RootForHashingFunction},
         utils::{header_rlp_index, decoders::{decode_rlp, decode_block_number, decode_parent_hash}},
     };
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry};
@@ -123,9 +121,7 @@ pub mod evm_growing_component {
 
                 assert(headers_rlp_len >= 1, 'INVALID_HEADER_RLP');
 
-                let (d, last_word_byte_len) = decode_rlp(
-                    header_rlp_first, [header_rlp_index::PARENT_HASH].span(),
-                );
+                let (d, _) = decode_rlp(header_rlp_first, [header_rlp_index::PARENT_HASH].span());
                 previous_parent_hash = decode_parent_hash(*d.at(0));
 
                 let reference_block = reference_block.unwrap();
@@ -135,15 +131,12 @@ pub mod evm_growing_component {
                 let initial_blockhash = state
                     .received_parent_hashes
                     .entry(chain_id)
-                    .entry(KECCAK_HASHING_FUNCTION) //! changed to keccak
+                    .entry(POSEIDON_HASHING_FUNCTION)
                     .entry(reference_block)
                     .read();
-                assert(initial_blockhash != 0, 'BLOCK_NOT_RECEIVED');
 
-                let rlp_hash = InternalFunctions::keccak_hash_rlp(
-                    header_rlp_first, last_word_byte_len, true,
-                );
-                assert(rlp_hash == initial_blockhash, 'INVALID_INITIAL_HEADER_RLP');
+                assert(initial_blockhash != 0, 'BLOCK_NOT_RECEIVED');
+                assert(initial_blockhash == poseidon_hash.into(), 'INVALID_INITIAL_HEADER_RLP');
 
                 let (_, p) = mmr.append(poseidon_hash, mmr_peaks).expect('MMR_APPEND_FAILED');
                 peaks = p;
@@ -154,12 +147,12 @@ pub mod evm_growing_component {
 
                 let current_rlp = *header_rlp;
 
-                let (d, last_word_byte_len) = decode_rlp(current_rlp, [header_rlp_index::PARENT_HASH].span());
+                let (d, last_word_byte_len) = decode_rlp(
+                    current_rlp, [header_rlp_index::PARENT_HASH].span(),
+                );
                 previous_parent_hash = decode_parent_hash(*d.at(0));
 
-                let current_hash = InternalFunctions::keccak_hash_rlp(
-                    current_rlp, last_word_byte_len, false,
-                );
+                let current_hash = keccak_cairo_words64(current_rlp, last_word_byte_len);
                 assert(current_hash == parent_hash, 'INVALID_HEADER_RLP');
 
                 let poseidon_hash = hash_words64(current_rlp);
@@ -191,23 +184,6 @@ pub mod evm_growing_component {
                         },
                     ),
                 );
-        }
-    }
-
-    #[generate_trait]
-    impl InternalFunctions of InternalFunctionsTrait {
-        // @notice Hashes RLP-encoded header
-        // @param rlp RLP-encoded header
-        // @param last_word_bytes Number of bytes in the last word
-        // @param big_endian Whether to reverse endianness of the hash
-        // @return Hash of the header
-        fn keccak_hash_rlp(rlp: Words64, last_word_bytes: usize, big_endian: bool) -> u256 {
-            let mut hash = keccak_cairo_words64(rlp, last_word_bytes);
-            if big_endian {
-                reverse_endianness_u256(hash)
-            } else {
-                hash
-            }
         }
     }
 }

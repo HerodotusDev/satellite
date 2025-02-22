@@ -1,4 +1,5 @@
 use cairo_lib::data_structures::mmr::mmr::{MMR, MMRImpl, MmrElement, MmrSize, Proof, Peaks};
+use cairo_lib::utils::types::words64::Words64;
 
 pub const POSEIDON_HASHING_FUNCTION: u256 =
     0xd3764378578a6e2b5a09713c3e8d5015a802d8de808c962ff5c53384ac7b1450;
@@ -78,21 +79,29 @@ pub trait ICoreMmrExternal<TContractState> {
         mmr_size: u256, // ignored when original_mmr_id is 0
         hashing_functions: Span<u256>,
     );
+
+    fn translateParentHashFunction(
+        ref self: TContractState, chain_id: u256, block_number: u256, header_rlp: Words64,
+    );
 }
 
 #[starknet::component]
 pub mod mmr_core_component {
     use herodotus_starknet::state::state_component;
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry};
+    use cairo_lib::{
+        utils::bitwise::reverse_endianness_u256, hashing::keccak::keccak_cairo_words64,
+        encoding::rlp::rlp_decode_list_lazy, hashing::poseidon::hash_words64,
+    };
     use super::*;
 
     #[storage]
     struct Storage {}
 
     #[derive(Drop, Serde)]
-    enum CreatedFrom {
-        FOREIGN,
-        DOMESTIC,
+    enum ReceivedFrom {
+        MESSAGE,
+        TRANSLATION,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -101,6 +110,13 @@ pub mod mmr_core_component {
         block_number: u256,
         parent_hash: u256,
         hashing_function: u256,
+        received_from: ReceivedFrom,
+    }
+
+    #[derive(Drop, Serde)]
+    enum CreatedFrom {
+        FOREIGN,
+        DOMESTIC,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -147,7 +163,11 @@ pub mod mmr_core_component {
                 .emit(
                     Event::ReceivedParentHash(
                         ReceivedParentHash {
-                            chain_id, block_number, parent_hash, hashing_function,
+                            chain_id,
+                            block_number,
+                            parent_hash,
+                            hashing_function,
+                            received_from: ReceivedFrom::MESSAGE,
                         },
                     ),
                 );
@@ -369,6 +389,52 @@ pub mod mmr_core_component {
                             roots_for_hashing_functions: roots_for_hashing_functions.span(),
                             origin_chain_id: state.chain_id.read(),
                             created_from: CreatedFrom::DOMESTIC,
+                        },
+                    ),
+                );
+        }
+
+        fn translateParentHashFunction(
+            ref self: ComponentState<TContractState>,
+            chain_id: u256,
+            block_number: u256,
+            header_rlp: Words64,
+        ) {
+            let mut state = get_dep_component_mut!(ref self, State);
+
+            let (_, last_word_byte_len) = rlp_decode_list_lazy(header_rlp, [].span())
+                .expect('ERR_DECODE_RLP_LIST');
+
+            let rlp_keccak_hash = reverse_endianness_u256(
+                keccak_cairo_words64(header_rlp, last_word_byte_len),
+            );
+
+            let rlp_poseidon_hash: u256 = hash_words64(header_rlp).into();
+
+            let receive_parent_hashes_chain = state.received_parent_hashes.entry(chain_id);
+
+            let saved_keccak_hash = receive_parent_hashes_chain
+                .entry(KECCAK_HASHING_FUNCTION)
+                .entry(block_number)
+                .read();
+
+            assert(saved_keccak_hash != 0, 'KECCAK_HASH_NOT_SAVED');
+            assert(saved_keccak_hash == rlp_keccak_hash, 'KECCAK_HASH_MISMATCH');
+
+            receive_parent_hashes_chain
+                .entry(POSEIDON_HASHING_FUNCTION)
+                .entry(block_number)
+                .write(rlp_poseidon_hash);
+
+            self
+                .emit(
+                    Event::ReceivedParentHash(
+                        ReceivedParentHash {
+                            chain_id,
+                            block_number,
+                            parent_hash: rlp_poseidon_hash,
+                            hashing_function: POSEIDON_HASHING_FUNCTION,
+                            received_from: ReceivedFrom::TRANSLATION,
                         },
                     ),
                 );

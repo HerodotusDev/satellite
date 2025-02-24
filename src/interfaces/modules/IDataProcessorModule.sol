@@ -21,9 +21,9 @@ interface IDataProcessorModule is IFactsRegistryCommon {
 
     /// @notice Storage structure for the module
     struct DataProcessorModuleStorage {
-        bytes32 programHash;
         IFactsRegistry factsRegistry;
         mapping(bytes32 => TaskResult) cachedTasksResult;
+        mapping(bytes32 => bool) authorizedProgramHashes;
     }
 
     struct MmrData {
@@ -32,15 +32,19 @@ interface IDataProcessorModule is IFactsRegistryCommon {
         uint256 mmrSize;
     }
 
+    /// @param mmrData For each used MMR, its chain ID, ID and size
+    /// @param taskResultLow The low part of the task result
+    /// @param taskResultHigh The high part of the task result
+    /// @param taskHashLow The low part of the task hash
+    /// @param taskHashHigh The high part of the task hash
+    /// @param programHash The program hash that was used to compute the task
     struct TaskData {
-        /// @dev The Merkle proof of the task
-        bytes32[] taskInclusionProof;
-        /// @dev The Merkle proof of the result
-        bytes32[] resultInclusionProof;
-        /// @dev The commitment of the task
-        bytes32 commitment;
-        /// @dev The result of the computational task
-        bytes32 result;
+        MmrData[] mmrData;
+        uint256 taskResultLow;
+        uint256 taskResultHigh;
+        uint256 taskHashLow;
+        uint256 taskHashHigh;
+        bytes32 programHash;
     }
 
     /// @notice emitted when a task already stored
@@ -55,15 +59,25 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     error NotInBatch();
     /// Task is not finalized
     error NotFinalized();
+    /// Unauthorized or inactive program hash
+    error UnauthorizedProgramHash();
+    /// Invalid MMR root
+    error InvalidMmrRoot();
+
+    /// @notice Emitted when a program hash is enabled
+    event ProgramHashEnabled(bytes32 enabledProgramHash);
+
+    /// @notice Emitted when some program hashes are disabled
+    event ProgramHashesDisabled(bytes32[] disabledProgramHashes);
 
     /// @notice Set the program hash for the HDP program
     function setDataProcessorProgramHash(bytes32 programHash) external;
 
+    /// @notice Disable some program hashes
+    function disableProgramHashes(bytes32[] calldata programHashes) external;
+
     /// @notice Set the facts registry contract
     function setDataProcessorFactsRegistry(IFactsRegistry factsRegistry) external;
-
-    /// @notice Get the program hash
-    function getDataProcessorProgramHash() external view returns (bytes32);
 
     /// @notice Requests the execution of a task with a module
     /// @param moduleTask module task
@@ -71,16 +85,15 @@ interface IDataProcessorModule is IFactsRegistryCommon {
 
     /// @notice Authenticates the execution of a task is finalized
     ///         by verifying the locally computed fact with the FactsRegistry
-    /// @param mmrData For each used MMR, its chain ID, ID and size
-    /// @param taskResultLow The low part of the task result
-    /// @param taskResultHigh The high part of the task result
-    /// @param taskHashLow The low part of the task hash
-    /// @param taskHashHigh The high part of the task hash
-    function authenticateDataProcessorTaskExecution(MmrData[] calldata mmrData, uint256 taskResultLow, uint256 taskResultHigh, uint256 taskHashLow, uint256 taskHashHigh) external;
+    /// @param taskData The task data
+    function authenticateDataProcessorTaskExecution(TaskData calldata taskData) external;
 
     /// @notice Returns the result of a finalized task
     function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32);
 
     /// @notice Returns the status of a task
     function getDataProcessorTaskStatus(bytes32 taskCommitment) external view returns (TaskStatus);
+
+    /// @notice Checks if a program hash is currently authorized
+    function isProgramHashAuthorized(bytes32 programHash) external view returns (bool);
 }

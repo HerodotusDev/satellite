@@ -8,6 +8,7 @@ import {LibSatellite} from "src/libraries/LibSatellite.sol";
 import {ModuleTask, ModuleCodecs} from "src/libraries/internal/data-processor/ModuleCodecs.sol";
 import {IDataProcessorModule} from "src/interfaces/modules/IDataProcessorModule.sol";
 import {AccessController} from "src/libraries/AccessController.sol";
+
 /// @title DataProcessorModule
 /// @author Herodotus Dev Ltd
 /// @notice A contract to store the execution results of HDP tasks
@@ -37,7 +38,18 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
     /// @inheritdoc IDataProcessorModule
     function setDataProcessorProgramHash(bytes32 programHash) external onlyOwner {
         DataProcessorModuleStorage storage ms = moduleStorage();
-        ms.programHash = programHash;
+        ms.authorizedProgramHashes[programHash] = true;
+        emit ProgramHashEnabled(programHash);
+    }
+
+    /// @inheritdoc IDataProcessorModule
+    function disableProgramHashes(bytes32[] calldata programHashes) external onlyOwner {
+        DataProcessorModuleStorage storage ms = moduleStorage();
+
+        for (uint256 i = 0; i < programHashes.length; i++) {
+            ms.authorizedProgramHashes[programHashes[i]] = false;
+        }
+        emit ProgramHashesDisabled(programHashes);
     }
 
     /// @inheritdoc IDataProcessorModule
@@ -69,23 +81,29 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
     }
 
     /// @inheritdoc IDataProcessorModule
-    function authenticateDataProcessorTaskExecution(MmrData[] calldata mmrData, uint256 taskResultLow, uint256 taskResultHigh, uint256 taskHashLow, uint256 taskHashHigh) external {
+    function authenticateDataProcessorTaskExecution(TaskData calldata taskData) external {
         DataProcessorModuleStorage storage ms = moduleStorage();
 
+        if (!isProgramHashAuthorized(taskData.programHash)) {
+            revert UnauthorizedProgramHash();
+        }
+
         // Initialize an array of uint256 to store the program output
-        uint256[] memory programOutput = new uint256[](3 + mmrData.length * 4);
+        uint256[] memory programOutput = new uint256[](3 + taskData.mmrData.length * 4);
 
         // Assign values to the program output array
         // This needs to be compatible with cairo program
         // https://github.com/HerodotusDev/hdp-cairo/blob/main/src/utils/utils.cairo#L27-L48
-        programOutput[0] = uint256(ms.programHash);
-        programOutput[1] = taskResultLow;
-        programOutput[2] = taskResultHigh;
+        programOutput[0] = uint256(taskData.programHash);
+        programOutput[1] = taskData.taskResultLow;
+        programOutput[2] = taskData.taskResultHigh;
 
-        for (uint8 i = 0; i < mmrData.length; i++) {
-            MmrData memory mmr = mmrData[i];
+        for (uint8 i = 0; i < taskData.mmrData.length; i++) {
+            MmrData memory mmr = taskData.mmrData[i];
             bytes32 usedMmrRoot = loadMmrRoot(mmr.mmrId, mmr.mmrSize, mmr.chainId);
-            require(usedMmrRoot != bytes32(0), "Could not retrieve MMR root");
+            if (usedMmrRoot == bytes32(0)) {
+                revert InvalidMmrRoot();
+            }
             programOutput[3 + i * 4] = mmr.mmrId;
             programOutput[3 + i * 4 + 1] = mmr.mmrSize;
             programOutput[3 + i * 4 + 2] = mmr.chainId;
@@ -96,27 +114,21 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         bytes32 programOutputHash = keccak256(abi.encodePacked(programOutput));
 
         // Compute GPS fact hash
-        bytes32 gpsFactHash = keccak256(abi.encode(ms.programHash, programOutputHash));
+        bytes32 gpsFactHash = keccak256(abi.encode(taskData.programHash, programOutputHash));
 
         // Ensure GPS fact is registered
         if (!ms.factsRegistry.isValid(gpsFactHash)) {
             revert InvalidFact();
         }
 
-        bytes32 taskHash = bytes32((taskHashHigh << 128) | taskHashLow);
-        bytes32 taskResult = bytes32((taskResultHigh << 128) | taskResultLow);
+        bytes32 taskHash = bytes32((taskData.taskHashHigh << 128) | taskData.taskHashLow);
+        bytes32 taskResult = bytes32((taskData.taskResultHigh << 128) | taskData.taskResultLow);
 
         // Store the task result
         ms.cachedTasksResult[taskHash] = TaskResult({status: TaskStatus.FINALIZED, result: taskResult});
     }
 
     // ========================= View Functions ========================= //
-
-    /// @inheritdoc IDataProcessorModule
-    function getDataProcessorProgramHash() external view returns (bytes32) {
-        DataProcessorModuleStorage storage ms = moduleStorage();
-        return ms.programHash;
-    }
 
     /// @inheritdoc IDataProcessorModule
     function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32) {
@@ -132,6 +144,12 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
     function getDataProcessorTaskStatus(bytes32 taskCommitment) external view returns (TaskStatus) {
         DataProcessorModuleStorage storage ms = moduleStorage();
         return ms.cachedTasksResult[taskCommitment].status;
+    }
+
+    /// @inheritdoc IDataProcessorModule
+    function isProgramHashAuthorized(bytes32 programHash) public view returns (bool) {
+        DataProcessorModuleStorage storage ms = moduleStorage();
+        return ms.authorizedProgramHashes[programHash];
     }
 
     // ========================= Internal Functions ========================= //

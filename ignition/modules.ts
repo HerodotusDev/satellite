@@ -1,8 +1,5 @@
 import settings from "../settings.json";
 
-const DATA_PROCESSOR_PROGRAM_HASH =
-  "0x0000000000000000000000000000000000000000000000000000000000000000";
-
 interface InitFunction {
   name: string;
   args: any[];
@@ -35,14 +32,15 @@ export const modules = (chainId: keyof typeof settings) =>
       interfaceName: "IEvmFactRegistryModule",
     },
 
-    ...("DATA_PROCESSOR_FACTS_REGISTRY" in settings[chainId]
+    ...("DATA_PROCESSOR_FACTS_REGISTRY" in settings[chainId] &&
+    "DATA_PROCESSOR_PROGRAM_HASH" in settings[chainId]
       ? {
           DataProcessorModule: {
             interfaceName: "IDataProcessorModule",
             initFunctions: [
               {
                 name: "setDataProcessorProgramHash",
-                args: [DATA_PROCESSOR_PROGRAM_HASH],
+                args: [settings[chainId].DATA_PROCESSOR_PROGRAM_HASH],
               },
               {
                 name: "setDataProcessorFactsRegistry",

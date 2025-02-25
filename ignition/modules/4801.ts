@@ -1,6 +1,6 @@
-import buildSatelliteDeployment from "../SatelliteDeployment";
+import buildSatelliteDeployment, { ModuleName } from "../SatelliteDeployment";
 
-export default buildSatelliteDeployment("4801", [
+export const modules: ModuleName[] = [
   "OwnershipModule",
   "SatelliteConnectionRegistryModule",
   "SatelliteInspectorModule",
@@ -10,4 +10,5 @@ export default buildSatelliteDeployment("4801", [
   "EvmOnChainGrowingModule",
   "NativeParentHashFetcherModule",
   "OptimismReceiverModule",
-]);
+];
+export default buildSatelliteDeployment("4801", modules);

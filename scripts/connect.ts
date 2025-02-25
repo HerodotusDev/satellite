@@ -15,7 +15,9 @@ function alias(address: string, shift: string) {
 
 async function main() {
   if (Bun.argv.length != 4) {
-    console.error("Usage: bun connect.ts <senderChainId> <receiverChainId>");
+    console.error(
+      "Usage: bun connection:register <senderChainId> <receiverChainId>",
+    );
     process.exit(1);
   }
 

@@ -94,7 +94,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         // Assign values to the program output array
         // This needs to be compatible with cairo program
         // https://github.com/HerodotusDev/hdp-cairo/blob/main/src/utils/utils.cairo#L27-L48
-        programOutput[0] = uint256(taskData.programHash);
+        programOutput[0] = uint256(taskData.moduleHash);
         programOutput[1] = taskData.taskResultLow;
         programOutput[2] = taskData.taskResultHigh;
 

@@ -81,6 +81,8 @@ async function getDeployedModules(chainId: string) {
     process.exit(1);
   }
 
+  console.log("Deployed satellite is:", deployedAddress);
+
   const contract = await hre.ethers.getContractAt(
     "ISatellite",
     deployedAddress,
@@ -198,38 +200,6 @@ async function compareModules(
     } else {
       preservedModules.push(compiledModule);
     }
-  }
-
-  console.log("\n========================================");
-  console.log(
-    addedModules.length ? "\nModules to be added:" : "\nNo modules to be added",
-  );
-  for (const module of addedModules) {
-    console.log("-", module!.name);
-  }
-  console.log(
-    deletedModules.length
-      ? "\nModules to be deleted:"
-      : "\nNo modules to be deleted",
-  );
-  for (const module of deletedModules) {
-    console.log("-", module!.name);
-  }
-  console.log(
-    updatedModules.length
-      ? "\nModules to be updated:"
-      : "\nNo modules to be updated",
-  );
-  for (const module of updatedModules) {
-    console.log("-", module!.name);
-  }
-  console.log(
-    preservedModules.length
-      ? "\nModules to be preserved:"
-      : "\nNo modules to be preserved",
-  );
-  for (const module of preservedModules) {
-    console.log("-", module!.name);
   }
 
   const menu = new ConsoleMenu([
@@ -367,6 +337,16 @@ async function compareModules(
     selectedModules.has(module.name),
   );
 
+  console.log("\n========================================\n");
+
+  const confirm = prompt("Confirm that this is correct [y/N]:");
+  if (confirm !== "y") {
+    console.log("Aborting...");
+    process.exit(0);
+  }
+
+  console.log("\n========================================\n");
+
   return {
     addedModules,
     deletedModules,
@@ -377,6 +357,55 @@ async function compareModules(
     movedSelectors,
     updatedModuleSelectors,
   };
+}
+
+async function getMaintenanceActions(
+  result: Awaited<ReturnType<typeof compareModules>>,
+) {
+  const modulesToDeploy = result.addedModules
+    .concat(result.updatedModules)
+    .map((x) => x!.name);
+  // TODO: deploy those module and get their addresses
+
+  console.log("Those modules will be deployed:");
+  for (const module of modulesToDeploy) {
+    console.log("-", module);
+  }
+
+  const f = function (addresses: Record<string, string>) {
+    const maintenances = [];
+    for (const [_module, selectors] of result.deletedSelectors) {
+      maintenances.push({
+        moduleAddress: "0x0000000000000000000000000000000000000000", // TODO: 0x0 when SatelliteMaintenanceModule is fixed
+        action: ACTION.Remove,
+        functionSelectors: selectors,
+      });
+    }
+    for (const [_from, to, selectors] of result.movedSelectors) {
+      maintenances.push({
+        moduleAddress: addresses[to], // TODO: deployed address
+        action: ACTION.Replace,
+        functionSelectors: selectors,
+      });
+    }
+    for (const [module, selectors] of result.updatedModuleSelectors) {
+      maintenances.push({
+        moduleAddress: addresses[module], // TODO: deployed address
+        action: ACTION.Replace,
+        functionSelectors: selectors,
+      });
+    }
+    for (const [module, selectors] of result.addedSelectors) {
+      maintenances.push({
+        moduleAddress: addresses[module], // TODO: deployed address
+        action: ACTION.Add,
+        functionSelectors: selectors,
+      });
+    }
+    return maintenances;
+  };
+
+  return [f, modulesToDeploy] as const;
 }
 
 export async function main() {
@@ -392,49 +421,22 @@ export async function main() {
 
   const result = await compareModules(deployedModules, compiledModules);
 
+  const [maintenanceActions, modules] = await getMaintenanceActions(result);
+
+  const x = {} as Record<string, string>;
+  for (const module of modules) {
+    x[module] = module;
+  }
+
+  console.log("\nMaintenance actions are:", maintenanceActions(x));
+  console.log("\n========================================\n");
+  const confirm = prompt("Confirm that this is correct [y/N]:");
+  if (confirm !== "y") {
+    console.log("Aborting...");
+    process.exit(0);
+  }
   console.log("\n========================================\n");
 
-  const modulesToDeploy = result.addedModules
-    .concat(result.updatedModules)
-    .map((x) => x!.name);
-  // TODO: deploy those module and get their addresses
-
-  console.log("Those modules will be deployed:");
-  for (const module of modulesToDeploy) {
-    console.log("-", module);
-  }
-
-  const maintenances = [];
-  for (const [module, selectors] of result.deletedSelectors) {
-    maintenances.push({
-      moduleAddress: module, // TODO: 0x0 when SatelliteMaintenanceModule is fixed
-      action: ACTION.Remove,
-      functionSelectors: selectors,
-    });
-  }
-  for (const [_from, to, selectors] of result.movedSelectors) {
-    maintenances.push({
-      moduleAddress: to, // TODO: deployed address
-      action: ACTION.Replace,
-      functionSelectors: selectors,
-    });
-  }
-  for (const [module, selectors] of result.updatedModuleSelectors) {
-    maintenances.push({
-      moduleAddress: module, // TODO: deployed address
-      action: ACTION.Replace,
-      functionSelectors: selectors,
-    });
-  }
-  for (const [module, selectors] of result.addedSelectors) {
-    maintenances.push({
-      moduleAddress: module, // TODO: deployed address
-      action: ACTION.Add,
-      functionSelectors: selectors,
-    });
-  }
-
-  console.log("\nMaintenance actions are:", maintenances);
   process.exit(0);
 }
 

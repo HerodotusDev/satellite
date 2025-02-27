@@ -128,6 +128,7 @@ library LibSatellite {
         if (_functionSelectors.length == 0) {
             revert ILibSatellite.NoSelectorsInModuleToMaintenance();
         }
+        // TODO: remove this if statement
         if (_moduleAddress == address(0)) {
             revert ILibSatellite.AddModuleAddressZero();
         }

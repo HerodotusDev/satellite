@@ -12,9 +12,11 @@ export function getSelector(interfaceName: string) {
   return selectors;
 }
 
+export type ModuleName = keyof ReturnType<typeof moduleList>;
+
 const buildSatelliteDeployment = (
   chainId: keyof typeof settings,
-  modules: (keyof ReturnType<typeof moduleList>)[],
+  modules: ModuleName[],
 ) =>
   buildModule("Satellite_" + chainId, (m) => {
     const satelliteMaintenanceModule = m.contract("SatelliteMaintenanceModule");

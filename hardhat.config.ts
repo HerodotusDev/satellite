@@ -34,6 +34,7 @@ const config: HardhatUserConfig = {
     sepolia: {
       url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY as string],
+      chainId: 11155111,
     },
     zkSyncSepolia: {
       url: "https://sepolia.era.zksync.dev",
@@ -42,34 +43,55 @@ const config: HardhatUserConfig = {
       zksync: true,
       verifyURL:
         "https://explorer.sepolia.era.zksync.dev/contract_verification",
+      chainId: 300,
     },
     optimismSepolia: {
       url: `https://opt-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY as string],
+      chainId: 11155420,
     },
     arbitrumSepolia: {
       url: `https://arb-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY as string],
+      chainId: 421614,
     },
     curtis: {
       url: "https://curtis.rpc.caldera.xyz/http",
       accounts: [process.env.PRIVATE_KEY as string],
+      chainId: 33111,
     },
     worldChainSepolia: {
       url: `https://worldchain-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY as string],
+      chainId: 4801,
     },
   },
   etherscan: {
     apiKey: {
       sepolia: process.env.L1_ETHERSCAN_API_KEY as string,
-      zksyncsepolia: process.env.ZKSYNC_ETHERSCAN_API_KEY as string,
+      zkSyncSepolia: process.env.ZKSYNC_ETHERSCAN_API_KEY as string,
       optimismSepolia: process.env.OPTIMISM_ETHERSCAN_API_KEY as string,
       arbitrumSepolia: process.env.ARBITRUM_ETHERSCAN_API_KEY as string,
       curtis: process.env.CURTIS_ETHERSCAN_API_KEY as string,
       worldChainSepolia: process.env.WORLDCHAIN_ETHERSCAN_API_KEY as string,
     },
     customChains: [
+      {
+        network: "sepolia",
+        chainId: 11155111,
+        urls: {
+          apiURL: "https://api-sepolia.etherscan.io/api",
+          browserURL: "https://sepolia.etherscan.io",
+        },
+      },
+      {
+        network: "zkSyncSepolia",
+        chainId: 300,
+        urls: {
+          apiURL: "https://api-sepolia-era.zksync.network/api",
+          browserURL: "https://sepolia-era.zksync.network",
+        },
+      },
       {
         network: "optimismSepolia",
         chainId: 11155420,

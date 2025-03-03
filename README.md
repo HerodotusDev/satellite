@@ -56,21 +56,7 @@ forge test
 - More Parent Hash getters
 - More Tests
 
-## Deployed Contracts
-
-### Sepolia
-
-```
-SatelliteMaintenanceModule: 0x22b387307183C6E4f9E1708D61427e7678106104
-Satellite: 0x710CdB36686CAFc73e6CEAF1bF8700226736A79c
-OwnershipModule: 0x03d3bB47B0bB38383B9C6dfd5eC402Ca81963A8f
-SatelliteInspectorModule: 0x4bd71E988Da55f451008CC81a90d30AA49dF34fc
-MmrCoreModule: 0xfc8ff335a3755cb3118AD378335720a84eD2146f
-MockFactsRegistry: 0xc81B78Ee1636bf5bB09CC150DA15Ca48D0ADC38c
-SharpFactsAggregatorModule: 0x00eD1852C25A87f524605c5AA2eDa120fe09A312
-EVMFactRegistryModule: 0xB7D90624345a34566829044221396224B08D7655
-NativeParentHashFetcherModule: 0xCBa5C999B19ebDEc3ABc2f74067f237c6d31Ab20
-```
+## [Deployed Contracts](/deployed_satellites.json)
 
 ## Deployment
 

@@ -2,8 +2,8 @@
 pragma solidity ^0.8.27;
 
 import {console} from "forge-std/console.sol";
-import {ISatellite} from "interfaces/ISatellite.sol";
-import {ILibSatellite} from "interfaces/ILibSatellite.sol";
+import {ISatellite} from "src/interfaces/ISatellite.sol";
+import {ILibSatellite} from "src/interfaces/ILibSatellite.sol";
 
 library LibSatellite {
     // ========================= Constants ========================= //
@@ -128,6 +128,7 @@ library LibSatellite {
         if (_functionSelectors.length == 0) {
             revert ILibSatellite.NoSelectorsInModuleToMaintenance();
         }
+        // TODO: remove this if statement
         if (_moduleAddress == address(0)) {
             revert ILibSatellite.AddModuleAddressZero();
         }

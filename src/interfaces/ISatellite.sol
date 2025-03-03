@@ -7,17 +7,19 @@ import {ISatelliteConnectionRegistryModule} from "./modules/ISatelliteConnection
 import {IMmrCoreModule} from "./modules/IMmrCoreModule.sol";
 import {ISatelliteInspectorModule} from "./modules/ISatelliteInspectorModule.sol";
 import {ISatelliteMaintenanceModule} from "./modules/ISatelliteMaintenanceModule.sol";
-import {INativeSharpMmrGrowingModule} from "./modules/growing/INativeSharpMmrGrowingModule.sol";
+import {IEvmSharpMmrGrowingModule} from "./modules/growing/IEvmSharpMmrGrowingModule.sol";
 import {IStarknetSharpMmrGrowingModule} from "./modules/growing/IStarknetSharpMmrGrowingModule.sol";
-import {IEVMFactRegistryModule} from "./modules/IEVMFactRegistryModule.sol";
+import {IEvmFactRegistryModule} from "./modules/IEvmFactRegistryModule.sol";
 import {INativeParentHashFetcherModule} from "./modules/parent-hash-fetching/INativeParentHashFetcherModule.sol";
 import {IStarknetParentHashFetcherModule} from "./modules/parent-hash-fetching/IStarknetParentHashFetcherModule.sol";
 import {IReceiverModule} from "./modules/messaging/receiver/IReceiverModule.sol";
-import {INativeOnChainGrowingModule} from "./modules/growing/INativeOnChainGrowingModule.sol";
+import {IEvmOnChainGrowingModule} from "./modules/growing/IEvmOnChainGrowingModule.sol";
 import {IDataProcessorModule} from "./modules/IDataProcessorModule.sol";
 import {IUniversalSenderModule} from "./modules/messaging/sender/IUniversalSenderModule.sol";
 import {IL1ToArbitrumSenderModule} from "./modules/messaging/sender/IL1ToArbitrumSenderModule.sol";
 import {IL1ToOptimismSenderModule} from "./modules/messaging/sender/IL1ToOptimismSenderModule.sol";
+import {IArbitrumToApeChainSenderModule} from "./modules/messaging/sender/IArbitrumToApeChainSenderModule.sol";
+import {IL1ToStarknetSenderModule} from "./modules/messaging/sender/IL1ToStarknetSenderModule.sol";
 interface ISatellite is
     ILibSatellite,
     IOwnershipModule,
@@ -25,15 +27,17 @@ interface ISatellite is
     IMmrCoreModule,
     ISatelliteInspectorModule,
     ISatelliteMaintenanceModule,
-    INativeSharpMmrGrowingModule,
-    IEVMFactRegistryModule,
+    IEvmSharpMmrGrowingModule,
+    IEvmFactRegistryModule,
     INativeParentHashFetcherModule,
-    INativeOnChainGrowingModule,
+    IEvmOnChainGrowingModule,
     IStarknetSharpMmrGrowingModule,
     IReceiverModule,
     IUniversalSenderModule,
     IL1ToArbitrumSenderModule,
     IL1ToOptimismSenderModule,
     IStarknetParentHashFetcherModule,
-    IDataProcessorModule
+    IDataProcessorModule,
+    IArbitrumToApeChainSenderModule,
+    IL1ToStarknetSenderModule
 {}

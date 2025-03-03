@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {LibSatellite} from "libraries/LibSatellite.sol";
-import {ISatellite} from "interfaces/ISatellite.sol";
-import {RootForHashingFunction} from "interfaces/modules/IMmrCoreModule.sol";
+import {LibSatellite} from "src/libraries/LibSatellite.sol";
+import {ISatellite} from "src/interfaces/ISatellite.sol";
+import {RootForHashingFunction} from "src/interfaces/modules/IMmrCoreModule.sol";
 import {AbstractReceiverModule} from "./AbstractReceiverModule.sol";
 
 /// @notice Implementation of the receiver module for chains that use aliased address as message sender for cross-chain communication

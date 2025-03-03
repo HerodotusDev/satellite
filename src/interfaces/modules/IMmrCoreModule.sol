@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {Lib_RLPReader as RLPReader} from "@optimism/libraries/rlp/Lib_RLPReader.sol";
+import {Lib_RLPReader as RLPReader} from "src/libraries/external/optimism/rlp/Lib_RLPReader.sol";
 import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
 
 struct RootForHashingFunction {
@@ -10,13 +10,12 @@ struct RootForHashingFunction {
 }
 
 enum GrownBy {
-    /// @dev GrownBy.EVM_ON_CHAIN_GROWER - appended by NativeOnChainGrowingModule
+    /// @dev GrownBy.EVM_ON_CHAIN_GROWER - appended by EvmOnChainGrowingModule
     EVM_ON_CHAIN_GROWER,
-    /// @dev GrownBy.EVM_SHARP_GROWER - appended by NativeSharpGrowingModule
+    /// @dev GrownBy.EVM_SHARP_GROWER - appended by EvmSharpGrowingModule
     EVM_SHARP_GROWER,
     /// @dev GrownBy.STARKNET_SHARP_GROWER - appended by StarknetSharpMmrGrowingModule
-    STARKNET_SHARP_GROWER,
-    EVM_TIMESTAMP_REMAPPER
+    STARKNET_SHARP_GROWER
 }
 
 enum CreatedFrom {

@@ -402,8 +402,13 @@ pub mod mmr_core_component {
         ) {
             let mut state = get_dep_component_mut!(ref self, State);
 
-            let (_, last_word_byte_len) = rlp_decode_list_lazy(header_rlp, [].span())
+            let (_, byte_len) = rlp_decode_list_lazy(header_rlp, [].span())
                 .expect('ERR_DECODE_RLP_LIST');
+
+            let mut last_word_byte_len = byte_len % 8;
+            if last_word_byte_len == 0 {
+                last_word_byte_len = 8;
+            }
 
             let rlp_keccak_hash = reverse_endianness_u256(
                 keccak_cairo_words64(header_rlp, last_word_byte_len),

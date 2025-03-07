@@ -14,7 +14,7 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
     using Uint256Splitter for uint256;
 
     // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
-    bytes32 public constant PROGRAM_HASH = bytes32(uint256(0x1eca36d586f5356fba096edbf7414017d51cd0ed24b8fde80f78b61a9216ed2));
+    bytes32 public constant PROGRAM_HASH = bytes32(uint256(0x4ebb807bacec9cf6202e6482d8f7f74a531b067571dba2ccf118b0328df8295));
 
     bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
     bytes32 public constant POSEIDON_HASHING_FUNCTION = keccak256("poseidon");

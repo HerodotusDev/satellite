@@ -2,7 +2,9 @@ import hre from "hardhat";
 import fs from "fs";
 
 async function main() {
-  const chains = fs.readdirSync("ignition/modules");
+  const chains = fs
+    .readdirSync("ignition/modules")
+    .filter((f) => /^\d+\.ts$/.test(f));
 
   for (const chain of chains) {
     const modules = require(`../ignition/modules/${chain}`).modules;

@@ -58,12 +58,31 @@ TODO: multiple MMRs, MMR IDs, different hash functions.
 
 Because of great complexity of the contract and need for fine-tuned upgradability, we decided to use [Diamond Proxy Patter](TODO: link) with following facets (or as we will call them - modules):
 
+- [EVM Fact Registry](./src/modules/EvmFactRegistryModule.sol) - stores accounts and storage data that was proven
 - [MMR Core](./src/modules/MmrCoreModule.sol) - responsible for storing and moving MMR data
 - Growing modules - append new blocks to existing MMR
   - [Evm On-Chain Growing](./src/modules/growing/EvmOnChainGrowingModule.sol) - processes all block data directly in the contract as described in [solution section](#solution)
-  - [Evm Sharp Growing](./src/modules/growing/EvmSharpMmrGrowingModule.sol) - processes block data that was proven with ZK proof using SHARP
-  - Starknet Growing - TODO
-- [EVM Fact Registry](./src/modules/EvmFactRegistryModule.sol) - TODO
+  - [Evm Sharp Growing](./src/modules/growing/EvmSharpMmrGrowingModule.sol) - processes block data that was proven with ZK proof using SHARP as described in [reducing cost](#reducing-cost)
+  - [Starknet Growing](./src/modules/growing/StarknetSharpMmrGrowingModule.sol) - TODO
+- [Satellite Registry](./src/modules/SatelliteConnectionRegistryModule.sol) - stores information about other satellites to/from which it can send/receive messages
+- Messaging modules - responsible for sending and receiving data to and from satellites deployed on other chains
+  - Receiver modules
+    - [Simple Receiver](./src/modules/messaging/receiver/SimpleReceiverModule.sol) - receives message on chains that set `msg.sender` for cross-chain messages to transaction sender on the source chain
+    - [Optimism Receiver](./src/modules/messaging/receiver/OptimismReceiverModule.sol) - receive messages on optimism (which [handles messaging differently](./src/modules/messaging/receiver/OptimismReceiverModule.sol#L12-L17))
+  - Sender modules
+    - [Universal Sender](./src/modules/messaging/sender/UniversalSenderModule.sol) - prepares and sends messages that move MMRs and Parent Hashes regardless of the destination chain (uses specific senders under the hood)
+    - [L1 to Starknet](./src/modules/messaging/sender/L1ToStarknetSenderModule.sol)
+    - [L1 to Optimism](./src/modules/messaging/sender/L1ToOptimismSenderModule.sol) - sends message to Optimism (or similar chains like WorldChain)
+    - [L1 to ZkSync](./src/modules/messaging/sender/L1ToZkSyncSenderModule.sol)
+    - [L1 to Arbitrum](./src/modules/messaging/sender/L1ToArbitrumSenderModule.sol)
+    - [Arbitrum to ApeChain](./src/modules/messaging/sender/ArbitrumToApeChainSenderModule.sol)
+- Parent Hash Fetching modules
+  - [Native Parent Hash Fetcher]() - fetches one of latest 256 parent hashes from the chain the satellite is deployed at
+  - [Starknet Parent Hash Fetcher]()
+- [DataProcessor]()
+- [Ownership]()
+- [Satellite Inspector]()
+- [Satellite Maintenance]()
 
 ## Deployment
 
@@ -99,6 +118,7 @@ bun satellite:upgrade CHAIN_ID
 
 Here are some useful links for further reading:
 
+- [Herodotus Cloud Documentation](https://docs.herodotus.cloud)
 - [Herodotus Documentation](https://docs.herodotus.dev)
 
 ## License

@@ -20,6 +20,8 @@ Returns value of storage slot number `slot` of `account` at `blockNumber` on cha
 
 Returns block number of the closest block with timestamp less than or equal to the given `timestamp` on chain with id `chainId`.
 
+## [Deployed Contracts](/deployed_satellites.json)
+
 ## Design
 
 ### How to access historical data in provable way?

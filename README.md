@@ -105,7 +105,7 @@ bun satellite:deploy CHAIN_ID
 > Note: Addresses of deployed contracts are saved to `deployed_satellites.json`. If contract for chain id, which you want to deploy, already exists in the config, it will fail. If you want to erase data about deployed contracts run
 >
 > ```
-> bun erase_deployed_satellites
+> bun detach_satellites
 > ```
 
 ### Upgrades

@@ -16,7 +16,7 @@ function alias(address: string, shift: string) {
 async function main() {
   if (Bun.argv.length != 4) {
     console.error(
-      "Usage: bun connection:register <senderChainId> <receiverChainId>",
+      "Usage: bun connection:remove <senderChainId> <receiverChainId>",
     );
     process.exit(1);
   }
@@ -25,80 +25,78 @@ async function main() {
   const receiverChainId = Bun.argv[3] as keyof typeof settings;
 
   if (!(senderChainId in settings)) {
-    throw new Error(`No settings found for ${senderChainId}`);
+    console.error(`No settings found for ${senderChainId}`);
+    process.exit(1);
   }
 
   if (!(receiverChainId in settings)) {
-    throw new Error(`No settings found for ${receiverChainId}`);
+    console.error(`No settings found for ${receiverChainId}`);
+    process.exit(1);
   }
 
   const senderSatellite = deployedSatellites.satellites.find(
     (s) => s.chainId === senderChainId,
   );
   if (!senderSatellite) {
-    throw new Error(`No satellite deployment found for ${senderChainId}`);
+    console.error(`No satellite deployment found for ${senderChainId}`);
+    process.exit(1);
   }
 
   const receiverSatellite = deployedSatellites.satellites.find(
     (s) => s.chainId === receiverChainId,
   );
   if (!receiverSatellite) {
-    throw new Error(`No satellite deployment found for ${receiverChainId}`);
+    console.error(`No satellite deployment found for ${receiverChainId}`);
+    process.exit(1);
   }
 
   if (
-    deployedSatellites.connections.find(
+    !(deployedSatellites.connections as any[]).find(
       (c) =>
         parseInt(c.from) === parseInt(senderChainId) &&
         parseInt(c.to) === parseInt(receiverChainId),
     )
   ) {
-    throw new Error(
-      `Connection already exists for ${senderChainId} -> ${receiverChainId}`,
+    console.error(
+      `Connection ${senderChainId} -> ${receiverChainId} not found`,
     );
+    process.exit(1);
   }
 
   const connectionData = settings[senderChainId].connections.find(
     (c) => c.to === receiverChainId,
   );
   if (!connectionData) {
-    throw new Error(
+    console.error(
       `No connection data found for ${senderChainId} -> ${receiverChainId}`,
     );
+    process.exit(1);
   }
 
   const senderArgs = [
     receiverChainId,
-    receiverSatellite.contractAddress,
-    connectionData.inboxContract,
     "0x0000000000000000000000000000000000000000",
-    ethers.FunctionFragment.getSelector(connectionData.sendFunction, [
-      "uint256",
-      "address",
-      "bytes",
-      "bytes",
-    ]),
   ];
 
-  await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${senderSatellite.contractAddress} ARGS=${senderArgs.join(",")} bun hardhat --network ${settings[senderChainId].network} run scripts/registerSatelliteConnection.ts`;
+  await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${senderSatellite.contractAddress} ARGS=${senderArgs.join(",")} bun hardhat --network ${settings[senderChainId].network} run scripts/connectionRemove_inner.ts`;
 
   // TODO: handle starknet
   if (settings[receiverChainId].network != "starknetSepolia") {
     const receiverArgs = [
       senderChainId,
-      senderSatellite.contractAddress,
-      "0x0000000000000000000000000000000000000000",
       alias(senderSatellite.contractAddress, connectionData.L2Alias),
-      "0x00000000",
     ];
 
-    await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${receiverSatellite.contractAddress} ARGS=${receiverArgs.join(",")} bun hardhat --network ${settings[receiverChainId].network} run scripts/registerSatelliteConnection.ts`;
+    await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${receiverSatellite.contractAddress} ARGS=${receiverArgs.join(",")} bun hardhat --network ${settings[receiverChainId].network} run scripts/connectionRemove_inner.ts`;
   }
 
-  deployedSatellites.connections.push({
-    from: senderChainId,
-    to: receiverChainId,
-  });
+  (deployedSatellites.connections as any[]) = (
+    deployedSatellites.connections as any[]
+  ).filter(
+    (c) =>
+      parseInt(c.from) !== parseInt(senderChainId) ||
+      parseInt(c.to) !== parseInt(receiverChainId),
+  );
 
   fs.writeFileSync(
     "deployed_satellites.json",

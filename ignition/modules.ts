@@ -150,4 +150,18 @@ export const modules = (chainId: keyof typeof settings) =>
     L1ToStarknetSenderModule: {
       interfaceName: "IL1ToStarknetSenderModule",
     },
+
+    ...("LEGACY_AGGREGATORS_FACTORY" in settings[chainId]
+      ? {
+          LegacyContractsInteractionModule: {
+            interfaceName: "ILegacyContractsInteractionModule",
+            initFunctions: [
+              {
+                name: "initLegacyContractsInteractionModule",
+                args: [settings[chainId].LEGACY_AGGREGATORS_FACTORY],
+              },
+            ],
+          },
+        }
+      : {}),
   }) satisfies Record<string, Module>;

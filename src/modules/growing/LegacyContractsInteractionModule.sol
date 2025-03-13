@@ -7,6 +7,7 @@ import {AccessController} from "src/libraries/AccessController.sol";
 import {ISharpFactsAggregator} from "src/interfaces/external/ISharpFactsAggregator.sol";
 import {ISatellite} from "src/interfaces/ISatellite.sol";
 import {LibSatellite} from "src/libraries/LibSatellite.sol";
+import {RootForHashingFunction} from "src/interfaces/modules/IMmrCoreModule.sol";
 
 contract LegacyContractsInteractionModule is ILegacyContractsInteractionModule, AccessController {
     bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
@@ -26,7 +27,7 @@ contract LegacyContractsInteractionModule is ILegacyContractsInteractionModule, 
     // ========================= Core Functions ========================= //
     //? Use this for Ethereum Sepolia: 0x70c61dd17b7207b450cb7dedc92c1707a07a1213
     //? Use this for Ethereum Mainnet: 0x5C189aEdEcBc07830B64Ec8CAE51ce38E4365286
-    function initEvmSharpMmrGrowingModule(IAggregatorsFactory aggregatorsFactory) external onlyOwner {
+    function initLegacyContractsInteractionModule(IAggregatorsFactory aggregatorsFactory) external onlyOwner {
         LegacyContractsInteractionModuleStorage storage ms = moduleStorage();
         ms.aggregatorsFactory = aggregatorsFactory;
         ms.aggregatedChainId = block.chainid;

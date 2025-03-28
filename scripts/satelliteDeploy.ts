@@ -40,6 +40,11 @@ async function main() {
       await $`bun run compile:zksync && bun hardhat deploy-zksync --script deploy.ts --network ${chainName}`
     ).text();
     regex = /^Satellite (\w+)$/;
+  } else if (chainName == "hardhat") {
+    output = (
+      await $`bun run compile && bun hardhat ignition deploy ./ignition/modules/${chainId}.ts --network localhost`
+    ).text();
+    regex = /^Satellite_\d+\#ISatellite - (\w+)$/;
   } else {
     output = (
       await $`bun run compile && bun hardhat ignition deploy ./ignition/modules/${chainId}.ts --network ${chainName} --verify`

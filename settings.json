@@ -1,4 +1,22 @@
 {
+  "1": {
+    "network": "mainnet",
+    "SHARP_FACT_REGISTRY": "0x47312450B3Ac8b5b8e247a6bB6d523e7605bDb60",
+    "STARKNET_CORE": "0xc662c410C0ECf747543f5bA90660f6ABeBD9C8c4",
+    "DATA_PROCESSOR_FACTS_REGISTRY": "0x47312450B3Ac8b5b8e247a6bB6d523e7605bDb60",
+    "DATA_PROCESSOR_PROGRAM_HASH": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "STARKNET_CHAIN_ID": "393402131332719809807700",
+    "LEGACY_AGGREGATORS_FACTORY": "0x5C189aEdEcBc07830B64Ec8CAE51ce38E4365286",
+
+    "connections": [
+      {
+        "to": "393402131332719809807700",
+        "inboxContract": "0xc662c410C0ECf747543f5bA90660f6ABeBD9C8c4",
+        "sendFunction": "sendMessageL1ToStarknet",
+        "L2Alias": "0x0"
+      }
+    ]
+  },
   "11155111": {
     "network": "sepolia",
     "SHARP_FACT_REGISTRY": "0x0ed8c44415e882F3033B4F3AFF916BbB4997f915",
@@ -76,6 +94,21 @@
   },
   "393402133025997798000961": {
     "network": "starknetSepolia",
+
+    "connections": []
+  },
+  "393402131332719809807700": {
+    "network": "sepolia",
+
+    "connections": []
+  },
+  "31337": {
+    "network": "hardhat",
+    "SHARP_FACT_REGISTRY": "0x0",
+    "STARKNET_CORE": "0x0",
+    "DATA_PROCESSOR_FACTS_REGISTRY": "0x0",
+    "DATA_PROCESSOR_PROGRAM_HASH": "0x0",
+    "STARKNET_CHAIN_ID": "0x0",
 
     "connections": []
   }

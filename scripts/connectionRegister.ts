@@ -89,7 +89,10 @@ async function main() {
   await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${senderSatellite.contractAddress} ARGS=${senderArgs.join(",")} bun hardhat --network ${settings[senderChainId].network} run scripts/connectionRegister_inner.ts`;
 
   // TODO: handle starknet
-  if (settings[receiverChainId].network != "starknetSepolia") {
+  if (
+    settings[receiverChainId].network != "starknetSepolia" &&
+    settings[receiverChainId].network != "starknet"
+  ) {
     const receiverArgs = [
       senderChainId,
       senderSatellite.contractAddress,

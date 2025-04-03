@@ -21,6 +21,7 @@ import {IL1ToOptimismSenderModule} from "./modules/messaging/sender/IL1ToOptimis
 import {IArbitrumToApeChainSenderModule} from "./modules/messaging/sender/IArbitrumToApeChainSenderModule.sol";
 import {IL1ToStarknetSenderModule} from "./modules/messaging/sender/IL1ToStarknetSenderModule.sol";
 import {ILegacyContractsInteractionModule} from "./modules/growing/ILegacyContractsInteractionModule.sol";
+import {IArbitrumParentHashFetcherModule} from "./modules/parent-hash-fetching/IArbitrumParentHashFetcherModule.sol";
 
 interface ISatellite is
     ILibSatellite,
@@ -39,6 +40,7 @@ interface ISatellite is
     IL1ToArbitrumSenderModule,
     IL1ToOptimismSenderModule,
     IStarknetParentHashFetcherModule,
+    IArbitrumParentHashFetcherModule,
     IDataProcessorModule,
     IArbitrumToApeChainSenderModule,
     IL1ToStarknetSenderModule,

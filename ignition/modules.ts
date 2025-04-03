@@ -109,6 +109,24 @@ export const modules = (chainId: keyof typeof settings) =>
         }
       : {}),
 
+    ...("ARBITRUM_FETCHER_OUTBOX_ADDRESS" in settings[chainId] &&
+    "ARBITRUM_FETCHER_CHAIN_ID" in settings[chainId]
+      ? {
+          ArbitrumParentHashFetcherModule: {
+            interfaceName: "IArbitrumParentHashFetcherModule",
+            initFunctions: [
+              {
+                name: "initArbitrumParentHashFetcherModule",
+                args: [
+                  settings[chainId].ARBITRUM_FETCHER_OUTBOX_ADDRESS,
+                  settings[chainId].ARBITRUM_FETCHER_CHAIN_ID,
+                ],
+              },
+            ],
+          },
+        }
+      : {}),
+
     UniversalSenderModule: {
       interfaceName: "IUniversalSenderModule",
     },

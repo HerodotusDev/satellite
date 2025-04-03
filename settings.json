@@ -72,6 +72,8 @@
   "421614": {
     "network": "arbitrumSepolia",
     "APE_CHAIN_TOKEN_ADDRESS": "0x6Cb8Cc1e323357Af5da49d90FCb7160B7f09e6Cd",
+    "ARBITRUM_FETCHER_OUTBOX_ADDRESS": "0x7B5fda237527B280224000A275eAa1B8b8149334",
+    "ARBITRUM_FETCHER_CHAIN_ID": "33111",
 
     "connections": [
       {

@@ -9,6 +9,7 @@ export const modules: ModuleName[] = [
   // "DataProcessorModule",
   "EvmOnChainGrowingModule",
   "NativeParentHashFetcherModule",
+  "ArbitrumParentHashFetcherModule",
   "SimpleReceiverModule",
   "UniversalSenderModule",
   "ArbitrumToApeChainSenderModule",

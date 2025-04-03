@@ -58,6 +58,6 @@ contract LegacyContractsInteractionModule is ILegacyContractsInteractionModule, 
         rootsForHashingFunctions[1].root = keccakRoot;
         rootsForHashingFunctions[1].hashingFunction = KECCAK_HASHING_FUNCTION;
 
-        emit LegacyEvmAggregatorMmrLoaded(rootsForHashingFunctions, size, newMmrId, legacyMmrId, ms.aggregatedChainId);
+        emit LegacyEvmAggregatorMmrLoadedV2(rootsForHashingFunctions, size, newMmrId, legacyMmrId, ms.aggregatedChainId, sharpFactsAggregatorAddress);
     }
 }

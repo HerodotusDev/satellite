@@ -13,5 +13,12 @@ interface ILegacyContractsInteractionModule {
         uint256 aggregatedChainId;
     }
 
-    event LegacyEvmAggregatorMmrLoaded(RootForHashingFunction[] rootsForHashingFunctions, uint256 size, uint256 newMmrId, uint256 legacyMmrId, uint256 aggregatedChainId);
+    event LegacyEvmAggregatorMmrLoadedV2(
+        RootForHashingFunction[] rootsForHashingFunctions,
+        uint256 size,
+        uint256 newMmrId,
+        uint256 legacyMmrId,
+        uint256 aggregatedChainId,
+        address sharpFactsAggregatorAddress
+    );
 }

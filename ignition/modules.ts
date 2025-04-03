@@ -109,6 +109,24 @@ export const modules = (chainId: keyof typeof settings) =>
         }
       : {}),
 
+    ...("ARBITRUM_FETCHER_OUTBOX_ADDRESS" in settings[chainId] &&
+    "ARBITRUM_FETCHER_CHAIN_ID" in settings[chainId]
+      ? {
+          ArbitrumParentHashFetcherModule: {
+            interfaceName: "IArbitrumParentHashFetcherModule",
+            initFunctions: [
+              {
+                name: "initArbitrumParentHashFetcherModule",
+                args: [
+                  settings[chainId].ARBITRUM_FETCHER_OUTBOX_ADDRESS,
+                  settings[chainId].ARBITRUM_FETCHER_CHAIN_ID,
+                ],
+              },
+            ],
+          },
+        }
+      : {}),
+
     UniversalSenderModule: {
       interfaceName: "IUniversalSenderModule",
     },
@@ -150,4 +168,18 @@ export const modules = (chainId: keyof typeof settings) =>
     L1ToStarknetSenderModule: {
       interfaceName: "IL1ToStarknetSenderModule",
     },
+
+    ...("LEGACY_AGGREGATORS_FACTORY" in settings[chainId]
+      ? {
+          LegacyContractsInteractionModule: {
+            interfaceName: "ILegacyContractsInteractionModule",
+            initFunctions: [
+              {
+                name: "initLegacyContractsInteractionModule",
+                args: [settings[chainId].LEGACY_AGGREGATORS_FACTORY],
+              },
+            ],
+          },
+        }
+      : {}),
   }) satisfies Record<string, Module>;

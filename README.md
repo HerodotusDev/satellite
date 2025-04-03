@@ -88,7 +88,7 @@ Because of great complexity of the contract and need for fine-tuned upgradabilit
 
 ## Deployment
 
-1. Create `.env` file using `.env.example` template. You will need `PRIVATE_KEY` of EVM deployment account and `ALCHEMY_API_KEY` which you can get from [TODO link](). Make sure that you enabled chains you need. Additionally, you will need API key for block explorers of chains you want to deploy to (`*CHAIN_NAME*_ETHERSCAN_API_KEY`).
+1. Create `.env` file using `.env.example` template. You will need `PRIVATE_KEY` of EVM deployment account and `ALCHEMY_API_KEY` which you can get from [Alchemy dashboard](https://dashboard.alchemy.com). Make sure that you enabled chains you need. Additionally, you will need API key for block explorers of chains you want to deploy to (`*CHAIN_NAME*_ETHERSCAN_API_KEY`).
 
 2. Compile your contract with
 
@@ -105,8 +105,14 @@ bun satellite:deploy CHAIN_ID
 > Note: Addresses of deployed contracts are saved to `deployed_satellites.json`. If contract for chain id, which you want to deploy, already exists in the config, it will fail. If you want to erase data about deployed contracts run
 >
 > ```
-> bun erase_deployed_satellites
+> bun detach_satellites
 > ```
+
+To connect two satellites that support messaging, run
+
+```
+bun connection:register SENDER_CHAIN_ID RECEIVER_CHAIN_ID
+```
 
 ### Upgrades
 
@@ -114,6 +120,20 @@ To upgrade existing satellite, run steps 1 and 2 from section above and then run
 
 ```
 bun satellite:upgrade CHAIN_ID
+```
+
+### Removing satellites and connections
+
+To remove connection between two satellites, run
+
+```
+bun connection:remove SENDER_CHAIN_ID RECEIVER_CHAIN_ID
+```
+
+When all connections to/from satellite are removed, you can remove satellite with
+
+```
+bun satellite:remove CHAIN_ID
 ```
 
 ## Documentation

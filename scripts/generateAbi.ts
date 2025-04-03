@@ -34,7 +34,7 @@ async function main() {
       dedupedAbi.push(abi);
     }
 
-    fs.writeFileSync(outFile, JSON.stringify(dedupedAbi, null, 2));
+    fs.writeFileSync(outFile, JSON.stringify(dedupedAbi, null, 2) + "\n");
   }
 }
 

@@ -25,46 +25,52 @@ async function main() {
   const receiverChainId = Bun.argv[3] as keyof typeof settings;
 
   if (!(senderChainId in settings)) {
-    throw new Error(`No settings found for ${senderChainId}`);
+    console.error(`No settings found for ${senderChainId}`);
+    process.exit(1);
   }
 
   if (!(receiverChainId in settings)) {
-    throw new Error(`No settings found for ${receiverChainId}`);
+    console.error(`No settings found for ${receiverChainId}`);
+    process.exit(1);
   }
 
   const senderSatellite = deployedSatellites.satellites.find(
     (s) => s.chainId === senderChainId,
   );
   if (!senderSatellite) {
-    throw new Error(`No satellite deployment found for ${senderChainId}`);
+    console.error(`No satellite deployment found for ${senderChainId}`);
+    process.exit(1);
   }
 
   const receiverSatellite = deployedSatellites.satellites.find(
     (s) => s.chainId === receiverChainId,
   );
   if (!receiverSatellite) {
-    throw new Error(`No satellite deployment found for ${receiverChainId}`);
+    console.error(`No satellite deployment found for ${receiverChainId}`);
+    process.exit(1);
   }
 
   if (
-    deployedSatellites.connections.find(
+    (deployedSatellites.connections as any[]).find(
       (c) =>
         parseInt(c.from) === parseInt(senderChainId) &&
         parseInt(c.to) === parseInt(receiverChainId),
     )
   ) {
-    throw new Error(
-      `Connection already exists for ${senderChainId} -> ${receiverChainId}`,
+    console.error(
+      `Connection ${senderChainId} -> ${receiverChainId} already exists`,
     );
+    process.exit(1);
   }
 
   const connectionData = settings[senderChainId].connections.find(
     (c) => c.to === receiverChainId,
   );
   if (!connectionData) {
-    throw new Error(
+    console.error(
       `No connection data found for ${senderChainId} -> ${receiverChainId}`,
     );
+    process.exit(1);
   }
 
   const senderArgs = [
@@ -80,10 +86,13 @@ async function main() {
     ]),
   ];
 
-  await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${senderSatellite.contractAddress} ARGS=${senderArgs.join(",")} bun hardhat --network ${settings[senderChainId].network} run scripts/registerSatelliteConnection.ts`;
+  await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${senderSatellite.contractAddress} ARGS=${senderArgs.join(",")} bun hardhat --network ${settings[senderChainId].network} run scripts/connectionRegister_inner.ts`;
 
   // TODO: handle starknet
-  if (settings[receiverChainId].network != "starknetSepolia") {
+  if (
+    settings[receiverChainId].network != "starknetSepolia" &&
+    settings[receiverChainId].network != "starknet"
+  ) {
     const receiverArgs = [
       senderChainId,
       senderSatellite.contractAddress,
@@ -92,10 +101,10 @@ async function main() {
       "0x00000000",
     ];
 
-    await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${receiverSatellite.contractAddress} ARGS=${receiverArgs.join(",")} bun hardhat --network ${settings[receiverChainId].network} run scripts/registerSatelliteConnection.ts`;
+    await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${receiverSatellite.contractAddress} ARGS=${receiverArgs.join(",")} bun hardhat --network ${settings[receiverChainId].network} run scripts/connectionRegister_inner.ts`;
   }
 
-  deployedSatellites.connections.push({
+  (deployedSatellites.connections as any[]).push({
     from: senderChainId,
     to: receiverChainId,
   });

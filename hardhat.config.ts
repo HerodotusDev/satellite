@@ -27,9 +27,10 @@ const config: HardhatUserConfig = {
     sources: "./src",
   },
   networks: {
-    localhost: {
-      url: "http://localhost:8545",
+    mainnet: {
+      url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY as string],
+      chainId: 1,
     },
     sepolia: {
       url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
@@ -68,6 +69,7 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
+      mainnet: process.env.L1_ETHERSCAN_API_KEY as string,
       sepolia: process.env.L1_ETHERSCAN_API_KEY as string,
       zkSyncSepolia: process.env.ZKSYNC_ETHERSCAN_API_KEY as string,
       optimismSepolia: process.env.OPTIMISM_ETHERSCAN_API_KEY as string,
@@ -76,6 +78,14 @@ const config: HardhatUserConfig = {
       worldChainSepolia: process.env.WORLDCHAIN_ETHERSCAN_API_KEY as string,
     },
     customChains: [
+      {
+        network: "mainnet",
+        chainId: 1,
+        urls: {
+          apiURL: "https://api.etherscan.io/api",
+          browserURL: "https://etherscan.io",
+        },
+      },
       {
         network: "sepolia",
         chainId: 11155111,
@@ -122,6 +132,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-sepolia.worldscan.org/api",
           browserURL: "https://sepolia.worldscan.org",
+        },
+      },
+      {
+        network: "localhost",
+        chainId: 31337,
+        urls: {
+          apiURL: "http://localhost:8545",
+          browserURL: "http://localhost:8545",
         },
       },
     ],

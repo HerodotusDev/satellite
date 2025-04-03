@@ -13,9 +13,6 @@ export const modules: ModuleName[] = [
   "NativeParentHashFetcherModule",
   "StarknetParentHashFetcherModule",
   "UniversalSenderModule",
-  "L1ToArbitrumSenderModule",
-  "L1ToOptimismSenderModule",
-  "L1ToZkSyncSenderModule",
   "L1ToStarknetSenderModule",
   "LegacyContractsInteractionModule",
 ];

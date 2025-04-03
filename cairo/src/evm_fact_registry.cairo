@@ -43,8 +43,8 @@ impl ConstSizeArrayToDynamicArray<T, +Drop<T>, +Copy<T>> of TryInto<Span<T>, [T;
 #[derive(Drop, Serde)]
 struct BlockHeaderProof {
     mmr_id: MmrId,
-    mmr_size: MmrSize, //! renamed
-    block_number: u256, //! new
+    mmr_size: MmrSize,
+    block_number: u256,
     leaf_index: MmrSize,
     mmr_peaks: Peaks,
     mmr_proof: Proof,
@@ -79,6 +79,8 @@ pub trait IEvmFactRegistry<TContractState> {
         slot_index: u256,
     ) -> Option<u256>;
 
+    fn timestamp(self: @TContractState, chain_id: u256, timestamp: u256) -> Option<u256>;
+
     // @notice Gets an account from a block
     // @param block_header_rlp: The RLP of the block header
     // @param account: The account to query
@@ -111,6 +113,14 @@ pub trait IEvmFactRegistry<TContractState> {
         slot_mpt_proof: Span<Words64>,
     ) -> u256;
 
+    fn verifyTimestamp(
+        self: @TContractState,
+        chain_id: u256,
+        timestamp: u256,
+        header_proof: BlockHeaderProof,
+        header_proof_next: BlockHeaderProof,
+    ) -> u256;
+
     // @notice Proves an account at a given block
     // @dev The proven fields are written to storage and can later be used
     // @param fields: The fields to prove
@@ -130,6 +140,7 @@ pub trait IEvmFactRegistry<TContractState> {
         header_proof: BlockHeaderProof,
         account_mpt_proof: Span<Words64>,
     );
+
     // @notice Proves a storage slot at a given block
     // @dev The proven slot is written to storage and can later be used
     // @dev The account storage hash must be proven
@@ -145,6 +156,20 @@ pub trait IEvmFactRegistry<TContractState> {
         slot_index: u256,
         slot_mpt_proof: Span<Words64>,
     );
+
+    fn proveTimestamp(
+        ref self: TContractState,
+        chain_id: u256,
+        timestamp: u256,
+        header_proof: BlockHeaderProof,
+        header_proof_next: BlockHeaderProof,
+    );
+}
+
+pub trait IEvmFactRegistryInternal<TContractState> {
+    fn _verifyAccumulatedHeaderProof(
+        self: @TContractState, chain_id: u256, header_proof: BlockHeaderProof, extra_field: u32,
+    ) -> u256;
 }
 
 #[starknet::component]
@@ -164,6 +189,8 @@ pub mod evm_fact_registry_component {
         account_fields: Map<u256, Map<EthAddress, Map<u256, [Option<u256>; 4]>>>,
         // chain_id => address => block_number => slot => value
         account_storage_slot_values: Map<u256, Map<EthAddress, Map<u256, Map<u256, Option<u256>>>>>,
+        // chain_id =>  timestamp => block_number
+        timestamp_to_block_number: Map<u256, Map<u256, u256>>,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -187,11 +214,75 @@ pub mod evm_fact_registry_component {
         slot_value: u256,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct ProvenTimestamp {
+        chain_id: u256,
+        timestamp: u256,
+        block_number: u256,
+    }
+
     #[event]
     #[derive(Drop, starknet::Event)]
     pub enum Event {
         ProvenAccount: ProvenAccount,
         ProvenStorage: ProvenStorage,
+        ProvenTimestamp: ProvenTimestamp,
+    }
+
+    impl EvmFactRegistryInternalImpl<
+        TContractState,
+        +HasComponent<TContractState>,
+        +Drop<TContractState>,
+        impl State: state_component::HasComponent<TContractState>,
+        impl MmrCore: mmr_core_component::HasComponent<TContractState>,
+    > of IEvmFactRegistryInternal<ComponentState<TContractState>> {
+        // @inheritdoc IEVMFactsRegistryInternal
+        fn _verifyAccumulatedHeaderProof(
+            self: @ComponentState<TContractState>,
+            chain_id: u256,
+            header_proof: BlockHeaderProof,
+            extra_field: u32,
+        ) -> u256 {
+            let blockhash = hash_words64(header_proof.block_header_rlp);
+
+            let mmr_core = get_dep_component!(self, MmrCore);
+            let mmr_inclusion = mmr_core
+                .verifyHistoricalMmrInclusion(
+                    chain_id,
+                    header_proof.mmr_id,
+                    header_proof.mmr_size,
+                    header_proof.leaf_index,
+                    blockhash,
+                    header_proof.mmr_proof,
+                    header_proof.mmr_peaks,
+                );
+            assert(mmr_inclusion, 'INVALID_MMR_PROOF');
+
+            let (decoded_rlp, _) = rlp_decode_list_lazy(
+                header_proof.block_header_rlp, [extra_field, header_rlp_index::BLOCK_NUMBER].span(),
+            )
+                .expect('INVALID_HEADER_RLP');
+            let mut extra_field_value: u256 = 0;
+            let mut block_number: u256 = 0;
+            match decoded_rlp {
+                RLPItem::Bytes(_) => panic!("INVALID_HEADER_RLP"),
+                RLPItem::List(l) => {
+                    let (extra_field_words, _) = *l.at(0);
+                    extra_field_value = extra_field_words.as_u256_le().unwrap();
+
+                    let (block_number_words, block_number_byte_len) = *l.at(1);
+                    assert(block_number_words.len() == 1, 'INVALID_BLOCK_NUMBER');
+
+                    let block_number_le = *block_number_words.at(0);
+                    block_number =
+                        reverse_endianness_u64(block_number_le, Option::Some(block_number_byte_len))
+                        .into();
+                },
+            };
+            assert(block_number == header_proof.block_number, 'Block number mismatch');
+
+            extra_field_value
+        }
     }
 
     #[embeddable_as(EvmFactRegistry)]
@@ -238,61 +329,35 @@ pub mod evm_fact_registry_component {
         }
 
         // @inheritdoc IEVMFactsRegistry
+        fn timestamp(
+            self: @ComponentState<TContractState>, chain_id: u256, timestamp: u256,
+        ) -> Option<u256> {
+            // block number stored is blockNumber + 1 and 0 means no data
+            let block_number_stored = self
+                .timestamp_to_block_number
+                .entry(chain_id)
+                .entry(timestamp)
+                .read();
+
+            if block_number_stored == 0 {
+                Option::None
+            } else {
+                Option::Some(block_number_stored - 1)
+            }
+        }
+
+        // @inheritdoc IEVMFactsRegistry
         fn verifyAccount(
             self: @ComponentState<TContractState>,
             chain_id: u256,
             account: EthAddress,
             header_proof: BlockHeaderProof,
             account_mpt_proof: Span<Words64>,
-            // self: @ContractState,
-        // fields: Span<AccountField>,
-        // block_header_rlp: Words64,
-        // account: felt252,
-        // mpt_proof: Span<Words64>,
-        // mmr_index: MmrSize,
-        // mmr_peaks: Peaks,
-        // mmr_proof: Proof,
-        // mmr_id: MmrId,
-        // last_pos: MmrSize,
         ) -> [u256; 4] {
-            let blockhash = hash_words64(header_proof.block_header_rlp);
-
-            let mmr_core = get_dep_component!(self, MmrCore);
-            let mmr_inclusion = mmr_core
-                .verifyHistoricalMmrInclusion(
-                    chain_id,
-                    header_proof.mmr_id,
-                    header_proof.mmr_size,
-                    header_proof.leaf_index,
-                    blockhash,
-                    header_proof.mmr_proof,
-                    header_proof.mmr_peaks,
+            let state_root = self
+                ._verifyAccumulatedHeaderProof(
+                    chain_id, header_proof, header_rlp_index::STATE_ROOT,
                 );
-            assert(mmr_inclusion, 'INVALID_MMR_PROOF');
-
-            let (decoded_rlp, _) = rlp_decode_list_lazy(
-                header_proof.block_header_rlp,
-                [header_rlp_index::STATE_ROOT, header_rlp_index::BLOCK_NUMBER].span(),
-            )
-                .expect('INVALID_HEADER_RLP');
-            let mut state_root: u256 = 0;
-            let mut block_number: u256 = 0;
-            match decoded_rlp {
-                RLPItem::Bytes(_) => panic!("INVALID_HEADER_RLP"),
-                RLPItem::List(l) => {
-                    let (state_root_words, _) = *l.at(0);
-                    state_root = state_root_words.as_u256_le().unwrap();
-
-                    let (block_number_words, block_number_byte_len) = *l.at(1);
-                    assert(block_number_words.len() == 1, 'INVALID_BLOCK_NUMBER');
-
-                    let block_number_le = *block_number_words.at(0);
-                    block_number =
-                        reverse_endianness_u64(block_number_le, Option::Some(block_number_byte_len))
-                        .into();
-                },
-            };
-            assert(block_number == header_proof.block_number, 'Block number mismatch');
 
             let mpt = MPTTrait::new(state_root);
             let account_u256: u256 = Into::<felt252>::into(account.into());
@@ -400,18 +465,35 @@ pub mod evm_fact_registry_component {
             }
         }
 
+        fn verifyTimestamp(
+            self: @ComponentState<TContractState>,
+            chain_id: u256,
+            timestamp: u256,
+            header_proof: BlockHeaderProof,
+            header_proof_next: BlockHeaderProof,
+        ) -> u256 {
+            let block_number = header_proof.block_number;
+
+            let block_timestamp = self
+                ._verifyAccumulatedHeaderProof(chain_id, header_proof, header_rlp_index::TIMESTAMP);
+            let block_timestamp_next = self
+                ._verifyAccumulatedHeaderProof(
+                    chain_id, header_proof_next, header_rlp_index::TIMESTAMP,
+                );
+
+            assert(block_number + 1 == block_number, 'ERR_INVALID_BLOCK_NUMBER_NEXT');
+
+            assert(
+                block_timestamp <= timestamp && timestamp < block_timestamp_next,
+                'ERR_TIMESTAMP_NOT_IN_RANGE',
+            );
+
+            block_number
+        }
+
         // @inheritdoc IEVMFactsRegistry
         fn proveAccount(
             ref self: ComponentState<TContractState>,
-            // fields: Span<AccountField>,
-            // block_header_rlp: Words64,
-            // account: felt252,
-            // mpt_proof: Span<Words64>,
-            // mmr_index: MmrSize,
-            // mmr_peaks: Peaks,
-            // mmr_proof: Proof,
-            // mmr_id: MmrId,
-            // last_pos: MmrSize,
             chain_id: u256,
             account: EthAddress,
             mut account_fields_to_save: u8,
@@ -489,6 +571,26 @@ pub mod evm_fact_registry_component {
                             chain_id, account, block_number, slot_index, slot_value: value,
                         },
                     ),
+                );
+        }
+
+        // @inheritdoc IEVMFactsRegistry
+        fn proveTimestamp(
+            ref self: ComponentState<TContractState>,
+            chain_id: u256,
+            timestamp: u256,
+            header_proof: BlockHeaderProof,
+            header_proof_next: BlockHeaderProof,
+        ) {
+            let block_number = self
+                .verifyTimestamp(chain_id, timestamp, header_proof, header_proof_next);
+            // blockNumber + 1 is stored, blockNumber cannot overflow because of check in
+            // verifyTimestamp
+            self.timestamp_to_block_number.entry(chain_id).entry(timestamp).write(block_number + 1);
+
+            self
+                .emit(
+                    Event::ProvenTimestamp(ProvenTimestamp { chain_id, timestamp, block_number }),
                 );
         }
     }

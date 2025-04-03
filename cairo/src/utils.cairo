@@ -2,6 +2,7 @@ pub mod header_rlp_index {
     pub const PARENT_HASH: usize = 0;
     pub const STATE_ROOT: usize = 3;
     pub const BLOCK_NUMBER: usize = 8;
+    pub const TIMESTAMP: usize = 11;
 }
 
 pub mod decoders {

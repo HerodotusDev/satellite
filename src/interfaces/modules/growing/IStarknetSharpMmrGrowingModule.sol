@@ -22,9 +22,19 @@ interface IStarknetSharpMmrGrowingModule is ISharpMmrGrowingCommon {
         IFactsRegistry factsRegistry;
         // Either Starknet or Starknet Sepolia chain ID
         uint256 aggregatedChainId;
+        // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
+        uint256 programHash;
     }
 
-    function initStarknetSharpMmrGrowingModule(IFactsRegistry factsRegistry, uint256 chainId) external;
+    function initStarknetSharpMmrGrowingModule(uint256 starknetChainId) external;
+
+    function setStarknetSharpMmrGrowingModuleFactsRegistry(address factsRegistry) external;
+
+    function setStarknetSharpMmrGrowingModuleProgramHash(uint256 programHash) external;
+
+    function getStarknetSharpMmrGrowingModuleFactsRegistry() external view returns (address);
+
+    function getStarknetSharpMmrGrowingModuleProgramHash() external view returns (uint256);
 
     function createStarknetSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
 

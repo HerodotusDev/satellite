@@ -167,8 +167,12 @@ pub trait IEvmFactRegistry<TContractState> {
 }
 
 pub trait IEvmFactRegistryInternal<TContractState> {
-    fn _verifyAccumulatedHeaderProof(
-        self: @TContractState, chain_id: u256, header_proof: BlockHeaderProof, extra_field: u32,
+    fn _verifyAccumulatedHeaderProofAndGetTimestamp(
+        self: @TContractState, chain_id: u256, header_proof: BlockHeaderProof,
+    ) -> u256;
+
+    fn _verifyAccumulatedHeaderProofAndGetStateRoot(
+        self: @TContractState, chain_id: u256, header_proof: BlockHeaderProof,
     ) -> u256;
 }
 
@@ -237,11 +241,10 @@ pub mod evm_fact_registry_component {
         impl MmrCore: mmr_core_component::HasComponent<TContractState>,
     > of IEvmFactRegistryInternal<ComponentState<TContractState>> {
         // @inheritdoc IEVMFactsRegistryInternal
-        fn _verifyAccumulatedHeaderProof(
+        fn _verifyAccumulatedHeaderProofAndGetTimestamp(
             self: @ComponentState<TContractState>,
             chain_id: u256,
             header_proof: BlockHeaderProof,
-            extra_field: u32,
         ) -> u256 {
             let blockhash = hash_words64(header_proof.block_header_rlp);
 
@@ -259,16 +262,64 @@ pub mod evm_fact_registry_component {
             assert(mmr_inclusion, 'INVALID_MMR_PROOF');
 
             let (decoded_rlp, _) = rlp_decode_list_lazy(
-                header_proof.block_header_rlp, [extra_field, header_rlp_index::BLOCK_NUMBER].span(),
+                header_proof.block_header_rlp, [header_rlp_index::BLOCK_NUMBER, header_rlp_index::TIMESTAMP].span(),
             )
                 .expect('INVALID_HEADER_RLP');
-            let mut extra_field_value: u256 = 0;
+            let mut timestamp_value: u256 = 0;
             let mut block_number: u256 = 0;
             match decoded_rlp {
                 RLPItem::Bytes(_) => panic!("INVALID_HEADER_RLP"),
                 RLPItem::List(l) => {
-                    let (extra_field_words, _) = *l.at(0);
-                    extra_field_value = extra_field_words.as_u256_le().unwrap();
+                    let (block_number_words, block_number_byte_len) = *l.at(0);
+                    assert(block_number_words.len() == 1, 'INVALID_BLOCK_NUMBER');
+                    
+                    let block_number_le = *block_number_words.at(0);
+                    block_number =
+                    reverse_endianness_u64(block_number_le, Option::Some(block_number_byte_len))
+                    .into();
+
+                    let (timestamp_words, timestamp_byte_len) = *l.at(1);
+                    assert(timestamp_byte_len == 4, 'INVALID_TIMESTAMP_LEN');
+                    timestamp_value = timestamp_words.as_u256_be(4).unwrap();
+                },
+            };
+            assert(block_number == header_proof.block_number, 'Block number mismatch');
+
+            timestamp_value
+        }
+        // @inheritdoc IEVMFactsRegistryInternal
+        fn _verifyAccumulatedHeaderProofAndGetStateRoot(
+            self: @ComponentState<TContractState>,
+            chain_id: u256,
+            header_proof: BlockHeaderProof,
+        ) -> u256 {
+            let blockhash = hash_words64(header_proof.block_header_rlp);
+
+            let mmr_core = get_dep_component!(self, MmrCore);
+            let mmr_inclusion = mmr_core
+                .verifyHistoricalMmrInclusion(
+                    chain_id,
+                    header_proof.mmr_id,
+                    header_proof.mmr_size,
+                    header_proof.leaf_index,
+                    blockhash,
+                    header_proof.mmr_proof,
+                    header_proof.mmr_peaks,
+                );
+            assert(mmr_inclusion, 'INVALID_MMR_PROOF');
+
+            let (decoded_rlp, _) = rlp_decode_list_lazy(
+                header_proof.block_header_rlp, [header_rlp_index::STATE_ROOT, header_rlp_index::BLOCK_NUMBER].span(),
+            )
+                .expect('INVALID_HEADER_RLP');
+            let mut state_root: u256 = 0;
+            let mut block_number: u256 = 0;
+            match decoded_rlp {
+                RLPItem::Bytes(_) => panic!("INVALID_HEADER_RLP"),
+                RLPItem::List(l) => {
+                    let (state_root_words, state_root_byte_len) = *l.at(0);
+                    assert(state_root_byte_len == 32, 'INVALID_STATE_ROOT_LEN');
+                    state_root = state_root_words.as_u256_le().unwrap();
 
                     let (block_number_words, block_number_byte_len) = *l.at(1);
                     assert(block_number_words.len() == 1, 'INVALID_BLOCK_NUMBER');
@@ -281,7 +332,7 @@ pub mod evm_fact_registry_component {
             };
             assert(block_number == header_proof.block_number, 'Block number mismatch');
 
-            extra_field_value
+            state_root
         }
     }
 
@@ -355,8 +406,8 @@ pub mod evm_fact_registry_component {
             account_mpt_proof: Span<Words64>,
         ) -> [u256; 4] {
             let state_root = self
-                ._verifyAccumulatedHeaderProof(
-                    chain_id, header_proof, header_rlp_index::STATE_ROOT,
+                ._verifyAccumulatedHeaderProofAndGetStateRoot(
+                    chain_id, header_proof,
                 );
 
             let mpt = MPTTrait::new(state_root);
@@ -473,15 +524,16 @@ pub mod evm_fact_registry_component {
             header_proof_next: BlockHeaderProof,
         ) -> u256 {
             let block_number = header_proof.block_number;
+            let block_number_next = header_proof_next.block_number;
 
             let block_timestamp = self
-                ._verifyAccumulatedHeaderProof(chain_id, header_proof, header_rlp_index::TIMESTAMP);
+                ._verifyAccumulatedHeaderProofAndGetTimestamp(chain_id, header_proof);
             let block_timestamp_next = self
-                ._verifyAccumulatedHeaderProof(
-                    chain_id, header_proof_next, header_rlp_index::TIMESTAMP,
+                ._verifyAccumulatedHeaderProofAndGetTimestamp(
+                    chain_id, header_proof_next,
                 );
 
-            assert(block_number + 1 == block_number, 'ERR_INVALID_BLOCK_NUMBER_NEXT');
+            assert(block_number + 1 == block_number_next, 'ERR_INVALID_BLOCK_NUMBER_NEXT');
 
             assert(
                 block_timestamp <= timestamp && timestamp < block_timestamp_next,

@@ -1,10 +1,10 @@
 [[call]]
 call_type = "deploy"
-class_hash = "0x023edf6338952a19a3802e264bcdf78423459ebddfaa3e66416651bdfcf3569a"
+class_hash = "0x079284a96a0f551aa50144b4a12bd964ae809781ff2d0121059afb15e477224d"
 inputs = [
-    "0x534e5f5345504f4c4941",
+    "0x534e5f4d41494e4e4554",
     "0",
-    "0x05a6c0f84179d695f0b598cc5d0be50421c247da95cfe63e4cd66fc27f32dfe6"
+    "0x07e4986c03d8a4fea74db3fa5a31467bea98d622570ae9daa74a94fb8dc71817"
 ]
 id = "herodotus_starknet"
 unique = false
@@ -13,4 +13,4 @@ unique = false
 call_type = "invoke"
 contract_address = "herodotus_starknet"
 function = "setL1MessageSender"
-inputs = ["0x59c0B3D09151aA2C0201808fEC0860f1168A4173"]
+inputs = ["0x8c26F9caD52c1F6b6fFaA5991bC71e3F6F2cd693"]

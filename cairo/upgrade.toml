@@ -1,5 +1,5 @@
 [[call]]
 call_type = "invoke"
-contract_address = "0x032d260a653bd1ee1c07b33b770aa32c7ab9fabde8bd74b47cc0ef4e5e472792"
+contract_address = "0x06d523b16d7f6f71e250fc7f8d95df3e9e987a120878ea1a25ff312d92f42c8e"
 function = "upgrade"
-inputs = ["0x023edf6338952a19a3802e264bcdf78423459ebddfaa3e66416651bdfcf3569a"]
+inputs = ["0x079284a96a0f551aa50144b4a12bd964ae809781ff2d0121059afb15e477224d"]

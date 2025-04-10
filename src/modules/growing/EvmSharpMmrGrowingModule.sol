@@ -13,9 +13,6 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
     // Using inline library for efficient splitting and joining of uint256 values
     using Uint256Splitter for uint256;
 
-    // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
-    bytes32 public constant PROGRAM_HASH = bytes32(uint256(0x1eca36d586f5356fba096edbf7414017d51cd0ed24b8fde80f78b61a9216ed2));
-
     bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
     bytes32 public constant POSEIDON_HASHING_FUNCTION = keccak256("poseidon");
 
@@ -39,10 +36,30 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
 
     // ========================= Core Functions ========================= //
 
-    function initEvmSharpMmrGrowingModule(IFactsRegistry factsRegistry) external onlyOwner {
+    function initEvmSharpMmrGrowingModule() external onlyOwner {
         EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
-        ms.factsRegistry = factsRegistry;
         ms.aggregatedChainId = block.chainid;
+    }
+
+    function setEvmSharpMmrGrowingModuleFactsRegistry(address factsRegistry) external onlyOwner {
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        ms.factsRegistry = IFactsRegistry(factsRegistry);
+    }
+
+    // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
+    function setEvmSharpMmrGrowingModuleProgramHash(uint256 programHash) external onlyOwner {
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        ms.programHash = programHash;
+    }
+
+    function getEvmSharpMmrGrowingModuleFactsRegistry() external view returns (address) {
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        return address(ms.factsRegistry);
+    }
+
+    function getEvmSharpMmrGrowingModuleProgramHash() external view returns (uint256) {
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        return ms.programHash;
     }
 
     function createEvmSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external {
@@ -189,10 +206,10 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
         // We hash the outputs
         bytes32 outputHash = keccak256(abi.encodePacked(outputs));
 
-        // We compute the deterministic fact bytes32 value
-        bytes32 fact = keccak256(abi.encode(PROGRAM_HASH, outputHash));
-
         EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+
+        // We compute the deterministic fact bytes32 value
+        bytes32 fact = keccak256(abi.encode(ms.programHash, outputHash));
 
         // We ensure this fact has been registered on SHARP Facts Registry
         if (!ms.factsRegistry.isValid(fact)) {

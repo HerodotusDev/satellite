@@ -90,6 +90,9 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     /// @param taskData The task data
     function authenticateDataProcessorTaskExecution(TaskData calldata taskData) external;
 
+    /// @notice Returns address of the facts registry
+    function getDataProcessorFactsRegistry() external view returns (address);
+
     /// @notice Returns the result of a finalized task
     function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32);
 

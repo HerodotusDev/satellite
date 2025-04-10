@@ -84,6 +84,12 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
     function authenticateDataProcessorTaskExecution(TaskData calldata taskData) external {
         DataProcessorModuleStorage storage ms = moduleStorage();
 
+        bytes32 taskHash = bytes32((taskData.taskHashHigh << 128) | taskData.taskHashLow);
+
+        if (ms.cachedTasksResult[taskHash].status == TaskStatus.FINALIZED) {
+            revert TaskAlreadyFinalized();
+        }
+
         if (!isProgramHashAuthorized(taskData.programHash)) {
             revert UnauthorizedProgramHash();
         }
@@ -94,7 +100,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         // Assign values to the program output array
         // This needs to be compatible with cairo program
         // https://github.com/HerodotusDev/hdp-cairo/blob/main/src/utils/utils.cairo#L27-L48
-        programOutput[0] = uint256(taskData.moduleHash);
+        programOutput[0] = uint256(taskHash);
         programOutput[1] = taskData.taskResultLow;
         programOutput[2] = taskData.taskResultHigh;
 
@@ -121,11 +127,11 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
             revert InvalidFact();
         }
 
-        bytes32 taskHash = bytes32((taskData.taskHashHigh << 128) | taskData.taskHashLow);
         bytes32 taskResult = bytes32((taskData.taskResultHigh << 128) | taskData.taskResultLow);
 
         // Store the task result
         ms.cachedTasksResult[taskHash] = TaskResult({status: TaskStatus.FINALIZED, result: taskResult});
+        emit TaskFinalized(taskHash, taskResult);
     }
 
     // ========================= View Functions ========================= //

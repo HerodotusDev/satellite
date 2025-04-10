@@ -65,6 +65,11 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     error UnauthorizedProgramHash();
     /// Invalid MMR root
     error InvalidMmrRoot();
+    /// Task is already finalized
+    error TaskAlreadyFinalized();
+
+    /// @notice Emitted when a task is finalized
+    event TaskFinalized(bytes32 taskHash, bytes32 taskResult);
 
     /// @notice Emitted when a program hash is enabled
     event ProgramHashEnabled(bytes32 enabledProgramHash);

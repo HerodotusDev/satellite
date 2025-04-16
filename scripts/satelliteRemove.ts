@@ -2,7 +2,10 @@ import { $ } from "bun";
 import fs from "fs";
 import { ethers } from "ethers";
 import settings from "../settings.json";
-import deployedSatellites from "../deployed_satellites.json";
+import {
+  getDeployedSatellites,
+  writeDeployedSatellites,
+} from "./satelliteDeploymentsManager";
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 async function main() {
@@ -17,6 +20,8 @@ async function main() {
     console.error(`No settings found for ${chainId}`);
     process.exit(1);
   }
+
+  const deployedSatellites = await getDeployedSatellites();
 
   const satellite = deployedSatellites.satellites.find(
     (s) => s.chainId === chainId,
@@ -48,10 +53,7 @@ async function main() {
     deployedSatellites.satellites as any[]
   ).filter((s) => parseInt(s.chainId) !== parseInt(chainId));
 
-  fs.writeFileSync(
-    "deployed_satellites.json",
-    JSON.stringify(deployedSatellites, null, 2),
-  );
+  writeDeployedSatellites(deployedSatellites);
 }
 
 main();

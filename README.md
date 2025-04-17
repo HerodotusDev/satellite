@@ -171,6 +171,13 @@ bun satellite:deploy 31337
 bun run_script:local --broadcast
 ```
 
+If you want to remove the satellite, to deploy it again, run:
+
+```
+bun satellite:remove 31337
+rm -rf ignition/deployments/chain-31337
+```
+
 ## Documentation
 
 Here are some useful links for further reading:
@@ -181,3 +188,7 @@ Here are some useful links for further reading:
 ## License
 
 Copyright 2024 - Herodotus Dev Ltd
+
+```
+
+```

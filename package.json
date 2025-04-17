@@ -21,8 +21,9 @@
     "satellite:remove": "bun run scripts/satelliteRemove.ts",
     "connection:register": "bun run scripts/connectionRegister.ts",
     "connection:remove": "bun run scripts/connectionRemove.ts",
-    "detach_satellites": "echo \"{\n\t\\\"satellites\\\": [],\n\t\\\"connections\\\": []\n}\" > deployed_satellites.json",
-    "generate_abi": "bun run scripts/generateAbi.ts"
+    "generate_abi": "bun run scripts/generateAbi.ts",
+    "anvil": "anvil",
+    "run_script:local": "bun run scripts/runTestScript.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
@@ -32,7 +33,6 @@
     "@nomicfoundation/hardhat-ignition-ethers": "^0.15.0",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "@nomicfoundation/hardhat-verify": "^2.0.0",
     "@typechain/ethers-v6": "^0.5.0",
     "@typechain/hardhat": "^9.0.0",
     "@types/chai": "^4.2.0",

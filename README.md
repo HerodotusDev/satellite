@@ -158,6 +158,19 @@ When all connections to/from satellite are removed, you can remove satellite wit
 bun satellite:remove CHAIN_ID
 ```
 
+## Development
+
+> If you get any unexpected errors, run `bun clear`.
+
+To set up anvil and deploy satellite to it, run:
+
+```
+bun env:create local
+bun anvil
+bun satellite:deploy 31337
+bun run_script:local --broadcast
+```
+
 ## Documentation
 
 Here are some useful links for further reading:

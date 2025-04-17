@@ -6,11 +6,11 @@ export const modules: ModuleName[] = [
   "SatelliteInspectorModule",
   "MmrCoreModule",
   "EvmFactRegistryModule",
-  // "DataProcessorModule",
+  "DataProcessorModule",
   // "EvmOnChainGrowingModule",
   // "EvmSharpMmrGrowingModule",
   // "StarknetSharpMmrGrowingModule",
-  // "NativeParentHashFetcherModule",
+  "NativeParentHashFetcherModule",
   // "StarknetParentHashFetcherModule",
 ];
 export default buildSatelliteDeployment("31337", modules);

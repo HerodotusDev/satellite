@@ -12,5 +12,6 @@ export const modules: ModuleName[] = [
   // "StarknetSharpMmrGrowingModule",
   "NativeParentHashFetcherModule",
   // "StarknetParentHashFetcherModule",
+  "MockFactsRegistry",
 ];
 export default buildSatelliteDeployment("31337", modules);

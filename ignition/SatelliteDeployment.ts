@@ -22,19 +22,24 @@ const buildSatelliteDeployment = (
     const satelliteMaintenanceModule = m.contract("SatelliteMaintenanceModule");
     const satellite = m.contract("Satellite", [satelliteMaintenanceModule]);
 
-    const maintenances = modules.map((moduleName) => {
+    const maintenances = [];
+    for (const moduleName of modules) {
       const moduleData = moduleList(chainId)[moduleName];
       // If this error is unexpectedly thrown, it might be misconfiguration in settings.json.
       // Namely, variable used in ignition/modules.ts is not defined in settings.json.
       if (!moduleData)
         throw new Error(`Module ${moduleName} is not supported on ${chainId}`);
 
-      return {
-        moduleAddress: m.contract(moduleName),
-        action: 0, // Add
-        functionSelectors: getSelector(moduleData.interfaceName),
-      };
-    });
+      if (!("isExternal" in moduleData && moduleData?.isExternal)) {
+        maintenances.push({
+          moduleAddress: m.contract(moduleName),
+          action: 0, // Add
+          functionSelectors: getSelector(moduleData.interfaceName),
+        });
+      } else {
+        m.contract(moduleName);
+      }
+    }
 
     const satelliteInterface = m.contractAt("ISatellite", satellite);
 

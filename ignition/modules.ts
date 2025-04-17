@@ -7,6 +7,7 @@ interface InitFunction {
 
 export interface Module {
   interfaceName: string;
+  isExternal?: boolean; // true if this contract shouldn't be connected to the satellite
   initFunctions?: InitFunction[];
 }
 
@@ -182,4 +183,9 @@ export const modules = (chainId: keyof typeof settings) =>
           },
         }
       : {}),
+
+    MockFactsRegistry: {
+      interfaceName: "IFactsRegistry",
+      isExternal: true,
+    },
   }) satisfies Record<string, Module>;

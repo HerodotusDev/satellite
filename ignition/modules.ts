@@ -7,6 +7,7 @@ interface InitFunction {
 
 export interface Module {
   interfaceName: string;
+  isExternal?: boolean; // true if this contract shouldn't be connected to the satellite
   initFunctions?: InitFunction[];
 }
 
@@ -62,6 +63,10 @@ export const modules = (chainId: keyof typeof settings) =>
             initFunctions: [
               {
                 name: "initEvmSharpMmrGrowingModule",
+                args: [],
+              },
+              {
+                name: "setEvmSharpMmrGrowingModuleFactsRegistry",
                 args: [settings[chainId].SHARP_FACT_REGISTRY],
               },
             ],
@@ -77,10 +82,11 @@ export const modules = (chainId: keyof typeof settings) =>
             initFunctions: [
               {
                 name: "initStarknetSharpMmrGrowingModule",
-                args: [
-                  settings[chainId].SHARP_FACT_REGISTRY,
-                  settings[chainId].STARKNET_CHAIN_ID,
-                ],
+                args: [settings[chainId].SHARP_FACT_REGISTRY],
+              },
+              {
+                name: "setStarknetSharpMmrGrowingModuleFactsRegistry",
+                args: [settings[chainId].STARKNET_CHAIN_ID],
               },
             ],
           },
@@ -182,4 +188,9 @@ export const modules = (chainId: keyof typeof settings) =>
           },
         }
       : {}),
+
+    MockFactsRegistry: {
+      interfaceName: "IFactsRegistry",
+      isExternal: true,
+    },
   }) satisfies Record<string, Module>;

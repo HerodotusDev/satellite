@@ -20,7 +20,7 @@ Returns value of storage slot number `slot` of `account` at `blockNumber` on cha
 
 Returns block number of the closest block with timestamp less than or equal to the given `timestamp` on chain with id `chainId`.
 
-## [Deployed Contracts](/deployed_satellites.json)
+## [Deployed Contracts](./deployments)
 
 ## Design
 
@@ -96,22 +96,44 @@ Because of great complexity of the contract and need for fine-tuned upgradabilit
 bun compile
 ```
 
-3. Deploy with
+3. Select your environment
+
+> Environments allow you to have multiple sets of satellite deployments, e.g. production, staging and local development. Data about deployed satellites is saved to `deployments/<ENVIRONMENT_NAME>.json`.
+
+```
+bun env:change <ENVIRONMENT_NAME>
+```
+
+4. Deploy with
 
 ```
 bun satellite:deploy CHAIN_ID
 ```
 
-> Note: Addresses of deployed contracts are saved to `deployed_satellites.json`. If contract for chain id, which you want to deploy, already exists in the config, it will fail. If you want to erase data about deployed contracts run
->
-> ```
-> bun detach_satellites
-> ```
-
-To connect two satellites that support messaging, run
+5. To connect two satellites that support messaging, run
 
 ```
 bun connection:register SENDER_CHAIN_ID RECEIVER_CHAIN_ID
+```
+
+### Managing environments
+
+To list all environments, run
+
+```
+bun env
+```
+
+To create a new environment with no satellites, run
+
+```
+bun env:create <ENVIRONMENT_NAME>
+```
+
+To delete environment, run
+
+```
+bun env:delete <ENVIRONMENT_NAME>
 ```
 
 ### Upgrades
@@ -136,6 +158,26 @@ When all connections to/from satellite are removed, you can remove satellite wit
 bun satellite:remove CHAIN_ID
 ```
 
+## Development
+
+> If you get any unexpected errors, run `bun clear`.
+
+To set up anvil and deploy satellite to it, run:
+
+```
+bun env:create local
+bun anvil
+bun satellite:deploy 31337
+bun run_script:local --broadcast
+```
+
+If you want to remove the satellite, to deploy it again, run:
+
+```
+bun satellite:remove 31337
+rm -rf ignition/deployments/chain-31337
+```
+
 ## Documentation
 
 Here are some useful links for further reading:
@@ -146,3 +188,7 @@ Here are some useful links for further reading:
 ## License
 
 Copyright 2024 - Herodotus Dev Ltd
+
+```
+
+```

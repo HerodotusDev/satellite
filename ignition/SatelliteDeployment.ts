@@ -23,6 +23,7 @@ const buildSatelliteDeployment = (
     const satellite = m.contract("Satellite", [satelliteMaintenanceModule]);
 
     const maintenances = [];
+    const externalContracts = {} as Record<string, any>;
     for (const moduleName of modules) {
       const moduleData = moduleList(chainId)[moduleName];
       // If this error is unexpectedly thrown, it might be misconfiguration in settings.json.
@@ -37,7 +38,7 @@ const buildSatelliteDeployment = (
           functionSelectors: getSelector(moduleData.interfaceName),
         });
       } else {
-        m.contract(moduleName);
+        externalContracts[moduleName] = m.contract(moduleName);
       }
     }
 
@@ -50,12 +51,23 @@ const buildSatelliteDeployment = (
     );
 
     for (const moduleName of modules) {
-      const funcs = (moduleList(chainId)[moduleName] as Module).initFunctions;
-      if (!funcs) continue;
-      for (const func of funcs) {
-        m.call(satelliteInterface, func.name, func.args, {
-          after: [maintenanceFuture],
-        });
+      const moduleData = moduleList(chainId)[moduleName] as Module;
+      if (!moduleData.initFunctions) continue;
+      for (const func of moduleData.initFunctions) {
+        const args = func.args.map((arg) =>
+          typeof arg === "string" &&
+          arg.startsWith("@") &&
+          externalContracts[arg.slice(1)]
+            ? externalContracts[arg.slice(1)]
+            : arg,
+        );
+        if (moduleData.isExternal) {
+          m.call(externalContracts[moduleName], func.name, args);
+        } else {
+          m.call(satelliteInterface, func.name, args, {
+            after: [maintenanceFuture],
+          });
+        }
       }
     }
 

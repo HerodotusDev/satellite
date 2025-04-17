@@ -106,7 +106,7 @@
   },
   "31337": {
     "network": "hardhat",
-    "SHARP_FACT_REGISTRY": "0x0",
+    "SHARP_FACT_REGISTRY": "@MockFactsRegistry",
     "STARKNET_CORE": "0x0",
     "STARKNET_CHAIN_ID": "0x0",
     "DATA_PROCESSOR_FACTS_REGISTRY": "@MockFactsRegistry",

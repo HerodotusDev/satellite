@@ -63,6 +63,10 @@ export const modules = (chainId: keyof typeof settings) =>
             initFunctions: [
               {
                 name: "initEvmSharpMmrGrowingModule",
+                args: [],
+              },
+              {
+                name: "setEvmSharpMmrGrowingModuleFactsRegistry",
                 args: [settings[chainId].SHARP_FACT_REGISTRY],
               },
             ],
@@ -78,10 +82,11 @@ export const modules = (chainId: keyof typeof settings) =>
             initFunctions: [
               {
                 name: "initStarknetSharpMmrGrowingModule",
-                args: [
-                  settings[chainId].SHARP_FACT_REGISTRY,
-                  settings[chainId].STARKNET_CHAIN_ID,
-                ],
+                args: [settings[chainId].SHARP_FACT_REGISTRY],
+              },
+              {
+                name: "setStarknetSharpMmrGrowingModuleFactsRegistry",
+                args: [settings[chainId].STARKNET_CHAIN_ID],
               },
             ],
           },

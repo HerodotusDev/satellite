@@ -95,14 +95,15 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         }
 
         // Initialize an array of uint256 to store the program output
-        uint256[] memory programOutput = new uint256[](3 + taskData.mmrData.length * 4);
+        uint256[] memory programOutput = new uint256[](4 + taskData.mmrData.length * 4);
 
         // Assign values to the program output array
         // This needs to be compatible with cairo program
         // https://github.com/HerodotusDev/hdp-cairo/blob/main/src/utils/utils.cairo#L27-L48
-        programOutput[0] = uint256(taskHash);
-        programOutput[1] = taskData.taskResultLow;
-        programOutput[2] = taskData.taskResultHigh;
+        programOutput[0] = taskData.taskHashLow;
+        programOutput[1] = taskData.taskHashHigh;
+        programOutput[2] = taskData.taskResultLow;
+        programOutput[3] = taskData.taskResultHigh;
 
         for (uint8 i = 0; i < taskData.mmrData.length; i++) {
             MmrData memory mmr = taskData.mmrData[i];
@@ -110,10 +111,10 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
             if (usedMmrRoot == bytes32(0)) {
                 revert InvalidMmrRoot();
             }
-            programOutput[3 + i * 4] = mmr.mmrId;
-            programOutput[3 + i * 4 + 1] = mmr.mmrSize;
-            programOutput[3 + i * 4 + 2] = mmr.chainId;
-            programOutput[3 + i * 4 + 3] = uint256(usedMmrRoot);
+            programOutput[4 + i * 4] = mmr.mmrId;
+            programOutput[4 + i * 4 + 1] = mmr.mmrSize;
+            programOutput[4 + i * 4 + 2] = mmr.chainId;
+            programOutput[4 + i * 4 + 3] = uint256(usedMmrRoot);
         }
 
         // Compute program output hash

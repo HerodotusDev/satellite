@@ -162,10 +162,12 @@ bun satellite:remove CHAIN_ID
 
 > If you get any unexpected errors, run `bun clear`.
 
+### Local anvil
+
 To set up anvil and deploy satellite to it, run:
 
-```
-bun env:create local
+```bash
+bun env:create local # or `bun env:change local` if you already have an environment
 bun anvil
 bun satellite:deploy 31337
 bun run_script:local --broadcast
@@ -173,9 +175,25 @@ bun run_script:local --broadcast
 
 If you want to remove the satellite, to deploy it again, run:
 
-```
+```bash
 bun satellite:remove 31337
 rm -rf ignition/deployments/chain-31337
+```
+
+### Forked anvil
+
+To fork anvil from any chain, run:
+
+```bash
+bun anvil:fork *CHAIN_ID*
+bun run_script:local
+```
+
+Then to run script for deployed satellite, run:
+
+```bash
+bun env:change stage # or whatever environment you want to use
+bun run_script:local --broadcast
 ```
 
 ## Documentation

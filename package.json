@@ -23,6 +23,7 @@
     "connection:remove": "bun run scripts/connectionRemove.ts",
     "generate_abi": "bun run scripts/generateAbi.ts",
     "anvil": "anvil",
+    "anvil:fork": "bash scripts/anvilFork.bash",
     "run_script:local": "bun run scripts/runTestScript.ts"
   },
   "devDependencies": {

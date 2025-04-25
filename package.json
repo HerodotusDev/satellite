@@ -25,7 +25,8 @@
     "anvil": "anvil",
     "anvil:fork": "bash scripts/anvilFork.bash",
     "script": "bun run scripts/script.ts",
-    "script:local": "bun run scripts/script.ts 31337"
+    "script:local": "bun run scripts/script.ts 31337",
+    "test": "bun hardhat test"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",

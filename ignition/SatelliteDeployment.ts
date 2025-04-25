@@ -71,7 +71,7 @@ const buildSatelliteDeployment = (
       }
     }
 
-    return { satellite, satelliteMaintenanceModule };
+    return { satellite: satelliteInterface, satelliteMaintenanceModule };
   });
 
 export default buildSatelliteDeployment;

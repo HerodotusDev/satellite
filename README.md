@@ -205,6 +205,14 @@ bun script 11155111 scripts/TestScript.s.sol:TestScript --broadcast
 
 ```
 
+### Running tests
+
+To execute tests, run:
+
+```bash
+bun run test
+```
+
 ## Documentation
 
 Here are some useful links for further reading:

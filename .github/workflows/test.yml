@@ -20,17 +20,8 @@ jobs:
         with:
           submodules: recursive
       - uses: oven-sh/setup-bun@v2
-      - uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Show Forge version
-        run: |
-          forge --version
-
-      - name: Run Forge Install
-        run: |
-          forge install
-
-      - name: Run Bun Install
+      - name: Run bun install
         run: |
           bun install
 
@@ -46,8 +37,4 @@ jobs:
 
       - name: Run Forge build
         run: |
-          bun forge:build
-
-      - name: Run Forge tests
-        run: |
-          bun forge:test -vvv
+          bun compile

@@ -24,7 +24,8 @@
     "generate_abi": "bun run scripts/generateAbi.ts",
     "anvil": "anvil",
     "anvil:fork": "bash scripts/anvilFork.bash",
-    "run_script:local": "bun run scripts/runTestScript.ts"
+    "script": "bun run scripts/script.ts",
+    "script:local": "bun run scripts/script.ts 31337"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",

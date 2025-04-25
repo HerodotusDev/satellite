@@ -170,7 +170,7 @@ To set up anvil and deploy satellite to it, run:
 bun env:create local # or `bun env:change local` if you already have an environment
 bun anvil
 bun satellite:deploy 31337
-bun run_script:local --broadcast
+bun script:local scripts/TestScript.s.sol:TestScript --broadcast
 ```
 
 If you want to remove the satellite, to deploy it again, run:
@@ -186,14 +186,23 @@ To fork anvil from any chain, run:
 
 ```bash
 bun anvil:fork *CHAIN_ID*
-bun run_script:local
 ```
 
 Then to run script for deployed satellite, run:
 
 ```bash
 bun env:change stage # or whatever environment you want to use
-bun run_script:local --broadcast
+bun script:local scripts/TestScript.s.sol:TestScript --broadcast
+```
+
+### Real chain
+
+To run on any real chain, e.g. Ethereum Sepolia, run:
+
+```bash
+bun env:change stage # or whatever environment you want to use
+bun script 11155111 scripts/TestScript.s.sol:TestScript --broadcast
+
 ```
 
 ## Documentation

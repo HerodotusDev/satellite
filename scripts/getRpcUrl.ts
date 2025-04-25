@@ -1,10 +1,22 @@
 import config from "../hardhat.config";
 
 function main() {
-  const chainId = process.env.CHAIN_ID;
+  if (process.env.CHAIN_ID === undefined) {
+    console.error(
+      "Usage: CHAIN_ID=<chainId> bun hardhat run scripts/getRpcUrl.ts",
+    );
+    process.exit(1);
+  }
+
+  const chainId = parseInt(process.env.CHAIN_ID);
+
+  if (chainId == 31337) {
+    console.log("http://localhost:8545");
+    process.exit(0);
+  }
 
   const network = Object.values(config.networks ?? {}).find(
-    (n) => n?.chainId === Number(chainId),
+    (n) => n?.chainId === chainId,
   );
 
   if (!network) {

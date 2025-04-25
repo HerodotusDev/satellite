@@ -442,7 +442,7 @@ export default buildModule("UpgradeDeployment", (m) => {
 
 export async function main() {
   if (Bun.argv.length != 3) {
-    console.error("Usage: pnpm satellite:upgrade <chainId>");
+    console.error("Usage: bun satellite:upgrade <chainId>");
     process.exit(1);
   }
 

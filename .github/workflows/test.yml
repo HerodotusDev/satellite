@@ -13,13 +13,18 @@ jobs:
     strategy:
       fail-fast: true
 
-    name: Foundry project
+    name: Hardhat project
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
       - uses: oven-sh/setup-bun@v2
+      - uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Show Forge version
+        run: |
+          forge --version
 
       - name: Run bun install
         run: |

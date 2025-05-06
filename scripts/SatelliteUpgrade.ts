@@ -221,7 +221,7 @@ async function compareModules(
 
   const menu = new ConsoleMenu([
     {
-      label: preservedModules.length ? "Added modules:" : "No added modules",
+      label: addedModules.length ? "Added modules:" : "No added modules",
       switchable: null,
     },
     ...addedModules.map((x) => ({

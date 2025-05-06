@@ -8,6 +8,7 @@ export const modules: ModuleName[] = [
   "EvmFactRegistryModule",
   // "DataProcessorModule",
   "EvmOnChainGrowingModule",
+  "EvmSharpMmrGrowingModule",
   "NativeParentHashFetcherModule",
   "SimpleReceiverModule",
 ];

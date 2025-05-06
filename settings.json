@@ -86,6 +86,7 @@
   },
   "33111": {
     "network": "curtis",
+    "SHARP_FACT_REGISTRY": "0x942C4b946c776F666b8A5E74a4277FD43764b52a",
 
     "connections": []
   },

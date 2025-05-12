@@ -71,13 +71,13 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         bytes32[] calldata hashingFunctions,
         bool isOffchainGrown
     ) external {
-        // TODO: DON'T ALLOW OFFCHAIN MMRS FROM ONCHAIN, ONLY ALLOW EMPTY MMRS
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
         require(hashingFunctions.length > 0, "INVALID_HASHING_FUNCTIONS_LENGTH");
 
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](hashingFunctions.length);
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
+        bool commonIsOffchainGrown = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].isOffchainGrown;
         for (uint256 i = 0; i < hashingFunctions.length; i++) {
             require(s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize == LibSatellite.NO_MMR_SIZE, "NEW_MMR_ALREADY_EXISTS");
 
@@ -91,6 +91,8 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
                 mmrRoot = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize];
                 // Ensure the given MMR exists
                 require(mmrRoot != LibSatellite.NO_MMR_ROOT, "SRC_MMR_NOT_FOUND");
+                // Ensure the given MMR has the same isOffchainGrown value
+                require(s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].isOffchainGrown == commonIsOffchainGrown, "isOffchainGrown mismatch");
             }
 
             // Copy the MMR data to the new MMR
@@ -99,6 +101,11 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].isOffchainGrown = isOffchainGrown;
 
             rootsForHashingFunctions[i] = RootForHashingFunction({hashingFunction: hashingFunctions[i], root: mmrRoot});
+        }
+
+        // Offchain growing can only be turned off, not on
+        if (originalMmrId != LibSatellite.EMPTY_MMR_ID && isOffchainGrown == true) {
+            require(commonIsOffchainGrown == true, "isOffchainGrown cannot be overridden to true");
         }
 
         emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, block.chainid, CreatedFrom.DOMESTIC);

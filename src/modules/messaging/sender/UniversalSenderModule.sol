@@ -44,7 +44,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
         uint256 originalMmrId,
         uint256 newMmrId,
         bytes32[] calldata hashingFunctions,
-        bool isOffchainGrown,
+        bool isOffchainGrownDestination,
         bytes calldata _xDomainMsgGasData
     ) external payable {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
@@ -52,16 +52,23 @@ contract UniversalSenderModule is IUniversalSenderModule {
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](hashingFunctions.length);
 
         uint256 commonMmrSize = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].latestSize;
+        bool commonIsOffchainGrown = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].isOffchainGrown;
 
-        // TODO: only allow turning off isOffchainGrown + check if for all hash functions there is the same isOffchainGrown value
         for (uint256 i = 0; i < hashingFunctions.length; i++) {
             uint256 mmrSize = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].latestSize;
             bytes32 root = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize];
+            bool isOffchainGrown = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].isOffchainGrown;
 
-            // MMRs with all hashing functions must have the same size
+            // MMRs with all hashing functions must have the same size and isOffchainGrown value
             require(mmrSize == commonMmrSize, "MMR size mismatch");
+            require(isOffchainGrown == commonIsOffchainGrown, "isOffchainGrown mismatch");
 
             rootsForHashingFunctions[i] = RootForHashingFunction(root, hashingFunctions[i]);
+        }
+
+        // Offchain growing can only be turned off, not on
+        if (isOffchainGrownDestination == true) {
+            require(commonIsOffchainGrown == true, "isOffchainGrown cannot be overridden to true");
         }
 
         ILibSatellite.SatelliteConnection memory satellite = s.satelliteConnectionRegistry[destinationChainId];
@@ -78,7 +85,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
                 accumulatedChainId,
                 block.chainid,
                 originalMmrId,
-                isOffchainGrown
+                commonIsOffchainGrown
             ),
             _xDomainMsgGasData
         );

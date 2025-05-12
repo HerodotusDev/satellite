@@ -5,13 +5,7 @@ import {IAggregatorsFactory} from "src/interfaces/external/IAggregatorsFactory.s
 import {RootForHashingFunction} from "src/interfaces/modules/IMmrCoreModule.sol";
 
 interface ILegacyContractsInteractionModule {
-    function initLegacyContractsInteractionModule(IAggregatorsFactory aggregatorsFactory) external;
-    function loadLegacyEvmAggregatorMmr(uint256 legacyMmrId, uint256 newMmrId) external;
-
-    struct LegacyContractsInteractionModuleStorage {
-        IAggregatorsFactory aggregatorsFactory;
-        uint256 aggregatedChainId;
-    }
+    function loadLegacyEvmAggregatorMmr(IAggregatorsFactory aggregatorsFactory, uint256 aggregatedChainId, uint256 legacyMmrId, uint256 newMmrId) external;
 
     event LegacyEvmAggregatorMmrLoadedV2(
         RootForHashingFunction[] rootsForHashingFunctions,

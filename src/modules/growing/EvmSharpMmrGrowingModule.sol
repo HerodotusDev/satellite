@@ -145,11 +145,11 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
         }
 
         if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown == false) {
-            revert AggregationError("Poseidon MMR not only sharp grown");
+            revert AggregationError("Poseidon MMR is not offchain grown");
         }
 
         if (s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown == false) {
-            revert AggregationError("Keccak MMR not only sharp grown");
+            revert AggregationError("Keccak MMR is not offchain grown");
         }
 
         // Check that the job's previous Poseidon MMR root is the same as the one stored in the contract state

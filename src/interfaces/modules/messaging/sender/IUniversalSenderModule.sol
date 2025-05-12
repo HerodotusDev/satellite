@@ -23,7 +23,7 @@ interface IUniversalSenderModule {
     /// @param originalMmrId the ID of the original MMR
     /// @param newMmrId the ID of the new MMR
     /// @param hashingFunctions the hashing functions used to hash the MMR
-    /// @param isOffchainGrown if true, MMR will be sent as Sharp Grown
+    /// @param isOffchainGrownDestination if true, MMR will be sent as Offchain Grown
     /// @param _xDomainMsgGasData the gas data for the cross-domain message, depends on the destination chain
     function sendMmr(
         uint256 destinationChainId,
@@ -31,7 +31,7 @@ interface IUniversalSenderModule {
         uint256 originalMmrId,
         uint256 newMmrId,
         bytes32[] calldata hashingFunctions,
-        bool isOffchainGrown,
+        bool isOffchainGrownDestination,
         bytes calldata _xDomainMsgGasData
     ) external payable;
 }

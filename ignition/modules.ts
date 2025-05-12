@@ -175,19 +175,10 @@ export const modules = (chainId: keyof typeof settings) =>
       interfaceName: "IL1ToStarknetSenderModule",
     },
 
-    ...("LEGACY_AGGREGATORS_FACTORY" in settings[chainId]
-      ? {
-          LegacyContractsInteractionModule: {
-            interfaceName: "ILegacyContractsInteractionModule",
-            initFunctions: [
-              {
-                name: "initLegacyContractsInteractionModule",
-                args: [settings[chainId].LEGACY_AGGREGATORS_FACTORY],
-              },
-            ],
-          },
-        }
-      : {}),
+    LegacyContractsInteractionModule: {
+      interfaceName: "ILegacyContractsInteractionModule",
+      initFunctions: [],
+    },
 
     MockFactsRegistry: {
       interfaceName: "IFactsRegistry",

@@ -140,7 +140,7 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         return s.mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize;
     }
 
-    function isMmrOnlySharpGrown(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bool) {
+    function isMmrOnlyOffchainGrown(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bool) {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         return s.mmrs[accumulatedChainId][mmrId][hashingFunction].isOffchainGrown;
     }

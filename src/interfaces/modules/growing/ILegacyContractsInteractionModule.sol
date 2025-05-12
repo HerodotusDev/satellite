@@ -6,6 +6,7 @@ import {RootForHashingFunction} from "src/interfaces/modules/IMmrCoreModule.sol"
 
 interface ILegacyContractsInteractionModule {
     function loadLegacyEvmAggregatorMmr(IAggregatorsFactory aggregatorsFactory, uint256 aggregatedChainId, uint256 legacyMmrId, uint256 newMmrId) external;
+    function loadLegacyStarknetAggregatorMmr(IAggregatorsFactory aggregatorsFactory, uint256 aggregatedChainId, uint256 legacyMmrId, uint256 newMmrId) external;
 
     event LegacyEvmAggregatorMmrLoadedV2(
         RootForHashingFunction[] rootsForHashingFunctions,

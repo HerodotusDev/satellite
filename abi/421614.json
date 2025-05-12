@@ -349,6 +349,12 @@
         "internalType": "enum CreatedFrom",
         "name": "createdFrom",
         "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isOffchainGrown",
+        "type": "bool"
       }
     ],
     "name": "CreatedMmr",
@@ -544,7 +550,7 @@
       },
       {
         "internalType": "bool",
-        "name": "isSiblingSynced",
+        "name": "isOffchainGrown",
         "type": "bool"
       }
     ],
@@ -607,6 +613,11 @@
         "internalType": "bytes32[]",
         "name": "hashingFunctions",
         "type": "bytes32[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "isOffchainGrown",
+        "type": "bool"
       }
     ],
     "name": "createMmrFromDomestic",
@@ -753,7 +764,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "isMMRSiblingSynced",
+    "name": "isMmrOnlySharpGrown",
     "outputs": [
       {
         "internalType": "bool",
@@ -1480,6 +1491,42 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "rootHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes",
+        "name": "blockHeader",
+        "type": "bytes"
+      }
+    ],
+    "name": "arbitrumFetchParentHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "outboxAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      }
+    ],
+    "name": "initArbitrumParentHashFetcherModule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "newMmrId",
         "type": "uint256"
@@ -1523,7 +1570,7 @@
       },
       {
         "internalType": "bool",
-        "name": "isSiblingSynced",
+        "name": "isOffchainGrown",
         "type": "bool"
       }
     ],
@@ -1589,7 +1636,7 @@
       },
       {
         "internalType": "bool",
-        "name": "isSiblingSyncedForSending",
+        "name": "isOffchainGrownDestination",
         "type": "bool"
       },
       {

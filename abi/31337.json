@@ -1443,6 +1443,320 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "DoubleRegistration",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidFact",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidMmrRoot",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotFinalized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotInBatch",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TaskAlreadyFinalized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "UnauthorizedProgramHash",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "programHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "inputs",
+            "type": "bytes32[]"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct ModuleTask",
+        "name": "moduleTask",
+        "type": "tuple"
+      }
+    ],
+    "name": "ModuleTaskScheduled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "enabledProgramHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ProgramHashEnabled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32[]",
+        "name": "disabledProgramHashes",
+        "type": "bytes32[]"
+      }
+    ],
+    "name": "ProgramHashesDisabled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "result",
+        "type": "bytes32"
+      }
+    ],
+    "name": "TaskAlreadyStored",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "taskHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "taskResult",
+        "type": "bytes32"
+      }
+    ],
+    "name": "TaskFinalized",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "chainId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "mmrId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "mmrSize",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct IDataProcessorModule.MmrData[]",
+            "name": "mmrData",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "taskResultLow",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "taskResultHigh",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "taskHashLow",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "taskHashHigh",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "programHash",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct IDataProcessorModule.TaskData",
+        "name": "taskData",
+        "type": "tuple"
+      }
+    ],
+    "name": "authenticateDataProcessorTaskExecution",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "programHashes",
+        "type": "bytes32[]"
+      }
+    ],
+    "name": "disableProgramHashes",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getDataProcessorFactsRegistry",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "taskCommitment",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getDataProcessorFinalizedTaskResult",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "taskCommitment",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getDataProcessorTaskStatus",
+    "outputs": [
+      {
+        "internalType": "enum IDataProcessorModule.TaskStatus",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "programHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isProgramHashAuthorized",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "programHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "inputs",
+            "type": "bytes32[]"
+          }
+        ],
+        "internalType": "struct ModuleTask",
+        "name": "moduleTask",
+        "type": "tuple"
+      }
+    ],
+    "name": "requestDataProcessorExecutionOfTask",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract IFactsRegistry",
+        "name": "factsRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "setDataProcessorFactsRegistry",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "programHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setDataProcessorProgramHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -1478,6 +1792,185 @@
   {
     "inputs": [
       {
+        "internalType": "string",
+        "name": "message",
+        "type": "string"
+      }
+    ],
+    "name": "AggregationBlockMismatch",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "message",
+        "type": "string"
+      }
+    ],
+    "name": "AggregationError",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "GenesisBlockReached",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotEnoughJobs",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "UnknownParentHash",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "mmrId",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "blockNumbersPacked",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "blockNPlusOneParentHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "blockNMinusRPlusOneParentHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "mmrPreviousRootPoseidon",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "mmrPreviousRootKeccak",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "mmrNewRootPoseidon",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "mmrNewRootKeccak",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mmrSizesPacked",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IEvmSharpMmrGrowingModule.JobOutputPacked[]",
+        "name": "outputs",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "aggregateEvmSharpJobs",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "newMmrId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "originalMmrId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "mmrSize",
+        "type": "uint256"
+      }
+    ],
+    "name": "createEvmSharpMmr",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getEvmSharpMmrGrowingModuleFactsRegistry",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getEvmSharpMmrGrowingModuleProgramHash",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "initEvmSharpMmrGrowingModule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "factsRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "setEvmSharpMmrGrowingModuleFactsRegistry",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "programHash",
+        "type": "uint256"
+      }
+    ],
+    "name": "setEvmSharpMmrGrowingModuleProgramHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "blockNumber",
         "type": "uint256"
@@ -1491,82 +1984,31 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "newMmrId",
-        "type": "uint256"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes32",
-            "name": "root",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "hashingFunction",
-            "type": "bytes32"
-          }
-        ],
-        "internalType": "struct RootForHashingFunction[]",
-        "name": "rootsForHashingFunctions",
-        "type": "tuple[]"
-      },
-      {
-        "internalType": "uint256",
-        "name": "mmrSize",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "accumulatedChainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "originChainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "originalMmrId",
-        "type": "uint256"
-      },
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isValid",
+    "outputs": [
       {
         "internalType": "bool",
-        "name": "isOffchainGrown",
+        "name": "",
         "type": "bool"
       }
     ],
-    "name": "receiveMmr",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "chainId",
-        "type": "uint256"
-      },
-      {
         "internalType": "bytes32",
-        "name": "hashingFunction",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "blockNumber",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "parentHash",
+        "name": "fact",
         "type": "bytes32"
       }
     ],
-    "name": "receiveParentHash",
+    "name": "setValid",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

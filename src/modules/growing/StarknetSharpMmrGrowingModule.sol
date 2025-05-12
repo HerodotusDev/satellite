@@ -59,7 +59,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
 
         StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
 
-        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions);
+        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions, true);
     }
 
     function aggregateStarknetSharpJobs(uint256 mmrId, StarknetJobOutput[] calldata outputs) external {
@@ -96,7 +96,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
 
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize = mmrNewSize;
-        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced = false;
+        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isSharpGrown = true;
 
         uint256 toBlock = lastOutput.toBlockNumberLow;
 

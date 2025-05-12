@@ -38,7 +38,7 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
         require(headersSerialized.length > 0, "ERR_EMPTY_BATCH");
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         require(s.mmrs[accumulatedChainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize != LibSatellite.NO_MMR_SIZE, "ERR_MMR_DOES_NOT_EXIST");
-        require(s.mmrs[accumulatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced != true, "ERR_MMR_IS_SIBLING_SYNCED");
+        require(s.mmrs[accumulatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isSharpGrown == false, "ERR_MMR_IS_SHARP_GROWN");
 
         MMRGrowResult memory result;
 
@@ -141,7 +141,7 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
         // Update the contract storage
         s.mmrs[accumulatedChainId][mmrId][hashingFunction].mmrSizeToRoot[newSize] = newRoot;
         s.mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize = newSize;
-        s.mmrs[accumulatedChainId][mmrId][hashingFunction].isSiblingSynced = false;
+        s.mmrs[accumulatedChainId][mmrId][hashingFunction].isSharpGrown = false;
     }
 
     function _isHeaderValid(bytes32 hash, bytes memory headerRlp) internal pure returns (bool) {

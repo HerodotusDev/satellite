@@ -36,7 +36,7 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         uint256 accumulatedChainId,
         uint256 originChainId,
         uint256 originalMmrId,
-        bool isSiblingSynced
+        bool isSharpGrown
     ) external onlyModule {
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
         require(rootsForHashingFunctions.length > 0, "INVALID_ROOTS_LENGTH");
@@ -52,24 +52,27 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
             require(s.mmrs[accumulatedChainId][newMmrId][hashingFunction].latestSize == LibSatellite.NO_MMR_SIZE, "NEW_MMR_ALREADY_EXISTS");
             s.mmrs[accumulatedChainId][newMmrId][hashingFunction].latestSize = mmrSize;
             s.mmrs[accumulatedChainId][newMmrId][hashingFunction].mmrSizeToRoot[mmrSize] = root;
-            s.mmrs[accumulatedChainId][newMmrId][hashingFunction].isSiblingSynced = isSiblingSynced;
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunction].isSharpGrown = isSharpGrown;
         }
 
         // Emit the event
         emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, originChainId, CreatedFrom.FOREIGN);
+        // TODO: should we emit the isSharpGrown flag?
     }
 
     // ========================= Core Functions ========================= //
 
-    function createMmrFromDomestic(uint256 newMmrId, uint256 originalMmrId, uint256 accumulatedChainId, uint256 mmrSize, bytes32[] calldata hashingFunctions) external {
+    /// @inheritdoc IMmrCoreModule
+    function createMmrFromDomestic(
+        uint256 newMmrId,
+        uint256 originalMmrId,
+        uint256 accumulatedChainId,
+        uint256 mmrSize,
+        bytes32[] calldata hashingFunctions,
+        bool isSharpGrown
+    ) external {
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
         require(hashingFunctions.length > 0, "INVALID_HASHING_FUNCTIONS_LENGTH");
-
-        bool isSiblingSynced = hashingFunctions.length > 1;
-
-        if (isSiblingSynced) {
-            LibSatellite.enforceIsSatelliteModule();
-        }
 
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](hashingFunctions.length);
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
@@ -87,16 +90,12 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
                 mmrRoot = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize];
                 // Ensure the given MMR exists
                 require(mmrRoot != LibSatellite.NO_MMR_ROOT, "SRC_MMR_NOT_FOUND");
-
-                if (isSiblingSynced) {
-                    require(s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].isSiblingSynced == isSiblingSynced, "ORIGINAL_MMR_NOT_SIBLING_SYNCED");
-                }
             }
 
             // Copy the MMR data to the new MMR
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize = mmrSize;
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize] = mmrRoot;
-            s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].isSiblingSynced = isSiblingSynced;
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].isSharpGrown = isSharpGrown;
 
             rootsForHashingFunctions[i] = RootForHashingFunction({hashingFunction: hashingFunctions[i], root: mmrRoot});
         }
@@ -134,9 +133,9 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         return s.mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize;
     }
 
-    function isMMRSiblingSynced(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bool) {
+    function isMmrOnlySharpGrown(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bool) {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        return s.mmrs[accumulatedChainId][mmrId][hashingFunction].isSiblingSynced;
+        return s.mmrs[accumulatedChainId][mmrId][hashingFunction].isSharpGrown;
     }
 
     function getReceivedParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber) external view returns (bytes32) {

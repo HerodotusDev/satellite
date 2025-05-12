@@ -115,7 +115,8 @@ interface IMmrCoreModule {
         uint256 originalMmrId,
         RootForHashingFunction[] rootsForHashingFunctions,
         uint256 originChainId,
-        CreatedFrom createdFrom
+        CreatedFrom createdFrom,
+        bool isOffchainGrown
     );
 
     /// @notice emitted when a batch of blocks is appended to the MMR

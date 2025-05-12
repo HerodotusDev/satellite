@@ -56,8 +56,7 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         }
 
         // Emit the event
-        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, originChainId, CreatedFrom.FOREIGN);
-        // TODO: should we emit the isOffchainGrown flag?
+        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, originChainId, CreatedFrom.FOREIGN, isOffchainGrown);
     }
 
     // ========================= Core Functions ========================= //
@@ -108,7 +107,7 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
             require(commonIsOffchainGrown == true, "isOffchainGrown cannot be overridden to true");
         }
 
-        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, block.chainid, CreatedFrom.DOMESTIC);
+        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, block.chainid, CreatedFrom.DOMESTIC, isOffchainGrown);
     }
 
     /// ========================= Internal functions ========================= //

@@ -106,11 +106,11 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
 
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize = mmrNewSize;
-        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isSharpGrown = true;
+        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown = true;
 
         s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootKeccak;
         s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize = mmrNewSize;
-        s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isSharpGrown = true;
+        s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown = true;
 
         (, uint256 toBlock) = lastOutput.blockNumbersPacked.split128();
 
@@ -144,11 +144,11 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
             revert AggregationError("MMR size mismatch");
         }
 
-        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isSharpGrown == false) {
+        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown == false) {
             revert AggregationError("Poseidon MMR not only sharp grown");
         }
 
-        if (s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isSharpGrown == false) {
+        if (s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown == false) {
             revert AggregationError("Keccak MMR not only sharp grown");
         }
 

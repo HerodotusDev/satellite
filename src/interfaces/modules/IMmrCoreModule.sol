@@ -37,7 +37,7 @@ interface IMmrCoreModule {
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates (where block is?)
     /// @param originChainId the ID of the chain from which the new MMR will be created (who is sending msg?)
     /// @param originalMmrId the ID of the MMR from which the new MMR will be created
-    /// @param isSharpGrown Whether the MMR can be grown with and only with either EVMSharpGrowingModule or StarknetSharpMmrGrowingModule
+    /// @param isOffchainGrown Whether the MMR can be grown with and only with either EVMSharpGrowingModule or StarknetSharpMmrGrowingModule
     function _createMmrFromForeign(
         uint256 newMmrId,
         RootForHashingFunction[] calldata rootsForHashingFunctions,
@@ -45,7 +45,7 @@ interface IMmrCoreModule {
         uint256 accumulatedChainId,
         uint256 originChainId,
         uint256 originalMmrId,
-        bool isSharpGrown
+        bool isOffchainGrown
     ) external;
 
     // ========================= Core Functions ========================= //
@@ -62,7 +62,7 @@ interface IMmrCoreModule {
         uint256 accumulatedChainId,
         uint256 mmrSize,
         bytes32[] calldata hashingFunctions,
-        bool isSharpGrown
+        bool isOffchainGrown
     ) external;
 
     // ========================= View functions ========================= //

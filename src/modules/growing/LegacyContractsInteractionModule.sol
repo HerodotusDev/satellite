@@ -46,11 +46,11 @@ contract LegacyContractsInteractionModule is ILegacyContractsInteractionModule, 
 
         s.mmrs[ms.aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[size] = poseidonRoot;
         s.mmrs[ms.aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].latestSize = size;
-        s.mmrs[ms.aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].isSharpGrown = true;
+        s.mmrs[ms.aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown = true;
 
         s.mmrs[ms.aggregatedChainId][newMmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[size] = keccakRoot;
         s.mmrs[ms.aggregatedChainId][newMmrId][KECCAK_HASHING_FUNCTION].latestSize = size;
-        s.mmrs[ms.aggregatedChainId][newMmrId][KECCAK_HASHING_FUNCTION].isSharpGrown = true;
+        s.mmrs[ms.aggregatedChainId][newMmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown = true;
 
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](2);
         rootsForHashingFunctions[0].root = poseidonRoot;
@@ -60,4 +60,6 @@ contract LegacyContractsInteractionModule is ILegacyContractsInteractionModule, 
 
         emit LegacyEvmAggregatorMmrLoadedV2(rootsForHashingFunctions, size, newMmrId, legacyMmrId, ms.aggregatedChainId, sharpFactsAggregatorAddress);
     }
+
+    // TODO: starknet with different address
 }

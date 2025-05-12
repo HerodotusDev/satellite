@@ -44,7 +44,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
         uint256 originalMmrId,
         uint256 newMmrId,
         bytes32[] calldata hashingFunctions,
-        bool isSharpGrown,
+        bool isOffchainGrown,
         bytes calldata _xDomainMsgGasData
     ) external payable {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
@@ -53,6 +53,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
 
         uint256 commonMmrSize = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].latestSize;
 
+        // TODO: only allow turning off isOffchainGrown + check if for all hash functions there is the same isOffchainGrown value
         for (uint256 i = 0; i < hashingFunctions.length; i++) {
             uint256 mmrSize = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].latestSize;
             bytes32 root = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize];
@@ -77,7 +78,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
                 accumulatedChainId,
                 block.chainid,
                 originalMmrId,
-                isSharpGrown
+                isOffchainGrown
             ),
             _xDomainMsgGasData
         );

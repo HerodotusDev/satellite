@@ -1443,6 +1443,320 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "DoubleRegistration",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidFact",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidMmrRoot",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotFinalized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotInBatch",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TaskAlreadyFinalized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "UnauthorizedProgramHash",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "programHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "inputs",
+            "type": "bytes32[]"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct ModuleTask",
+        "name": "moduleTask",
+        "type": "tuple"
+      }
+    ],
+    "name": "ModuleTaskScheduled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "enabledProgramHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ProgramHashEnabled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32[]",
+        "name": "disabledProgramHashes",
+        "type": "bytes32[]"
+      }
+    ],
+    "name": "ProgramHashesDisabled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "result",
+        "type": "bytes32"
+      }
+    ],
+    "name": "TaskAlreadyStored",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "taskHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "taskResult",
+        "type": "bytes32"
+      }
+    ],
+    "name": "TaskFinalized",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "chainId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "mmrId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "mmrSize",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct IDataProcessorModule.MmrData[]",
+            "name": "mmrData",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "taskResultLow",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "taskResultHigh",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "taskHashLow",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "taskHashHigh",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "programHash",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct IDataProcessorModule.TaskData",
+        "name": "taskData",
+        "type": "tuple"
+      }
+    ],
+    "name": "authenticateDataProcessorTaskExecution",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "programHashes",
+        "type": "bytes32[]"
+      }
+    ],
+    "name": "disableProgramHashes",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getDataProcessorFactsRegistry",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "taskCommitment",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getDataProcessorFinalizedTaskResult",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "taskCommitment",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getDataProcessorTaskStatus",
+    "outputs": [
+      {
+        "internalType": "enum IDataProcessorModule.TaskStatus",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "programHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isProgramHashAuthorized",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "programHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "inputs",
+            "type": "bytes32[]"
+          }
+        ],
+        "internalType": "struct ModuleTask",
+        "name": "moduleTask",
+        "type": "tuple"
+      }
+    ],
+    "name": "requestDataProcessorExecutionOfTask",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract IFactsRegistry",
+        "name": "factsRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "setDataProcessorFactsRegistry",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "programHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setDataProcessorProgramHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -1500,11 +1814,6 @@
   {
     "inputs": [],
     "name": "GenesisBlockReached",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "InvalidFact",
     "type": "error"
   },
   {
@@ -1805,6 +2114,284 @@
     "name": "setStarknetSharpMmrGrowingModuleProgramHash",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      }
+    ],
+    "name": "nativeFetchParentHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract IStarknet",
+        "name": "starknetContract",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      }
+    ],
+    "name": "initStarknetParentHashFetcherModule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "starknetFetchParentHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "destinationChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "accumulatedChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "originalMmrId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "newMmrId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "hashingFunctions",
+        "type": "bytes32[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "isOffchainGrownDestination",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_xDomainMsgGasData",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendMmr",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "destinationChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "accumulatedChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "hashingFunction",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_xDomainMsgGasData",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendParentHash",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "satelliteAddress",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "inboxAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_data",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_xDomainMsgGasData",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendMessageL1ToArbitrum",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "satelliteAddress",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "inboxAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_data",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_xDomainMsgGasData",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendMessageL1ToOptimism",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "satelliteAddress",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "inboxAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_data",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_xDomainMsgGasData",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendMessageL1ToZkSync",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "RECEIVE_MMR_L1_SELECTOR",
+    "outputs": [
+      {
+        "internalType": "bytes4",
+        "name": "",
+        "type": "bytes4"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "RECEIVE_MMR_L2_SELECTOR",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "RECEIVE_PARENT_HASH_L1_SELECTOR",
+    "outputs": [
+      {
+        "internalType": "bytes4",
+        "name": "",
+        "type": "bytes4"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "RECEIVE_PARENT_HASH_L2_SELECTOR",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "satelliteAddress",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "inboxAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_data",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendMessageL1ToStarknet",
+    "outputs": [],
+    "stateMutability": "payable",
     "type": "function"
   },
   {

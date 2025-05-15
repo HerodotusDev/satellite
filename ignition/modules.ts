@@ -82,11 +82,11 @@ export const modules = (chainId: keyof typeof settings) =>
             initFunctions: [
               {
                 name: "initStarknetSharpMmrGrowingModule",
-                args: [settings[chainId].SHARP_FACT_REGISTRY],
+                args: [settings[chainId].STARKNET_CHAIN_ID],
               },
               {
                 name: "setStarknetSharpMmrGrowingModuleFactsRegistry",
-                args: [settings[chainId].STARKNET_CHAIN_ID],
+                args: [settings[chainId].SHARP_FACT_REGISTRY],
               },
             ],
           },

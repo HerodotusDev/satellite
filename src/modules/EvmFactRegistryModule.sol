@@ -49,7 +49,8 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         EvmFactRegistryModuleStorage storage ms = moduleStorage();
 
         Account storage accountData = ms.accountField[chainId][account][blockNumber];
-        require(readBitAtIndexFromRight(accountData.savedFields, uint8(field)), "ERR_FIELD_NOT_SAVED");
+        uint8 savedFieldIndex = uint8(field) < 4 ? uint8(field) : 4;
+        require(readBitAtIndexFromRight(accountData.savedFields, savedFieldIndex), "ERR_FIELD_NOT_SAVED");
         return accountData.fields[field];
     }
 
@@ -113,10 +114,10 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         BlockHeaderProof calldata headerProof,
         bytes calldata accountTrieProof
     ) public view returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot) {
-        // Ensure provided header is a valid one by making sure it is present in saved MMRs
+        // // Ensure provided header is a valid one by making sure it is present in saved MMRs
         _verifyAccumulatedHeaderProof(chainId, headerProof);
 
-        // Verify the account state proof
+        // // Verify the account state proof
         bytes32 stateRoot = _getStateRoot(headerProof.provenBlockHeader);
 
         (bool doesAccountExist, bytes memory accountRLP) = SecureMerkleTrie.get(abi.encodePacked(account), accountTrieProof, stateRoot);

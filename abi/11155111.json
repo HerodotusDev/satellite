@@ -834,6 +834,36 @@
         "internalType": "bytes32",
         "name": "storageHash",
         "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "flags",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fixed_",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "shares",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "debt",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "delegate",
+        "type": "uint256"
       }
     ],
     "name": "ProvenAccount",
@@ -1297,6 +1327,112 @@
         "type": "address"
       },
       {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "treeId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint128",
+            "name": "mmrTreeSize",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockProofLeafIndex",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrPeaks",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrElementInclusionProof",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes",
+            "name": "provenBlockHeader",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct IEvmFactRegistryModule.BlockHeaderProof",
+        "name": "headerProof",
+        "type": "tuple"
+      },
+      {
+        "internalType": "bytes",
+        "name": "accountTrieProof",
+        "type": "bytes"
+      }
+    ],
+    "name": "verifyAccountApechain",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "flags",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fixed_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "shares",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "debt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "delegate",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "codeHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "storageRoot",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "blockNumber",
         "type": "uint256"
@@ -1458,6 +1594,11 @@
   },
   {
     "inputs": [],
+    "name": "TaskAlreadyFinalized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "UnauthorizedProgramHash",
     "type": "error"
   },
@@ -1526,6 +1667,25 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "taskHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "taskResult",
+        "type": "bytes32"
+      }
+    ],
+    "name": "TaskFinalized",
+    "type": "event"
+  },
+  {
     "inputs": [
       {
         "components": [
@@ -1573,11 +1733,6 @@
           },
           {
             "internalType": "bytes32",
-            "name": "moduleHash",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "bytes32",
             "name": "programHash",
             "type": "bytes32"
           }
@@ -1603,6 +1758,19 @@
     "name": "disableProgramHashes",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getDataProcessorFactsRegistry",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -1784,19 +1952,6 @@
     "type": "error"
   },
   {
-    "inputs": [],
-    "name": "PROGRAM_HASH",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -1880,14 +2035,60 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getEvmSharpMmrGrowingModuleFactsRegistry",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getEvmSharpMmrGrowingModuleProgramHash",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "initEvmSharpMmrGrowingModule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
-        "internalType": "contract IFactsRegistry",
+        "internalType": "address",
         "name": "factsRegistry",
         "type": "address"
       }
     ],
-    "name": "initEvmSharpMmrGrowingModule",
+    "name": "setEvmSharpMmrGrowingModuleFactsRegistry",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "programHash",
+        "type": "uint256"
+      }
+    ],
+    "name": "setEvmSharpMmrGrowingModuleProgramHash",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1976,19 +2177,66 @@
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "getStarknetSharpMmrGrowingModuleFactsRegistry",
+    "outputs": [
       {
-        "internalType": "contract IFactsRegistry",
-        "name": "factsRegistry",
+        "internalType": "address",
+        "name": "",
         "type": "address"
-      },
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getStarknetSharpMmrGrowingModuleProgramHash",
+    "outputs": [
       {
         "internalType": "uint256",
-        "name": "chainId",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "starknetChainId",
         "type": "uint256"
       }
     ],
     "name": "initStarknetSharpMmrGrowingModule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "factsRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "setStarknetSharpMmrGrowingModuleFactsRegistry",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "programHash",
+        "type": "uint256"
+      }
+    ],
+    "name": "setStarknetSharpMmrGrowingModuleProgramHash",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2269,6 +2517,92 @@
     "name": "sendMessageL1ToStarknet",
     "outputs": [],
     "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "root",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "hashingFunction",
+            "type": "bytes32"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct RootForHashingFunction[]",
+        "name": "rootsForHashingFunctions",
+        "type": "tuple[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "size",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newMmrId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "legacyMmrId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "aggregatedChainId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "sharpFactsAggregatorAddress",
+        "type": "address"
+      }
+    ],
+    "name": "LegacyEvmAggregatorMmrLoadedV2",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract IAggregatorsFactory",
+        "name": "aggregatorsFactory",
+        "type": "address"
+      }
+    ],
+    "name": "initLegacyContractsInteractionModule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "legacyMmrId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "newMmrId",
+        "type": "uint256"
+      }
+    ],
+    "name": "loadLegacyEvmAggregatorMmr",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

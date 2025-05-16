@@ -16,7 +16,12 @@ interface IEvmFactRegistryModule {
         NONCE,
         BALANCE,
         STORAGE_ROOT,
-        CODE_HASH
+        CODE_HASH,
+        APE_FLAGS,
+        APE_FIXED,
+        APE_SHARES,
+        APE_DEBT,
+        APE_DELEGATE
     }
 
     struct StorageSlot {
@@ -25,7 +30,9 @@ interface IEvmFactRegistryModule {
     }
 
     struct Account {
-        /// @dev Bitmask of saved fields (4 bits)
+        /// @dev Bitmask of saved fields (5 bits)
+        /// @dev First 4 bits are for NONCE, BALANCE, STORAGE_ROOT, CODE_HASH
+        /// @dev 5th bit (2^4) is for all ApeChain fields so either all ApeChain fields are saved or none
         uint8 savedFields;
         mapping(AccountField => bytes32) fields;
     }
@@ -94,6 +101,28 @@ interface IEvmFactRegistryModule {
         bytes calldata accountTrieProof
     ) external view returns (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot);
 
+    /// @notice Verifies the headerProof against saved MMRs but for ApeChain chains
+    /// @notice ApeChain has different handling of accounts, e.i. balance is missing,
+    /// @notice and ape_flags, ape_fixed, ape_shares, ape_debt, ape_delegate are added
+    /// @param chainId Chain ID where the account lives
+    /// @param account Address of the account
+    /// @param headerProof Header proof of the block that contains the account
+    /// @param accountTrieProof MPT proof for the account (has to hash to the state root)
+    /// @return nonce
+    /// @return flags
+    /// @return fixed_
+    /// @return shares
+    /// @return debt
+    /// @return delegate
+    /// @return codeHash
+    /// @return storageRoot
+    function verifyAccountApechain(
+        uint256 chainId,
+        address account,
+        BlockHeaderProof calldata headerProof,
+        bytes calldata accountTrieProof
+    ) external view returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot);
+
     /// @notice Verifies the storageSlotTrieProof against saved MMRs
     /// @notice Account's storage root has to be proven before calling this function
     /// @param chainId Chain ID where the queried block lives
@@ -115,7 +144,21 @@ interface IEvmFactRegistryModule {
     // ========================= Events ========================= //
 
     /// @notice Emitted when account fields are proven
-    event ProvenAccount(uint256 chainId, address account, uint256 blockNumber, uint8 savedFields, uint256 nonce, uint256 balance, bytes32 codeHash, bytes32 storageHash);
+    event ProvenAccount(
+        uint256 chainId,
+        address account,
+        uint256 blockNumber,
+        uint8 savedFields,
+        uint256 nonce,
+        uint256 balance,
+        bytes32 codeHash,
+        bytes32 storageHash,
+        uint256 flags,
+        uint256 fixed_,
+        uint256 shares,
+        uint256 debt,
+        uint256 delegate
+    );
 
     /// @notice Emitted when storage slot value is proven
     event ProvenStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes32 slotValue);

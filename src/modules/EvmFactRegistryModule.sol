@@ -17,6 +17,15 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     uint8 private constant ACCOUNT_STORAGE_ROOT_INDEX = 2;
     uint8 private constant ACCOUNT_CODE_HASH_INDEX = 3;
 
+    uint8 private constant APECHAIN_ACCOUNT_NONCE_INDEX = 0;
+    uint8 private constant APECHAIN_ACCOUNT_FLAGS_INDEX = 1;
+    uint8 private constant APECHAIN_ACCOUNT_FIXED_INDEX = 2;
+    uint8 private constant APECHAIN_ACCOUNT_SHARES_INDEX = 3;
+    uint8 private constant APECHAIN_ACCOUNT_DEBT_INDEX = 4;
+    uint8 private constant APECHAIN_ACCOUNT_DELEGATE_INDEX = 5;
+    uint8 private constant APECHAIN_ACCOUNT_CODE_HASH_INDEX = 6;
+    uint8 private constant APECHAIN_ACCOUNT_STORAGE_ROOT_INDEX = 7;
+
     bytes32 private constant EMPTY_TRIE_ROOT_HASH = 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421;
     bytes32 private constant EMPTY_CODE_HASH = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
 
@@ -65,35 +74,12 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
 
     // ========================= Core Functions ========================= //
 
-    /// @inheritdoc IEvmFactRegistryModule
     function proveAccount(uint256 chainId, address account, uint8 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) external {
-        EvmFactRegistryModuleStorage storage ms = moduleStorage();
-
-        // Verify the proof and decode the account fields
-        (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) = verifyAccount(chainId, account, headerProof, accountTrieProof);
-
-        // Save the desired account properties to the storage
-        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.NONCE))) {
-            ms.accountField[chainId][account][headerProof.blockNumber].savedFields |= uint8(1 << uint8(AccountField.NONCE));
-            ms.accountField[chainId][account][headerProof.blockNumber].fields[AccountField.NONCE] = bytes32(nonce);
+        if (_isApeChain(chainId)) {
+            _proveAccountApechain(chainId, account, accountFieldsToSave, headerProof, accountTrieProof);
+        } else {
+            _proveAccountEvm(chainId, account, accountFieldsToSave, headerProof, accountTrieProof);
         }
-
-        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.BALANCE))) {
-            ms.accountField[chainId][account][headerProof.blockNumber].savedFields |= uint8(1 << uint8(AccountField.BALANCE));
-            ms.accountField[chainId][account][headerProof.blockNumber].fields[AccountField.BALANCE] = bytes32(accountBalance);
-        }
-
-        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.CODE_HASH))) {
-            ms.accountField[chainId][account][headerProof.blockNumber].savedFields |= uint8(1 << uint8(AccountField.CODE_HASH));
-            ms.accountField[chainId][account][headerProof.blockNumber].fields[AccountField.CODE_HASH] = codeHash;
-        }
-
-        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.STORAGE_ROOT))) {
-            ms.accountField[chainId][account][headerProof.blockNumber].savedFields |= uint8(1 << uint8(AccountField.STORAGE_ROOT));
-            ms.accountField[chainId][account][headerProof.blockNumber].fields[AccountField.STORAGE_ROOT] = storageRoot;
-        }
-
-        emit ProvenAccount(chainId, account, headerProof.blockNumber, accountFieldsToSave, nonce, accountBalance, codeHash, storageRoot);
     }
 
     /// @inheritdoc IEvmFactRegistryModule
@@ -121,6 +107,23 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     // ========================= View functions ========================= //
 
     /// @inheritdoc IEvmFactRegistryModule
+    function verifyAccountApechain(
+        uint256 chainId,
+        address account,
+        BlockHeaderProof calldata headerProof,
+        bytes calldata accountTrieProof
+    ) public view returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot) {
+        // Ensure provided header is a valid one by making sure it is present in saved MMRs
+        _verifyAccumulatedHeaderProof(chainId, headerProof);
+
+        // Verify the account state proof
+        bytes32 stateRoot = _getStateRoot(headerProof.provenBlockHeader);
+
+        (bool doesAccountExist, bytes memory accountRLP) = SecureMerkleTrie.get(abi.encodePacked(account), accountTrieProof, stateRoot);
+        // Decode the account fields
+        (nonce, flags, fixed_, shares, debt, delegate, codeHash, storageRoot) = _decodeAccountFieldsApechain(doesAccountExist, accountRLP);
+    }
+
     function verifyAccount(
         uint256 chainId,
         address account,
@@ -173,6 +176,84 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
 
     // ========================= Internal functions ========================= //
 
+    function _isApeChain(uint256 chainId) internal pure returns (bool) {
+        return chainId == 33111 || chainId == 33139;
+    }
+
+    function _proveAccountEvm(uint256 chainId, address account, uint8 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) internal {
+        EvmFactRegistryModuleStorage storage ms = moduleStorage();
+        Account storage accountData = ms.accountField[chainId][account][headerProof.blockNumber];
+
+        // Verify the proof and decode the account fields
+        (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) = verifyAccount(chainId, account, headerProof, accountTrieProof);
+
+        // Save the desired account properties to the storage
+        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.NONCE))) {
+            accountData.savedFields |= uint8(1 << uint8(AccountField.NONCE));
+            accountData.fields[AccountField.NONCE] = bytes32(nonce);
+        }
+
+        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.BALANCE))) {
+            accountData.savedFields |= uint8(1 << uint8(AccountField.BALANCE));
+            accountData.fields[AccountField.BALANCE] = bytes32(accountBalance);
+        }
+
+        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.CODE_HASH))) {
+            accountData.savedFields |= uint8(1 << uint8(AccountField.CODE_HASH));
+            accountData.fields[AccountField.CODE_HASH] = codeHash;
+        }
+
+        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.STORAGE_ROOT))) {
+            accountData.savedFields |= uint8(1 << uint8(AccountField.STORAGE_ROOT));
+            accountData.fields[AccountField.STORAGE_ROOT] = storageRoot;
+        }
+
+        emit ProvenAccount(chainId, account, headerProof.blockNumber, accountFieldsToSave, nonce, accountBalance, codeHash, storageRoot, 0, 0, 0, 0, 0);
+    }
+
+    function _proveAccountApechain(uint256 chainId, address account, uint8 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) internal {
+        EvmFactRegistryModuleStorage storage ms = moduleStorage();
+        Account storage accountData = ms.accountField[chainId][account][headerProof.blockNumber];
+
+        // Verify the proof and decode the account fields
+        (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot) = verifyAccountApechain(
+            chainId,
+            account,
+            headerProof,
+            accountTrieProof
+        );
+
+        // Save the desired account properties to the storage
+        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.NONCE))) {
+            accountData.savedFields |= uint8(1 << uint8(AccountField.NONCE));
+            accountData.fields[AccountField.NONCE] = bytes32(nonce);
+        }
+
+        require(readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.BALANCE)) == false, "PROVING_BALANCE_NOT_SUPPORTED_FOR_APECHAIN");
+
+        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.CODE_HASH))) {
+            accountData.savedFields |= uint8(1 << uint8(AccountField.CODE_HASH));
+            accountData.fields[AccountField.CODE_HASH] = codeHash;
+        }
+
+        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.STORAGE_ROOT))) {
+            accountData.savedFields |= uint8(1 << uint8(AccountField.STORAGE_ROOT));
+            accountData.fields[AccountField.STORAGE_ROOT] = storageRoot;
+        }
+
+        // Bit 4 is for all ApeChain fields so either all ApeChain fields are saved or none
+        if (readBitAtIndexFromRight(accountFieldsToSave, 4)) {
+            accountData.savedFields |= 1 << 4;
+            accountData.fields[AccountField.APE_FLAGS] = bytes32(flags);
+            accountData.fields[AccountField.APE_FIXED] = bytes32(fixed_);
+            accountData.fields[AccountField.APE_SHARES] = bytes32(shares);
+            accountData.fields[AccountField.APE_DEBT] = bytes32(debt);
+            accountData.fields[AccountField.APE_DELEGATE] = bytes32(delegate);
+        }
+
+        emit ProvenAccount(chainId, account, headerProof.blockNumber, accountFieldsToSave, nonce, 0, codeHash, storageRoot, flags, fixed_, shares, debt, delegate);
+    }
+
     function _verifyAccumulatedHeaderProof(uint256 chainId, BlockHeaderProof memory proof) internal view {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         bytes32 mmrRoot = s.mmrs[chainId][proof.treeId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[proof.mmrTreeSize];
@@ -197,6 +278,26 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         balance = accountFields[ACCOUNT_BALANCE_INDEX].readUint256();
         codeHash = accountFields[ACCOUNT_CODE_HASH_INDEX].readBytes32();
         storageRoot = accountFields[ACCOUNT_STORAGE_ROOT_INDEX].readBytes32();
+    }
+
+    function _decodeAccountFieldsApechain(
+        bool doesAccountExist,
+        bytes memory accountRLP
+    ) internal pure returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 storageRoot, bytes32 codeHash) {
+        if (!doesAccountExist) {
+            return (0, 0, 0, 0, 0, 0, EMPTY_TRIE_ROOT_HASH, EMPTY_CODE_HASH);
+        }
+
+        RLPReader.RLPItem[] memory accountFields = accountRLP.toRLPItem().readList();
+
+        nonce = accountFields[APECHAIN_ACCOUNT_NONCE_INDEX].readUint256();
+        flags = accountFields[APECHAIN_ACCOUNT_FLAGS_INDEX].readUint256();
+        fixed_ = accountFields[APECHAIN_ACCOUNT_FIXED_INDEX].readUint256();
+        shares = accountFields[APECHAIN_ACCOUNT_SHARES_INDEX].readUint256();
+        debt = accountFields[APECHAIN_ACCOUNT_DEBT_INDEX].readUint256();
+        delegate = accountFields[APECHAIN_ACCOUNT_DELEGATE_INDEX].readUint256();
+        codeHash = accountFields[APECHAIN_ACCOUNT_CODE_HASH_INDEX].readBytes32();
+        storageRoot = accountFields[APECHAIN_ACCOUNT_STORAGE_ROOT_INDEX].readBytes32();
     }
 
     function _getStateRoot(bytes memory headerRlp) internal pure returns (bytes32) {

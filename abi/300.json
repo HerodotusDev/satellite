@@ -834,6 +834,36 @@
         "internalType": "bytes32",
         "name": "storageHash",
         "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "flags",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fixed_",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "shares",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "debt",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "delegate",
+        "type": "uint256"
       }
     ],
     "name": "ProvenAccount",
@@ -1268,6 +1298,112 @@
       {
         "internalType": "uint256",
         "name": "accountBalance",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "codeHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "storageRoot",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "treeId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint128",
+            "name": "mmrTreeSize",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockProofLeafIndex",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrPeaks",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrElementInclusionProof",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes",
+            "name": "provenBlockHeader",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct IEvmFactRegistryModule.BlockHeaderProof",
+        "name": "headerProof",
+        "type": "tuple"
+      },
+      {
+        "internalType": "bytes",
+        "name": "accountTrieProof",
+        "type": "bytes"
+      }
+    ],
+    "name": "verifyAccountApechain",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "flags",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fixed_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "shares",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "debt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "delegate",
         "type": "uint256"
       },
       {

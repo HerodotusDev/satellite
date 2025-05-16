@@ -42,7 +42,7 @@
     "@types/mocha": ">=9.1.0",
     "@types/node": ">=18.0.0",
     "bun-types": "latest",
-    "chai": "^4.2.0",
+    "chai": "^5.2.0",
     "ethers": "^6.4.0",
     "hardhat-gas-reporter": "^1.0.8",
     "only-allow": "^1.2.1",

@@ -1,0 +1,89 @@
+import { ethers, ignition } from "hardhat";
+import SatelliteModule from "../ignition/modules/31337";
+
+export const fields = {
+  NONCE: 0,
+  BALANCE: 1,
+  STORAGE_ROOT: 2,
+  CODE_HASH: 3,
+  APE_FLAGS: 4,
+  APE_FIXED: 5,
+  APE_SHARES: 6,
+  APE_DEBT: 7,
+  APE_DELEGATE: 8,
+};
+
+export const fieldsToSave = {
+  NONCE: 1,
+  BALANCE: 2,
+  STORAGE_ROOT: 4,
+  CODE_HASH: 8,
+  APE_FLAGS: 16,
+};
+
+export function toU256(x: bigint | number, ...y: bigint[]) {
+  return (
+    "0x" +
+    x.toString(16).padStart(64, "0") +
+    y.map((y) => y.toString(16).padStart(64, "0")).join("")
+  );
+}
+
+export function getMappingSlot(baseSlot: bigint, keys: bigint[]) {
+  let slot = baseSlot;
+  for (const key of keys) {
+    slot = BigInt(ethers.keccak256(toU256(key, slot)));
+  }
+  return slot;
+}
+
+export async function setMmrData(
+  satelliteAddress: string,
+  chainId: bigint,
+  mmrId: bigint,
+  hashingFunction: bigint,
+  isOffchainGrown: boolean,
+  latestMmrSize: bigint,
+  roots: bigint | { root: bigint; size: bigint }[],
+) {
+  const baseSlot = BigInt(
+    "0x3566ec3f371302e261b8606f979325c5d4baa8f06afec0221cefed0d7fd9cc76",
+  );
+  const mmrMappingSlot = baseSlot + BigInt(4);
+  const mmrInfoSlot = getMappingSlot(mmrMappingSlot, [
+    chainId,
+    mmrId,
+    hashingFunction,
+  ]);
+
+  await ethers.provider.send("hardhat_setStorageAt", [
+    satelliteAddress,
+    toU256(mmrInfoSlot),
+    toU256(isOffchainGrown ? 1 : 0),
+  ]);
+
+  await ethers.provider.send("hardhat_setStorageAt", [
+    satelliteAddress,
+    toU256(mmrInfoSlot + BigInt(1)),
+    toU256(latestMmrSize),
+  ]);
+
+  const mmrRootsSlot = mmrInfoSlot + BigInt(2);
+  const rootsAndSizes =
+    typeof roots == "bigint" ? [{ size: latestMmrSize, root: roots }] : roots;
+
+  for (const r of rootsAndSizes) {
+    await ethers.provider.send("hardhat_setStorageAt", [
+      satelliteAddress,
+      toU256(getMappingSlot(mmrRootsSlot, [r.size])),
+      toU256(r.root),
+    ]);
+  }
+}
+
+export async function deploy() {
+  const { satellite } = await ignition.deploy(SatelliteModule);
+  const satelliteAddress = await satellite.getAddress();
+
+  return { satellite, satelliteAddress };
+}

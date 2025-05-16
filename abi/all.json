@@ -1443,6 +1443,302 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "accumulatedChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "mmrId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "processFromReceivedBlockHash",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes",
+        "name": "ctx",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes[]",
+        "name": "headersSerialized",
+        "type": "bytes[]"
+      }
+    ],
+    "name": "onchainEvmAppendBlocksBatch",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      }
+    ],
+    "name": "nativeFetchParentHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "newMmrId",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "root",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "hashingFunction",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct RootForHashingFunction[]",
+        "name": "rootsForHashingFunctions",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "mmrSize",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "accumulatedChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "originChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "originalMmrId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isOffchainGrown",
+        "type": "bool"
+      }
+    ],
+    "name": "receiveMmr",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "hashingFunction",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "parentHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "receiveParentHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes4",
+        "name": "selector",
+        "type": "bytes4"
+      }
+    ],
+    "name": "AddFunctionAlreadyExists",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "AddModuleAddressZero",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "details",
+        "type": "string"
+      }
+    ],
+    "name": "AddressHasNoCode",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CalldataEmptyButInitNotEmpty",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum ILibSatellite.ModuleMaintenanceAction",
+        "name": "action",
+        "type": "uint8"
+      }
+    ],
+    "name": "IncorrectModuleMaintenanceAction",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InitAddressZeroButCalldataNotEmpty",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "errors",
+        "type": "string"
+      }
+    ],
+    "name": "InitFunctionReverted",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NoSelectorsInModuleToMaintenance",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RemoveFunctionDoesNotExist",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RemoveImmutableFunction",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes4",
+        "name": "selector",
+        "type": "bytes4"
+      }
+    ],
+    "name": "ReplaceFunctionWithSameFunction",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "moduleAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "enum ILibSatellite.ModuleMaintenanceAction",
+            "name": "action",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes4[]",
+            "name": "functionSelectors",
+            "type": "bytes4[]"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct ILibSatellite.ModuleMaintenance[]",
+        "name": "_satelliteMaintenance",
+        "type": "tuple[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_init",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "_calldata",
+        "type": "bytes"
+      }
+    ],
+    "name": "SatelliteMaintenance",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "moduleAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "enum ILibSatellite.ModuleMaintenanceAction",
+            "name": "action",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes4[]",
+            "name": "functionSelectors",
+            "type": "bytes4[]"
+          }
+        ],
+        "internalType": "struct ILibSatellite.ModuleMaintenance[]",
+        "name": "_satelliteMaintenance",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "address",
+        "name": "_init",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_calldata",
+        "type": "bytes"
+      }
+    ],
+    "name": "satelliteMaintenance",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "DoubleRegistration",
     "type": "error"
@@ -1752,39 +2048,6 @@
       }
     ],
     "name": "setDataProcessorProgramHash",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "accumulatedChainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "mmrId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "processFromReceivedBlockHash",
-        "type": "bool"
-      },
-      {
-        "internalType": "bytes",
-        "name": "ctx",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes[]",
-        "name": "headersSerialized",
-        "type": "bytes[]"
-      }
-    ],
-    "name": "onchainEvmAppendBlocksBatch",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2119,19 +2382,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "blockNumber",
-        "type": "uint256"
-      }
-    ],
-    "name": "nativeFetchParentHash",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "contract IStarknet",
         "name": "starknetContract",
         "type": "address"
@@ -2226,90 +2476,6 @@
       }
     ],
     "name": "sendParentHash",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "satelliteAddress",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "inboxAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_data",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_xDomainMsgGasData",
-        "type": "bytes"
-      }
-    ],
-    "name": "sendMessageL1ToArbitrum",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "satelliteAddress",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "inboxAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_data",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_xDomainMsgGasData",
-        "type": "bytes"
-      }
-    ],
-    "name": "sendMessageL1ToOptimism",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "satelliteAddress",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "inboxAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_data",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_xDomainMsgGasData",
-        "type": "bytes"
-      }
-    ],
-    "name": "sendMessageL1ToZkSync",
     "outputs": [],
     "stateMutability": "payable",
     "type": "function"
@@ -2508,168 +2674,194 @@
   {
     "inputs": [
       {
-        "internalType": "bytes4",
-        "name": "selector",
-        "type": "bytes4"
-      }
-    ],
-    "name": "AddFunctionAlreadyExists",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "AddModuleAddressZero",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "details",
-        "type": "string"
-      }
-    ],
-    "name": "AddressHasNoCode",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "CalldataEmptyButInitNotEmpty",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "enum ILibSatellite.ModuleMaintenanceAction",
-        "name": "action",
-        "type": "uint8"
-      }
-    ],
-    "name": "IncorrectModuleMaintenanceAction",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "InitAddressZeroButCalldataNotEmpty",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "errors",
-        "type": "string"
-      }
-    ],
-    "name": "InitFunctionReverted",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "NoSelectorsInModuleToMaintenance",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "RemoveFunctionDoesNotExist",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "RemoveImmutableFunction",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes4",
-        "name": "selector",
-        "type": "bytes4"
-      }
-    ],
-    "name": "ReplaceFunctionWithSameFunction",
-    "type": "error"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "moduleAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "enum ILibSatellite.ModuleMaintenanceAction",
-            "name": "action",
-            "type": "uint8"
-          },
-          {
-            "internalType": "bytes4[]",
-            "name": "functionSelectors",
-            "type": "bytes4[]"
-          }
-        ],
-        "indexed": false,
-        "internalType": "struct ILibSatellite.ModuleMaintenance[]",
-        "name": "_satelliteMaintenance",
-        "type": "tuple[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_init",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "_calldata",
-        "type": "bytes"
-      }
-    ],
-    "name": "SatelliteMaintenance",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "moduleAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "enum ILibSatellite.ModuleMaintenanceAction",
-            "name": "action",
-            "type": "uint8"
-          },
-          {
-            "internalType": "bytes4[]",
-            "name": "functionSelectors",
-            "type": "bytes4[]"
-          }
-        ],
-        "internalType": "struct ILibSatellite.ModuleMaintenance[]",
-        "name": "_satelliteMaintenance",
-        "type": "tuple[]"
-      },
-      {
-        "internalType": "address",
-        "name": "_init",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "rootHash",
+        "type": "bytes32"
       },
       {
         "internalType": "bytes",
-        "name": "_calldata",
+        "name": "blockHeader",
         "type": "bytes"
       }
     ],
-    "name": "satelliteMaintenance",
+    "name": "arbitrumFetchParentHash",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "outboxAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      }
+    ],
+    "name": "initArbitrumParentHashFetcherModule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "satelliteAddress",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "inboxAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_data",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_xDomainMsgGasData",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendMessageArbitrumToApeChain",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      }
+    ],
+    "name": "setApeChainTokenAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isValid",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "fact",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setValid",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "satelliteAddress",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "inboxAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_data",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_xDomainMsgGasData",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendMessageL1ToArbitrum",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "satelliteAddress",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "inboxAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_data",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_xDomainMsgGasData",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendMessageL1ToOptimism",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "satelliteAddress",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "inboxAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_data",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_xDomainMsgGasData",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendMessageL1ToZkSync",
+    "outputs": [],
+    "stateMutability": "payable",
     "type": "function"
   }
 ]

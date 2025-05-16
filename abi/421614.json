@@ -764,7 +764,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "isMmrOnlySharpGrown",
+    "name": "isMmrOnlyOffchainGrown",
     "outputs": [
       {
         "internalType": "bool",

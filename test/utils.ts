@@ -91,3 +91,9 @@ export async function deploy() {
 export const KECCAK_HASHER = BigInt(
   "0xdf35a135a69c769066bbb4d17b2fa3ec922c028d4e4bf9d0402e6f7c12b31813",
 );
+
+export const APECHAIN_SHARE_PRICE_ADDRESS =
+  "0xA4b05FffffFffFFFFfFFfffFfffFFfffFfFfFFFf";
+
+export const APECHAIN_SHARE_PRICE_SLOT =
+  "0x15fed0451499512d95f3ec5a41c878b9de55f21878b5b4e190d4667ec709b432";

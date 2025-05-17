@@ -26,6 +26,9 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     uint8 private constant APECHAIN_ACCOUNT_CODE_HASH_INDEX = 6;
     uint8 private constant APECHAIN_ACCOUNT_STORAGE_ROOT_INDEX = 7;
 
+    address private constant APECHAIN_SHARE_PRICE_ADDRESS = 0xA4b05FffffFffFFFFfFFfffFfffFFfffFfFfFFFf;
+    bytes32 private constant APECHAIN_SHARE_PRICE_SLOT = bytes32(0x15fed0451499512d95f3ec5a41c878b9de55f21878b5b4e190d4667ec709b432);
+
     bytes32 private constant EMPTY_TRIE_ROOT_HASH = 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421;
     bytes32 private constant EMPTY_CODE_HASH = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
 
@@ -175,6 +178,12 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         return blockNumber;
     }
 
+    function getApechainSharePrice(uint256 chainId, uint256 blockNumber) public view returns (uint256) {
+        require(_isApeChain(chainId), "ERR_NOT_APECHAIN");
+        bytes32 slotValue = IEvmFactRegistryModule(address(this)).storageSlot(chainId, APECHAIN_SHARE_PRICE_ADDRESS, blockNumber, APECHAIN_SHARE_PRICE_SLOT);
+        return uint256(slotValue);
+    }
+
     // ========================= Internal functions ========================= //
 
     function _isApeChain(uint256 chainId) internal pure returns (bool) {
@@ -230,7 +239,11 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
             accountData.fields[AccountField.NONCE] = bytes32(nonce);
         }
 
-        require(readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.BALANCE)) == false, "PROVING_BALANCE_NOT_SUPPORTED_FOR_APECHAIN");
+        if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.BALANCE))) {
+            accountData.savedFields |= uint8(1 << uint8(AccountField.BALANCE));
+            uint256 sharePrice = IEvmFactRegistryModule(address(this)).getApechainSharePrice(chainId, headerProof.blockNumber);
+            accountData.fields[AccountField.BALANCE] = bytes32(shares * sharePrice + fixed_ - debt);
+        }
 
         if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.CODE_HASH))) {
             accountData.savedFields |= uint8(1 << uint8(AccountField.CODE_HASH));

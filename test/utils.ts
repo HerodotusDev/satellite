@@ -87,3 +87,7 @@ export async function deploy() {
 
   return { satellite, satelliteAddress };
 }
+
+export const KECCAK_HASHER = BigInt(
+  "0xdf35a135a69c769066bbb4d17b2fa3ec922c028d4e4bf9d0402e6f7c12b31813",
+);

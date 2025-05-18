@@ -48,13 +48,28 @@ interface IEvmFactRegistryModule {
 
     // ===================== Functions for End Users ===================== //
 
+    /// @notice Fetches nonce, balance, storage root or code hash of a given account, at a given block number and chainId
+    /// @notice Returns (true, value) if the field is saved, (false, 0) otherwise
+    function accountFieldSafe(uint256 chainId, address account, uint256 blockNumber, AccountField field) external view returns (bool, bytes32);
+
     /// @notice Returns nonce, balance, storage root or code hash of a given account, at a given block number and chainId
+    /// @notice reverts with "STORAGE_PROOF_FIELD_NOT_SAVED" if the field is not saved
     function accountField(uint256 chainId, address account, uint256 blockNumber, AccountField field) external view returns (bytes32);
 
+    /// @notice Fetches value of a given storage slot of a given account, at a given block number and chainId
+    /// @notice Returns (true, value) if the slot is saved, (false, 0) otherwise
+    function storageSlotSafe(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bool, bytes32);
+
     /// @notice Returns value of a given storage slot of a given account, at a given block number and chainId
+    /// @notice reverts with "STORAGE_PROOF_SLOT_NOT_SAVED" if the slot is not saved
     function storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bytes32);
 
+    /// @notice Fetches block number of the closest block with timestamp less than or equal to the given timestamp
+    /// @notice Returns (true, block number) if the timestamp is saved, (false, 0) otherwise
+    function timestampSafe(uint256 chainId, uint256 timestamp) external view returns (bool, uint256);
+
     /// @notice Returns block number of the closest block with timestamp less than or equal to the given timestamp
+    /// @notice reverts with "STORAGE_PROOF_TIMESTAMP_NOT_SAVED" if the timestamp is not saved
     function timestamp(uint256 chainId, uint256 timestamp) external view returns (uint256);
 
     // ========================= Core Functions ========================= //

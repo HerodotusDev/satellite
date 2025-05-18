@@ -71,11 +71,11 @@ describe("EVM Fact Registry Apechain", () => {
 
     await expect(
       satellite.accountField(chainId, account, blockNumber, fields.NONCE),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     await expect(
       satellite.accountField(chainId, account, blockNumber, fields.BALANCE),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     await expect(
       satellite.accountField(
@@ -84,27 +84,27 @@ describe("EVM Fact Registry Apechain", () => {
         blockNumber,
         fields.STORAGE_ROOT,
       ),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     await expect(
       satellite.accountField(chainId, account, blockNumber, fields.CODE_HASH),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     await expect(
       satellite.accountField(chainId, account, blockNumber, fields.APE_FLAGS),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     await expect(
       satellite.accountField(chainId, account, blockNumber, fields.APE_FIXED),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     await expect(
       satellite.accountField(chainId, account, blockNumber, fields.APE_SHARES),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     await expect(
       satellite.accountField(chainId, account, blockNumber, fields.APE_DEBT),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     await expect(
       satellite.accountField(
@@ -113,7 +113,7 @@ describe("EVM Fact Registry Apechain", () => {
         blockNumber,
         fields.APE_DELEGATE,
       ),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     await satellite.proveAccount(
       chainId,
@@ -129,7 +129,7 @@ describe("EVM Fact Registry Apechain", () => {
 
     await expect(
       satellite.accountField(chainId, account, blockNumber, fields.BALANCE),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     expect(
       await satellite.accountField(
@@ -196,7 +196,7 @@ describe("EVM Fact Registry Apechain", () => {
 
     await expect(
       satellite.getApechainSharePrice(chainId, blockNumber),
-    ).to.be.revertedWith("ERR_SLOT_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_SLOT_NOT_SAVED");
 
     const apechainSharePriceAccountTrieProof =
       "0xf90b6bb90214f90211a0e7615cc1a65525dcbe26e59fac6822fd3bd555af663c4c580bd8cef784c31536a0715132fc76d255fc7a8aebdf240b8568e33bed61fcbd13db95e057b25ee4199fa067eabbde6b28d98300186b627409c9c1d0c4f83d29aa9fca00657df26fb99b57a070c2526f2f783305f00a9559d780220e963e83b238d0b4c06604c36c6b6c139ea09849edeee1a769316786b848c5bfa444be3c568cff1d5985fc8b29f75258df6fa030fd041f6909484573737047e63792567e4daf95b93d98d60c70d3baed2990a4a09b620ab489dd1f05f4582f2dcfb387bcb632f1b5e8046486e1ee2c9ccc0a4c38a09ead1c3d6ab8d10a6ea3a20f40e7cd121cc57db7ff09faa738dddd3e1acd30d0a0a8f04abb4045983d189a1bb6b5c9721e5a19edbba9e9f4f9e967d13bf2f1f238a07ebdee05c7a405f3420066674c3a3bb10e6a123fed1b620214e1ae166b286804a02977cc2cadc3788dc5c7b29aca508221307a1bf670d2a8613fc4a6a1cbe0a5a4a0c8016a382a4d7b60aa1e183191385ff158939782826e490616cae49ec19bfd2aa047f06817e34cf3ac2d5fa8c08e9f406cc1cef22f18d2a838ab2413d6c472f8cea0567eb8dc4e3fd62e2dd4fe7f362610d64396522a5938150995aafa41db552bd7a067674c5952ee92b673b653670cb7673a2d9058b8c085b104b302e70f2e3b8ba6a0cffc85324a41da22ae10bf2f959a21bdf35ce0a86d9b353a3213bc0feee08abd80b90214f90211a0c6a45e7643678caeab67b2ba2b9c5ee63e68d246e79f13daa2bf5accf6f7d5eaa08942f14eeaa72cea4b1eac826656ba78277c740cc472e209e8ca42ba6e833221a0afbdd15b83feaffd4202571c2f92e2711861e4fdc63f0ae354bbcc40de251deea0ee76733b83cd882b7613c37669c8dd9226a6fabb7be1c03b1919b93ee15f8c05a04dbc2cede94421cb41db7cc988c5759037037e813deb31dea233349c16e73a3aa0a95d21dcd3140c9a1fbc897a3f38945d5b706e156e4019acddaf8bf708861c6ca04ffc8554acc7c0fcb97705475d13c84413f693dfe93123c65057d4bbb0c65309a07b57185e563cbb38b78f80264cb5af4d80f8552e2a041f882080e21da7de983ba04c9b1e3cf12d6431471e5e83c41184c41fa83878aef158fb96757db39b0a4584a08aaf3a7a1b88ce57e6e8bad22ed53286281c9a02e2311e38cdd9ba143c63e251a0aa88e180440ad40044f07bb62ab5ce7e9ba28ef1396eb14394c315cfe7a45af0a017d4c4a3d02d2ec585cc2a5f719cbf53caf358dbfa41c3d96dd60da6dd19096aa04fb77d6d3519a3e4d18a4d5c7b93e04ad4e37781625c6e21d7430dd1fb36562fa094dfb81a60d56a6212e3e4606abe8c4476cbfaf1a6eb5159190d79c37c052434a0f60bd9aebe842082a47b60ef69c0d2931062d2e8e027e0abab6e1cbe3d914eaca0d5405a4969797de7bee1f939a25a208cfd0d10e1ec3b65f9df91470954e1c0da80b90214f90211a0477f8a999f5ed4367b58cd35cc748db36cce4e409d209518e67d36cef11632ffa034a750ee2dd5e3696f1c885f2d84258e55ee7bc3372769c922fd331c4521a90ca0264a694f3048de28220ec57e683f8c58f51ac396d0bda5326b8c297e02c4f090a03e0ce7c0f2ef8ae1f0aa8ba240a8eef5ba3214d45ced28bb9a575afe050059d2a098e9dbaec1546ba3c66ed8d115db838d433ae5044cffc27a2674ae475bbbf783a0011777739811535a0614bb54029aecdd4e88117794f14905e10d9f67d9dd7631a0966b55dd70190fca36c2a57ebd4d14e72bf3dea34955cd2ab607b4ba21515f90a0918641e853e6ca4c67a3b4343ef8188cc117a128488bca7ceef3e19a922e8feda00c7ad82c54c554486ee656ef0852fa440eb5d51a51c6564d1138e4eae6cd47aba0e4865aad08b197acada368076566ab26888193c30ffa2286af6cd7971b26ca8ca0fa499b1b93f72dda4f55fef241ae0903117b3f78add2755db78c1862df7c9821a074cc5d0b88fafde98cd12861d5ccacf81a2f308ff0ad4a8e56635784fadab31aa0a4128b1b060b89be15391c21d6ea54ef1db0d44f479b80f1a52966806f306fa6a0a15c40e1b09ac8b1edeec582803d1b459c53cd3a7307a0ad704135cf0d5be29fa0791ac40922459e4c7254d3a3fcdb8750b95c52dadf8cac41ca049dac1d76f43fa061549225d7f527c1011a320fc49bbf8e7cb3fd59f6821a703a92ae99d8fe911d80b90214f90211a03c04d65d7bbc314e8826f8ee85c092d9cba69d28009026474d7e8bbab523ec1ea08fde3b47534d861f97c701834a161f2f2b3242d8f2fee4d37045bd76594276b7a0dfcb522a5fffc7c1423e737b09df3696b3d39a546c442a932f0ce79629eaaba3a0d4c01cb806525b30a13f425550dfddefdcf47b9d1c4e0312bd149e05f86aa51aa02bdaea26637046c4eab9cc911427785154765cdafc0f00c6f1defcea57a35118a091b22d1063e9afcf048d47d006b2a06e96d7a3e5d516110a5db62a6fa3ab5a11a00845128608baf13cb7ea7895864abccbc4507f9f62a9c23732f5f26dd275c490a06732f6def5bfd950de6152b15a3beedc8c6f8ff5284d3454c604b56e83e7057aa00d8686518436272f33a41eb2d080eab49d70b8f7f6aa6e846ed2e3e0418171efa004f8a7b65cef7d3e93287a98c821d748697647f78559228dda6c439dbbc0ce76a0626e3616069f2204984b2f0ec555efd50136986bd0a1646729baf0501b6b36bca00674f2009540c3eb5cebfe2305daeec3bfc0ee8f4b3d38c043167ac0d1bb4cc2a015332ba3a2b62763daf1240f7fc8aacaec4093ead0b25ed6e2a93f89fc7890c3a0cd5cdef31151355c139dbc5cbf22cf010b00d5e2dca3ad0f808d4aa963432681a0223a62ec93fb0dccfdd560aae6802791dd8e5ffa4c6073e8099be03dfcd479cca070e8d4d01b8de4991da41f17f309d37421939a6e42a73464a631a335fbf8406b80b90214f90211a07f44fe4608ed9923ffeac170269c74faf23e824617ce8285c8b95de01f12bb15a015367127ae31f6ca4633a71cfe8135979e6c3cff0ba49abb44d46cb894f72028a064d98ecb4b285cf2c528d395a7a735ff85d83583eaa0f9e0dcfd3172ef769a15a0de42e90609f66ca1ca8101cbab77a1a773519de5dfd408533df239cf1864dcc9a0f4b85ec281f3c4f09879579cc0bea45eeb6b599584b130994e109a43c664b463a055abd4a9efb67dcd863a9597e4c7ccbdebc1d60542b12f920603775e63acdceba0051e9e0655f35890747c09af7c4b9fdcb7c1b6a08f5da375715fb10b9b3e6d2ca0fdd740415e090e4294c6e9f0d34784ba9dd99a66d56e2764f4bdee8769d66fdca0e25e7d9adbab2fa55cf97426759a44178e87ce0c42120e6cb0adb00dc3e3a7c2a0b413b05fd5576bf2bfab305ff61f286929593226bfb255f259e2220b61c154f6a01bf41016b8c1a8fef48ea631332da70d596bd73d2f2fd69f007d39eaa2dc5f54a0961264770fcb1e1bbcfb30cdecd04d37e503430ab21928b7cde9f3b18036c081a0b1fcae7cc5cd15e9557ea67888c98f29c507e90589cd5bff982633582b7ed9c8a00b571955a1ceb3e23d9a4ca307d48eb2b8a525c1bd504cabeb54f07bb209402aa0a290132dd983c4e046e72fa74268f4c35f90f15cc3b82099470ca3b9a3153651a03b74c9957aa75b117aada236db299110c03ef8c0bc2ca2fe953e6ea602e83e7080b873f871808080808080a0b0d91d4bcd5121bd936dfaf310d6c7dc0b4c9922b13642accd9d913304dd62da808080a00fe4c37bd8dd301accf06702dbfadb09860ea0e86c1a33665e12646abf722313808080a01ee632dca6859758322e01908a13d7f86ccbcc27a706ee3115d68a2afa81f0a38080b881f87f9e20c89c201c23aa60e231e3993b3966b33ff1f55d198ec25980957ab32065b85ef85c0180808080940000000000000000000000000000000000000000a0febbcdc0e5f7973de7ffbfd6c9791f2592ddce81ee65b46301100f4551647aaaa0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470";

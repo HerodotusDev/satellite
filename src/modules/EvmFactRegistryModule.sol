@@ -26,8 +26,8 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     uint8 private constant APECHAIN_ACCOUNT_CODE_HASH_INDEX = 6;
     uint8 private constant APECHAIN_ACCOUNT_STORAGE_ROOT_INDEX = 7;
 
-    address private constant APECHAIN_SHARE_PRICE_ADDRESS = 0xA4b05FffffFffFFFFfFFfffFfffFFfffFfFfFFFf;
-    bytes32 private constant APECHAIN_SHARE_PRICE_SLOT = bytes32(0x15fed0451499512d95f3ec5a41c878b9de55f21878b5b4e190d4667ec709b432);
+    address public constant APECHAIN_SHARE_PRICE_ADDRESS = 0xA4b05FffffFffFFFFfFFfffFfffFFfffFfFfFFFf;
+    bytes32 public constant APECHAIN_SHARE_PRICE_SLOT = bytes32(0x15fed0451499512d95f3ec5a41c878b9de55f21878b5b4e190d4667ec709b432);
 
     bytes32 private constant EMPTY_TRIE_ROOT_HASH = 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421;
     bytes32 private constant EMPTY_CODE_HASH = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
@@ -48,32 +48,53 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     // ===================== Functions for End Users ===================== //
 
     /// @inheritdoc IEvmFactRegistryModule
-    function accountField(uint256 chainId, address account, uint256 blockNumber, AccountField field) external view returns (bytes32) {
+    function accountFieldSafe(uint256 chainId, address account, uint256 blockNumber, AccountField field) external view returns (bool, bytes32) {
         EvmFactRegistryModuleStorage storage ms = moduleStorage();
 
         Account storage accountData = ms.accountField[chainId][account][blockNumber];
         uint8 savedFieldIndex = uint8(field) < 4 ? uint8(field) : 4;
-        require(readBitAtIndexFromRight(accountData.savedFields, savedFieldIndex), "ERR_FIELD_NOT_SAVED");
-        return accountData.fields[field];
+        if (!readBitAtIndexFromRight(accountData.savedFields, savedFieldIndex)) return (false, bytes32(0));
+        return (true, accountData.fields[field]);
+    }
+
+    /// @inheritdoc IEvmFactRegistryModule
+    function accountField(uint256 chainId, address account, uint256 blockNumber, AccountField field) external view returns (bytes32) {
+        (bool exists, bytes32 value) = IEvmFactRegistryModule(address(this)).accountFieldSafe(chainId, account, blockNumber, field);
+        require(exists, "STORAGE_PROOF_FIELD_NOT_SAVED");
+        return value;
+    }
+
+    /// @inheritdoc IEvmFactRegistryModule
+    function storageSlotSafe(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bool, bytes32) {
+        EvmFactRegistryModuleStorage storage ms = moduleStorage();
+
+        StorageSlot storage valueRaw = ms.accountStorageSlotValues[chainId][account][blockNumber][slot];
+        if (!valueRaw.exists) return (false, bytes32(0));
+        return (true, valueRaw.value);
     }
 
     /// @inheritdoc IEvmFactRegistryModule
     function storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bytes32) {
-        EvmFactRegistryModuleStorage storage ms = moduleStorage();
-
-        StorageSlot storage valueRaw = ms.accountStorageSlotValues[chainId][account][blockNumber][slot];
-        require(valueRaw.exists, "ERR_SLOT_NOT_SAVED");
-        return bytes32(valueRaw.value);
+        (bool exists, bytes32 value) = IEvmFactRegistryModule(address(this)).storageSlotSafe(chainId, account, blockNumber, slot);
+        require(exists, "STORAGE_PROOF_SLOT_NOT_SAVED");
+        return value;
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function timestamp(uint256 chainId, uint256 timestamp_) external view returns (uint256) {
+    function timestampSafe(uint256 chainId, uint256 timestamp_) external view returns (bool, uint256) {
         EvmFactRegistryModuleStorage storage ms = moduleStorage();
 
         // block number stored is blockNumber + 1 and 0 means no data
         uint256 blockNumberStored = ms.timestampToBlockNumber[chainId][timestamp_];
-        require(blockNumberStored != 0, "ERR_NO_BLOCK_STORED_FOR_TIMESTAMP");
-        return blockNumberStored - 1;
+        if (blockNumberStored == 0) return (false, 0);
+        return (true, blockNumberStored - 1);
+    }
+
+    /// @inheritdoc IEvmFactRegistryModule
+    function timestamp(uint256 chainId, uint256 timestamp_) external view returns (uint256) {
+        (bool exists, uint256 value) = IEvmFactRegistryModule(address(this)).timestampSafe(chainId, timestamp_);
+        require(exists, "STORAGE_PROOF_TIMESTAMP_NOT_SAVED");
+        return value;
     }
 
     // ========================= Core Functions ========================= //
@@ -150,7 +171,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         EvmFactRegistryModuleStorage storage ms = moduleStorage();
 
         Account storage accountData = ms.accountField[chainId][account][blockNumber];
-        require(readBitAtIndexFromRight(accountData.savedFields, uint8(AccountField.STORAGE_ROOT)), "ERR_STORAGE_ROOT_NOT_SAVED");
+        require(readBitAtIndexFromRight(accountData.savedFields, uint8(AccountField.STORAGE_ROOT)), "STORAGE_PROOF_STORAGE_ROOT_NOT_SAVED");
 
         bytes32 storageRoot = accountData.fields[AccountField.STORAGE_ROOT];
 
@@ -167,19 +188,19 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         uint256 blockNumber = _decodeBlockNumber(headerProof.provenBlockHeader);
         uint256 blockNumberNext = _decodeBlockNumber(headerProofNext.provenBlockHeader);
 
-        require(blockNumber != type(uint256).max, "ERR_BLOCK_NUMBER_TOO_HIGH");
-        require(blockNumber + 1 == blockNumberNext, "ERR_INVALID_BLOCK_NUMBER_NEXT");
+        require(blockNumber != type(uint256).max, "STORAGE_PROOF_BLOCK_NUMBER_TOO_HIGH");
+        require(blockNumber + 1 == blockNumberNext, "STORAGE_PROOF_INVALID_BLOCK_NUMBER_NEXT");
 
         uint256 blockTimestamp = _decodeBlockTimestamp(headerProof.provenBlockHeader);
         uint256 blockTimestampNext = _decodeBlockTimestamp(headerProofNext.provenBlockHeader);
 
-        require(blockTimestamp <= timestamp_ && timestamp_ < blockTimestampNext, "ERR_TIMESTAMP_NOT_IN_RANGE");
+        require(blockTimestamp <= timestamp_ && timestamp_ < blockTimestampNext, "STORAGE_PROOF_TIMESTAMP_NOT_BETWEEN_BLOCKS");
 
         return blockNumber;
     }
 
     function getApechainSharePrice(uint256 chainId, uint256 blockNumber) public view returns (uint256) {
-        require(_isApeChain(chainId), "ERR_NOT_APECHAIN");
+        require(_isApeChain(chainId), "STORAGE_PROOF_NOT_APECHAIN");
         bytes32 slotValue = IEvmFactRegistryModule(address(this)).storageSlot(chainId, APECHAIN_SHARE_PRICE_ADDRESS, blockNumber, APECHAIN_SHARE_PRICE_SLOT);
         return uint256(slotValue);
     }
@@ -271,14 +292,14 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     function _verifyAccumulatedHeaderProof(uint256 chainId, BlockHeaderProof memory proof) internal view {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         bytes32 mmrRoot = s.mmrs[chainId][proof.treeId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[proof.mmrTreeSize];
-        require(mmrRoot != bytes32(0), "ERR_EMPTY_MMR_ROOT");
+        require(mmrRoot != bytes32(0), "STORAGE_PROOF_EMPTY_MMR_ROOT");
 
         bytes32 blockHeaderHash = keccak256(proof.provenBlockHeader);
 
         StatelessMmr.verifyProof(proof.blockProofLeafIndex, blockHeaderHash, proof.mmrElementInclusionProof, proof.mmrPeaks, proof.mmrTreeSize, mmrRoot);
 
         uint256 actualBlockNumber = _decodeBlockNumber(proof.provenBlockHeader);
-        require(actualBlockNumber == proof.blockNumber, "ERR_INVALID_BLOCK_NUMBER");
+        require(actualBlockNumber == proof.blockNumber, "STORAGE_PROOF_INVALID_BLOCK_NUMBER");
     }
 
     function _decodeAccountFields(bool doesAccountExist, bytes memory accountRLP) internal pure returns (uint256 nonce, uint256 balance, bytes32 storageRoot, bytes32 codeHash) {
@@ -327,7 +348,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     }
 
     function readBitAtIndexFromRight(uint8 bitmap, uint8 index) internal pure returns (bool value) {
-        require(index < 8, "ERR_OUR_OF_RANGE");
+        require(index < 8, "STORAGE_PROOF_INDEX_OUT_OF_RANGE");
         return (bitmap & (1 << index)) != 0;
     }
 }

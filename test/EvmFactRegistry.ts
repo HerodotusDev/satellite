@@ -61,11 +61,11 @@ describe("EVM Fact Registry Ethereum Sepolia", () => {
 
     await expect(
       satellite.accountField(chainId, account, blockNumber, fields.NONCE),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     await expect(
       satellite.accountField(chainId, account, blockNumber, fields.BALANCE),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     await expect(
       satellite.accountField(
@@ -74,11 +74,11 @@ describe("EVM Fact Registry Ethereum Sepolia", () => {
         blockNumber,
         fields.STORAGE_ROOT,
       ),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     await expect(
       satellite.accountField(chainId, account, blockNumber, fields.CODE_HASH),
-    ).to.be.revertedWith("ERR_FIELD_NOT_SAVED");
+    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
 
     await satellite.proveAccount(
       chainId,

@@ -101,8 +101,10 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
 
     function proveAccount(uint256 chainId, address account, uint8 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) external {
         if (_isApeChain(chainId)) {
+            require(accountFieldsToSave >> 5 == 0, "STORAGE_PROOF_INVALID_FIELDS_TO_SAVE");
             _proveAccountApechain(chainId, account, accountFieldsToSave, headerProof, accountTrieProof);
         } else {
+            require(accountFieldsToSave >> 4 == 0, "STORAGE_PROOF_INVALID_FIELDS_TO_SAVE");
             _proveAccountEvm(chainId, account, accountFieldsToSave, headerProof, accountTrieProof);
         }
     }
@@ -138,10 +140,10 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         BlockHeaderProof calldata headerProof,
         bytes calldata accountTrieProof
     ) public view returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot) {
-        // // Ensure provided header is a valid one by making sure it is present in saved MMRs
+        // Ensure provided header is a valid one by making sure it is present in saved MMRs
         _verifyAccumulatedHeaderProof(chainId, headerProof);
 
-        // // Verify the account state proof
+        // Verify the account state proof
         bytes32 stateRoot = _getStateRoot(headerProof.provenBlockHeader);
 
         (bool doesAccountExist, bytes memory accountRLP) = SecureMerkleTrie.get(abi.encodePacked(account), accountTrieProof, stateRoot);

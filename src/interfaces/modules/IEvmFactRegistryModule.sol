@@ -156,8 +156,15 @@ interface IEvmFactRegistryModule {
     /// @return blockNumber Block number of the closest block with timestamp that is less than or equal to the given timestamp
     function verifyTimestamp(uint256 chainId, uint256 timestamp, BlockHeaderProof calldata headerProof, BlockHeaderProof calldata headerProofNext) external view returns (uint256);
 
+    /// @notice Fetches the share price of the ApeChain at a given block number,
+    /// @notice returns (true, share price) if the share price is saved for the given block number,
+    /// @notice (false, 0) otherwise
+    /// @param chainId Chain ID of the ApeChain
+    /// @param blockNumber Block number of the ApeChain
+    function getApechainSharePriceSafe(uint256 chainId, uint256 blockNumber) external view returns (bool, uint256);
+
     /// @notice Returns the share price of the ApeChain at a given block number,
-    /// @notice reverts with "ERR_SLOT_NOT_SAVED" if the share price is not saved for the given block number
+    /// @notice reverts with "STORAGE_PROOF_SHARE_PRICE_NOT_SAVED" if the share price is not saved for the given block number
     /// @param chainId Chain ID of the ApeChain
     /// @param blockNumber Block number of the ApeChain
     function getApechainSharePrice(uint256 chainId, uint256 blockNumber) external view returns (uint256);

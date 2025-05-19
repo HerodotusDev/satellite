@@ -201,10 +201,16 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         return blockNumber;
     }
 
-    function getApechainSharePrice(uint256 chainId, uint256 blockNumber) public view returns (uint256) {
+    function getApechainSharePriceSafe(uint256 chainId, uint256 blockNumber) public view returns (bool, uint256) {
         require(_isApeChain(chainId), "STORAGE_PROOF_NOT_APECHAIN");
-        bytes32 slotValue = IEvmFactRegistryModule(address(this)).storageSlot(chainId, APECHAIN_SHARE_PRICE_ADDRESS, blockNumber, APECHAIN_SHARE_PRICE_SLOT);
-        return uint256(slotValue);
+        (bool exists, bytes32 slotValue) = IEvmFactRegistryModule(address(this)).storageSlotSafe(chainId, APECHAIN_SHARE_PRICE_ADDRESS, blockNumber, APECHAIN_SHARE_PRICE_SLOT);
+        return (exists, uint256(slotValue));
+    }
+
+    function getApechainSharePrice(uint256 chainId, uint256 blockNumber) public view returns (uint256) {
+        (bool exists, uint256 sharePrice) = IEvmFactRegistryModule(address(this)).getApechainSharePriceSafe(chainId, blockNumber);
+        require(exists, "STORAGE_PROOF_SHARE_PRICE_NOT_SAVED");
+        return sharePrice;
     }
 
     // ========================= Internal functions ========================= //

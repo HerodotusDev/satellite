@@ -140,6 +140,8 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         BlockHeaderProof calldata headerProof,
         bytes calldata accountTrieProof
     ) public view returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot) {
+        require(_isApeChain(chainId), "STORAGE_PROOF_NOT_APECHAIN");
+
         // Ensure provided header is a valid one by making sure it is present in saved MMRs
         _verifyAccumulatedHeaderProof(chainId, headerProof);
 
@@ -157,6 +159,8 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         BlockHeaderProof calldata headerProof,
         bytes calldata accountTrieProof
     ) public view returns (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) {
+        require(!_isApeChain(chainId), "STORAGE_PROOF_SHOULD_BE_NON_APECHAIN");
+
         // Ensure provided header is a valid one by making sure it is present in saved MMRs
         _verifyAccumulatedHeaderProof(chainId, headerProof);
 

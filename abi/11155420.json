@@ -349,6 +349,12 @@
         "internalType": "enum CreatedFrom",
         "name": "createdFrom",
         "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isOffchainGrown",
+        "type": "bool"
       }
     ],
     "name": "CreatedMmr",
@@ -544,7 +550,7 @@
       },
       {
         "internalType": "bool",
-        "name": "isSiblingSynced",
+        "name": "isOffchainGrown",
         "type": "bool"
       }
     ],
@@ -607,6 +613,11 @@
         "internalType": "bytes32[]",
         "name": "hashingFunctions",
         "type": "bytes32[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "isOffchainGrown",
+        "type": "bool"
       }
     ],
     "name": "createMmrFromDomestic",
@@ -753,7 +764,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "isMMRSiblingSynced",
+    "name": "isMmrOnlyOffchainGrown",
     "outputs": [
       {
         "internalType": "bool",
@@ -1523,7 +1534,7 @@
       },
       {
         "internalType": "bool",
-        "name": "isSiblingSynced",
+        "name": "isOffchainGrown",
         "type": "bool"
       }
     ],

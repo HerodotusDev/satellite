@@ -44,32 +44,31 @@ contract UniversalSenderModule is IUniversalSenderModule {
         uint256 originalMmrId,
         uint256 newMmrId,
         bytes32[] calldata hashingFunctions,
-        bool isSiblingSyncedForSending,
+        bool isOffchainGrownDestination,
         bytes calldata _xDomainMsgGasData
     ) external payable {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         require(hashingFunctions.length > 0, "hashingFunctions array cannot be empty");
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](hashingFunctions.length);
 
-        if (isSiblingSyncedForSending) {
-            require(hashingFunctions.length > 1, "Sibling synced MMRs must have at least 2 hashing functions");
-        }
-
         uint256 commonMmrSize = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].latestSize;
+        bool commonIsOffchainGrown = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].isOffchainGrown;
 
         for (uint256 i = 0; i < hashingFunctions.length; i++) {
             uint256 mmrSize = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].latestSize;
             bytes32 root = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize];
-            bool isSiblingSynced = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].isSiblingSynced;
+            bool isOffchainGrown = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].isOffchainGrown;
 
-            // MMRs with all hashing functions must have the same size
+            // MMRs with all hashing functions must have the same size and isOffchainGrown value
             require(mmrSize == commonMmrSize, "MMR size mismatch");
-
-            if (isSiblingSyncedForSending) {
-                require(isSiblingSynced, "MMR isSiblingSynced mismatch");
-            }
+            require(isOffchainGrown == commonIsOffchainGrown, "isOffchainGrown mismatch");
 
             rootsForHashingFunctions[i] = RootForHashingFunction(root, hashingFunctions[i]);
+        }
+
+        // Offchain growing can only be turned off, not on
+        if (isOffchainGrownDestination == true) {
+            require(commonIsOffchainGrown == true, "isOffchainGrown cannot be overridden to true");
         }
 
         ILibSatellite.SatelliteConnection memory satellite = s.satelliteConnectionRegistry[destinationChainId];
@@ -86,9 +85,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
                 accumulatedChainId,
                 block.chainid,
                 originalMmrId,
-                // Even if MMRs were sibling synced, it will be sent with whatever user asked (synced or not)
-                // Of course, if user had requested sibling synced version, it was validated that original MMRs were sibling synced
-                isSiblingSyncedForSending
+                commonIsOffchainGrown
             ),
             _xDomainMsgGasData
         );

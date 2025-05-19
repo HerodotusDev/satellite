@@ -36,8 +36,9 @@ interface ILibSatellite {
     /// @notice This struct represents a Merkle Mountain Range accumulating provably valid block hashes
     /// @dev each MMR is mapped to a unique ID also referred to as mmrId
     struct MmrInfo {
-        /// @notice isSiblingSynced informs if the MMR has it's siblings (MMRs with different hash functions) and has to be grown in sync with them - used when growing off-chain and growing multiple hash functions at once, for example, this could be a keccak MMR sibling synced to a poseidon MMR
-        bool isSiblingSynced;
+        /// @notice isOffchainGrown if true the MMR can be grown with Offchain Growing Modules
+        /// @notice if false the MMR can be grown with Onchain Growing Module
+        bool isOffchainGrown;
         /// @notice latestSize represents the latest size of the MMR
         uint256 latestSize;
         /// @notice mmrSizeToRoot maps the  MMR size => the MMR root, that way we have automatic versioning

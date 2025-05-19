@@ -6,6 +6,7 @@ async function main() {
     .readdirSync("ignition/modules")
     .filter((f) => /^\d+\.ts$/.test(f));
 
+  const allModules = new Set<string>();
   for (const chain of chains) {
     const modules = require(`../ignition/modules/${chain}`).modules;
     modules.push("SatelliteMaintenanceModule");
@@ -15,6 +16,7 @@ async function main() {
     for (const module of modules) {
       const abi = hre.artifacts.readArtifactSync(module).abi;
       mergedAbi.push(...abi);
+      allModules.add(module);
     }
 
     const dedupedAbi = [];
@@ -36,6 +38,31 @@ async function main() {
 
     fs.writeFileSync(outFile, JSON.stringify(dedupedAbi, null, 2) + "\n");
   }
+
+  const mergedAbi = [];
+  for (const module of allModules) {
+    const abi = hre.artifacts.readArtifactSync(module).abi;
+    mergedAbi.push(...abi);
+  }
+
+  const dedupedAbi = [];
+  const nameToJsonString = new Map<string, string>();
+  for (const abi of mergedAbi) {
+    const abiJsonString = JSON.stringify(abi);
+    if (nameToJsonString.has(abi.name)) {
+      if (nameToJsonString.get(abi.name) !== abiJsonString) {
+        throw new Error(
+          `Duplicate function ${abi.name} with different parameters`,
+        );
+      } else {
+        continue;
+      }
+    }
+    nameToJsonString.set(abi.name, abiJsonString);
+    dedupedAbi.push(abi);
+  }
+
+  fs.writeFileSync("abi/all.json", JSON.stringify(dedupedAbi, null, 2) + "\n");
 }
 
 main();

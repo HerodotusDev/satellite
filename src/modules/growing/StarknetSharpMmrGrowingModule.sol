@@ -59,7 +59,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
 
         StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
 
-        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions);
+        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions, true);
     }
 
     function aggregateStarknetSharpJobs(uint256 mmrId, StarknetJobOutput[] calldata outputs) external {
@@ -96,7 +96,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
 
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize = mmrNewSize;
-        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced = false;
+        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown = true;
 
         uint256 toBlock = lastOutput.toBlockNumberLow;
 
@@ -120,6 +120,9 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
         // Retrieve from cache the parent hash of the block to start from
         bytes32 fromBlockPlusOneParentHash = s.receivedParentHashes[ms.aggregatedChainId][POSEIDON_HASHING_FUNCTION][fromBlockNumber + 1];
         uint256 actualMmrSizePoseidon = s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize;
+        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown == false) {
+            revert AggregationError("Mmr is not offchain grown");
+        }
 
         // Check that the job's previous MMR size is the same as the one stored in the contract state
         if (firstOutput.mmrPreviousSize != actualMmrSizePoseidon) revert AggregationError("MMR size mismatch");

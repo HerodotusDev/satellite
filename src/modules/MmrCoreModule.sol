@@ -36,7 +36,7 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         uint256 accumulatedChainId,
         uint256 originChainId,
         uint256 originalMmrId,
-        bool isSiblingSynced
+        bool isOffchainGrown
     ) external onlyModule {
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
         require(rootsForHashingFunctions.length > 0, "INVALID_ROOTS_LENGTH");
@@ -52,28 +52,31 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
             require(s.mmrs[accumulatedChainId][newMmrId][hashingFunction].latestSize == LibSatellite.NO_MMR_SIZE, "NEW_MMR_ALREADY_EXISTS");
             s.mmrs[accumulatedChainId][newMmrId][hashingFunction].latestSize = mmrSize;
             s.mmrs[accumulatedChainId][newMmrId][hashingFunction].mmrSizeToRoot[mmrSize] = root;
-            s.mmrs[accumulatedChainId][newMmrId][hashingFunction].isSiblingSynced = isSiblingSynced;
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunction].isOffchainGrown = isOffchainGrown;
         }
 
         // Emit the event
-        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, originChainId, CreatedFrom.FOREIGN);
+        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, originChainId, CreatedFrom.FOREIGN, isOffchainGrown);
     }
 
     // ========================= Core Functions ========================= //
 
-    function createMmrFromDomestic(uint256 newMmrId, uint256 originalMmrId, uint256 accumulatedChainId, uint256 mmrSize, bytes32[] calldata hashingFunctions) external {
+    /// @inheritdoc IMmrCoreModule
+    function createMmrFromDomestic(
+        uint256 newMmrId,
+        uint256 originalMmrId,
+        uint256 accumulatedChainId,
+        uint256 mmrSize,
+        bytes32[] calldata hashingFunctions,
+        bool isOffchainGrown
+    ) external {
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
         require(hashingFunctions.length > 0, "INVALID_HASHING_FUNCTIONS_LENGTH");
-
-        bool isSiblingSynced = hashingFunctions.length > 1;
-
-        if (isSiblingSynced) {
-            LibSatellite.enforceIsSatelliteModule();
-        }
 
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](hashingFunctions.length);
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
+        bool commonIsOffchainGrown = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].isOffchainGrown;
         for (uint256 i = 0; i < hashingFunctions.length; i++) {
             require(s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize == LibSatellite.NO_MMR_SIZE, "NEW_MMR_ALREADY_EXISTS");
 
@@ -87,21 +90,24 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
                 mmrRoot = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize];
                 // Ensure the given MMR exists
                 require(mmrRoot != LibSatellite.NO_MMR_ROOT, "SRC_MMR_NOT_FOUND");
-
-                if (isSiblingSynced) {
-                    require(s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].isSiblingSynced == isSiblingSynced, "ORIGINAL_MMR_NOT_SIBLING_SYNCED");
-                }
+                // Ensure the given MMR has the same isOffchainGrown value
+                require(s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[i]].isOffchainGrown == commonIsOffchainGrown, "isOffchainGrown mismatch");
             }
 
             // Copy the MMR data to the new MMR
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize = mmrSize;
             s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize] = mmrRoot;
-            s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].isSiblingSynced = isSiblingSynced;
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].isOffchainGrown = isOffchainGrown;
 
             rootsForHashingFunctions[i] = RootForHashingFunction({hashingFunction: hashingFunctions[i], root: mmrRoot});
         }
 
-        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, block.chainid, CreatedFrom.DOMESTIC);
+        // Offchain growing can only be turned off, not on
+        if (originalMmrId != LibSatellite.EMPTY_MMR_ID && isOffchainGrown == true) {
+            require(commonIsOffchainGrown == true, "isOffchainGrown cannot be overridden to true");
+        }
+
+        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, block.chainid, CreatedFrom.DOMESTIC, isOffchainGrown);
     }
 
     /// ========================= Internal functions ========================= //
@@ -134,9 +140,9 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         return s.mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize;
     }
 
-    function isMMRSiblingSynced(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bool) {
+    function isMmrOnlyOffchainGrown(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bool) {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        return s.mmrs[accumulatedChainId][mmrId][hashingFunction].isSiblingSynced;
+        return s.mmrs[accumulatedChainId][mmrId][hashingFunction].isOffchainGrown;
     }
 
     function getReceivedParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber) external view returns (bytes32) {

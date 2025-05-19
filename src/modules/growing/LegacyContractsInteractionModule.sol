@@ -13,29 +13,12 @@ contract LegacyContractsInteractionModule is ILegacyContractsInteractionModule, 
     bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
     bytes32 public constant POSEIDON_HASHING_FUNCTION = keccak256("poseidon");
 
-    // ========================= Satellite Module Storage ========================= //
-
-    bytes32 constant MODULE_STORAGE_POSITION = keccak256("diamond.standard.satellite.module.storage.legacy-contracts-interaction");
-
-    function moduleStorage() internal pure returns (LegacyContractsInteractionModuleStorage storage s) {
-        bytes32 position = MODULE_STORAGE_POSITION;
-        assembly {
-            s.slot := position
-        }
-    }
-
     // ========================= Core Functions ========================= //
+
     //? Use this for Ethereum Sepolia: 0x70c61dd17b7207b450cb7dedc92c1707a07a1213
     //? Use this for Ethereum Mainnet: 0x5C189aEdEcBc07830B64Ec8CAE51ce38E4365286
-    function initLegacyContractsInteractionModule(IAggregatorsFactory aggregatorsFactory) external onlyOwner {
-        LegacyContractsInteractionModuleStorage storage ms = moduleStorage();
-        ms.aggregatorsFactory = aggregatorsFactory;
-        ms.aggregatedChainId = block.chainid;
-    }
-
-    function loadLegacyEvmAggregatorMmr(uint256 legacyMmrId, uint256 newMmrId) external onlyOwner {
-        LegacyContractsInteractionModuleStorage storage ms = moduleStorage();
-        address sharpFactsAggregatorAddress = ms.aggregatorsFactory.aggregatorsById(legacyMmrId);
+    function loadLegacyEvmAggregatorMmr(IAggregatorsFactory aggregatorsFactory, uint256 aggregatedChainId, uint256 legacyMmrId, uint256 newMmrId) external onlyOwner {
+        address sharpFactsAggregatorAddress = aggregatorsFactory.aggregatorsById(legacyMmrId);
         ISharpFactsAggregator sharpFactsAggregator = ISharpFactsAggregator(sharpFactsAggregatorAddress);
 
         bytes32 keccakRoot = sharpFactsAggregator.getMMRKeccakRoot();
@@ -44,13 +27,13 @@ contract LegacyContractsInteractionModule is ILegacyContractsInteractionModule, 
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
-        s.mmrs[ms.aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[size] = poseidonRoot;
-        s.mmrs[ms.aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].latestSize = size;
-        s.mmrs[ms.aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced = true;
+        s.mmrs[aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[size] = poseidonRoot;
+        s.mmrs[aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].latestSize = size;
+        s.mmrs[aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown = true;
 
-        s.mmrs[ms.aggregatedChainId][newMmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[size] = keccakRoot;
-        s.mmrs[ms.aggregatedChainId][newMmrId][KECCAK_HASHING_FUNCTION].latestSize = size;
-        s.mmrs[ms.aggregatedChainId][newMmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced = true;
+        s.mmrs[aggregatedChainId][newMmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[size] = keccakRoot;
+        s.mmrs[aggregatedChainId][newMmrId][KECCAK_HASHING_FUNCTION].latestSize = size;
+        s.mmrs[aggregatedChainId][newMmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown = true;
 
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](2);
         rootsForHashingFunctions[0].root = poseidonRoot;
@@ -58,6 +41,26 @@ contract LegacyContractsInteractionModule is ILegacyContractsInteractionModule, 
         rootsForHashingFunctions[1].root = keccakRoot;
         rootsForHashingFunctions[1].hashingFunction = KECCAK_HASHING_FUNCTION;
 
-        emit LegacyEvmAggregatorMmrLoadedV2(rootsForHashingFunctions, size, newMmrId, legacyMmrId, ms.aggregatedChainId, sharpFactsAggregatorAddress);
+        emit LegacyEvmAggregatorMmrLoadedV2(rootsForHashingFunctions, size, newMmrId, legacyMmrId, aggregatedChainId, sharpFactsAggregatorAddress);
+    }
+
+    function loadLegacyStarknetAggregatorMmr(IAggregatorsFactory aggregatorsFactory, uint256 aggregatedChainId, uint256 legacyMmrId, uint256 newMmrId) external onlyOwner {
+        address sharpFactsAggregatorAddress = aggregatorsFactory.aggregatorsById(legacyMmrId);
+        ISharpFactsAggregator sharpFactsAggregator = ISharpFactsAggregator(sharpFactsAggregatorAddress);
+
+        bytes32 poseidonRoot = sharpFactsAggregator.getMMRPoseidonRoot();
+        uint256 size = sharpFactsAggregator.getMMRSize();
+
+        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
+
+        s.mmrs[aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[size] = poseidonRoot;
+        s.mmrs[aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].latestSize = size;
+        s.mmrs[aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown = true;
+
+        RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](1);
+        rootsForHashingFunctions[0].root = poseidonRoot;
+        rootsForHashingFunctions[0].hashingFunction = POSEIDON_HASHING_FUNCTION;
+
+        emit LegacyEvmAggregatorMmrLoadedV2(rootsForHashingFunctions, size, newMmrId, legacyMmrId, aggregatedChainId, sharpFactsAggregatorAddress);
     }
 }

@@ -69,7 +69,7 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
 
         EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
 
-        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions);
+        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions, true);
     }
 
     function aggregateEvmSharpJobs(uint256 mmrId, IEvmSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external {
@@ -106,11 +106,11 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
 
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize = mmrNewSize;
-        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced = true;
+        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown = true;
 
         s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootKeccak;
         s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize = mmrNewSize;
-        s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced = true;
+        s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown = true;
 
         (, uint256 toBlock) = lastOutput.blockNumbersPacked.split128();
 
@@ -144,12 +144,12 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
             revert AggregationError("MMR size mismatch");
         }
 
-        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced == false) {
-            revert AggregationError("Poseidon MMR not sibling synced");
+        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown == false) {
+            revert AggregationError("Poseidon MMR is not offchain grown");
         }
 
-        if (s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced == false) {
-            revert AggregationError("Keccak MMR not sibling synced");
+        if (s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown == false) {
+            revert AggregationError("Keccak MMR is not offchain grown");
         }
 
         // Check that the job's previous Poseidon MMR root is the same as the one stored in the contract state

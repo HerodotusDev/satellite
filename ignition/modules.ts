@@ -82,11 +82,11 @@ export const modules = (chainId: keyof typeof settings) =>
             initFunctions: [
               {
                 name: "initStarknetSharpMmrGrowingModule",
-                args: [settings[chainId].SHARP_FACT_REGISTRY],
+                args: [settings[chainId].STARKNET_CHAIN_ID],
               },
               {
                 name: "setStarknetSharpMmrGrowingModuleFactsRegistry",
-                args: [settings[chainId].STARKNET_CHAIN_ID],
+                args: [settings[chainId].SHARP_FACT_REGISTRY],
               },
             ],
           },
@@ -175,19 +175,10 @@ export const modules = (chainId: keyof typeof settings) =>
       interfaceName: "IL1ToStarknetSenderModule",
     },
 
-    ...("LEGACY_AGGREGATORS_FACTORY" in settings[chainId]
-      ? {
-          LegacyContractsInteractionModule: {
-            interfaceName: "ILegacyContractsInteractionModule",
-            initFunctions: [
-              {
-                name: "initLegacyContractsInteractionModule",
-                args: [settings[chainId].LEGACY_AGGREGATORS_FACTORY],
-              },
-            ],
-          },
-        }
-      : {}),
+    LegacyContractsInteractionModule: {
+      interfaceName: "ILegacyContractsInteractionModule",
+      initFunctions: [],
+    },
 
     MockFactsRegistry: {
       interfaceName: "IFactsRegistry",

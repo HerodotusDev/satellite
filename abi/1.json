@@ -349,6 +349,12 @@
         "internalType": "enum CreatedFrom",
         "name": "createdFrom",
         "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isOffchainGrown",
+        "type": "bool"
       }
     ],
     "name": "CreatedMmr",
@@ -544,7 +550,7 @@
       },
       {
         "internalType": "bool",
-        "name": "isSiblingSynced",
+        "name": "isOffchainGrown",
         "type": "bool"
       }
     ],
@@ -607,6 +613,11 @@
         "internalType": "bytes32[]",
         "name": "hashingFunctions",
         "type": "bytes32[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "isOffchainGrown",
+        "type": "bool"
       }
     ],
     "name": "createMmrFromDomestic",
@@ -753,7 +764,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "isMMRSiblingSynced",
+    "name": "isMmrOnlyOffchainGrown",
     "outputs": [
       {
         "internalType": "bool",
@@ -834,36 +845,6 @@
         "internalType": "bytes32",
         "name": "storageHash",
         "type": "bytes32"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "flags",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "fixed_",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "shares",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "debt",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "delegate",
-        "type": "uint256"
       }
     ],
     "name": "ProvenAccount",
@@ -932,32 +913,6 @@
     "type": "event"
   },
   {
-    "inputs": [],
-    "name": "APECHAIN_SHARE_PRICE_ADDRESS",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "APECHAIN_SHARE_PRICE_SLOT",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -986,69 +941,6 @@
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "chainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "blockNumber",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum IEvmFactRegistryModule.AccountField",
-        "name": "field",
-        "type": "uint8"
-      }
-    ],
-    "name": "accountFieldSafe",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "chainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "blockNumber",
-        "type": "uint256"
-      }
-    ],
-    "name": "getApechainSharePrice",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1301,45 +1193,6 @@
         "type": "uint256"
       },
       {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "blockNumber",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "slot",
-        "type": "bytes32"
-      }
-    ],
-    "name": "storageSlotSafe",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "chainId",
-        "type": "uint256"
-      },
-      {
         "internalType": "uint256",
         "name": "timestamp_",
         "type": "uint256"
@@ -1347,35 +1200,6 @@
     ],
     "name": "timestamp",
     "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "chainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "timestamp_",
-        "type": "uint256"
-      }
-    ],
-    "name": "timestampSafe",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      },
       {
         "internalType": "uint256",
         "name": "",
@@ -1455,112 +1279,6 @@
       {
         "internalType": "uint256",
         "name": "accountBalance",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "codeHash",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "storageRoot",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "chainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      },
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "treeId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint128",
-            "name": "mmrTreeSize",
-            "type": "uint128"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockNumber",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockProofLeafIndex",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes32[]",
-            "name": "mmrPeaks",
-            "type": "bytes32[]"
-          },
-          {
-            "internalType": "bytes32[]",
-            "name": "mmrElementInclusionProof",
-            "type": "bytes32[]"
-          },
-          {
-            "internalType": "bytes",
-            "name": "provenBlockHeader",
-            "type": "bytes"
-          }
-        ],
-        "internalType": "struct IEvmFactRegistryModule.BlockHeaderProof",
-        "name": "headerProof",
-        "type": "tuple"
-      },
-      {
-        "internalType": "bytes",
-        "name": "accountTrieProof",
-        "type": "bytes"
-      }
-    ],
-    "name": "verifyAccountApechain",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "nonce",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "flags",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "fixed_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "shares",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "debt",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "delegate",
         "type": "uint256"
       },
       {
@@ -2465,7 +2183,7 @@
       },
       {
         "internalType": "bool",
-        "name": "isSiblingSyncedForSending",
+        "name": "isOffchainGrownDestination",
         "type": "bool"
       },
       {
@@ -2653,15 +2371,12 @@
         "internalType": "contract IAggregatorsFactory",
         "name": "aggregatorsFactory",
         "type": "address"
-      }
-    ],
-    "name": "initLegacyContractsInteractionModule",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+      },
+      {
+        "internalType": "uint256",
+        "name": "aggregatedChainId",
+        "type": "uint256"
+      },
       {
         "internalType": "uint256",
         "name": "legacyMmrId",
@@ -2674,6 +2389,34 @@
       }
     ],
     "name": "loadLegacyEvmAggregatorMmr",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract IAggregatorsFactory",
+        "name": "aggregatorsFactory",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "aggregatedChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "legacyMmrId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "newMmrId",
+        "type": "uint256"
+      }
+    ],
+    "name": "loadLegacyStarknetAggregatorMmr",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

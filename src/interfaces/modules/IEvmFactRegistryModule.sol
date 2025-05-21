@@ -82,19 +82,19 @@ interface IEvmFactRegistryModule {
 
     /// @notice Fetches account field (e.g. nonce, balance or storage root) of a given account, at a given block number on a given chain id.
     /// @notice Returns (true, value) if the field is saved, (false, 0) otherwise.
-    function accountFieldSafe(uint256 chainId, address account, uint256 blockNumber, AccountField field) external view returns (bool, bytes32);
+    function accountFieldSafe(uint256 chainId, uint256 blockNumber, address account, AccountField field) external view returns (bool, bytes32);
 
     /// @notice Returns account field (e.g. nonce, balance or storage root) of a given account, at a given block number on a given chain id.
     /// @notice Reverts with "STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED" if the field is not saved.
-    function accountField(uint256 chainId, address account, uint256 blockNumber, AccountField field) external view returns (bytes32);
+    function accountField(uint256 chainId, uint256 blockNumber, address account, AccountField field) external view returns (bytes32);
 
     /// @notice Fetches value of a given storage slot of a given account, at a given block number on a given chain id.
     /// @notice Returns (true, value) if the slot is saved, (false, 0) otherwise.
-    function storageSlotSafe(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bool, bytes32);
+    function storageSlotSafe(uint256 chainId, uint256 blockNumber, address account, bytes32 slot) external view returns (bool, bytes32);
 
     /// @notice Returns value of a given storage slot of a given account, at a given block number on a given chain id.
     /// @notice Reverts with "STORAGE_PROOF_SLOT_NOT_SAVED" if the slot is not saved.
-    function storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bytes32);
+    function storageSlot(uint256 chainId, uint256 blockNumber, address account, bytes32 slot) external view returns (bytes32);
 
     /// @notice Finds block number with a biggest timestamp that is less than or equal to the given timestamp.
     /// @notice In other words, it answers what was the latest block at a given timestamp (including block with equal timestamp).
@@ -129,12 +129,12 @@ interface IEvmFactRegistryModule {
     /// @notice Additionally, if chainId is ApeChain and BALANCE bit is set, ApeChain's share price also has to be proven before calling this function.
     /// @notice To prove share price, storage slot with index `APECHAIN_SHARE_PRICE_SLOT` of account `APECHAIN_SHARE_PRICE_ADDRESS` at desired block has to be proven first with `proveStorage` function.
     /// @param accountFieldsToSave Bitmask of fields to save. First 4 bits correspond to NONCE, BALANCE, STORAGE_ROOT and CODE_HASH fields. Last bit (2^4) is responsible for all ApeChain fields, i.e. APE_FLAGS, APE_FIXED, APE_SHARES, APE_DEBT, APE_DELEGATE.
-    function proveAccount(uint256 chainId, address account, uint256 blockNumber, uint8 accountFieldsToSave, bytes calldata accountTrieProof) external;
+    function proveAccount(uint256 chainId, uint256 blockNumber, address account, uint8 accountFieldsToSave, bytes calldata accountTrieProof) external;
 
     /// @notice Verifies the storageSlotTrieProof and saves the storage slot value in the satellite.
     /// @notice Saved value can be read with `storageSlotSafe` and `storageSlot` functions.
     /// @notice Requires account's STORAGE_ROOT to be proven first with `proveAccount` function.
-    function proveStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) external;
+    function proveStorage(uint256 chainId, uint256 blockNumber, address account, bytes32 slot, bytes calldata storageSlotTrieProof) external;
 
     /// @notice Verifies that block with number blockNumberLow is the latest block with timestamp less than or equal to the given timestamp.
     /// @notice Requires timestamps of block with number blockNumberLow and blockNumberLow + 1 to be proven first with `proveHeader` function.
@@ -193,10 +193,10 @@ interface IEvmFactRegistryModule {
     event ProvenHeader(uint256 chainId, uint256 blockNumber, uint128 savedFields);
 
     /// @notice Emitted when account fields are proven
-    event ProvenAccount(uint256 chainId, address account, uint256 blockNumber, uint8 savedFields);
+    event ProvenAccount(uint256 chainId, uint256 blockNumber, address account, uint8 savedFields);
 
     /// @notice Emitted when storage slot value is proven
-    event ProvenStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot);
+    event ProvenStorage(uint256 chainId, uint256 blockNumber, address account, bytes32 slot);
 
     /// @notice Emitted when timestamp is proven
     event ProvenTimestamp(uint256 chainId, uint256 timestamp);

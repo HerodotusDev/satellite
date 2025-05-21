@@ -29,13 +29,13 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
 
     uint8 private constant BLOCK_HEADER_FIELD_COUNT = 15;
 
-    address public constant APECHAIN_SHARE_PRICE_ADDRESS = 0xA4b05FffffFffFFFFfFFfffFfffFFfffFfFfFFFf;
-    bytes32 public constant APECHAIN_SHARE_PRICE_SLOT = bytes32(0x15fed0451499512d95f3ec5a41c878b9de55f21878b5b4e190d4667ec709b432);
-
     bytes32 private constant EMPTY_TRIE_ROOT_HASH = 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421;
     bytes32 private constant EMPTY_CODE_HASH = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
 
     bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
+
+    address public constant APECHAIN_SHARE_PRICE_ADDRESS = 0xA4b05FffffFffFFFFfFFfffFfffFFfffFfFfFFFf;
+    bytes32 public constant APECHAIN_SHARE_PRICE_SLOT = bytes32(0x15fed0451499512d95f3ec5a41c878b9de55f21878b5b4e190d4667ec709b432);
 
     // ========================= Satellite Module Storage ========================= //
 
@@ -65,7 +65,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function accountFieldSafe(uint256 chainId, address account, uint256 blockNumber, AccountField field) public view returns (bool, bytes32) {
+    function accountFieldSafe(uint256 chainId, uint256 blockNumber, address account, AccountField field) public view returns (bool, bytes32) {
         Account storage accountData = moduleStorage().accountField[chainId][account][blockNumber];
         uint8 savedFieldIndex = uint8(field) < 4 ? uint8(field) : 4;
         if ((accountData.savedFields >> savedFieldIndex) & 1 == 0) return (false, bytes32(0));
@@ -73,22 +73,22 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function accountField(uint256 chainId, address account, uint256 blockNumber, AccountField field) public view returns (bytes32) {
-        (bool exists, bytes32 value) = accountFieldSafe(chainId, account, blockNumber, field);
+    function accountField(uint256 chainId, uint256 blockNumber, address account, AccountField field) public view returns (bytes32) {
+        (bool exists, bytes32 value) = accountFieldSafe(chainId, blockNumber, account, field);
         require(exists, "STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
         return value;
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function storageSlotSafe(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) public view returns (bool, bytes32) {
+    function storageSlotSafe(uint256 chainId, uint256 blockNumber, address account, bytes32 slot) public view returns (bool, bytes32) {
         StorageSlot storage valueRaw = moduleStorage().accountStorageSlotValues[chainId][account][blockNumber][slot];
         if (!valueRaw.exists) return (false, bytes32(0));
         return (true, valueRaw.value);
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) public view returns (bytes32) {
-        (bool exists, bytes32 value) = storageSlotSafe(chainId, account, blockNumber, slot);
+    function storageSlot(uint256 chainId, uint256 blockNumber, address account, bytes32 slot) public view returns (bytes32) {
+        (bool exists, bytes32 value) = storageSlotSafe(chainId, blockNumber, account, slot);
         require(exists, "STORAGE_PROOF_SLOT_NOT_SAVED");
         return value;
     }
@@ -103,7 +103,6 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
 
     /// @inheritdoc IEvmFactRegistryModule
     function timestamp(uint256 chainId, uint256 timestamp_) public view returns (uint256) {
-        // block number stored is blockNumber + 1 and 0 means no data
         (bool exists, uint256 blockNumber) = timestampSafe(chainId, timestamp_);
         require(exists, "STORAGE_PROOF_TIMESTAMP_NOT_SAVED");
         return blockNumber;
@@ -111,7 +110,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
 
     function getApechainSharePriceSafe(uint256 chainId, uint256 blockNumber) public view returns (bool, uint256) {
         require(_isApeChain(chainId), "STORAGE_PROOF_NOT_APECHAIN");
-        (bool exists, bytes32 slotValue) = storageSlotSafe(chainId, APECHAIN_SHARE_PRICE_ADDRESS, blockNumber, APECHAIN_SHARE_PRICE_SLOT);
+        (bool exists, bytes32 slotValue) = storageSlotSafe(chainId, blockNumber, APECHAIN_SHARE_PRICE_ADDRESS, APECHAIN_SHARE_PRICE_SLOT);
         return (exists, uint256(slotValue));
     }
 
@@ -125,9 +124,9 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
 
     function proveHeader(uint256 chainId, uint128 headerFieldsToSave, BlockHeaderProof calldata headerProof) external {
         require(headerFieldsToSave >> uint128(BLOCK_HEADER_FIELD_COUNT) == 0, "STORAGE_PROOF_INVALID_FIELDS_TO_SAVE");
-        require(headerFieldsToSave & (1 << uint128(BlockHeaderField.LOGS_BLOOM)) == 0, "STORAGE_PROOF_LOGS_BLOOM_NOT_SUPPORTED");
+        require((headerFieldsToSave >> uint8(BlockHeaderField.LOGS_BLOOM)) & 1 == 0, "STORAGE_PROOF_LOGS_BLOOM_NOT_SUPPORTED");
         // Block number is the key in the mapping, so it's pointless to save it.
-        require(headerFieldsToSave & (1 << uint128(BlockHeaderField.NUMBER)) == 0, "STORAGE_PROOF_BLOCK_NUMBER_NOT_SUPPORTED");
+        require((headerFieldsToSave >> uint8(BlockHeaderField.NUMBER)) & 1 == 0, "STORAGE_PROOF_BLOCK_NUMBER_NOT_SUPPORTED");
 
         bytes32[BLOCK_HEADER_FIELD_COUNT] memory fields = verifyHeader(chainId, headerProof);
         uint256 blockNumber = uint256(fields[uint8(BlockHeaderField.NUMBER)]);
@@ -136,7 +135,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
 
         header.savedFields |= headerFieldsToSave; // Mark additional fields as saved
         for (uint8 i = 0; i < BLOCK_HEADER_FIELD_COUNT; i++) {
-            if ((headerFieldsToSave & 1) == 1) {
+            if (headerFieldsToSave & 1 == 1) {
                 header.fields[BlockHeaderField(i)] = fields[i];
             }
             headerFieldsToSave >>= 1;
@@ -145,18 +144,18 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         emit ProvenHeader(chainId, blockNumber, header.savedFields);
     }
 
-    function proveAccount(uint256 chainId, address account, uint256 blockNumber, uint8 accountFieldsToSave, bytes calldata accountTrieProof) external {
+    function proveAccount(uint256 chainId, uint256 blockNumber, address account, uint8 accountFieldsToSave, bytes calldata accountTrieProof) external {
         if (_isApeChain(chainId)) {
-            _proveAccountApechain(chainId, account, blockNumber, accountFieldsToSave, accountTrieProof);
+            _proveAccountApechain(chainId, blockNumber, account, accountFieldsToSave, accountTrieProof);
         } else {
-            _proveAccount(chainId, account, blockNumber, accountFieldsToSave, accountTrieProof);
+            _proveAccount(chainId, blockNumber, account, accountFieldsToSave, accountTrieProof);
         }
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function proveStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) external {
+    function proveStorage(uint256 chainId, uint256 blockNumber, address account, bytes32 slot, bytes calldata storageSlotTrieProof) external {
         // Read proven storage root
-        bytes32 storageRoot = accountField(chainId, account, blockNumber, AccountField.STORAGE_ROOT);
+        bytes32 storageRoot = accountField(chainId, blockNumber, account, AccountField.STORAGE_ROOT);
 
         // Verify the proof and decode the slot value
         bytes32 slotValue = verifyStorage(slot, storageRoot, storageSlotTrieProof);
@@ -164,7 +163,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         // Save the slot value to the storage
         moduleStorage().accountStorageSlotValues[chainId][account][blockNumber][slot] = StorageSlot(slotValue, true);
 
-        emit ProvenStorage(chainId, account, blockNumber, slot);
+        emit ProvenStorage(chainId, blockNumber, account, slot);
     }
 
     /// @inheritdoc IEvmFactRegistryModule
@@ -247,7 +246,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         return chainId == 33111 || chainId == 33139;
     }
 
-    function _proveAccount(uint256 chainId, address account, uint256 blockNumber, uint8 accountFieldsToSave, bytes calldata accountTrieProof) internal {
+    function _proveAccount(uint256 chainId, uint256 blockNumber, address account, uint8 accountFieldsToSave, bytes calldata accountTrieProof) internal {
         require(accountFieldsToSave >> 4 == 0, "STORAGE_PROOF_INVALID_FIELDS_TO_SAVE");
 
         // Read proven state root
@@ -279,10 +278,10 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
             accountData.fields[AccountField.STORAGE_ROOT] = storageRoot;
         }
 
-        emit ProvenAccount(chainId, account, blockNumber, accountData.savedFields);
+        emit ProvenAccount(chainId, blockNumber, account, accountData.savedFields);
     }
 
-    function _proveAccountApechain(uint256 chainId, address account, uint256 blockNumber, uint8 accountFieldsToSave, bytes calldata accountTrieProof) internal {
+    function _proveAccountApechain(uint256 chainId, uint256 blockNumber, address account, uint8 accountFieldsToSave, bytes calldata accountTrieProof) internal {
         require(accountFieldsToSave >> 5 == 0, "STORAGE_PROOF_INVALID_FIELDS_TO_SAVE");
 
         // Read proven state root
@@ -330,7 +329,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
             accountData.fields[AccountField.APE_DELEGATE] = bytes32(delegate);
         }
 
-        emit ProvenAccount(chainId, account, blockNumber, accountData.savedFields);
+        emit ProvenAccount(chainId, blockNumber, account, accountData.savedFields);
     }
 
     function _decodeAccountFields(bool doesAccountExist, bytes memory accountRLP) internal pure returns (uint256 nonce, uint256 balance, bytes32 storageRoot, bytes32 codeHash) {

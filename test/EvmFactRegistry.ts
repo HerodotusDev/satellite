@@ -61,48 +61,48 @@ describe("EVM Fact Registry Ethereum Sepolia", () => {
     };
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, af.NONCE),
+      satellite.accountField(chainId, blockNumber, account, af.NONCE),
     ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, af.BALANCE),
+      satellite.accountField(chainId, blockNumber, account, af.BALANCE),
     ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, af.STORAGE_ROOT),
+      satellite.accountField(chainId, blockNumber, account, af.STORAGE_ROOT),
     ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, af.CODE_HASH),
+      satellite.accountField(chainId, blockNumber, account, af.CODE_HASH),
     ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await satellite.proveHeader(chainId, hm.STATE_ROOT, headerProof);
 
     await satellite.proveAccount(
       chainId,
-      account,
       blockNumber,
+      account,
       am.NONCE | am.BALANCE | am.CODE_HASH | am.STORAGE_ROOT,
       accountTrieProof,
     );
 
     expect(
-      await satellite.accountField(chainId, account, blockNumber, af.NONCE),
+      await satellite.accountField(chainId, blockNumber, account, af.NONCE),
     ).to.equal(toU256(expected.nonce));
 
     expect(
-      await satellite.accountField(chainId, account, blockNumber, af.BALANCE),
+      await satellite.accountField(chainId, blockNumber, account, af.BALANCE),
     ).to.equal(toU256(expected.balance));
 
     expect(
-      await satellite.accountField(chainId, account, blockNumber, af.CODE_HASH),
+      await satellite.accountField(chainId, blockNumber, account, af.CODE_HASH),
     ).to.equal(toU256(expected.codeHash));
 
     expect(
       await satellite.accountField(
         chainId,
-        account,
         blockNumber,
+        account,
         af.STORAGE_ROOT,
       ),
     ).to.equal(toU256(expected.storageHash));

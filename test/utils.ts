@@ -1,7 +1,7 @@
 import { ethers, ignition } from "hardhat";
 import SatelliteModule from "../ignition/modules/31337";
 
-export const fields = {
+export const accountFields = {
   NONCE: 0,
   BALANCE: 1,
   STORAGE_ROOT: 2,
@@ -13,12 +13,48 @@ export const fields = {
   APE_DELEGATE: 8,
 };
 
-export const fieldsToSave = {
+export const accountFieldsBitmask = {
   NONCE: 1,
   BALANCE: 2,
   STORAGE_ROOT: 4,
   CODE_HASH: 8,
   APE_FLAGS: 16,
+};
+
+export const headerFields = {
+  PARENT_HASH: 0,
+  OMMERS_HASH: 1,
+  BENEFICIARY: 2,
+  STATE_ROOT: 3,
+  RECEIPTS_ROOT: 4,
+  TRANSACTION_ROOT: 5,
+  LOGS_BLOOM: 6,
+  DIFFICULTY: 7,
+  NUMBER: 8,
+  GAS_LIMIT: 9,
+  GAS_USED: 10,
+  TIMESTAMP: 11,
+  EXTRA_DATA: 12,
+  MIX_HASH: 13,
+  NONCE: 14,
+};
+
+export const headerFieldsBitmask = {
+  PARENT_HASH: 1,
+  OMMERS_HASH: 2,
+  BENEFICIARY: 4,
+  STATE_ROOT: 8,
+  RECEIPTS_ROOT: 16,
+  TRANSACTION_ROOT: 32,
+  LOGS_BLOOM: 64,
+  DIFFICULTY: 128,
+  NUMBER: 256,
+  GAS_LIMIT: 512,
+  GAS_USED: 1024,
+  TIMESTAMP: 2048,
+  EXTRA_DATA: 4096,
+  MIX_HASH: 8192,
+  NONCE: 16384,
 };
 
 export function toU256(x: bigint | number, ...y: bigint[]) {

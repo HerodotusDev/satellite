@@ -7,6 +7,7 @@ import {Lib_RLPReader as RLPReader} from "src/libraries/external/optimism/rlp/Li
 import {IEvmFactRegistryModule} from "src/interfaces/modules/IEvmFactRegistryModule.sol";
 import {LibSatellite} from "src/libraries/LibSatellite.sol";
 import {ISatellite} from "src/interfaces/ISatellite.sol";
+import {console} from "forge-std/console.sol";
 
 contract EvmFactRegistryModule is IEvmFactRegistryModule {
     using RLPReader for bytes;
@@ -25,6 +26,8 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     uint8 private constant APECHAIN_ACCOUNT_DELEGATE_INDEX = 5;
     uint8 private constant APECHAIN_ACCOUNT_CODE_HASH_INDEX = 6;
     uint8 private constant APECHAIN_ACCOUNT_STORAGE_ROOT_INDEX = 7;
+
+    uint8 private constant BLOCK_HEADER_FIELD_COUNT = 15;
 
     address public constant APECHAIN_SHARE_PRICE_ADDRESS = 0xA4b05FffffFffFFFFfFFfffFfffFFfffFfFfFFFf;
     bytes32 public constant APECHAIN_SHARE_PRICE_SLOT = bytes32(0x15fed0451499512d95f3ec5a41c878b9de55f21878b5b4e190d4667ec709b432);
@@ -45,190 +48,215 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         }
     }
 
-    // ===================== Functions for End Users ===================== //
+    // =============== Functions for End Users (Reads proven values) ============== //
 
     /// @inheritdoc IEvmFactRegistryModule
-    function accountFieldSafe(uint256 chainId, address account, uint256 blockNumber, AccountField field) external view returns (bool, bytes32) {
-        EvmFactRegistryModuleStorage storage ms = moduleStorage();
-
-        Account storage accountData = ms.accountField[chainId][account][blockNumber];
-        uint8 savedFieldIndex = uint8(field) < 4 ? uint8(field) : 4;
-        if (!readBitAtIndexFromRight(accountData.savedFields, savedFieldIndex)) return (false, bytes32(0));
-        return (true, accountData.fields[field]);
+    function headerFieldSafe(uint256 chainId, uint256 blockNumber, BlockHeaderField field) public view returns (bool, bytes32) {
+        BlockHeader storage header = moduleStorage().blockHeader[chainId][blockNumber];
+        if ((header.savedFields >> uint8(field)) & 1 == 0) return (false, bytes32(0));
+        return (true, header.fields[field]);
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function accountField(uint256 chainId, address account, uint256 blockNumber, AccountField field) external view returns (bytes32) {
-        (bool exists, bytes32 value) = IEvmFactRegistryModule(address(this)).accountFieldSafe(chainId, account, blockNumber, field);
-        require(exists, "STORAGE_PROOF_FIELD_NOT_SAVED");
+    function headerField(uint256 chainId, uint256 blockNumber, BlockHeaderField field) public view returns (bytes32) {
+        (bool exists, bytes32 value) = headerFieldSafe(chainId, blockNumber, field);
+        require(exists, "STORAGE_PROOF_HEADER_FIELD_NOT_SAVED");
         return value;
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function storageSlotSafe(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bool, bytes32) {
-        EvmFactRegistryModuleStorage storage ms = moduleStorage();
+    function accountFieldSafe(uint256 chainId, address account, uint256 blockNumber, AccountField field) public view returns (bool, bytes32) {
+        Account storage accountData = moduleStorage().accountField[chainId][account][blockNumber];
+        uint8 savedFieldIndex = uint8(field) < 4 ? uint8(field) : 4;
+        if ((accountData.savedFields >> savedFieldIndex) & 1 == 0) return (false, bytes32(0));
+        return (true, accountData.fields[field]);
+    }
 
-        StorageSlot storage valueRaw = ms.accountStorageSlotValues[chainId][account][blockNumber][slot];
+    /// @inheritdoc IEvmFactRegistryModule
+    function accountField(uint256 chainId, address account, uint256 blockNumber, AccountField field) public view returns (bytes32) {
+        (bool exists, bytes32 value) = accountFieldSafe(chainId, account, blockNumber, field);
+        require(exists, "STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
+        return value;
+    }
+
+    /// @inheritdoc IEvmFactRegistryModule
+    function storageSlotSafe(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) public view returns (bool, bytes32) {
+        StorageSlot storage valueRaw = moduleStorage().accountStorageSlotValues[chainId][account][blockNumber][slot];
         if (!valueRaw.exists) return (false, bytes32(0));
         return (true, valueRaw.value);
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) external view returns (bytes32) {
-        (bool exists, bytes32 value) = IEvmFactRegistryModule(address(this)).storageSlotSafe(chainId, account, blockNumber, slot);
+    function storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) public view returns (bytes32) {
+        (bool exists, bytes32 value) = storageSlotSafe(chainId, account, blockNumber, slot);
         require(exists, "STORAGE_PROOF_SLOT_NOT_SAVED");
         return value;
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function timestampSafe(uint256 chainId, uint256 timestamp_) external view returns (bool, uint256) {
-        EvmFactRegistryModuleStorage storage ms = moduleStorage();
-
+    function timestampSafe(uint256 chainId, uint256 timestamp_) public view returns (bool, uint256) {
         // block number stored is blockNumber + 1 and 0 means no data
-        uint256 blockNumberStored = ms.timestampToBlockNumber[chainId][timestamp_];
+        uint256 blockNumberStored = moduleStorage().timestampToBlockNumber[chainId][timestamp_];
         if (blockNumberStored == 0) return (false, 0);
         return (true, blockNumberStored - 1);
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function timestamp(uint256 chainId, uint256 timestamp_) external view returns (uint256) {
-        (bool exists, uint256 value) = IEvmFactRegistryModule(address(this)).timestampSafe(chainId, timestamp_);
+    function timestamp(uint256 chainId, uint256 timestamp_) public view returns (uint256) {
+        // block number stored is blockNumber + 1 and 0 means no data
+        (bool exists, uint256 blockNumber) = timestampSafe(chainId, timestamp_);
         require(exists, "STORAGE_PROOF_TIMESTAMP_NOT_SAVED");
-        return value;
+        return blockNumber;
     }
 
-    // ========================= Core Functions ========================= //
+    function getApechainSharePriceSafe(uint256 chainId, uint256 blockNumber) public view returns (bool, uint256) {
+        require(_isApeChain(chainId), "STORAGE_PROOF_NOT_APECHAIN");
+        (bool exists, bytes32 slotValue) = storageSlotSafe(chainId, APECHAIN_SHARE_PRICE_ADDRESS, blockNumber, APECHAIN_SHARE_PRICE_SLOT);
+        return (exists, uint256(slotValue));
+    }
 
-    function proveAccount(uint256 chainId, address account, uint8 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) external {
+    function getApechainSharePrice(uint256 chainId, uint256 blockNumber) public view returns (uint256) {
+        (bool exists, uint256 sharePrice) = getApechainSharePriceSafe(chainId, blockNumber);
+        require(exists, "STORAGE_PROOF_SHARE_PRICE_NOT_SAVED");
+        return sharePrice;
+    }
+
+    // ====================== Proving (Saves verified values) ===================== //
+
+    function proveHeader(uint256 chainId, uint128 headerFieldsToSave, BlockHeaderProof calldata headerProof) external {
+        require(headerFieldsToSave >> uint128(BLOCK_HEADER_FIELD_COUNT) == 0, "STORAGE_PROOF_INVALID_FIELDS_TO_SAVE");
+        require(headerFieldsToSave & (1 << uint128(BlockHeaderField.LOGS_BLOOM)) == 0, "STORAGE_PROOF_LOGS_BLOOM_NOT_SUPPORTED");
+        // Block number is the key in the mapping, so it's pointless to save it.
+        require(headerFieldsToSave & (1 << uint128(BlockHeaderField.NUMBER)) == 0, "STORAGE_PROOF_BLOCK_NUMBER_NOT_SUPPORTED");
+
+        bytes32[BLOCK_HEADER_FIELD_COUNT] memory fields = verifyHeader(chainId, headerProof);
+        uint256 blockNumber = uint256(fields[uint8(BlockHeaderField.NUMBER)]);
+
+        BlockHeader storage header = moduleStorage().blockHeader[chainId][blockNumber];
+
+        header.savedFields |= headerFieldsToSave; // Mark additional fields as saved
+        for (uint8 i = 0; i < BLOCK_HEADER_FIELD_COUNT; i++) {
+            if ((headerFieldsToSave & 1) == 1) {
+                header.fields[BlockHeaderField(i)] = fields[i];
+            }
+            headerFieldsToSave >>= 1;
+        }
+
+        emit ProvenHeader(chainId, blockNumber, header.savedFields);
+    }
+
+    function proveAccount(uint256 chainId, address account, uint256 blockNumber, uint8 accountFieldsToSave, bytes calldata accountTrieProof) external {
         if (_isApeChain(chainId)) {
-            require(accountFieldsToSave >> 5 == 0, "STORAGE_PROOF_INVALID_FIELDS_TO_SAVE");
-            _proveAccountApechain(chainId, account, accountFieldsToSave, headerProof, accountTrieProof);
+            _proveAccountApechain(chainId, account, blockNumber, accountFieldsToSave, accountTrieProof);
         } else {
-            require(accountFieldsToSave >> 4 == 0, "STORAGE_PROOF_INVALID_FIELDS_TO_SAVE");
-            _proveAccountEvm(chainId, account, accountFieldsToSave, headerProof, accountTrieProof);
+            _proveAccount(chainId, account, blockNumber, accountFieldsToSave, accountTrieProof);
         }
     }
 
     /// @inheritdoc IEvmFactRegistryModule
     function proveStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) external {
-        EvmFactRegistryModuleStorage storage ms = moduleStorage();
+        // Read proven storage root
+        bytes32 storageRoot = accountField(chainId, account, blockNumber, AccountField.STORAGE_ROOT);
 
         // Verify the proof and decode the slot value
-        bytes32 slotValue = verifyStorage(chainId, account, blockNumber, slot, storageSlotTrieProof);
-        ms.accountStorageSlotValues[chainId][account][blockNumber][slot] = StorageSlot(slotValue, true);
+        bytes32 slotValue = verifyStorage(slot, storageRoot, storageSlotTrieProof);
 
-        emit ProvenStorage(chainId, account, blockNumber, slot, slotValue);
+        // Save the slot value to the storage
+        moduleStorage().accountStorageSlotValues[chainId][account][blockNumber][slot] = StorageSlot(slotValue, true);
+
+        emit ProvenStorage(chainId, account, blockNumber, slot);
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function proveTimestamp(uint256 chainId, uint256 timestamp_, BlockHeaderProof calldata headerProof, BlockHeaderProof calldata headerProofNext) external {
-        EvmFactRegistryModuleStorage storage ms = moduleStorage();
+    function proveTimestamp(uint256 chainId, uint256 timestamp_, uint256 blockNumberLow) external {
+        // Read proven timestamps
+        uint256 blockTimestampLow = uint256(headerField(chainId, blockNumberLow, BlockHeaderField.TIMESTAMP));
+        uint256 blockTimestampHigh = uint256(headerField(chainId, blockNumberLow + 1, BlockHeaderField.TIMESTAMP));
 
-        uint256 blockNumber = verifyTimestamp(chainId, timestamp_, headerProof, headerProofNext);
+        // Verify that blockNumberLow is the answer for given timestamp
+        verifyTimestamp(timestamp_, blockNumberLow, blockTimestampLow, blockTimestampHigh);
+
         // blockNumber + 1 is stored, blockNumber cannot overflow because of check in verifyTimestamp
-        ms.timestampToBlockNumber[chainId][timestamp_] = blockNumber + 1;
+        moduleStorage().timestampToBlockNumber[chainId][timestamp_] = blockNumberLow + 1;
 
-        emit ProvenTimestamp(chainId, timestamp_, blockNumber);
+        emit ProvenTimestamp(chainId, timestamp_);
     }
 
-    // ========================= View functions ========================= //
+    // ============ Verifying (Verifies that storage proof is correct) ============ //
+
+    /// @inheritdoc IEvmFactRegistryModule
+    function verifyHeader(uint256 chainId, BlockHeaderProof calldata headerProof) public view returns (bytes32[BLOCK_HEADER_FIELD_COUNT] memory fields) {
+        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
+
+        fields = _readBlockHeaderFields(headerProof.blockHeaderRlp);
+
+        // Ensure provided header is a valid one by making sure it is present in saved MMRs
+
+        bytes32 mmrRoot = s.mmrs[chainId][headerProof.mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[headerProof.mmrSize];
+        require(mmrRoot != bytes32(0), "STORAGE_PROOF_EMPTY_MMR_ROOT");
+
+        bytes32 blockHeaderHash = keccak256(headerProof.blockHeaderRlp);
+
+        StatelessMmr.verifyProof(headerProof.mmrLeafIndex, blockHeaderHash, headerProof.mmrInclusionProof, headerProof.mmrPeaks, headerProof.mmrSize, mmrRoot);
+    }
+
+    /// @inheritdoc IEvmFactRegistryModule
+    function verifyAccount(
+        uint256 chainId,
+        address account,
+        bytes32 stateRoot,
+        bytes calldata accountMptProof
+    ) public pure returns (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) {
+        require(!_isApeChain(chainId), "STORAGE_PROOF_SHOULD_BE_NON_APECHAIN");
+
+        (bool doesAccountExist, bytes memory accountRLP) = SecureMerkleTrie.get(abi.encodePacked(account), accountMptProof, stateRoot);
+
+        (nonce, accountBalance, storageRoot, codeHash) = _decodeAccountFields(doesAccountExist, accountRLP);
+    }
 
     /// @inheritdoc IEvmFactRegistryModule
     function verifyAccountApechain(
         uint256 chainId,
         address account,
-        BlockHeaderProof calldata headerProof,
-        bytes calldata accountTrieProof
-    ) public view returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot) {
-        require(_isApeChain(chainId), "STORAGE_PROOF_NOT_APECHAIN");
+        bytes32 stateRoot,
+        bytes calldata accountMptProof
+    ) public pure returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot) {
+        require(_isApeChain(chainId), "STORAGE_PROOF_SHOULD_BE_APECHAIN");
 
-        // Ensure provided header is a valid one by making sure it is present in saved MMRs
-        _verifyAccumulatedHeaderProof(chainId, headerProof);
+        (bool doesAccountExist, bytes memory accountRLP) = SecureMerkleTrie.get(abi.encodePacked(account), accountMptProof, stateRoot);
 
-        // Verify the account state proof
-        bytes32 stateRoot = _getStateRoot(headerProof.provenBlockHeader);
-
-        (bool doesAccountExist, bytes memory accountRLP) = SecureMerkleTrie.get(abi.encodePacked(account), accountTrieProof, stateRoot);
-        // Decode the account fields
         (nonce, flags, fixed_, shares, debt, delegate, codeHash, storageRoot) = _decodeAccountFieldsApechain(doesAccountExist, accountRLP);
     }
 
-    function verifyAccount(
-        uint256 chainId,
-        address account,
-        BlockHeaderProof calldata headerProof,
-        bytes calldata accountTrieProof
-    ) public view returns (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) {
-        require(!_isApeChain(chainId), "STORAGE_PROOF_SHOULD_BE_NON_APECHAIN");
-
-        // Ensure provided header is a valid one by making sure it is present in saved MMRs
-        _verifyAccumulatedHeaderProof(chainId, headerProof);
-
-        // Verify the account state proof
-        bytes32 stateRoot = _getStateRoot(headerProof.provenBlockHeader);
-
-        (bool doesAccountExist, bytes memory accountRLP) = SecureMerkleTrie.get(abi.encodePacked(account), accountTrieProof, stateRoot);
-        // Decode the account fields
-        (nonce, accountBalance, storageRoot, codeHash) = _decodeAccountFields(doesAccountExist, accountRLP);
-    }
-
     /// @inheritdoc IEvmFactRegistryModule
-    function verifyStorage(uint256 chainId, address account, uint256 blockNumber, bytes32 slot, bytes calldata storageSlotTrieProof) public view returns (bytes32 slotValue) {
-        EvmFactRegistryModuleStorage storage ms = moduleStorage();
-
-        Account storage accountData = ms.accountField[chainId][account][blockNumber];
-        require(readBitAtIndexFromRight(accountData.savedFields, uint8(AccountField.STORAGE_ROOT)), "STORAGE_PROOF_STORAGE_ROOT_NOT_SAVED");
-
-        bytes32 storageRoot = accountData.fields[AccountField.STORAGE_ROOT];
-
+    function verifyStorage(bytes32 slot, bytes32 storageRoot, bytes calldata storageSlotTrieProof) public pure returns (bytes32 slotValue) {
         (, bytes memory slotValueRLP) = SecureMerkleTrie.get(abi.encode(slot), storageSlotTrieProof, storageRoot);
 
         slotValue = slotValueRLP.toRLPItem().readBytes32();
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function verifyTimestamp(uint256 chainId, uint256 timestamp_, BlockHeaderProof calldata headerProof, BlockHeaderProof calldata headerProofNext) public view returns (uint256) {
-        _verifyAccumulatedHeaderProof(chainId, headerProof);
-        _verifyAccumulatedHeaderProof(chainId, headerProofNext);
-
-        uint256 blockNumber = _decodeBlockNumber(headerProof.provenBlockHeader);
-        uint256 blockNumberNext = _decodeBlockNumber(headerProofNext.provenBlockHeader);
-
-        require(blockNumber != type(uint256).max, "STORAGE_PROOF_BLOCK_NUMBER_TOO_HIGH");
-        require(blockNumber + 1 == blockNumberNext, "STORAGE_PROOF_INVALID_BLOCK_NUMBER_NEXT");
-
-        uint256 blockTimestamp = _decodeBlockTimestamp(headerProof.provenBlockHeader);
-        uint256 blockTimestampNext = _decodeBlockTimestamp(headerProofNext.provenBlockHeader);
-
-        require(blockTimestamp <= timestamp_ && timestamp_ < blockTimestampNext, "STORAGE_PROOF_TIMESTAMP_NOT_BETWEEN_BLOCKS");
-
-        return blockNumber;
+    function verifyTimestamp(uint256 timestamp_, uint256 blockNumberLow, uint256 blockTimestampLow, uint256 blockTimestampHigh) public pure {
+        require(blockNumberLow != type(uint256).max, "STORAGE_PROOF_BLOCK_NUMBER_TOO_HIGH");
+        require(blockTimestampLow <= timestamp_ && timestamp_ < blockTimestampHigh, "STORAGE_PROOF_TIMESTAMP_NOT_BETWEEN_BLOCKS");
     }
 
-    function getApechainSharePriceSafe(uint256 chainId, uint256 blockNumber) public view returns (bool, uint256) {
-        require(_isApeChain(chainId), "STORAGE_PROOF_NOT_APECHAIN");
-        (bool exists, bytes32 slotValue) = IEvmFactRegistryModule(address(this)).storageSlotSafe(chainId, APECHAIN_SHARE_PRICE_ADDRESS, blockNumber, APECHAIN_SHARE_PRICE_SLOT);
-        return (exists, uint256(slotValue));
-    }
-
-    function getApechainSharePrice(uint256 chainId, uint256 blockNumber) public view returns (uint256) {
-        (bool exists, uint256 sharePrice) = IEvmFactRegistryModule(address(this)).getApechainSharePriceSafe(chainId, blockNumber);
-        require(exists, "STORAGE_PROOF_SHARE_PRICE_NOT_SAVED");
-        return sharePrice;
-    }
-
-    // ========================= Internal functions ========================= //
+    // ============================ Internal functions ============================ //
 
     function _isApeChain(uint256 chainId) internal pure returns (bool) {
         return chainId == 33111 || chainId == 33139;
     }
 
-    function _proveAccountEvm(uint256 chainId, address account, uint8 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) internal {
-        EvmFactRegistryModuleStorage storage ms = moduleStorage();
-        Account storage accountData = ms.accountField[chainId][account][headerProof.blockNumber];
+    function _proveAccount(uint256 chainId, address account, uint256 blockNumber, uint8 accountFieldsToSave, bytes calldata accountTrieProof) internal {
+        require(accountFieldsToSave >> 4 == 0, "STORAGE_PROOF_INVALID_FIELDS_TO_SAVE");
+
+        // Read proven state root
+        bytes32 stateRoot = headerField(chainId, blockNumber, BlockHeaderField.STATE_ROOT);
 
         // Verify the proof and decode the account fields
-        (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) = verifyAccount(chainId, account, headerProof, accountTrieProof);
+        (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) = verifyAccount(chainId, account, stateRoot, accountTrieProof);
+
+        Account storage accountData = moduleStorage().accountField[chainId][account][blockNumber];
 
         // Save the desired account properties to the storage
         if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.NONCE))) {
@@ -251,20 +279,24 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
             accountData.fields[AccountField.STORAGE_ROOT] = storageRoot;
         }
 
-        emit ProvenAccount(chainId, account, headerProof.blockNumber, accountFieldsToSave, nonce, accountBalance, codeHash, storageRoot, 0, 0, 0, 0, 0);
+        emit ProvenAccount(chainId, account, blockNumber, accountData.savedFields);
     }
 
-    function _proveAccountApechain(uint256 chainId, address account, uint8 accountFieldsToSave, BlockHeaderProof calldata headerProof, bytes calldata accountTrieProof) internal {
-        EvmFactRegistryModuleStorage storage ms = moduleStorage();
-        Account storage accountData = ms.accountField[chainId][account][headerProof.blockNumber];
+    function _proveAccountApechain(uint256 chainId, address account, uint256 blockNumber, uint8 accountFieldsToSave, bytes calldata accountTrieProof) internal {
+        require(accountFieldsToSave >> 5 == 0, "STORAGE_PROOF_INVALID_FIELDS_TO_SAVE");
+
+        // Read proven state root
+        bytes32 stateRoot = headerField(chainId, blockNumber, BlockHeaderField.STATE_ROOT);
 
         // Verify the proof and decode the account fields
         (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot) = verifyAccountApechain(
             chainId,
             account,
-            headerProof,
+            stateRoot,
             accountTrieProof
         );
+
+        Account storage accountData = moduleStorage().accountField[chainId][account][blockNumber];
 
         // Save the desired account properties to the storage
         if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.NONCE))) {
@@ -274,7 +306,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
 
         if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.BALANCE))) {
             accountData.savedFields |= uint8(1 << uint8(AccountField.BALANCE));
-            uint256 sharePrice = IEvmFactRegistryModule(address(this)).getApechainSharePrice(chainId, headerProof.blockNumber);
+            uint256 sharePrice = IEvmFactRegistryModule(address(this)).getApechainSharePrice(chainId, blockNumber);
             accountData.fields[AccountField.BALANCE] = bytes32(shares * sharePrice + fixed_ - debt);
         }
 
@@ -298,20 +330,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
             accountData.fields[AccountField.APE_DELEGATE] = bytes32(delegate);
         }
 
-        emit ProvenAccount(chainId, account, headerProof.blockNumber, accountFieldsToSave, nonce, 0, codeHash, storageRoot, flags, fixed_, shares, debt, delegate);
-    }
-
-    function _verifyAccumulatedHeaderProof(uint256 chainId, BlockHeaderProof memory proof) internal view {
-        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        bytes32 mmrRoot = s.mmrs[chainId][proof.treeId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[proof.mmrTreeSize];
-        require(mmrRoot != bytes32(0), "STORAGE_PROOF_EMPTY_MMR_ROOT");
-
-        bytes32 blockHeaderHash = keccak256(proof.provenBlockHeader);
-
-        StatelessMmr.verifyProof(proof.blockProofLeafIndex, blockHeaderHash, proof.mmrElementInclusionProof, proof.mmrPeaks, proof.mmrTreeSize, mmrRoot);
-
-        uint256 actualBlockNumber = _decodeBlockNumber(proof.provenBlockHeader);
-        require(actualBlockNumber == proof.blockNumber, "STORAGE_PROOF_INVALID_BLOCK_NUMBER");
+        emit ProvenAccount(chainId, account, blockNumber, accountData.savedFields);
     }
 
     function _decodeAccountFields(bool doesAccountExist, bytes memory accountRLP) internal pure returns (uint256 nonce, uint256 balance, bytes32 storageRoot, bytes32 codeHash) {
@@ -347,16 +366,13 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         storageRoot = accountFields[APECHAIN_ACCOUNT_STORAGE_ROOT_INDEX].readBytes32();
     }
 
-    function _getStateRoot(bytes memory headerRlp) internal pure returns (bytes32) {
-        return RLPReader.toRLPItem(headerRlp).readList()[3].readBytes32();
-    }
-
-    function _decodeBlockNumber(bytes memory headerRlp) internal pure returns (uint256) {
-        return RLPReader.toRLPItem(headerRlp).readList()[8].readUint256();
-    }
-
-    function _decodeBlockTimestamp(bytes memory headerRlp) internal pure returns (uint256) {
-        return RLPReader.toRLPItem(headerRlp).readList()[11].readUint256();
+    function _readBlockHeaderFields(bytes memory headerRlp) internal pure returns (bytes32[BLOCK_HEADER_FIELD_COUNT] memory fields) {
+        RLPReader.RLPItem[] memory headerFields = RLPReader.toRLPItem(headerRlp).readList();
+        for (uint8 i = 0; i < BLOCK_HEADER_FIELD_COUNT; i++) {
+            // Logs bloom is longer than 32 bytes, so it's not supported
+            if (i == uint8(BlockHeaderField.LOGS_BLOOM)) continue;
+            fields[i] = headerFields[i].readBytes32();
+        }
     }
 
     function readBitAtIndexFromRight(uint8 bitmap, uint8 index) internal pure returns (bool value) {

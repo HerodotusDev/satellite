@@ -1,8 +1,10 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import {
-  fieldsToSave as f,
-  fields,
+  accountFieldsBitmask as am,
+  accountFields as af,
+  headerFieldsBitmask as hm,
+  headerFields as hf,
   toU256,
   setMmrData,
   deploy,
@@ -36,13 +38,12 @@ describe("EVM Fact Registry Ethereum Sepolia", () => {
 
     const account = "0xE7F48E6dCfBeA43ff5CD1F1570f6543878cCF156";
     const headerProof = {
-      treeId: mmrId,
-      mmrTreeSize: mmrSize,
-      blockNumber,
-      blockProofLeafIndex: 1,
+      mmrId,
+      mmrSize,
+      mmrLeafIndex: 1,
       mmrPeaks: [blockHash],
-      mmrElementInclusionProof: [],
-      provenBlockHeader:
+      mmrInclusionProof: [],
+      blockHeaderRlp:
         "0xf90265a018b82986d853e1e2b7624ef9e14330dbd74bc6a15716f31ec0d2d2bfda70f281a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d4934794455e5aa18469bc6ccef49594645666c587a3a71ba0bd8967936dcac753885027317cfb97eff8ec90bbf952c3b4308f2928dec83fdda0e4938d93eb85918eb86e0cc84339f991b5e10f186dad45fb7c1817518c38b14ea00d6d2e3378a4079d1977017eeec1ff2ec52b15e796f6335c3ca615970f816133b901008148084dcc014422899c209e829a00000149c84085135860c200843004800192148600480820025448600441215c01892314268000a12e080d071a541d2c0854631265080b4c011a705baa1a2000c89004040728013400b1e0821b02942e72d36964280f0b510d4582a7a58210a049b802e908c4806884002008981e01a908010252040483826500608808018330a012101114231402028871450f45c482085d020a60100102c44088a04b4090c8905601816660ba02308a428421b2300818898b00126a260a8ab7007606bd9dd20226645401408001a1712113442208266b4480550014610c04d45d500401a940040681aa1834cc1216680985292838490014808370100c840225510083db271c84676a77f899d883010e0b846765746888676f312e32332e31856c696e7578a037423beb31682dd753561ca8dcab7addebe125f41a93c95105b195bfd6d7d235880000000000000000850886cb2404a059574b119ccf2b9cf5a54dee5b16c4943fb661971ed77837008228e984d4d08b830a00008404e00000a0cc666c56fbf798e23edfc0b9f29910c5ac09605ad17dc3e1b648deb8534d9484",
     };
     const accountTrieProof =
@@ -60,62 +61,49 @@ describe("EVM Fact Registry Ethereum Sepolia", () => {
     };
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, fields.NONCE),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.NONCE),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, fields.BALANCE),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.BALANCE),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(
-        chainId,
-        account,
-        blockNumber,
-        fields.STORAGE_ROOT,
-      ),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.STORAGE_ROOT),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, fields.CODE_HASH),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.CODE_HASH),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
+
+    await satellite.proveHeader(chainId, hm.STATE_ROOT, headerProof);
 
     await satellite.proveAccount(
       chainId,
+      blockNumber,
       account,
-      f.NONCE | f.BALANCE | f.CODE_HASH | f.STORAGE_ROOT,
-      headerProof,
+      am.NONCE | am.BALANCE | am.CODE_HASH | am.STORAGE_ROOT,
       accountTrieProof,
     );
 
     expect(
-      await satellite.accountField(chainId, account, blockNumber, fields.NONCE),
+      await satellite.accountField(chainId, blockNumber, account, af.NONCE),
     ).to.equal(toU256(expected.nonce));
 
     expect(
-      await satellite.accountField(
-        chainId,
-        account,
-        blockNumber,
-        fields.BALANCE,
-      ),
+      await satellite.accountField(chainId, blockNumber, account, af.BALANCE),
     ).to.equal(toU256(expected.balance));
 
     expect(
-      await satellite.accountField(
-        chainId,
-        account,
-        blockNumber,
-        fields.CODE_HASH,
-      ),
+      await satellite.accountField(chainId, blockNumber, account, af.CODE_HASH),
     ).to.equal(toU256(expected.codeHash));
 
     expect(
       await satellite.accountField(
         chainId,
-        account,
         blockNumber,
-        fields.STORAGE_ROOT,
+        account,
+        af.STORAGE_ROOT,
       ),
     ).to.equal(toU256(expected.storageHash));
   });

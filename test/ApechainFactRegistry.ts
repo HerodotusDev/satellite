@@ -1,8 +1,10 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import {
-  fieldsToSave as f,
-  fields,
+  accountFields as af,
+  accountFieldsBitmask as am,
+  headerFields as hf,
+  headerFieldsBitmask as hm,
   toU256,
   setMmrData,
   deploy,
@@ -40,13 +42,12 @@ describe("EVM Fact Registry Apechain", () => {
 
     const account = "0xEEBC6016539E0bC60D35f527FEfa414794854499";
     const headerProof = {
-      treeId: mmrId,
-      mmrTreeSize: mmrSize,
-      blockNumber,
-      blockProofLeafIndex: 1,
+      mmrId,
+      mmrSize,
+      mmrLeafIndex: 1,
       mmrPeaks: [blockHash],
-      mmrElementInclusionProof: [],
-      provenBlockHeader:
+      mmrInclusionProof: [],
+      blockHeaderRlp:
         "0xf90223a0e09c933b2ae4b00ae29a6ce9ec40d2073f74cc1a39cd2453948a2945c8051680a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d4934794a4b000000000000000000073657175656e636572a07da0dca81ff738751942f1e160e8bb174f2822b54271e048e30028e9f05d4f7ca05494efe03c9f501e7c8afc33f13af9304224f840d91a9608dabfedc43cd1fbb6a008519cd3f965720c9f16783ad2e6a3d2df9fa05d18ac58f8d0ade7dd8c5ec5c6b901000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000040000000000000000220000000000000000000000000000000000000200000000000000000000000000000000000000000002000000000000000004080000000000000000400000000004200000000000000000000000002000000041000000000000000000000022000000000000000000000000000000080000800000080000000000000000000000000000000000002000000000004000000000000400000000000000000000000000002000000000000000000000000800000000000000800000040000000000000010000001840104e8218704000000000000830129388467efcb0fa055197ad14d6804f2dcd9118ebd0cea13640510a635005d312d7dae2db30d96bfa000000000004430d200000000007ad0d7000000000000002000000000000000008800000000000d920883989680",
     };
     const accountTrieProof =
@@ -70,127 +71,99 @@ describe("EVM Fact Registry Apechain", () => {
     };
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, fields.NONCE),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.NONCE),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, fields.BALANCE),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.BALANCE),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(
-        chainId,
-        account,
-        blockNumber,
-        fields.STORAGE_ROOT,
-      ),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.STORAGE_ROOT),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, fields.CODE_HASH),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.CODE_HASH),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, fields.APE_FLAGS),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.APE_FLAGS),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, fields.APE_FIXED),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.APE_FIXED),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, fields.APE_SHARES),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.APE_SHARES),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, fields.APE_DEBT),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.APE_DEBT),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     await expect(
-      satellite.accountField(
-        chainId,
-        account,
-        blockNumber,
-        fields.APE_DELEGATE,
-      ),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.APE_DELEGATE),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
+
+    await satellite.proveHeader(chainId, hm.STATE_ROOT, headerProof);
 
     await satellite.proveAccount(
       chainId,
+      blockNumber,
       account,
-      f.NONCE | f.CODE_HASH | f.STORAGE_ROOT | f.APE_FLAGS,
-      headerProof,
+      am.NONCE | am.CODE_HASH | am.STORAGE_ROOT | am.APE_FLAGS,
       accountTrieProof,
     );
 
     expect(
-      await satellite.accountField(chainId, account, blockNumber, fields.NONCE),
+      await satellite.accountField(chainId, blockNumber, account, af.NONCE),
     ).to.equal(toU256(expected.nonce));
 
     await expect(
-      satellite.accountField(chainId, account, blockNumber, fields.BALANCE),
-    ).to.be.revertedWith("STORAGE_PROOF_FIELD_NOT_SAVED");
+      satellite.accountField(chainId, blockNumber, account, af.BALANCE),
+    ).to.be.revertedWith("STORAGE_PROOF_ACCOUNT_FIELD_NOT_SAVED");
 
     expect(
-      await satellite.accountField(
-        chainId,
-        account,
-        blockNumber,
-        fields.CODE_HASH,
-      ),
+      await satellite.accountField(chainId, blockNumber, account, af.CODE_HASH),
     ).to.equal(toU256(expected.codeHash));
 
     expect(
       await satellite.accountField(
         chainId,
-        account,
         blockNumber,
-        fields.STORAGE_ROOT,
+        account,
+        af.STORAGE_ROOT,
       ),
     ).to.equal(toU256(expected.storageHash));
 
     expect(
-      await satellite.accountField(
-        chainId,
-        account,
-        blockNumber,
-        fields.APE_FLAGS,
-      ),
+      await satellite.accountField(chainId, blockNumber, account, af.APE_FLAGS),
     ).to.equal(toU256(expected.flags));
 
     expect(
-      await satellite.accountField(
-        chainId,
-        account,
-        blockNumber,
-        fields.APE_FIXED,
-      ),
+      await satellite.accountField(chainId, blockNumber, account, af.APE_FIXED),
     ).to.equal(toU256(expected.fixed));
 
     expect(
       await satellite.accountField(
         chainId,
-        account,
         blockNumber,
-        fields.APE_SHARES,
+        account,
+        af.APE_SHARES,
       ),
     ).to.equal(toU256(expected.shares));
 
     expect(
-      await satellite.accountField(
-        chainId,
-        account,
-        blockNumber,
-        fields.APE_DEBT,
-      ),
+      await satellite.accountField(chainId, blockNumber, account, af.APE_DEBT),
     ).to.equal(toU256(expected.debt));
 
     expect(
       await satellite.accountField(
         chainId,
-        account,
         blockNumber,
-        fields.APE_DELEGATE,
+        account,
+        af.APE_DELEGATE,
       ),
     ).to.equal(toU256(expected.delegate));
 
@@ -203,9 +176,9 @@ describe("EVM Fact Registry Apechain", () => {
 
     await satellite.proveAccount(
       chainId,
+      blockNumber,
       APECHAIN_SHARE_PRICE_ADDRESS,
-      f.STORAGE_ROOT,
-      headerProof,
+      am.STORAGE_ROOT,
       apechainSharePriceAccountTrieProof,
     );
 
@@ -214,8 +187,8 @@ describe("EVM Fact Registry Apechain", () => {
 
     await satellite.proveStorage(
       chainId,
-      APECHAIN_SHARE_PRICE_ADDRESS,
       blockNumber,
+      APECHAIN_SHARE_PRICE_ADDRESS,
       APECHAIN_SHARE_PRICE_SLOT,
       apechainSharePriceSlotTrieProof,
     );
@@ -226,19 +199,14 @@ describe("EVM Fact Registry Apechain", () => {
 
     await satellite.proveAccount(
       chainId,
+      blockNumber,
       account,
-      f.BALANCE,
-      headerProof,
+      am.BALANCE,
       accountTrieProof,
     );
 
     expect(
-      await satellite.accountField(
-        chainId,
-        account,
-        blockNumber,
-        fields.BALANCE,
-      ),
+      await satellite.accountField(chainId, blockNumber, account, af.BALANCE),
     ).to.equal(toU256(expected.balance));
   });
 });

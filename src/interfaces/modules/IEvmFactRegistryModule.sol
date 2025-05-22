@@ -17,7 +17,7 @@ interface IEvmFactRegistryModule {
         BENEFICIARY, // 2
         STATE_ROOT, // 3
         RECEIPTS_ROOT, // 4
-        TRANSACTION_ROOT, // 5
+        TRANSACTIONS_ROOT, // 5
         LOGS_BLOOM, // 6 - not supported
         DIFFICULTY, // 7
         NUMBER, // 8 - not supported

@@ -219,8 +219,12 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         address account,
         BlockHeaderProof calldata headerProof,
         bytes calldata accountMptProof
-    ) external view returns (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) {
-        bytes32 stateRoot = verifyHeader(chainId, headerProof)[uint8(BlockHeaderField.STATE_ROOT)];
+    ) public view returns (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) {
+        bytes32[BLOCK_HEADER_FIELD_COUNT] memory headerFields = verifyHeader(chainId, headerProof);
+
+        require(uint256(headerFields[uint8(BlockHeaderField.NUMBER)]) == blockNumber, "STORAGE_PROOF_BLOCK_NUMBER_NOT_MATCH");
+        bytes32 stateRoot = headerFields[uint8(BlockHeaderField.STATE_ROOT)];
+
         return verifyOnlyAccount(chainId, account, stateRoot, accountMptProof);
     }
 
@@ -244,8 +248,12 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         address account,
         BlockHeaderProof calldata headerProof,
         bytes calldata accountMptProof
-    ) external view returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot) {
-        bytes32 stateRoot = verifyHeader(chainId, headerProof)[uint8(BlockHeaderField.STATE_ROOT)];
+    ) public view returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot) {
+        bytes32[BLOCK_HEADER_FIELD_COUNT] memory headerFields = verifyHeader(chainId, headerProof);
+
+        require(uint256(headerFields[uint8(BlockHeaderField.NUMBER)]) == blockNumber, "STORAGE_PROOF_BLOCK_NUMBER_NOT_MATCH");
+        bytes32 stateRoot = headerFields[uint8(BlockHeaderField.STATE_ROOT)];
+
         return verifyOnlyAccountApechain(chainId, account, stateRoot, accountMptProof);
     }
 
@@ -345,6 +353,8 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     function _proveAccountApechain(uint256 chainId, uint256 blockNumber, address account, uint8 accountFieldsToSave, bytes calldata accountTrieProof) internal {
         require(accountFieldsToSave >> 5 == 0, "STORAGE_PROOF_INVALID_FIELDS_TO_SAVE");
 
+        Account storage accountData = moduleStorage().accountField[chainId][account][blockNumber];
+
         // Read proven state root
         bytes32 stateRoot = headerField(chainId, blockNumber, BlockHeaderField.STATE_ROOT);
 
@@ -356,8 +366,6 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
             accountTrieProof
         );
 
-        Account storage accountData = moduleStorage().accountField[chainId][account][blockNumber];
-
         // Save the desired account properties to the storage
         if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.NONCE))) {
             accountData.savedFields |= uint8(1 << uint8(AccountField.NONCE));
@@ -366,7 +374,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
 
         if (readBitAtIndexFromRight(accountFieldsToSave, uint8(AccountField.BALANCE))) {
             accountData.savedFields |= uint8(1 << uint8(AccountField.BALANCE));
-            uint256 sharePrice = IEvmFactRegistryModule(address(this)).getApechainSharePrice(chainId, blockNumber);
+            uint256 sharePrice = getApechainSharePrice(chainId, blockNumber);
             accountData.fields[AccountField.BALANCE] = bytes32(shares * sharePrice + fixed_ - debt);
         }
 

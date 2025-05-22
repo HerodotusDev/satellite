@@ -843,9 +843,9 @@
       },
       {
         "indexed": false,
-        "internalType": "uint128",
+        "internalType": "uint16",
         "name": "savedFields",
-        "type": "uint128"
+        "type": "uint16"
       }
     ],
     "name": "ProvenHeader",
@@ -1140,7 +1140,7 @@
       },
       {
         "internalType": "bytes",
-        "name": "accountTrieProof",
+        "name": "accountMptProof",
         "type": "bytes"
       }
     ],
@@ -1157,9 +1157,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint128",
+        "internalType": "uint16",
         "name": "headerFieldsToSave",
-        "type": "uint128"
+        "type": "uint16"
       },
       {
         "components": [
@@ -1228,7 +1228,7 @@
       },
       {
         "internalType": "bytes",
-        "name": "storageSlotTrieProof",
+        "name": "storageSlotMptProof",
         "type": "bytes"
       }
     ],
@@ -1766,7 +1766,7 @@
       },
       {
         "internalType": "bytes",
-        "name": "storageSlotTrieProof",
+        "name": "storageSlotMptProof",
         "type": "bytes"
       }
     ],
@@ -1875,7 +1875,7 @@
       },
       {
         "internalType": "bytes",
-        "name": "storageSlotTrieProof",
+        "name": "storageSlotMptProof",
         "type": "bytes"
       }
     ],

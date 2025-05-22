@@ -3,6 +3,7 @@ import "@nomicfoundation/hardhat-foundry";
 import "@nomicfoundation/hardhat-ignition-ethers";
 import "@matterlabs/hardhat-zksync";
 import "@matterlabs/hardhat-zksync-verify";
+import "@nomicfoundation/hardhat-toolbox";
 
 import dotenv from "dotenv";
 dotenv.config();

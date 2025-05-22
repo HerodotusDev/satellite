@@ -1,7 +1,10 @@
 import { $ } from "bun";
 import hre from "hardhat";
 import fs from "fs";
-import deployedSatellites from "../deployed_satellites.json";
+import {
+  getDeployedSatellites,
+  writeDeployedSatellites,
+} from "./satelliteDeploymentsManager";
 
 async function main() {
   if (Bun.argv.length != 3) {
@@ -22,13 +25,15 @@ async function main() {
     process.exit(1);
   }
 
+  const deployedSatellites = await getDeployedSatellites();
+
   const [chainName, chainConfig] = chainConfigs[0];
 
   if (
     (deployedSatellites.satellites as any[]).find((s) => s.chainId == chainId)
   ) {
     console.error(
-      `Satellite ${chainId} already deployed\nHint: you may use "bun satellite:remove ${chainId}" or "bun erase_deployed_satellites"`,
+      `Satellite ${chainId} already deployed\nHint: you may use "bun satellite:remove ${chainId}" or change the active environment with "bun env:change"`,
     );
     process.exit(1);
   }
@@ -70,10 +75,7 @@ async function main() {
     contractAddress: address,
   });
 
-  fs.writeFileSync(
-    "deployed_satellites.json",
-    JSON.stringify(deployedSatellites, null, 2),
-  );
+  writeDeployedSatellites(deployedSatellites);
 }
 
 main();

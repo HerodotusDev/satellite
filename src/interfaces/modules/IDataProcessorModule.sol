@@ -37,7 +37,6 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     /// @param taskResultHigh The high part of the task result
     /// @param taskHashLow The low part of the task hash
     /// @param taskHashHigh The high part of the task hash
-    /// @param moduleHash The module hash that was used to compute the task
     /// @param programHash The program hash that was used to compute the task
     struct TaskData {
         MmrData[] mmrData;
@@ -45,7 +44,6 @@ interface IDataProcessorModule is IFactsRegistryCommon {
         uint256 taskResultHigh;
         uint256 taskHashLow;
         uint256 taskHashHigh;
-        bytes32 moduleHash;
         bytes32 programHash;
     }
 
@@ -65,6 +63,11 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     error UnauthorizedProgramHash();
     /// Invalid MMR root
     error InvalidMmrRoot();
+    /// Task is already finalized
+    error TaskAlreadyFinalized();
+
+    /// @notice Emitted when a task is finalized
+    event TaskFinalized(bytes32 taskHash, bytes32 taskResult);
 
     /// @notice Emitted when a program hash is enabled
     event ProgramHashEnabled(bytes32 enabledProgramHash);
@@ -89,6 +92,9 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     ///         by verifying the locally computed fact with the FactsRegistry
     /// @param taskData The task data
     function authenticateDataProcessorTaskExecution(TaskData calldata taskData) external;
+
+    /// @notice Returns address of the facts registry
+    function getDataProcessorFactsRegistry() external view returns (address);
 
     /// @notice Returns the result of a finalized task
     function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32);

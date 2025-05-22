@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: true
 
-    name: Foundry project
+    name: Hardhat project
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,11 +26,7 @@ jobs:
         run: |
           forge --version
 
-      - name: Run Forge Install
-        run: |
-          forge install
-
-      - name: Run Bun Install
+      - name: Run Bun install
         run: |
           bun install
 
@@ -44,10 +40,10 @@ jobs:
         run: |
           bun prettier:check
 
-      - name: Run Forge build
+      - name: Run Hardhat build
         run: |
-          bun forge:build
+          bun compile
 
-      - name: Run Forge tests
+      - name: Run Hardhat test
         run: |
-          bun forge:test -vvv
+          bun run test

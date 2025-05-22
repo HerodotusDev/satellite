@@ -13,9 +13,6 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
     // Using inline library for efficient splitting and joining of uint256 values
     using Uint256Splitter for uint256;
 
-    // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
-    bytes32 public constant PROGRAM_HASH = bytes32(uint256(0x1eca36d586f5356fba096edbf7414017d51cd0ed24b8fde80f78b61a9216ed2));
-
     bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
     bytes32 public constant POSEIDON_HASHING_FUNCTION = keccak256("poseidon");
 
@@ -39,10 +36,30 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
 
     // ========================= Core Functions ========================= //
 
-    function initEvmSharpMmrGrowingModule(IFactsRegistry factsRegistry) external onlyOwner {
+    function initEvmSharpMmrGrowingModule() external onlyOwner {
         EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
-        ms.factsRegistry = factsRegistry;
         ms.aggregatedChainId = block.chainid;
+    }
+
+    function setEvmSharpMmrGrowingModuleFactsRegistry(address factsRegistry) external onlyOwner {
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        ms.factsRegistry = IFactsRegistry(factsRegistry);
+    }
+
+    // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
+    function setEvmSharpMmrGrowingModuleProgramHash(uint256 programHash) external onlyOwner {
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        ms.programHash = programHash;
+    }
+
+    function getEvmSharpMmrGrowingModuleFactsRegistry() external view returns (address) {
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        return address(ms.factsRegistry);
+    }
+
+    function getEvmSharpMmrGrowingModuleProgramHash() external view returns (uint256) {
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        return ms.programHash;
     }
 
     function createEvmSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external {
@@ -52,7 +69,7 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
 
         EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
 
-        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions);
+        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions, true);
     }
 
     function aggregateEvmSharpJobs(uint256 mmrId, IEvmSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external {
@@ -89,11 +106,11 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
 
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize = mmrNewSize;
-        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced = true;
+        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown = true;
 
         s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootKeccak;
         s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize = mmrNewSize;
-        s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced = true;
+        s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown = true;
 
         (, uint256 toBlock) = lastOutput.blockNumbersPacked.split128();
 
@@ -127,12 +144,12 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
             revert AggregationError("MMR size mismatch");
         }
 
-        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced == false) {
-            revert AggregationError("Poseidon MMR not sibling synced");
+        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown == false) {
+            revert AggregationError("Poseidon MMR is not offchain grown");
         }
 
-        if (s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isSiblingSynced == false) {
-            revert AggregationError("Keccak MMR not sibling synced");
+        if (s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown == false) {
+            revert AggregationError("Keccak MMR is not offchain grown");
         }
 
         // Check that the job's previous Poseidon MMR root is the same as the one stored in the contract state
@@ -189,10 +206,10 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
         // We hash the outputs
         bytes32 outputHash = keccak256(abi.encodePacked(outputs));
 
-        // We compute the deterministic fact bytes32 value
-        bytes32 fact = keccak256(abi.encode(PROGRAM_HASH, outputHash));
-
         EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+
+        // We compute the deterministic fact bytes32 value
+        bytes32 fact = keccak256(abi.encode(ms.programHash, outputHash));
 
         // We ensure this fact has been registered on SHARP Facts Registry
         if (!ms.factsRegistry.isValid(fact)) {

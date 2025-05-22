@@ -10,9 +10,6 @@ import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "src/interfaces/mo
 import {AccessController} from "src/libraries/AccessController.sol";
 
 contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, AccessController {
-    // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
-    bytes32 public constant PROGRAM_HASH = bytes32(uint256(0x4ebb807bacec9cf6202e6482d8f7f74a531b067571dba2ccf118b0328df8295));
-
     bytes32 public constant POSEIDON_HASHING_FUNCTION = keccak256("poseidon");
 
     // Default roots for new aggregators:
@@ -30,10 +27,30 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
         }
     }
 
-    function initStarknetSharpMmrGrowingModule(IFactsRegistry factsRegistry, uint256 chainId) external onlyOwner {
+    function initStarknetSharpMmrGrowingModule(uint256 starknetChainId) external onlyOwner {
         StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
-        ms.factsRegistry = factsRegistry;
-        ms.aggregatedChainId = chainId;
+        ms.aggregatedChainId = starknetChainId;
+    }
+
+    function setStarknetSharpMmrGrowingModuleFactsRegistry(address factsRegistry) external onlyOwner {
+        StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        ms.factsRegistry = IFactsRegistry(factsRegistry);
+    }
+
+    // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
+    function setStarknetSharpMmrGrowingModuleProgramHash(uint256 programHash) external onlyOwner {
+        StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        ms.programHash = programHash;
+    }
+
+    function getStarknetSharpMmrGrowingModuleFactsRegistry() external view returns (address) {
+        StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        return address(ms.factsRegistry);
+    }
+
+    function getStarknetSharpMmrGrowingModuleProgramHash() external view returns (uint256) {
+        StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        return ms.programHash;
     }
 
     function createStarknetSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external {
@@ -42,7 +59,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
 
         StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
 
-        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions);
+        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions, true);
     }
 
     function aggregateStarknetSharpJobs(uint256 mmrId, StarknetJobOutput[] calldata outputs) external {
@@ -79,7 +96,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
 
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
         s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize = mmrNewSize;
-        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isSiblingSynced = false;
+        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown = true;
 
         uint256 toBlock = lastOutput.toBlockNumberLow;
 
@@ -103,6 +120,9 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
         // Retrieve from cache the parent hash of the block to start from
         bytes32 fromBlockPlusOneParentHash = s.receivedParentHashes[ms.aggregatedChainId][POSEIDON_HASHING_FUNCTION][fromBlockNumber + 1];
         uint256 actualMmrSizePoseidon = s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize;
+        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown == false) {
+            revert AggregationError("Mmr is not offchain grown");
+        }
 
         // Check that the job's previous MMR size is the same as the one stored in the contract state
         if (firstOutput.mmrPreviousSize != actualMmrSizePoseidon) revert AggregationError("MMR size mismatch");
@@ -135,10 +155,10 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
         // We hash the outputs
         bytes32 outputHash = keccak256(abi.encodePacked(outputs));
 
-        // We compute the deterministic fact bytes32 value
-        bytes32 fact = keccak256(abi.encode(PROGRAM_HASH, outputHash));
-
         StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+
+        // We compute the deterministic fact bytes32 value
+        bytes32 fact = keccak256(abi.encode(ms.programHash, outputHash));
 
         // We ensure this fact has been registered on SHARP Facts Registry
         if (!ms.factsRegistry.isValid(fact)) revert InvalidFact();

@@ -349,6 +349,12 @@
         "internalType": "enum CreatedFrom",
         "name": "createdFrom",
         "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isOffchainGrown",
+        "type": "bool"
       }
     ],
     "name": "CreatedMmr",
@@ -544,7 +550,7 @@
       },
       {
         "internalType": "bool",
-        "name": "isSiblingSynced",
+        "name": "isOffchainGrown",
         "type": "bool"
       }
     ],
@@ -607,6 +613,11 @@
         "internalType": "bytes32[]",
         "name": "hashingFunctions",
         "type": "bytes32[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "isOffchainGrown",
+        "type": "bool"
       }
     ],
     "name": "createMmrFromDomestic",
@@ -753,7 +764,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "isMMRSiblingSynced",
+    "name": "isMmrOnlyOffchainGrown",
     "outputs": [
       {
         "internalType": "bool",
@@ -795,45 +806,21 @@
       },
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      },
-      {
-        "indexed": false,
         "internalType": "uint256",
         "name": "blockNumber",
         "type": "uint256"
       },
       {
         "indexed": false,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": false,
         "internalType": "uint8",
         "name": "savedFields",
         "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "nonce",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "balance",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes32",
-        "name": "codeHash",
-        "type": "bytes32"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes32",
-        "name": "storageHash",
-        "type": "bytes32"
       }
     ],
     "name": "ProvenAccount",
@@ -850,9 +837,28 @@
       },
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16",
+        "name": "savedFields",
+        "type": "uint16"
+      }
+    ],
+    "name": "ProvenHeader",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
       },
       {
         "indexed": false,
@@ -862,14 +868,14 @@
       },
       {
         "indexed": false,
-        "internalType": "bytes32",
-        "name": "slot",
-        "type": "bytes32"
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
       },
       {
         "indexed": false,
         "internalType": "bytes32",
-        "name": "slotValue",
+        "name": "slot",
         "type": "bytes32"
       }
     ],
@@ -890,16 +896,36 @@
         "internalType": "uint256",
         "name": "timestamp",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "blockNumber",
-        "type": "uint256"
       }
     ],
     "name": "ProvenTimestamp",
     "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "APECHAIN_SHARE_PRICE_ADDRESS",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "APECHAIN_SHARE_PRICE_SLOT",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [
@@ -909,14 +935,14 @@
         "type": "uint256"
       },
       {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
         "name": "blockNumber",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
       },
       {
         "internalType": "enum IEvmFactRegistryModule.AccountField",
@@ -943,6 +969,166 @@
         "type": "uint256"
       },
       {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "internalType": "enum IEvmFactRegistryModule.AccountField",
+        "name": "field",
+        "type": "uint8"
+      }
+    ],
+    "name": "accountFieldSafe",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      }
+    ],
+    "name": "getApechainSharePrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      }
+    ],
+    "name": "getApechainSharePriceSafe",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "internalType": "enum IEvmFactRegistryModule.BlockHeaderField",
+        "name": "field",
+        "type": "uint8"
+      }
+    ],
+    "name": "headerField",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "internalType": "enum IEvmFactRegistryModule.BlockHeaderField",
+        "name": "field",
+        "type": "uint8"
+      }
+    ],
+    "name": "headerFieldSafe",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
         "internalType": "address",
         "name": "account",
         "type": "address"
@@ -953,50 +1139,8 @@
         "type": "uint8"
       },
       {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "treeId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint128",
-            "name": "mmrTreeSize",
-            "type": "uint128"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockNumber",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockProofLeafIndex",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes32[]",
-            "name": "mmrPeaks",
-            "type": "bytes32[]"
-          },
-          {
-            "internalType": "bytes32[]",
-            "name": "mmrElementInclusionProof",
-            "type": "bytes32[]"
-          },
-          {
-            "internalType": "bytes",
-            "name": "provenBlockHeader",
-            "type": "bytes"
-          }
-        ],
-        "internalType": "struct IEvmFactRegistryModule.BlockHeaderProof",
-        "name": "headerProof",
-        "type": "tuple"
-      },
-      {
         "internalType": "bytes",
-        "name": "accountTrieProof",
+        "name": "accountMptProof",
         "type": "bytes"
       }
     ],
@@ -1013,14 +1157,69 @@
         "type": "uint256"
       },
       {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
+        "internalType": "uint16",
+        "name": "headerFieldsToSave",
+        "type": "uint16"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "mmrId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint128",
+            "name": "mmrSize",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mmrLeafIndex",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrPeaks",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrInclusionProof",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes",
+            "name": "blockHeaderRlp",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct IEvmFactRegistryModule.BlockHeaderProof",
+        "name": "headerProof",
+        "type": "tuple"
+      }
+    ],
+    "name": "proveHeader",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
       },
       {
         "internalType": "uint256",
         "name": "blockNumber",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
       },
       {
         "internalType": "bytes32",
@@ -1029,7 +1228,7 @@
       },
       {
         "internalType": "bytes",
-        "name": "storageSlotTrieProof",
+        "name": "storageSlotMptProof",
         "type": "bytes"
       }
     ],
@@ -1051,88 +1250,9 @@
         "type": "uint256"
       },
       {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "treeId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint128",
-            "name": "mmrTreeSize",
-            "type": "uint128"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockNumber",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockProofLeafIndex",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes32[]",
-            "name": "mmrPeaks",
-            "type": "bytes32[]"
-          },
-          {
-            "internalType": "bytes32[]",
-            "name": "mmrElementInclusionProof",
-            "type": "bytes32[]"
-          },
-          {
-            "internalType": "bytes",
-            "name": "provenBlockHeader",
-            "type": "bytes"
-          }
-        ],
-        "internalType": "struct IEvmFactRegistryModule.BlockHeaderProof",
-        "name": "headerProof",
-        "type": "tuple"
-      },
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "treeId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint128",
-            "name": "mmrTreeSize",
-            "type": "uint128"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockNumber",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockProofLeafIndex",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes32[]",
-            "name": "mmrPeaks",
-            "type": "bytes32[]"
-          },
-          {
-            "internalType": "bytes32[]",
-            "name": "mmrElementInclusionProof",
-            "type": "bytes32[]"
-          },
-          {
-            "internalType": "bytes",
-            "name": "provenBlockHeader",
-            "type": "bytes"
-          }
-        ],
-        "internalType": "struct IEvmFactRegistryModule.BlockHeaderProof",
-        "name": "headerProofNext",
-        "type": "tuple"
+        "internalType": "uint256",
+        "name": "blockNumberLow",
+        "type": "uint256"
       }
     ],
     "name": "proveTimestamp",
@@ -1148,14 +1268,14 @@
         "type": "uint256"
       },
       {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
         "name": "blockNumber",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
       },
       {
         "internalType": "bytes32",
@@ -1165,6 +1285,45 @@
     ],
     "name": "storageSlot",
     "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "slot",
+        "type": "bytes32"
+      }
+    ],
+    "name": "storageSlotSafe",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      },
       {
         "internalType": "bytes32",
         "name": "",
@@ -1206,6 +1365,40 @@
         "type": "uint256"
       },
       {
+        "internalType": "uint256",
+        "name": "timestamp_",
+        "type": "uint256"
+      }
+    ],
+    "name": "timestampSafe",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
         "internalType": "address",
         "name": "account",
         "type": "address"
@@ -1214,22 +1407,17 @@
         "components": [
           {
             "internalType": "uint256",
-            "name": "treeId",
+            "name": "mmrId",
             "type": "uint256"
           },
           {
             "internalType": "uint128",
-            "name": "mmrTreeSize",
+            "name": "mmrSize",
             "type": "uint128"
           },
           {
             "internalType": "uint256",
-            "name": "blockNumber",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockProofLeafIndex",
+            "name": "mmrLeafIndex",
             "type": "uint256"
           },
           {
@@ -1239,12 +1427,12 @@
           },
           {
             "internalType": "bytes32[]",
-            "name": "mmrElementInclusionProof",
+            "name": "mmrInclusionProof",
             "type": "bytes32[]"
           },
           {
             "internalType": "bytes",
-            "name": "provenBlockHeader",
+            "name": "blockHeaderRlp",
             "type": "bytes"
           }
         ],
@@ -1254,7 +1442,7 @@
       },
       {
         "internalType": "bytes",
-        "name": "accountTrieProof",
+        "name": "accountMptProof",
         "type": "bytes"
       }
     ],
@@ -1292,9 +1480,341 @@
         "type": "uint256"
       },
       {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
         "internalType": "address",
         "name": "account",
         "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "mmrId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint128",
+            "name": "mmrSize",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mmrLeafIndex",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrPeaks",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrInclusionProof",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes",
+            "name": "blockHeaderRlp",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct IEvmFactRegistryModule.BlockHeaderProof",
+        "name": "headerProof",
+        "type": "tuple"
+      },
+      {
+        "internalType": "bytes",
+        "name": "accountMptProof",
+        "type": "bytes"
+      }
+    ],
+    "name": "verifyAccountApechain",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "flags",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fixed_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "shares",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "debt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "delegate",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "codeHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "storageRoot",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "mmrId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint128",
+            "name": "mmrSize",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mmrLeafIndex",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrPeaks",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrInclusionProof",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes",
+            "name": "blockHeaderRlp",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct IEvmFactRegistryModule.BlockHeaderProof",
+        "name": "headerProof",
+        "type": "tuple"
+      }
+    ],
+    "name": "verifyHeader",
+    "outputs": [
+      {
+        "internalType": "bytes32[15]",
+        "name": "fields",
+        "type": "bytes32[15]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "stateRoot",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes",
+        "name": "accountMptProof",
+        "type": "bytes"
+      }
+    ],
+    "name": "verifyOnlyAccount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "accountBalance",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "codeHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "storageRoot",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "stateRoot",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes",
+        "name": "accountMptProof",
+        "type": "bytes"
+      }
+    ],
+    "name": "verifyOnlyAccountApechain",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "flags",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fixed_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "shares",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "debt",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "delegate",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "codeHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "storageRoot",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "slot",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "storageRoot",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes",
+        "name": "storageSlotMptProof",
+        "type": "bytes"
+      }
+    ],
+    "name": "verifyOnlyStorage",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "slotValue",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "timestamp_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumberLow",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockTimestampLow",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockTimestampHigh",
+        "type": "uint256"
+      }
+    ],
+    "name": "verifyOnlyTimestamp",
+    "outputs": [],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
       },
       {
         "internalType": "uint256",
@@ -1302,13 +1822,60 @@
         "type": "uint256"
       },
       {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
         "internalType": "bytes32",
         "name": "slot",
         "type": "bytes32"
       },
       {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "mmrId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint128",
+            "name": "mmrSize",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mmrLeafIndex",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrPeaks",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrInclusionProof",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes",
+            "name": "blockHeaderRlp",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct IEvmFactRegistryModule.BlockHeaderProof",
+        "name": "headerProof",
+        "type": "tuple"
+      },
+      {
         "internalType": "bytes",
-        "name": "storageSlotTrieProof",
+        "name": "accountMptProof",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "storageSlotMptProof",
         "type": "bytes"
       }
     ],
@@ -1339,22 +1906,17 @@
         "components": [
           {
             "internalType": "uint256",
-            "name": "treeId",
+            "name": "mmrId",
             "type": "uint256"
           },
           {
             "internalType": "uint128",
-            "name": "mmrTreeSize",
+            "name": "mmrSize",
             "type": "uint128"
           },
           {
             "internalType": "uint256",
-            "name": "blockNumber",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockProofLeafIndex",
+            "name": "mmrLeafIndex",
             "type": "uint256"
           },
           {
@@ -1364,39 +1926,34 @@
           },
           {
             "internalType": "bytes32[]",
-            "name": "mmrElementInclusionProof",
+            "name": "mmrInclusionProof",
             "type": "bytes32[]"
           },
           {
             "internalType": "bytes",
-            "name": "provenBlockHeader",
+            "name": "blockHeaderRlp",
             "type": "bytes"
           }
         ],
         "internalType": "struct IEvmFactRegistryModule.BlockHeaderProof",
-        "name": "headerProof",
+        "name": "headerProofLow",
         "type": "tuple"
       },
       {
         "components": [
           {
             "internalType": "uint256",
-            "name": "treeId",
+            "name": "mmrId",
             "type": "uint256"
           },
           {
             "internalType": "uint128",
-            "name": "mmrTreeSize",
+            "name": "mmrSize",
             "type": "uint128"
           },
           {
             "internalType": "uint256",
-            "name": "blockNumber",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockProofLeafIndex",
+            "name": "mmrLeafIndex",
             "type": "uint256"
           },
           {
@@ -1406,17 +1963,17 @@
           },
           {
             "internalType": "bytes32[]",
-            "name": "mmrElementInclusionProof",
+            "name": "mmrInclusionProof",
             "type": "bytes32[]"
           },
           {
             "internalType": "bytes",
-            "name": "provenBlockHeader",
+            "name": "blockHeaderRlp",
             "type": "bytes"
           }
         ],
         "internalType": "struct IEvmFactRegistryModule.BlockHeaderProof",
-        "name": "headerProofNext",
+        "name": "headerProofHigh",
         "type": "tuple"
       }
     ],
@@ -1424,7 +1981,7 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "blockNumber",
         "type": "uint256"
       }
     ],
@@ -1523,7 +2080,7 @@
       },
       {
         "internalType": "bool",
-        "name": "isSiblingSynced",
+        "name": "isOffchainGrown",
         "type": "bool"
       }
     ],

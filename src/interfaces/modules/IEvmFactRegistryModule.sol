@@ -131,10 +131,10 @@ interface IEvmFactRegistryModule {
     /// @param accountFieldsToSave Bitmask of fields to save. First 4 bits correspond to NONCE, BALANCE, STORAGE_ROOT and CODE_HASH fields. Last bit (2^4) is responsible for all ApeChain fields, i.e. APE_FLAGS, APE_FIXED, APE_SHARES, APE_DEBT, APE_DELEGATE.
     function proveAccount(uint256 chainId, uint256 blockNumber, address account, uint8 accountFieldsToSave, bytes calldata accountTrieProof) external;
 
-    /// @notice Verifies the storageSlotTrieProof and saves the storage slot value in the satellite.
+    /// @notice Verifies the storageSlotMptProof and saves the storage slot value in the satellite.
     /// @notice Saved value can be read with `storageSlotSafe` and `storageSlot` functions.
     /// @notice Requires account's STORAGE_ROOT to be proven first with `proveAccount` function.
-    function proveStorage(uint256 chainId, uint256 blockNumber, address account, bytes32 slot, bytes calldata storageSlotTrieProof) external;
+    function proveStorage(uint256 chainId, uint256 blockNumber, address account, bytes32 slot, bytes calldata storageSlotMptProof) external;
 
     /// @notice Verifies that block with number blockNumberLow is the latest block with timestamp less than or equal to the given timestamp.
     /// @notice Requires timestamps of block with number blockNumberLow and blockNumberLow + 1 to be proven first with `proveHeader` function.
@@ -144,16 +144,14 @@ interface IEvmFactRegistryModule {
 
     /// @notice Verifies whether block header given by headerProof is present in MMR at given chain id, which means that it is a valid block.
     /// @notice Returns array of block header fields.
-    /// @dev Does following checks:
-    /// @dev 1. Hash of the block header is present in the given MMR
-    /// @dev 2. Given block number matches one decoded from the header
+    /// @notice After successful verification, it can be assumed that block header with fields returned from this function is part of the chain with given chain id.
     function verifyHeader(uint256 chainId, BlockHeaderProof calldata headerProof) external view returns (bytes32[15] memory fields);
 
     /// @notice Verifies the accountMptProof against block's state root.
     /// @notice Returns account fields.
+    /// @notice Reverts with "STORAGE_PROOF_SHOULD_BE_NON_APECHAIN" if the given chain id is ApeChain. (For ApeChain, use verifyOnlyAccountApechain instead)
     /// @notice IMPORTANT: It DOES NOT check whether state root is valid given the chain id, block number and account address.
     /// @notice To verify state root, use verifyHeader function.
-    /// @notice Reverts with "STORAGE_PROOF_SHOULD_BE_NON_APECHAIN" if the given chain id is ApeChain. (For ApeChain, use verifyOnlyAccountApechain instead)
     function verifyOnlyAccount(
         uint256 chainId,
         address account,
@@ -161,8 +159,9 @@ interface IEvmFactRegistryModule {
         bytes calldata accountMptProof
     ) external pure returns (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot);
 
-    /// @notice Verifies the accountMptProof and headerProof against saved MMR.
+    /// @notice Verifies the accountMptProof and whether block given by headerProof is present in MMR at given chain id.
     /// @notice Returns account fields.
+    /// @notice After successful verification, it can be assumed that account at given block number and chain id has field values returned from this function.
     function verifyAccount(
         uint256 chainId,
         uint256 blockNumber,
@@ -183,8 +182,9 @@ interface IEvmFactRegistryModule {
         bytes calldata accountMptProof
     ) external pure returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot);
 
-    /// @notice Verifies the accountMptProof and headerProof against saved MMR.
+    /// @notice Verifies the accountMptProof and whether block given by headerProof is present in MMR at given chain id.
     /// @notice Returns account fields.
+    /// @notice After successful verification, it can be assumed that account at given block number and chain id has field values returned from this function.
     function verifyAccountApechain(
         uint256 chainId,
         uint256 blockNumber,
@@ -199,8 +199,9 @@ interface IEvmFactRegistryModule {
     /// @notice To verify storage root, use verifyOnlyAccount function.
     function verifyOnlyStorage(bytes32 slot, bytes32 storageRoot, bytes calldata storageSlotMptProof) external pure returns (bytes32 slotValue);
 
-    /// @notice Verifies the storageSlotMptProof, accountMptProof and headerProof against saved MMR.
+    /// @notice Verifies the storageSlotMptProof, accountMptProof and whether block given by headerProof is present in MMR at given chain id.
     /// @notice Returns storage slot value.
+    /// @notice After successful verification, it can be assumed that given slot index of the account at block number and chain id has value returned from this function.
     function verifyStorage(
         uint256 chainId,
         uint256 blockNumber,
@@ -208,7 +209,7 @@ interface IEvmFactRegistryModule {
         bytes32 slot,
         BlockHeaderProof calldata headerProof,
         bytes calldata accountMptProof,
-        bytes calldata storageSlotTrieProof
+        bytes calldata storageSlotMptProof
     ) external view returns (bytes32 slotValue);
 
     /// @notice Verifies that block with number blockNumberLow is the latest block with timestamp less than or equal to the given timestamp.

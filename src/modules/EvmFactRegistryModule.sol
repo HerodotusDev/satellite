@@ -144,21 +144,21 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         emit ProvenHeader(chainId, blockNumber, header.savedFields);
     }
 
-    function proveAccount(uint256 chainId, uint256 blockNumber, address account, uint8 accountFieldsToSave, bytes calldata accountTrieProof) external {
+    function proveAccount(uint256 chainId, uint256 blockNumber, address account, uint8 accountFieldsToSave, bytes calldata accountMptProof) external {
         if (_isApeChain(chainId)) {
-            _proveAccountApechain(chainId, blockNumber, account, accountFieldsToSave, accountTrieProof);
+            _proveAccountApechain(chainId, blockNumber, account, accountFieldsToSave, accountMptProof);
         } else {
-            _proveAccount(chainId, blockNumber, account, accountFieldsToSave, accountTrieProof);
+            _proveAccount(chainId, blockNumber, account, accountFieldsToSave, accountMptProof);
         }
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function proveStorage(uint256 chainId, uint256 blockNumber, address account, bytes32 slot, bytes calldata storageSlotTrieProof) external {
+    function proveStorage(uint256 chainId, uint256 blockNumber, address account, bytes32 slot, bytes calldata storageSlotMptProof) external {
         // Read proven storage root
         bytes32 storageRoot = accountField(chainId, blockNumber, account, AccountField.STORAGE_ROOT);
 
         // Verify the proof and decode the slot value
-        bytes32 slotValue = verifyOnlyStorage(slot, storageRoot, storageSlotTrieProof);
+        bytes32 slotValue = verifyOnlyStorage(slot, storageRoot, storageSlotMptProof);
 
         // Save the slot value to the storage
         moduleStorage().accountStorageSlotValues[chainId][account][blockNumber][slot] = StorageSlot(slotValue, true);
@@ -258,8 +258,8 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function verifyOnlyStorage(bytes32 slot, bytes32 storageRoot, bytes calldata storageSlotTrieProof) public pure returns (bytes32 slotValue) {
-        (, bytes memory slotValueRLP) = SecureMerkleTrie.get(abi.encode(slot), storageSlotTrieProof, storageRoot);
+    function verifyOnlyStorage(bytes32 slot, bytes32 storageRoot, bytes calldata storageSlotMptProof) public pure returns (bytes32 slotValue) {
+        (, bytes memory slotValueRLP) = SecureMerkleTrie.get(abi.encode(slot), storageSlotMptProof, storageRoot);
 
         slotValue = slotValueRLP.toRLPItem().readBytes32();
     }
@@ -271,7 +271,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         bytes32 slot,
         BlockHeaderProof calldata headerProof,
         bytes calldata accountMptProof,
-        bytes calldata storageSlotTrieProof
+        bytes calldata storageSlotMptProof
     ) external view returns (bytes32 slotValue) {
         bytes32 storageRoot;
         if (_isApeChain(chainId)) {
@@ -279,7 +279,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         } else {
             (, , , storageRoot) = verifyAccount(chainId, blockNumber, account, headerProof, accountMptProof);
         }
-        return verifyOnlyStorage(slot, storageRoot, storageSlotTrieProof);
+        return verifyOnlyStorage(slot, storageRoot, storageSlotMptProof);
     }
 
     /// @inheritdoc IEvmFactRegistryModule

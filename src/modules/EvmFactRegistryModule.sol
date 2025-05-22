@@ -122,8 +122,8 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
 
     // ====================== Proving (Saves verified values) ===================== //
 
-    function proveHeader(uint256 chainId, uint128 headerFieldsToSave, BlockHeaderProof calldata headerProof) external {
-        require(headerFieldsToSave >> uint128(BLOCK_HEADER_FIELD_COUNT) == 0, "STORAGE_PROOF_INVALID_FIELDS_TO_SAVE");
+    function proveHeader(uint256 chainId, uint16 headerFieldsToSave, BlockHeaderProof calldata headerProof) external {
+        require(headerFieldsToSave >> uint16(BLOCK_HEADER_FIELD_COUNT) == 0, "STORAGE_PROOF_INVALID_FIELDS_TO_SAVE");
         require((headerFieldsToSave >> uint8(BlockHeaderField.LOGS_BLOOM)) & 1 == 0, "STORAGE_PROOF_LOGS_BLOOM_NOT_SUPPORTED");
         // Block number is the key in the mapping, so it's pointless to save it.
         require((headerFieldsToSave >> uint8(BlockHeaderField.NUMBER)) & 1 == 0, "STORAGE_PROOF_BLOCK_NUMBER_NOT_SUPPORTED");
@@ -158,7 +158,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         bytes32 storageRoot = accountField(chainId, blockNumber, account, AccountField.STORAGE_ROOT);
 
         // Verify the proof and decode the slot value
-        bytes32 slotValue = verifyStorage(slot, storageRoot, storageSlotTrieProof);
+        bytes32 slotValue = verifyOnlyStorage(slot, storageRoot, storageSlotTrieProof);
 
         // Save the slot value to the storage
         moduleStorage().accountStorageSlotValues[chainId][account][blockNumber][slot] = StorageSlot(slotValue, true);
@@ -173,9 +173,9 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         uint256 blockTimestampHigh = uint256(headerField(chainId, blockNumberLow + 1, BlockHeaderField.TIMESTAMP));
 
         // Verify that blockNumberLow is the answer for given timestamp
-        verifyTimestamp(timestamp_, blockNumberLow, blockTimestampLow, blockTimestampHigh);
+        verifyOnlyTimestamp(timestamp_, blockNumberLow, blockTimestampLow, blockTimestampHigh);
 
-        // blockNumber + 1 is stored, blockNumber cannot overflow because of check in verifyTimestamp
+        // blockNumber + 1 is stored, blockNumber cannot overflow because of check in verifyOnlyTimestamp
         moduleStorage().timestampToBlockNumber[chainId][timestamp_] = blockNumberLow + 1;
 
         emit ProvenTimestamp(chainId, timestamp_);
@@ -200,7 +200,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     }
 
     /// @inheritdoc IEvmFactRegistryModule
-    function verifyAccount(
+    function verifyOnlyAccount(
         uint256 chainId,
         address account,
         bytes32 stateRoot,
@@ -213,8 +213,19 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         (nonce, accountBalance, storageRoot, codeHash) = _decodeAccountFields(doesAccountExist, accountRLP);
     }
 
+    function verifyAccount(
+        uint256 chainId,
+        uint256 blockNumber,
+        address account,
+        BlockHeaderProof calldata headerProof,
+        bytes calldata accountMptProof
+    ) external view returns (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) {
+        bytes32 stateRoot = verifyHeader(chainId, headerProof)[uint8(BlockHeaderField.STATE_ROOT)];
+        return verifyOnlyAccount(chainId, account, stateRoot, accountMptProof);
+    }
+
     /// @inheritdoc IEvmFactRegistryModule
-    function verifyAccountApechain(
+    function verifyOnlyAccountApechain(
         uint256 chainId,
         address account,
         bytes32 stateRoot,
@@ -227,17 +238,67 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         (nonce, flags, fixed_, shares, debt, delegate, codeHash, storageRoot) = _decodeAccountFieldsApechain(doesAccountExist, accountRLP);
     }
 
+    function verifyAccountApechain(
+        uint256 chainId,
+        uint256 blockNumber,
+        address account,
+        BlockHeaderProof calldata headerProof,
+        bytes calldata accountMptProof
+    ) external view returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot) {
+        bytes32 stateRoot = verifyHeader(chainId, headerProof)[uint8(BlockHeaderField.STATE_ROOT)];
+        return verifyOnlyAccountApechain(chainId, account, stateRoot, accountMptProof);
+    }
+
     /// @inheritdoc IEvmFactRegistryModule
-    function verifyStorage(bytes32 slot, bytes32 storageRoot, bytes calldata storageSlotTrieProof) public pure returns (bytes32 slotValue) {
+    function verifyOnlyStorage(bytes32 slot, bytes32 storageRoot, bytes calldata storageSlotTrieProof) public pure returns (bytes32 slotValue) {
         (, bytes memory slotValueRLP) = SecureMerkleTrie.get(abi.encode(slot), storageSlotTrieProof, storageRoot);
 
         slotValue = slotValueRLP.toRLPItem().readBytes32();
     }
 
+    function verifyStorage(
+        uint256 chainId,
+        uint256 blockNumber,
+        address account,
+        bytes32 slot,
+        BlockHeaderProof calldata headerProof,
+        bytes calldata accountMptProof,
+        bytes calldata storageSlotTrieProof
+    ) external view returns (bytes32 slotValue) {
+        bytes32 storageRoot;
+        if (_isApeChain(chainId)) {
+            (, , , , , , , storageRoot) = verifyAccountApechain(chainId, blockNumber, account, headerProof, accountMptProof);
+        } else {
+            (, , , storageRoot) = verifyAccount(chainId, blockNumber, account, headerProof, accountMptProof);
+        }
+        return verifyOnlyStorage(slot, storageRoot, storageSlotTrieProof);
+    }
+
     /// @inheritdoc IEvmFactRegistryModule
-    function verifyTimestamp(uint256 timestamp_, uint256 blockNumberLow, uint256 blockTimestampLow, uint256 blockTimestampHigh) public pure {
+    function verifyOnlyTimestamp(uint256 timestamp_, uint256 blockNumberLow, uint256 blockTimestampLow, uint256 blockTimestampHigh) public pure {
         require(blockNumberLow != type(uint256).max, "STORAGE_PROOF_BLOCK_NUMBER_TOO_HIGH");
         require(blockTimestampLow <= timestamp_ && timestamp_ < blockTimestampHigh, "STORAGE_PROOF_TIMESTAMP_NOT_BETWEEN_BLOCKS");
+    }
+
+    function verifyTimestamp(
+        uint256 chainId,
+        uint256 timestamp_,
+        BlockHeaderProof calldata headerProofLow,
+        BlockHeaderProof calldata headerProofHigh
+    ) external view returns (uint256 blockNumber) {
+        bytes32[BLOCK_HEADER_FIELD_COUNT] memory headerFieldsLow = verifyHeader(chainId, headerProofLow);
+        uint256 blockNumberLow = uint256(headerFieldsLow[uint8(BlockHeaderField.NUMBER)]);
+        uint256 blockTimestampLow = uint256(headerFieldsLow[uint8(BlockHeaderField.TIMESTAMP)]);
+
+        bytes32[BLOCK_HEADER_FIELD_COUNT] memory headerFieldsHigh = verifyHeader(chainId, headerProofHigh);
+        uint256 blockNumberHigh = uint256(headerFieldsHigh[uint8(BlockHeaderField.NUMBER)]);
+        uint256 blockTimestampHigh = uint256(headerFieldsHigh[uint8(BlockHeaderField.TIMESTAMP)]);
+
+        require(blockNumberLow + 1 == blockNumberHigh, "STORAGE_PROOF_BLOCK_NUMBER_NOT_CONTIGUOUS");
+
+        verifyOnlyTimestamp(timestamp_, blockNumberLow, blockTimestampLow, blockTimestampHigh);
+
+        return blockNumberLow;
     }
 
     // ============================ Internal functions ============================ //
@@ -253,7 +314,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         bytes32 stateRoot = headerField(chainId, blockNumber, BlockHeaderField.STATE_ROOT);
 
         // Verify the proof and decode the account fields
-        (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) = verifyAccount(chainId, account, stateRoot, accountTrieProof);
+        (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot) = verifyOnlyAccount(chainId, account, stateRoot, accountTrieProof);
 
         Account storage accountData = moduleStorage().accountField[chainId][account][blockNumber];
 
@@ -288,7 +349,7 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         bytes32 stateRoot = headerField(chainId, blockNumber, BlockHeaderField.STATE_ROOT);
 
         // Verify the proof and decode the account fields
-        (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot) = verifyAccountApechain(
+        (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot) = verifyOnlyAccountApechain(
             chainId,
             account,
             stateRoot,

@@ -18,9 +18,9 @@ interface IEvmFactRegistryModule {
         STATE_ROOT, // 3
         RECEIPTS_ROOT, // 4
         TRANSACTION_ROOT, // 5
-        LOGS_BLOOM, // 6
+        LOGS_BLOOM, // 6 - not supported
         DIFFICULTY, // 7
-        NUMBER, // 8
+        NUMBER, // 8 - not supported
         GAS_LIMIT, // 9
         GAS_USED, // 10
         TIMESTAMP, // 11
@@ -31,7 +31,7 @@ interface IEvmFactRegistryModule {
 
     struct BlockHeader {
         /// @dev Bitmask of saved fields (3 bits)
-        uint128 savedFields;
+        uint16 savedFields;
         mapping(BlockHeaderField => bytes32) fields;
     }
 
@@ -121,7 +121,7 @@ interface IEvmFactRegistryModule {
     /// @notice Verifies the headerProof and saves selected fields in the satellite.
     /// @notice Saved fields can be read with `headerFieldSafe` and `headerField` functions.
     /// @param headerFieldsToSave Bitmask of fields to save. i-th bit corresponds to i-th field in `BlockHeaderField` enum.
-    function proveHeader(uint256 chainId, uint128 headerFieldsToSave, BlockHeaderProof calldata headerProof) external;
+    function proveHeader(uint256 chainId, uint16 headerFieldsToSave, BlockHeaderProof calldata headerProof) external;
 
     /// @notice Verifies the accountTrieProof and saves selected fields in the satellite.
     /// @notice Saved fields can be read with `accountFieldSafe` and `accountField` functions.
@@ -153,31 +153,63 @@ interface IEvmFactRegistryModule {
     /// @notice Returns account fields.
     /// @notice IMPORTANT: It DOES NOT check whether state root is valid given the chain id, block number and account address.
     /// @notice To verify state root, use verifyHeader function.
-    /// @notice Reverts with "STORAGE_PROOF_SHOULD_BE_NON_APECHAIN" if the given chain id is ApeChain. (For ApeChain, use verifyAccountApechain instead)
-    function verifyAccount(
+    /// @notice Reverts with "STORAGE_PROOF_SHOULD_BE_NON_APECHAIN" if the given chain id is ApeChain. (For ApeChain, use verifyOnlyAccountApechain instead)
+    function verifyOnlyAccount(
         uint256 chainId,
         address account,
         bytes32 stateRoot,
         bytes calldata accountMptProof
     ) external pure returns (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot);
 
+    /// @notice Verifies the accountMptProof and headerProof against saved MMR.
+    /// @notice Returns account fields.
+    function verifyAccount(
+        uint256 chainId,
+        uint256 blockNumber,
+        address account,
+        BlockHeaderProof calldata headerProof,
+        bytes calldata accountMptProof
+    ) external view returns (uint256 nonce, uint256 accountBalance, bytes32 codeHash, bytes32 storageRoot);
+
     /// @notice Verifies the accountMptProof against block's state root.
     /// @notice Returns account fields.
     /// @notice IMPORTANT: It DOES NOT check whether state root is valid given the chain id, block number and account address.
     /// @notice To verify state root, use verifyHeader function.
-    /// @notice Reverts with "STORAGE_PROOF_SHOULD_BE_APECHAIN" if the given chain id is not ApeChain. (For non-ApeChain, use verifyAccount instead)
-    function verifyAccountApechain(
+    /// @notice Reverts with "STORAGE_PROOF_SHOULD_BE_APECHAIN" if the given chain id is not ApeChain. (For non-ApeChain, use verifyOnlyAccount instead)
+    function verifyOnlyAccountApechain(
         uint256 chainId,
         address account,
         bytes32 stateRoot,
         bytes calldata accountMptProof
     ) external pure returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot);
 
+    /// @notice Verifies the accountMptProof and headerProof against saved MMR.
+    /// @notice Returns account fields.
+    function verifyAccountApechain(
+        uint256 chainId,
+        uint256 blockNumber,
+        address account,
+        BlockHeaderProof calldata headerProof,
+        bytes calldata accountMptProof
+    ) external view returns (uint256 nonce, uint256 flags, uint256 fixed_, uint256 shares, uint256 debt, uint256 delegate, bytes32 codeHash, bytes32 storageRoot);
+
     /// @notice Verifies the storageSlotMptProof against account's storage root.
     /// @notice Returns storage slot value.
     /// @notice IMPORTANT: It DOES NOT check whether storage root is valid given the chain id, block number, account address and slot index.
-    /// @notice To verify storage root, use verifyAccount function.
-    function verifyStorage(bytes32 slot, bytes32 storageRoot, bytes calldata storageSlotMptProof) external pure returns (bytes32 slotValue);
+    /// @notice To verify storage root, use verifyOnlyAccount function.
+    function verifyOnlyStorage(bytes32 slot, bytes32 storageRoot, bytes calldata storageSlotMptProof) external pure returns (bytes32 slotValue);
+
+    /// @notice Verifies the storageSlotMptProof, accountMptProof and headerProof against saved MMR.
+    /// @notice Returns storage slot value.
+    function verifyStorage(
+        uint256 chainId,
+        uint256 blockNumber,
+        address account,
+        bytes32 slot,
+        BlockHeaderProof calldata headerProof,
+        bytes calldata accountMptProof,
+        bytes calldata storageSlotTrieProof
+    ) external view returns (bytes32 slotValue);
 
     /// @notice Verifies that block with number blockNumberLow is the latest block with timestamp less than or equal to the given timestamp.
     /// @notice IMPORTANT: It DOES NOT check if blockTimestampLow and High correspond to blockNumberLow and blockNumberLow + 1.
@@ -185,12 +217,21 @@ interface IEvmFactRegistryModule {
     /// @notice - blockTimestampLow is the timestamp of block with number blockNumberLow - `headerField(chainId, blockNumberLow, BlockHeaderField.TIMESTAMP) == blockTimestampLow`
     /// @notice - blockTimestampHigh is the timestamp of block with number blockNumberLow + 1 - `headerField(chainId, blockNumberLow + 1, BlockHeaderField.TIMESTAMP) == blockTimestampHigh`
     /// @notice Both checks above can be done with `verifyHeader` (without needing to use additional storage in satellite contract).
-    function verifyTimestamp(uint256 timestamp, uint256 blockNumberLow, uint256 blockTimestampLow, uint256 blockTimestampHigh) external pure;
+    function verifyOnlyTimestamp(uint256 timestamp, uint256 blockNumberLow, uint256 blockTimestampLow, uint256 blockTimestampHigh) external pure;
+
+    /// @notice Verifies that block with number blockNumberLow is the latest block with timestamp less than or equal to the given timestamp and that both header proofs are present in MMR.
+    /// @notice Returns block number.
+    function verifyTimestamp(
+        uint256 chainId,
+        uint256 timestamp,
+        BlockHeaderProof calldata headerProofLow,
+        BlockHeaderProof calldata headerProofHigh
+    ) external view returns (uint256 blockNumber);
 
     // ========================= Events ========================= //
 
     /// @notice Emitted when block header fields are proven
-    event ProvenHeader(uint256 chainId, uint256 blockNumber, uint128 savedFields);
+    event ProvenHeader(uint256 chainId, uint256 blockNumber, uint16 savedFields);
 
     /// @notice Emitted when account fields are proven
     event ProvenAccount(uint256 chainId, uint256 blockNumber, address account, uint8 savedFields);

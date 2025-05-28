@@ -85,7 +85,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
                 accumulatedChainId,
                 block.chainid,
                 originalMmrId,
-                commonIsOffchainGrown
+                isOffchainGrownDestination
             ),
             _xDomainMsgGasData
         );

@@ -16,8 +16,8 @@ interface IEvmFactRegistryModule {
         OMMERS_HASH, // 1
         BENEFICIARY, // 2
         STATE_ROOT, // 3
-        RECEIPTS_ROOT, // 4
-        TRANSACTIONS_ROOT, // 5
+        TRANSACTIONS_ROOT, // 4
+        RECEIPTS_ROOT, // 5
         LOGS_BLOOM, // 6 - not supported
         DIFFICULTY, // 7
         NUMBER, // 8 - not supported
@@ -30,7 +30,7 @@ interface IEvmFactRegistryModule {
     }
 
     struct BlockHeader {
-        /// @dev Bitmask of saved fields (3 bits)
+        /// @dev Bitmask of saved fields (15 bits) - i-th bit corresponds to i-th field in `BlockHeaderField` enum.
         uint16 savedFields;
         mapping(BlockHeaderField => bytes32) fields;
     }
@@ -48,9 +48,9 @@ interface IEvmFactRegistryModule {
     }
 
     struct Account {
-        /// @dev Bitmask of saved fields (5 bits)
-        /// @dev First 4 bits are for NONCE, BALANCE, STORAGE_ROOT, CODE_HASH
-        /// @dev 5th bit (2^4) is for all ApeChain fields so either all ApeChain fields are saved or none
+        /// @dev Bitmask of saved fields (5 bits on Apechain, 4 bits otherwise).
+        /// @dev First 4 bits are for NONCE, BALANCE, STORAGE_ROOT, CODE_HASH.
+        /// @dev 5th bit (2^4) is for all ApeChain fields, so either all ApeChain fields are saved or none.
         uint8 savedFields;
         mapping(AccountField => bytes32) fields;
     }

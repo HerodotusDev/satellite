@@ -14,8 +14,34 @@
         "inboxContract": "0xc662c410C0ECf747543f5bA90660f6ABeBD9C8c4",
         "sendFunction": "sendMessageL1ToStarknet",
         "L2Alias": "0x0"
+      },
+      {
+        "to": "42161",
+        "inboxContract": "0x4Dbd4fc535Ac27206064B68FfCf827b0A60BAB3f",
+        "sendFunction": "sendMessageL1ToArbitrum",
+        "L2Alias": "0x1111000000000000000000000000000000001111"
       }
     ]
+  },
+  "42161": {
+    "network": "arbitrumOne",
+    "APE_CHAIN_TOKEN_ADDRESS": "0x7f9FBf9bDd3F4105C478b996B648FE6e828a1e98",
+    "ARBITRUM_FETCHER_OUTBOX_ADDRESS": "0x4F405BA65291063d8A524c2bDf55d4e67405c2aF",
+    "ARBITRUM_FETCHER_CHAIN_ID": "33139",
+
+    "connections": [
+      {
+        "to": "33139",
+        "inboxContract": "0x1B98e4ED82Ee1a91A65a38C690e2266364064D15",
+        "sendFunction": "sendMessageArbitrumToApeChain",
+        "L2Alias": "0x1111000000000000000000000000000000001111"
+      }
+    ]
+  },
+  "33139": {
+    "network": "apechain",
+
+    "connections": []
   },
   "11155111": {
     "network": "sepolia",

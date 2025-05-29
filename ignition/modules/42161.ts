@@ -6,15 +6,11 @@ export const modules: ModuleName[] = [
   "SatelliteInspectorModule",
   "MmrCoreModule",
   "EvmFactRegistryModule",
-  "DataProcessorModule",
   "EvmOnChainGrowingModule",
-  "EvmSharpMmrGrowingModule",
-  "StarknetSharpMmrGrowingModule",
   "NativeParentHashFetcherModule",
-  "StarknetParentHashFetcherModule",
+  "ArbitrumParentHashFetcherModule",
+  "SimpleReceiverModule",
   "UniversalSenderModule",
-  "L1ToStarknetSenderModule",
-  "L1ToArbitrumSenderModule",
-  "LegacyContractsInteractionModule",
+  "ArbitrumToApeChainSenderModule",
 ];
-export default buildSatelliteDeployment("11155111", modules);
+export default buildSatelliteDeployment("42161", modules);

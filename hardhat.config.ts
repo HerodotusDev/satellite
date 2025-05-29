@@ -51,10 +51,20 @@ const config: HardhatUserConfig = {
       accounts: [process.env.PRIVATE_KEY as string],
       chainId: 11155420,
     },
+    arbitrumOne: {
+      url: `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      accounts: [process.env.PRIVATE_KEY as string],
+      chainId: 42161,
+    },
     arbitrumSepolia: {
       url: `https://arb-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY as string],
       chainId: 421614,
+    },
+    apechain: {
+      url: "https://apechain.calderachain.xyz/http",
+      accounts: [process.env.PRIVATE_KEY as string],
+      chainId: 33139,
     },
     curtis: {
       url: "https://curtis.rpc.caldera.xyz/http",
@@ -73,8 +83,10 @@ const config: HardhatUserConfig = {
       sepolia: process.env.L1_ETHERSCAN_API_KEY as string,
       zkSyncSepolia: process.env.ZKSYNC_ETHERSCAN_API_KEY as string,
       optimismSepolia: process.env.OPTIMISM_ETHERSCAN_API_KEY as string,
+      arbitrumOne: process.env.ARBITRUM_ETHERSCAN_API_KEY as string,
       arbitrumSepolia: process.env.ARBITRUM_ETHERSCAN_API_KEY as string,
-      curtis: process.env.CURTIS_ETHERSCAN_API_KEY as string,
+      apechain: process.env.APECHAIN_ETHERSCAN_API_KEY as string,
+      curtis: process.env.APECHAIN_ETHERSCAN_API_KEY as string,
       worldChainSepolia: process.env.WORLDCHAIN_ETHERSCAN_API_KEY as string,
     },
     customChains: [
@@ -111,11 +123,27 @@ const config: HardhatUserConfig = {
         },
       },
       {
+        network: "arbitrumOne",
+        chainId: 42161,
+        urls: {
+          apiURL: "https://api.arbiscan.io/api",
+          browserURL: "https://arbiscan.io",
+        },
+      },
+      {
         network: "arbitrumSepolia",
         chainId: 421614,
         urls: {
           apiURL: "https://api-sepolia.arbiscan.io/api",
           browserURL: "https://sepolia.arbiscan.io",
+        },
+      },
+      {
+        network: "apechain",
+        chainId: 33139,
+        urls: {
+          apiURL: "https://apechain.calderaexplorer.xyz/api",
+          browserURL: "https://apechain.calderaexplorer.xyz",
         },
       },
       {

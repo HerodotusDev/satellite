@@ -5,6 +5,18 @@
       "contractAddress": "0x2E6F182B06F37CbDC966Ff5471c7D98cec2bfe70"
     },
     {
+      "chainId": "42161",
+      "contractAddress": "0x4357e87460436a1CE94B12A8B2ce349624979396"
+    },
+    {
+      "chainId": "33139",
+      "contractAddress": "0x82F29Af756036132Ec188FFbB48447895a8D339e"
+    },
+    {
+      "chainId": "393402131332719809807700",
+      "contractAddress": "0x01ba7d4b5707f8878c22fb335763abfc26c2ae157c434d597f6416fe6a79bf2e"
+    },
+    {
       "chainId": "11155111",
       "contractAddress": "0x396bF739f7b37D81f6CdD4571fDEF298150db88f"
     },
@@ -31,10 +43,6 @@
     {
       "chainId": "393402133025997798000961",
       "contractAddress": "0x00421cd95f9ddabdd090db74c9429f257cb6bc1ccc339278d1db1de39156676e"
-    },
-    {
-      "chainId": "393402131332719809807700",
-      "contractAddress": "0x01ba7d4b5707f8878c22fb335763abfc26c2ae157c434d597f6416fe6a79bf2e"
     }
   ],
   "connections": [
@@ -65,6 +73,14 @@
     {
       "from": "1",
       "to": "393402131332719809807700"
+    },
+    {
+      "from": "42161",
+      "to": "33139"
+    },
+    {
+      "from": "1",
+      "to": "42161"
     }
   ]
 }

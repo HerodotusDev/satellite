@@ -117,6 +117,8 @@ pub mod HerodotusStarknet {
     #[abi(embed_v0)]
     impl EvmFactRegistryImpl =
         evm_fact_registry_component::EvmFactRegistry<ContractState>;
+    impl EvmFactRegistryInternalImpl =
+        evm_fact_registry_component::EvmFactRegistryInternal<ContractState>;
 
     impl MmrCoreInternalImpl = mmr_core_component::MmrCoreInternal<ContractState>;
     #[abi(embed_v0)]

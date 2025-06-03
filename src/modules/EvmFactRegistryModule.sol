@@ -259,9 +259,13 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
 
     /// @inheritdoc IEvmFactRegistryModule
     function verifyOnlyStorage(bytes32 slot, bytes32 storageRoot, bytes calldata storageSlotMptProof) public pure returns (bytes32 slotValue) {
-        (, bytes memory slotValueRLP) = SecureMerkleTrie.get(abi.encode(slot), storageSlotMptProof, storageRoot);
+        (bool exists, bytes memory slotValueRLP) = SecureMerkleTrie.get(abi.encode(slot), storageSlotMptProof, storageRoot);
 
-        slotValue = slotValueRLP.toRLPItem().readBytes32();
+        if (!exists) {
+            return bytes32(0);
+        }
+
+        return slotValueRLP.toRLPItem().readBytes32();
     }
 
     function verifyStorage(

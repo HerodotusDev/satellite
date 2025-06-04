@@ -34,7 +34,7 @@ pub trait ICoreMmrInternal<TContractState> {
         accumulated_chain_id: u256,
         origin_chain_id: u256,
         original_mmr_id: u256,
-        is_sibling_synced: bool,
+        is_offchain_grown: bool,
     );
 
     fn _getInitialMmrRoot(self: @TContractState, hashing_function: u256) -> u256;
@@ -49,6 +49,13 @@ pub trait ICoreMmrExternal<TContractState> {
     fn getParentHash(
         self: @TContractState, chain_id: u256, hashing_function: u256, block_number: u256,
     ) -> u256;
+
+    fn isMmrOnlyOffchainGrown(
+        self: @TContractState,
+        chain_id: u256,
+        mmr_id: u256,
+        hashing_function: u256,
+    ) -> bool;
 
     fn verifyMmrInclusion(
         self: @TContractState,
@@ -78,6 +85,7 @@ pub trait ICoreMmrExternal<TContractState> {
         accumulated_chain_id: u256,
         mmr_size: u256, // ignored when original_mmr_id is 0
         hashing_functions: Span<u256>,
+        is_offchain_grown: bool,
     );
 
     fn translateParentHashFunction(
@@ -128,6 +136,7 @@ pub mod mmr_core_component {
         roots_for_hashing_functions: Span<RootForHashingFunction>,
         origin_chain_id: u256,
         created_from: CreatedFrom,
+        is_offchain_grown: bool,
     }
 
     #[event]
@@ -144,6 +153,8 @@ pub mod mmr_core_component {
         +Drop<TContractState>,
         impl State: state_component::HasComponent<TContractState>,
     > of ICoreMmrInternal<ComponentState<TContractState>> {
+        // ========================= Other Satellite Modules Only Functions ========================= //
+
         fn _receiveParentHash(
             ref self: ComponentState<TContractState>,
             chain_id: u256,
@@ -181,7 +192,7 @@ pub mod mmr_core_component {
             accumulated_chain_id: u256,
             origin_chain_id: u256,
             original_mmr_id: u256,
-            is_sibling_synced: bool,
+            is_offchain_grown: bool,
         ) {
             assert(new_mmr_id != 0, 'NEW_MMR_ID_0_NOT_ALLOWED');
             assert(roots_for_hashing_functions.len() != 0, 'INVALID_ROOTS_LENGTH');
@@ -198,7 +209,7 @@ pub mod mmr_core_component {
 
                 assert(mmr.latest_size.read() == 0, 'NEW_MMR_ALREADY_EXISTS');
                 mmr.latest_size.write(mmr_size);
-                mmr.is_sibling_synced.write(is_sibling_synced);
+                mmr.is_offchain_grown.write(is_offchain_grown);
                 mmr.mmr_size_to_root.entry(mmr_size).write(*r.root);
             };
 
@@ -213,10 +224,13 @@ pub mod mmr_core_component {
                             roots_for_hashing_functions,
                             origin_chain_id,
                             created_from: CreatedFrom::FOREIGN,
+                            is_offchain_grown,
                         },
                     ),
                 );
         }
+
+        // ========================= Internal functions ========================= //
 
         fn _getInitialMmrRoot(
             self: @ComponentState<TContractState>, hashing_function: u256,
@@ -239,6 +253,89 @@ pub mod mmr_core_component {
         +Drop<TContractState>,
         impl State: state_component::HasComponent<TContractState>,
     > of ICoreMmrExternal<ComponentState<TContractState>> {
+        // ========================= Core Functions ========================= //
+
+        fn createMmrFromDomestic(
+            ref self: ComponentState<TContractState>,
+            new_mmr_id: u256,
+            original_mmr_id: u256,
+            accumulated_chain_id: u256,
+            mut mmr_size: u256, // ignored when original_mmr_id is 0
+            hashing_functions: Span<u256>,
+            is_offchain_grown: bool,
+        ) {
+            assert(new_mmr_id != 0, 'NEW_MMR_ID_0_NOT_ALLOWED');
+            assert(hashing_functions.len() != 0, 'INVALID_HASHING_FUNCTIONS_LEN');
+            if original_mmr_id == 0 {
+                // Create an empty MMR
+                mmr_size = 1;
+            }
+
+            let mut state = get_dep_component_mut!(ref self, State);
+
+            let original_mmrs = state.mmrs.entry(accumulated_chain_id).entry(original_mmr_id);
+            let mut new_mmrs = state.mmrs.entry(accumulated_chain_id).entry(new_mmr_id);
+
+            let common_is_offchain_grown = original_mmrs.entry(*hashing_functions.at(0)).is_offchain_grown.read();
+            let mut roots_for_hashing_functions = array![];
+
+            for hashing_function in hashing_functions {
+                assert(
+                    new_mmrs.entry(*hashing_function).latest_size.read() == 0,
+                    'NEW_MMR_ALREADY_EXISTS',
+                );
+
+                let root = if original_mmr_id == 0 {
+                    // Create an empty MMR
+                    self._getInitialMmrRoot(*hashing_function)
+                } else {
+                    // Load existing MMR data
+                    let original_mmr = original_mmrs.entry(*hashing_function);
+
+                    let mmr_root = original_mmr.mmr_size_to_root.read(mmr_size);
+                    
+                    // Ensure the given MMR exists
+                    assert(mmr_root != 0, 'SRC_MMR_NOT_FOUND');
+
+                    // Ensure the given MMR has the same isOffchainGrown value
+                    assert(original_mmr.is_offchain_grown.read() == common_is_offchain_grown, 'IS_OFFCHAIN_GROWN_MISMATCH');
+
+                    mmr_root
+                };
+
+                // Copy the MMR data to the new MMR
+                let mut new_mmr = new_mmrs.entry(*hashing_function);
+                new_mmr.latest_size.write(mmr_size);
+                new_mmr.is_offchain_grown.write(common_is_offchain_grown);
+                new_mmr.mmr_size_to_root.entry(mmr_size).write(root);
+                roots_for_hashing_functions
+                    .append(RootForHashingFunction { hashing_function: *hashing_function, root });
+            };
+    
+            // Offchain growing can only be turned off, not on
+            if original_mmr_id != 0 && is_offchain_grown == true {
+                assert(common_is_offchain_grown == true, 'CANT_TURN_ON_OFFCHAIN_GROWING');
+            }
+
+            self
+                .emit(
+                    Event::CreatedMmr(
+                        CreatedMmr {
+                            new_mmr_id,
+                            mmr_size,
+                            accumulated_chain_id,
+                            original_mmr_id,
+                            roots_for_hashing_functions: roots_for_hashing_functions.span(),
+                            origin_chain_id: state.chain_id.read(),
+                            created_from: CreatedFrom::DOMESTIC,
+                            is_offchain_grown,
+                        },
+                    ),
+                );
+        }
+
+        // ========================= View functions ========================= //
+
         fn getMmr(self: @ComponentState<TContractState>, chain_id: u256, mmr_id: u256) -> MMR {
             let state = get_dep_component!(self, State);
             let mmr = state.mmrs.entry(chain_id).entry(mmr_id).entry(POSEIDON_HASHING_FUNCTION);
@@ -270,6 +367,16 @@ pub mod mmr_core_component {
                 .entry(hashing_function)
                 .entry(block_number)
                 .read()
+        }
+
+        fn isMmrOnlyOffchainGrown(
+            self: @ComponentState<TContractState>,
+            chain_id: u256,
+            mmr_id: u256,
+            hashing_function: u256,
+        ) -> bool {
+            let state = get_dep_component!(self, State);
+            state.mmrs.entry(chain_id).entry(mmr_id).entry(hashing_function).is_offchain_grown.read()
         }
 
         fn verifyMmrInclusion(
@@ -326,72 +433,6 @@ pub mod mmr_core_component {
 
             let mmr = MMR { root, last_pos: mmr_size };
             mmr.verify_proof(index, leaf_value, peaks, proof).is_ok()
-        }
-
-        fn createMmrFromDomestic(
-            ref self: ComponentState<TContractState>,
-            new_mmr_id: u256,
-            original_mmr_id: u256,
-            accumulated_chain_id: u256,
-            mut mmr_size: u256, // ignored when original_mmr_id is 0
-            hashing_functions: Span<u256>,
-        ) {
-            assert(new_mmr_id != 0, 'NEW_MMR_ID_0_NOT_ALLOWED');
-            assert(hashing_functions.len() != 0, 'INVALID_HASHING_FUNCTIONS_LEN');
-            if original_mmr_id == 0 {
-                mmr_size = 1;
-            }
-
-            let is_sibling_synced = hashing_functions.len() != 1;
-
-            // TODO: is this right
-            assert(!is_sibling_synced, 'SIBLING_SYNCED_NOT_SUPPORTED');
-
-            let mut state = get_dep_component_mut!(ref self, State);
-            let old_mmrs = state.mmrs.entry(accumulated_chain_id).entry(original_mmr_id);
-            let mut new_mmrs = state.mmrs.entry(accumulated_chain_id).entry(new_mmr_id);
-            let mut roots_for_hashing_functions = array![];
-
-            for hashing_function in hashing_functions {
-                assert(
-                    new_mmrs.entry(*hashing_function).latest_size.read() == 0,
-                    'NEW_MMR_ALREADY_EXISTS',
-                );
-
-                let root = if original_mmr_id == 0 {
-                    self._getInitialMmrRoot(*hashing_function)
-                } else {
-                    let old_mmr = old_mmrs.entry(*hashing_function);
-                    if is_sibling_synced {
-                        assert(old_mmr.is_sibling_synced.read(), 'OLD_MMR_NOT_SYNCED');
-                    }
-                    old_mmr.mmr_size_to_root.read(mmr_size)
-                };
-
-                assert(root != 0, 'SRC_MMR_NOT_FOUND');
-
-                let mut new_mmr = new_mmrs.entry(*hashing_function);
-                new_mmr.latest_size.write(mmr_size);
-                new_mmr.is_sibling_synced.write(is_sibling_synced);
-                new_mmr.mmr_size_to_root.entry(mmr_size).write(root);
-                roots_for_hashing_functions
-                    .append(RootForHashingFunction { hashing_function: *hashing_function, root });
-            };
-
-            self
-                .emit(
-                    Event::CreatedMmr(
-                        CreatedMmr {
-                            new_mmr_id,
-                            mmr_size,
-                            accumulated_chain_id,
-                            original_mmr_id,
-                            roots_for_hashing_functions: roots_for_hashing_functions.span(),
-                            origin_chain_id: state.chain_id.read(),
-                            created_from: CreatedFrom::DOMESTIC,
-                        },
-                    ),
-                );
         }
 
         fn translateParentHashFunction(

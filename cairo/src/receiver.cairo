@@ -82,7 +82,7 @@ pub mod HerodotusStarknet {
         accumulated_chain_id: u256,
         origin_chain_id: u256,
         original_mmr_id: u256,
-        is_sibling_synced: bool,
+        is_offchain_grown: bool,
     ) {
         assert(from_address == self.l1_message_sender.read(), 'ONLY_L1_MESSAGE_SENDER');
         self
@@ -93,7 +93,7 @@ pub mod HerodotusStarknet {
                 accumulated_chain_id,
                 origin_chain_id,
                 original_mmr_id,
-                is_sibling_synced,
+                is_offchain_grown,
             );
     }
 

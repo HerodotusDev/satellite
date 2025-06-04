@@ -2,7 +2,7 @@ use starknet::storage::Map;
 
 #[starknet::storage_node]
 pub struct MmrInfo {
-    is_sibling_synced: bool,
+    is_offchain_grown: bool,
     latest_size: u256,
     mmr_size_to_root: Map<u256, u256>,
 }

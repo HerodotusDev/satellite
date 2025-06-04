@@ -18,6 +18,8 @@ pub struct RootForHashingFunction {
 
 #[starknet::interface]
 pub trait ICoreMmrInternal<TContractState> {
+    // =================== Other Satellite Modules Only Functions =================== //
+
     fn _receiveParentHash(
         ref self: TContractState,
         chain_id: u256,
@@ -37,22 +39,42 @@ pub trait ICoreMmrInternal<TContractState> {
         is_offchain_grown: bool,
     );
 
+    // ============================= Internal functions ============================= //
+
     fn _getInitialMmrRoot(self: @TContractState, hashing_function: u256) -> u256;
 }
 
 #[starknet::interface]
 pub trait ICoreMmrExternal<TContractState> {
-    fn getMmr(self: @TContractState, chain_id: u256, mmr_id: u256) -> MMR;
+    // =============================== Core Functions =============================== //
 
-    fn getHistoricalRoot(self: @TContractState, chain_id: u256, mmr_id: u256, size: u256) -> u256;
+    fn createMmrFromDomestic(
+        ref self: TContractState,
+        new_mmr_id: u256,
+        original_mmr_id: u256,
+        accumulated_chain_id: u256,
+        mmr_size: u256, // ignored when original_mmr_id is 0
+        hashing_functions: Span<u256>,
+        is_offchain_grown: bool,
+    );
 
-    fn getParentHash(
-        self: @TContractState, chain_id: u256, hashing_function: u256, block_number: u256,
-    ) -> u256;
+    fn translateParentHashFunction(
+        ref self: TContractState, chain_id: u256, block_number: u256, header_rlp: Words64,
+    );
 
-    fn isMmrOnlyOffchainGrown(
+    // =============================== View Functions =============================== //
+
+    fn getMmrAtSize(
+        self: @TContractState, chain_id: u256, mmr_id: u256, hashing_function: u256, mmr_size: u256,
+    ) -> (u256, bool);
+
+    fn getLatestMmr(
         self: @TContractState, chain_id: u256, mmr_id: u256, hashing_function: u256,
-    ) -> bool;
+    ) -> (u256, u256, bool);
+
+    fn getReceivedParentHash(
+        self: @TContractState, chain_id: u256, block_number: u256, hashing_function: u256,
+    ) -> u256;
 
     fn verifyMmrInclusion(
         self: @TContractState,
@@ -74,20 +96,6 @@ pub trait ICoreMmrExternal<TContractState> {
         proof: Proof,
         peaks: Peaks,
     ) -> bool;
-
-    fn createMmrFromDomestic(
-        ref self: TContractState,
-        new_mmr_id: u256,
-        original_mmr_id: u256,
-        accumulated_chain_id: u256,
-        mmr_size: u256, // ignored when original_mmr_id is 0
-        hashing_functions: Span<u256>,
-        is_offchain_grown: bool,
-    );
-
-    fn translateParentHashFunction(
-        ref self: TContractState, chain_id: u256, block_number: u256, header_rlp: Words64,
-    );
 }
 
 #[starknet::component]
@@ -150,8 +158,7 @@ pub mod mmr_core_component {
         +Drop<TContractState>,
         impl State: state_component::HasComponent<TContractState>,
     > of ICoreMmrInternal<ComponentState<TContractState>> {
-        // ========================= Other Satellite Modules Only Functions
-        // ========================= //
+        // =================== Other Satellite Modules Only Functions =================== //
 
         fn _receiveParentHash(
             ref self: ComponentState<TContractState>,
@@ -194,18 +201,23 @@ pub mod mmr_core_component {
         ) {
             assert(new_mmr_id != 0, 'NEW_MMR_ID_0_NOT_ALLOWED');
             assert(roots_for_hashing_functions.len() != 0, 'INVALID_ROOTS_LENGTH');
-
+            if is_offchain_grown == false {
+                // Onchain grown MMRs can have only one hashing function
+                assert(roots_for_hashing_functions.len() == 1, 'INVALID_ROOTS_LENGTH');
+            }
             let mut state = get_dep_component_mut!(ref self, State);
+            let mut mmrs = state.mmrs.entry(accumulated_chain_id).entry(new_mmr_id);
+            assert(
+                mmrs.entry(KECCAK_HASHING_FUNCTION).latest_size.read() == 0
+                    && mmrs.entry(POSEIDON_HASHING_FUNCTION).latest_size.read() == 0,
+                'NEW_MMR_ALREADY_EXISTS',
+            );
+
             for r in roots_for_hashing_functions {
                 assert(*r.root != 0, 'ROOT_0_NOT_ALLOWED');
 
-                let mut mmr = state
-                    .mmrs
-                    .entry(accumulated_chain_id)
-                    .entry(new_mmr_id)
-                    .entry(*r.hashing_function);
+                let mut mmr = mmrs.entry(*r.hashing_function);
 
-                assert(mmr.latest_size.read() == 0, 'NEW_MMR_ALREADY_EXISTS');
                 mmr.latest_size.write(mmr_size);
                 mmr.is_offchain_grown.write(is_offchain_grown);
                 mmr.mmr_size_to_root.entry(mmr_size).write(*r.root);
@@ -228,7 +240,9 @@ pub mod mmr_core_component {
                 );
         }
 
-        // ========================= Internal functions ========================= //
+        // ============================= Internal functions ============================= //
+
+        // Important: This function has to be consistent with "Does mmr exist" checks
 
         fn _getInitialMmrRoot(
             self: @ComponentState<TContractState>, hashing_function: u256,
@@ -251,7 +265,7 @@ pub mod mmr_core_component {
         +Drop<TContractState>,
         impl State: state_component::HasComponent<TContractState>,
     > of ICoreMmrExternal<ComponentState<TContractState>> {
-        // ========================= Core Functions ========================= //
+        // =============================== Core Functions =============================== //
 
         fn createMmrFromDomestic(
             ref self: ComponentState<TContractState>,
@@ -264,6 +278,10 @@ pub mod mmr_core_component {
         ) {
             assert(new_mmr_id != 0, 'NEW_MMR_ID_0_NOT_ALLOWED');
             assert(hashing_functions.len() != 0, 'INVALID_HASHING_FUNCTIONS_LEN');
+            if is_offchain_grown == false {
+                // Onchain grown MMRs can have only one hashing function
+                assert(hashing_functions.len() == 1, 'INVALID_HASHING_FUNCTIONS_LEN');
+            }
             if original_mmr_id == 0 {
                 // Create an empty MMR
                 mmr_size = 1;
@@ -273,6 +291,11 @@ pub mod mmr_core_component {
 
             let original_mmrs = state.mmrs.entry(accumulated_chain_id).entry(original_mmr_id);
             let mut new_mmrs = state.mmrs.entry(accumulated_chain_id).entry(new_mmr_id);
+            assert(
+                new_mmrs.entry(KECCAK_HASHING_FUNCTION).latest_size.read() == 0
+                    && new_mmrs.entry(POSEIDON_HASHING_FUNCTION).latest_size.read() == 0,
+                'NEW_MMR_ALREADY_EXISTS',
+            );
 
             let common_is_offchain_grown = original_mmrs
                 .entry(*hashing_functions.at(0))
@@ -281,11 +304,6 @@ pub mod mmr_core_component {
             let mut roots_for_hashing_functions = array![];
 
             for hashing_function in hashing_functions {
-                assert(
-                    new_mmrs.entry(*hashing_function).latest_size.read() == 0,
-                    'NEW_MMR_ALREADY_EXISTS',
-                );
-
                 let root = if original_mmr_id == 0 {
                     // Create an empty MMR
                     self._getInitialMmrRoot(*hashing_function)
@@ -310,16 +328,11 @@ pub mod mmr_core_component {
                 // Copy the MMR data to the new MMR
                 let mut new_mmr = new_mmrs.entry(*hashing_function);
                 new_mmr.latest_size.write(mmr_size);
-                new_mmr.is_offchain_grown.write(common_is_offchain_grown);
+                new_mmr.is_offchain_grown.write(is_offchain_grown);
                 new_mmr.mmr_size_to_root.entry(mmr_size).write(root);
                 roots_for_hashing_functions
                     .append(RootForHashingFunction { hashing_function: *hashing_function, root });
             };
-
-            // Offchain growing can only be turned off, not on
-            if original_mmr_id != 0 && is_offchain_grown == true {
-                assert(common_is_offchain_grown == true, 'CANT_TURN_ON_OFFCHAIN_GROWING');
-            }
 
             self
                 .emit(
@@ -338,31 +351,88 @@ pub mod mmr_core_component {
                 );
         }
 
-        // ========================= View functions ========================= //
+        fn translateParentHashFunction(
+            ref self: ComponentState<TContractState>,
+            chain_id: u256,
+            block_number: u256,
+            header_rlp: Words64,
+        ) {
+            let mut state = get_dep_component_mut!(ref self, State);
 
-        fn getMmr(self: @ComponentState<TContractState>, chain_id: u256, mmr_id: u256) -> MMR {
-            let state = get_dep_component!(self, State);
-            let mmr = state.mmrs.entry(chain_id).entry(mmr_id).entry(POSEIDON_HASHING_FUNCTION);
-            let size = mmr.latest_size.read();
-            MMR {
-                root: mmr.mmr_size_to_root.read(size).try_into().expect('ROOT_DOES_NOT_FIT'),
-                last_pos: size,
+            let (_, byte_len) = rlp_decode_list_lazy(header_rlp, [].span())
+                .expect('ERR_DECODE_RLP_LIST');
+
+            let mut last_word_byte_len = byte_len % 8;
+            if last_word_byte_len == 0 {
+                last_word_byte_len = 8;
             }
+
+            let rlp_keccak_hash = reverse_endianness_u256(
+                keccak_cairo_words64(header_rlp, last_word_byte_len),
+            );
+
+            let rlp_poseidon_hash: u256 = hash_words64(header_rlp).into();
+
+            let receive_parent_hashes_chain = state.received_parent_hashes.entry(chain_id);
+
+            let saved_keccak_hash = receive_parent_hashes_chain
+                .entry(KECCAK_HASHING_FUNCTION)
+                .entry(block_number)
+                .read();
+
+            assert(saved_keccak_hash != 0, 'KECCAK_HASH_NOT_SAVED');
+            assert(saved_keccak_hash == rlp_keccak_hash, 'KECCAK_HASH_MISMATCH');
+
+            receive_parent_hashes_chain
+                .entry(POSEIDON_HASHING_FUNCTION)
+                .entry(block_number)
+                .write(rlp_poseidon_hash);
+
+            self
+                .emit(
+                    Event::ReceivedParentHash(
+                        ReceivedParentHash {
+                            chain_id,
+                            block_number,
+                            parent_hash: rlp_poseidon_hash,
+                            hashing_function: POSEIDON_HASHING_FUNCTION,
+                            received_from: ReceivedFrom::TRANSLATION,
+                        },
+                    ),
+                );
         }
 
-        fn getHistoricalRoot(
-            self: @ComponentState<TContractState>, chain_id: u256, mmr_id: u256, size: u256,
-        ) -> u256 {
-            let state = get_dep_component!(self, State);
-            let mmr = state.mmrs.entry(chain_id).entry(mmr_id).entry(POSEIDON_HASHING_FUNCTION);
-            mmr.mmr_size_to_root.read(size)
-        }
+        // =============================== View Functions =============================== //
 
-        fn getParentHash(
+        fn getMmrAtSize(
             self: @ComponentState<TContractState>,
             chain_id: u256,
+            mmr_id: u256,
             hashing_function: u256,
+            mmr_size: u256,
+        ) -> (u256, bool) {
+            let state = get_dep_component!(self, State);
+            let mmr = state.mmrs.entry(chain_id).entry(mmr_id).entry(hashing_function);
+            (mmr.mmr_size_to_root.read(mmr_size), mmr.is_offchain_grown.read())
+        }
+
+        fn getLatestMmr(
+            self: @ComponentState<TContractState>,
+            chain_id: u256,
+            mmr_id: u256,
+            hashing_function: u256,
+        ) -> (u256, u256, bool) {
+            let state = get_dep_component!(self, State);
+            let mmr = state.mmrs.entry(chain_id).entry(mmr_id).entry(hashing_function);
+            let latest_size = mmr.latest_size.read();
+            (latest_size, mmr.mmr_size_to_root.read(latest_size), mmr.is_offchain_grown.read())
+        }
+
+        fn getReceivedParentHash(
+            self: @ComponentState<TContractState>,
+            chain_id: u256,
             block_number: u256,
+            hashing_function: u256,
         ) -> u256 {
             let state = get_dep_component!(self, State);
             state
@@ -370,22 +440,6 @@ pub mod mmr_core_component {
                 .entry(chain_id)
                 .entry(hashing_function)
                 .entry(block_number)
-                .read()
-        }
-
-        fn isMmrOnlyOffchainGrown(
-            self: @ComponentState<TContractState>,
-            chain_id: u256,
-            mmr_id: u256,
-            hashing_function: u256,
-        ) -> bool {
-            let state = get_dep_component!(self, State);
-            state
-                .mmrs
-                .entry(chain_id)
-                .entry(mmr_id)
-                .entry(hashing_function)
-                .is_offchain_grown
                 .read()
         }
 
@@ -443,57 +497,6 @@ pub mod mmr_core_component {
 
             let mmr = MMR { root, last_pos: mmr_size };
             mmr.verify_proof(index, leaf_value, peaks, proof).is_ok()
-        }
-
-        fn translateParentHashFunction(
-            ref self: ComponentState<TContractState>,
-            chain_id: u256,
-            block_number: u256,
-            header_rlp: Words64,
-        ) {
-            let mut state = get_dep_component_mut!(ref self, State);
-
-            let (_, byte_len) = rlp_decode_list_lazy(header_rlp, [].span())
-                .expect('ERR_DECODE_RLP_LIST');
-
-            let mut last_word_byte_len = byte_len % 8;
-            if last_word_byte_len == 0 {
-                last_word_byte_len = 8;
-            }
-
-            let rlp_keccak_hash = reverse_endianness_u256(
-                keccak_cairo_words64(header_rlp, last_word_byte_len),
-            );
-
-            let rlp_poseidon_hash: u256 = hash_words64(header_rlp).into();
-
-            let receive_parent_hashes_chain = state.received_parent_hashes.entry(chain_id);
-
-            let saved_keccak_hash = receive_parent_hashes_chain
-                .entry(KECCAK_HASHING_FUNCTION)
-                .entry(block_number)
-                .read();
-
-            assert(saved_keccak_hash != 0, 'KECCAK_HASH_NOT_SAVED');
-            assert(saved_keccak_hash == rlp_keccak_hash, 'KECCAK_HASH_MISMATCH');
-
-            receive_parent_hashes_chain
-                .entry(POSEIDON_HASHING_FUNCTION)
-                .entry(block_number)
-                .write(rlp_poseidon_hash);
-
-            self
-                .emit(
-                    Event::ReceivedParentHash(
-                        ReceivedParentHash {
-                            chain_id,
-                            block_number,
-                            parent_hash: rlp_poseidon_hash,
-                            hashing_function: POSEIDON_HASHING_FUNCTION,
-                            received_from: ReceivedFrom::TRANSLATION,
-                        },
-                    ),
-                );
         }
     }
 }

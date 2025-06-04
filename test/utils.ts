@@ -128,6 +128,10 @@ export const KECCAK_HASHER = BigInt(
   "0xdf35a135a69c769066bbb4d17b2fa3ec922c028d4e4bf9d0402e6f7c12b31813",
 );
 
+export const POSEIDON_HASHER = BigInt(
+  "0xd3764378578a6e2b5a09713c3e8d5015a802d8de808c962ff5c53384ac7b1450",
+);
+
 export const APECHAIN_SHARE_PRICE_ADDRESS =
   "0xA4b05FffffFffFFFFfFFfffFfffFFfffFfFfFFFf";
 

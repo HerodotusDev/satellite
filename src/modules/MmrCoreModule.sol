@@ -155,9 +155,9 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         return (mmr.mmrSizeToRoot[mmrSize], mmr.isOffchainGrown);
     }
 
-    function getLatestMmr(uint256 chainId, uint256 mmrId, bytes32 hashingFunction) external view returns (bytes32, uint256, bool) {
+    function getLatestMmr(uint256 chainId, uint256 mmrId, bytes32 hashingFunction) external view returns (uint256, bytes32, bool) {
         ISatellite.MmrInfo storage mmr = LibSatellite.satelliteStorage().mmrs[chainId][mmrId][hashingFunction];
-        return (mmr.mmrSizeToRoot[mmr.latestSize], mmr.latestSize, mmr.isOffchainGrown);
+        return (mmr.latestSize, mmr.mmrSizeToRoot[mmr.latestSize], mmr.isOffchainGrown);
     }
 
     function getReceivedParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber) external view returns (bytes32) {

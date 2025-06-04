@@ -81,7 +81,7 @@ interface IMmrCoreModule {
 
     function getMmrAtSize(uint256 chainId, uint256 mmrId, bytes32 hashingFunction, uint256 mmrSize) external view returns (bytes32, bool);
 
-    function getLatestMmr(uint256 chainId, uint256 mmrId, bytes32 hashingFunction) external view returns (bytes32, uint256, bool);
+    function getLatestMmr(uint256 chainId, uint256 mmrId, bytes32 hashingFunction) external view returns (uint256, bytes32, bool);
 
     function getReceivedParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber) external view returns (bytes32);
 

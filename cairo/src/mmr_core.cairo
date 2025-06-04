@@ -51,10 +51,7 @@ pub trait ICoreMmrExternal<TContractState> {
     ) -> u256;
 
     fn isMmrOnlyOffchainGrown(
-        self: @TContractState,
-        chain_id: u256,
-        mmr_id: u256,
-        hashing_function: u256,
+        self: @TContractState, chain_id: u256, mmr_id: u256, hashing_function: u256,
     ) -> bool;
 
     fn verifyMmrInclusion(
@@ -153,7 +150,8 @@ pub mod mmr_core_component {
         +Drop<TContractState>,
         impl State: state_component::HasComponent<TContractState>,
     > of ICoreMmrInternal<ComponentState<TContractState>> {
-        // ========================= Other Satellite Modules Only Functions ========================= //
+        // ========================= Other Satellite Modules Only Functions
+        // ========================= //
 
         fn _receiveParentHash(
             ref self: ComponentState<TContractState>,
@@ -276,7 +274,10 @@ pub mod mmr_core_component {
             let original_mmrs = state.mmrs.entry(accumulated_chain_id).entry(original_mmr_id);
             let mut new_mmrs = state.mmrs.entry(accumulated_chain_id).entry(new_mmr_id);
 
-            let common_is_offchain_grown = original_mmrs.entry(*hashing_functions.at(0)).is_offchain_grown.read();
+            let common_is_offchain_grown = original_mmrs
+                .entry(*hashing_functions.at(0))
+                .is_offchain_grown
+                .read();
             let mut roots_for_hashing_functions = array![];
 
             for hashing_function in hashing_functions {
@@ -293,12 +294,15 @@ pub mod mmr_core_component {
                     let original_mmr = original_mmrs.entry(*hashing_function);
 
                     let mmr_root = original_mmr.mmr_size_to_root.read(mmr_size);
-                    
+
                     // Ensure the given MMR exists
                     assert(mmr_root != 0, 'SRC_MMR_NOT_FOUND');
 
                     // Ensure the given MMR has the same isOffchainGrown value
-                    assert(original_mmr.is_offchain_grown.read() == common_is_offchain_grown, 'IS_OFFCHAIN_GROWN_MISMATCH');
+                    assert(
+                        original_mmr.is_offchain_grown.read() == common_is_offchain_grown,
+                        'IS_OFFCHAIN_GROWN_MISMATCH',
+                    );
 
                     mmr_root
                 };
@@ -311,7 +315,7 @@ pub mod mmr_core_component {
                 roots_for_hashing_functions
                     .append(RootForHashingFunction { hashing_function: *hashing_function, root });
             };
-    
+
             // Offchain growing can only be turned off, not on
             if original_mmr_id != 0 && is_offchain_grown == true {
                 assert(common_is_offchain_grown == true, 'CANT_TURN_ON_OFFCHAIN_GROWING');
@@ -376,7 +380,13 @@ pub mod mmr_core_component {
             hashing_function: u256,
         ) -> bool {
             let state = get_dep_component!(self, State);
-            state.mmrs.entry(chain_id).entry(mmr_id).entry(hashing_function).is_offchain_grown.read()
+            state
+                .mmrs
+                .entry(chain_id)
+                .entry(mmr_id)
+                .entry(hashing_function)
+                .is_offchain_grown
+                .read()
         }
 
         fn verifyMmrInclusion(

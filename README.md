@@ -50,7 +50,7 @@ We will be calling the process described above an on-chain growing, because it d
 
 So here is where Zero Knowledge Proofs come to rescue. We won't really use the zero knowledge property, but the fact that verifying ZK proof is much cheaper than running the program itself. In our case we will use STARKs with Cairo0 programming language, SHARP prover and L1 verifier. Program, that takes current MMR state along with block headers to append and returns new MMR data, will be ran, proven and verified on Ethereum. Then our contract will just check if the initial MMR data present in the proof matches one stored in the contract as well as whether the first block in the chain is a parent of existing one or one of the latest 256 blocks. If those conditions are met, MMR data will be updated with new values given in the ZK proof. Thanks to the STARK proof, we can be sure that new MMR values are the same as if growing happened on-chain.
 
-We will be calling this process of appending using ZK proofs an off-chain growing or SHARP growing (becase proofs are generated and verified with Starkware's Sharp Prover).
+We will be calling this process of appending using ZK proofs an off-chain growing or SHARP growing (because proofs are generated and verified with Starkware's Sharp Prover).
 
 ### Enhancements
 

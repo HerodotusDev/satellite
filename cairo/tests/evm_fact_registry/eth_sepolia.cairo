@@ -1,9 +1,9 @@
-use crate::{
+use storage_proofs::{
     evm_fact_registry::{
         evm_fact_registry_component::{EvmFactRegistryInternalImpl, EvmFactRegistryImpl},
         BlockHeaderField, AccountField,
     },
-    mmr_core::{mmr_core_component::MmrCoreInternalImpl}, receiver::HerodotusStarknet,
+    mmr_core::{mmr_core_component::MmrCoreInternalImpl}, receiver::StorageProofs,
 };
 use starknet::EthAddress;
 use crate::_utils::create_mmr_with_block;
@@ -189,7 +189,7 @@ fn get_account_sepolia() -> (Span<Span<u64>>, EthAddress) {
 
 #[test]
 fn read_header_fields() {
-    let mut contract = HerodotusStarknet::contract_state_for_testing();
+    let mut contract = StorageProofs::contract_state_for_testing();
     let (header_rlp, _) = get_header_sepolia();
     let result = contract._readBlockHeaderFields(header_rlp);
 
@@ -217,7 +217,7 @@ fn read_header_fields() {
 
 #[test]
 fn prove_header() {
-    let mut contract = HerodotusStarknet::contract_state_for_testing();
+    let mut contract = StorageProofs::contract_state_for_testing();
 
     let chain_id = 11155111;
     let (header_rlp, block_number) = get_header_sepolia();
@@ -344,7 +344,7 @@ fn prove_header() {
 
 #[test]
 fn prove_account() {
-    let mut contract = HerodotusStarknet::contract_state_for_testing();
+    let mut contract = StorageProofs::contract_state_for_testing();
 
     let chain_id = 11155111;
     let (header_rlp, block_number) = get_header_sepolia();

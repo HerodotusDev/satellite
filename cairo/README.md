@@ -13,7 +13,7 @@ url = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/*your ap
 Before deploying or upgrading the contract, make sure you have the latest class hash:
 
 ```
-sncast declare --contract-name HerodotusStarknet
+sncast declare --contract-name StorageProofs
 ```
 
 Then copy the class hash and update it in `deploy.toml:3` and `upgrade.toml:5`

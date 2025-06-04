@@ -1,6 +1,6 @@
-use herodotus_starknet::{
+use storage_proofs::{
     mmr_core::{ICoreMmrExternal, KECCAK_HASHING_FUNCTION, POSEIDON_HASHING_FUNCTION},
-    receiver::HerodotusStarknet,
+    receiver::StorageProofs,
 };
 use core::starknet::storage::{
     StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry,
@@ -74,7 +74,7 @@ fn test_translate_parent_hash_1() {
     let chain_id: u256 = 11155111;
     let (header_rlp, block_number, hash_keccak, hash_poseidon) = get_example_1();
 
-    let mut contract = HerodotusStarknet::contract_state_for_testing();
+    let mut contract = StorageProofs::contract_state_for_testing();
 
     contract
         .state
@@ -101,7 +101,7 @@ fn test_translate_parent_hash_2() {
     let chain_id: u256 = 11155111;
     let (header_rlp, block_number, hash_keccak, hash_poseidon) = get_example_2();
 
-    let mut contract = HerodotusStarknet::contract_state_for_testing();
+    let mut contract = StorageProofs::contract_state_for_testing();
 
     contract
         .state

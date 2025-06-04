@@ -4,7 +4,7 @@ pub trait IReceiver<TContractState> {
 }
 
 #[starknet::contract]
-pub mod HerodotusStarknet {
+pub mod StorageProofs {
     use openzeppelin::{
         access::ownable::OwnableComponent,
         upgrades::{UpgradeableComponent, interface::IUpgradeable},

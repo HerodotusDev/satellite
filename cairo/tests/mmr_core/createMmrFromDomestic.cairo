@@ -1,4 +1,4 @@
-use crate::{
+use storage_proofs::{
     evm_fact_registry::evm_fact_registry_component::{
         EvmFactRegistryInternalImpl, EvmFactRegistryImpl,
     },
@@ -6,14 +6,14 @@ use crate::{
         mmr_core_component::{MmrCoreInternalImpl, MmrCoreExternalImpl}, RootForHashingFunction,
         POSEIDON_HASHING_FUNCTION, KECCAK_HASHING_FUNCTION,
     },
-    receiver::HerodotusStarknet,
+    receiver::StorageProofs,
 };
 
 
 fn setup_mmr_multiple_hashing_functions() -> (
-    HerodotusStarknet::ContractState, u256, u256, u256, u256, u256,
+    StorageProofs::ContractState, u256, u256, u256, u256, u256,
 ) {
-    let mut contract = HerodotusStarknet::contract_state_for_testing();
+    let mut contract = StorageProofs::contract_state_for_testing();
 
     // Set up some MMR for testing
     let chain_id = 11155111;
@@ -57,8 +57,8 @@ fn setup_mmr_multiple_hashing_functions() -> (
 
 fn setup_mmr_single_hashing_functions(
     original_is_offchain_grown: bool,
-) -> (HerodotusStarknet::ContractState, u256, u256, u256, u256) {
-    let mut contract = HerodotusStarknet::contract_state_for_testing();
+) -> (StorageProofs::ContractState, u256, u256, u256, u256) {
+    let mut contract = StorageProofs::contract_state_for_testing();
 
     // Set up some MMR for testing
     let chain_id = 11155111;

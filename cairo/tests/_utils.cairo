@@ -1,4 +1,4 @@
-use crate::{
+use storage_proofs::{
     evm_fact_registry::{
         evm_fact_registry_component::{EvmFactRegistryInternalImpl, EvmFactRegistryImpl},
         BlockHeaderProof,
@@ -6,12 +6,12 @@ use crate::{
     mmr_core::{
         mmr_core_component::MmrCoreInternalImpl, RootForHashingFunction, POSEIDON_HASHING_FUNCTION,
     },
-    receiver::HerodotusStarknet,
+    receiver::StorageProofs,
 };
 use cairo_lib::{hashing::poseidon::hash_words64, data_structures::mmr::utils::compute_root};
 
 pub fn create_mmr_with_block(
-    ref contract: HerodotusStarknet::ContractState,
+    ref contract: StorageProofs::ContractState,
     header_rlp: Span<u64>,
     chain_id: u256,
     mmr_id: u256,

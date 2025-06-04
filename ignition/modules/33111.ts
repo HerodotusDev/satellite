@@ -9,7 +9,7 @@ export const modules: ModuleName[] = [
   // "DataProcessorModule",
   "EvmOnChainGrowingModule",
   "EvmSharpMmrGrowingModule",
-  "NativeParentHashFetcherModule",
+  "L1ParentHashFetcherModule",
   "SimpleReceiverModule",
 ];
 export default buildSatelliteDeployment("33111", modules);

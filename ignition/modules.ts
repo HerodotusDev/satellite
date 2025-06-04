@@ -93,9 +93,28 @@ export const modules = (chainId: keyof typeof settings) =>
         }
       : {}),
 
-    NativeParentHashFetcherModule: {
-      interfaceName: "INativeParentHashFetcherModule",
-    },
+    // Either parent hash fetcher module is used depending on whether blockhash() function returns L1 or native block hash
+    ...("L1_PARENT_HASH_FETCHER_CHAIN_ID" in settings[chainId]
+      ? {
+          L1ParentHashFetcherModule: {
+            interfaceName: "IL1ParentHashFetcherModule",
+            initFunctions: [
+              {
+                name: "initL1ParentHashFetcherModule",
+                args: [settings[chainId].L1_PARENT_HASH_FETCHER_CHAIN_ID],
+              },
+            ],
+          },
+        }
+      : {}),
+
+    ...(!("L1_PARENT_HASH_FETCHER_CHAIN_ID" in settings[chainId])
+      ? {
+          NativeParentHashFetcherModule: {
+            interfaceName: "INativeParentHashFetcherModule",
+          },
+        }
+      : {}),
 
     ...("STARKNET_CORE" in settings[chainId] &&
     "STARKNET_CHAIN_ID" in settings[chainId]

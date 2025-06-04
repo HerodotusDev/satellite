@@ -8,6 +8,6 @@ export const modules = [
   "EvmFactRegistryModule",
   // "DataProcessorModule",
   "EvmOnChainGrowingModule",
-  "NativeParentHashFetcherModule",
+  // "NativeParentHashFetcherModule", // TODO: check if ZKSync supports blockhash function correctly
   "SimpleReceiverModule",
 ] as const;

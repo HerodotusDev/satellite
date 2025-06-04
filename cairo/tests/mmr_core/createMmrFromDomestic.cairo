@@ -1,4 +1,4 @@
-use herodotus_starknet::{
+use crate::{
     evm_fact_registry::evm_fact_registry_component::{
         EvmFactRegistryInternalImpl, EvmFactRegistryImpl,
     },

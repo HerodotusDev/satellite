@@ -1,5 +1,5 @@
 [package]
-name = "herodotus_starknet"
+name = "storage_proofs"
 version = "0.1.0"
 edition = "2023_11"
 

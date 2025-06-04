@@ -7,15 +7,6 @@ version = "0.2.0"
 source = "git+https://github.com/HerodotusDev/cairo-lib.git?branch=v2#206c5d155074744c8973a68ed0c42e25e0e42351"
 
 [[package]]
-name = "herodotus_starknet"
-version = "0.1.0"
-dependencies = [
- "cairo_lib",
- "openzeppelin",
- "snforge_std",
-]
-
-[[package]]
 name = "openzeppelin"
 version = "0.20.0"
 source = "registry+https://scarbs.xyz/"
@@ -146,4 +137,13 @@ source = "registry+https://scarbs.xyz/"
 checksum = "sha256:9f38c6c376447cfe225c5869905122f6a64bc301f5872c7855d2abe6e9c0a1da"
 dependencies = [
  "snforge_scarb_plugin",
+]
+
+[[package]]
+name = "storage_proofs"
+version = "0.1.0"
+dependencies = [
+ "cairo_lib",
+ "openzeppelin",
+ "snforge_std",
 ]

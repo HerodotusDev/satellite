@@ -100,7 +100,7 @@ pub trait ICoreMmrExternal<TContractState> {
 
 #[starknet::component]
 pub mod mmr_core_component {
-    use herodotus_starknet::state::state_component;
+    use crate::state::state_component;
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry};
     use cairo_lib::{
         utils::bitwise::reverse_endianness_u256, hashing::keccak::keccak_cairo_words64,

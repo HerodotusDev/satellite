@@ -427,7 +427,7 @@ pub trait IEvmFactRegistryInternal<TContractState> {
 
 #[starknet::component]
 pub mod evm_fact_registry_component {
-    use herodotus_starknet::{
+    use crate::{
         state::state_component, mmr_core::mmr_core_component,
         mmr_core::mmr_core_component::MmrCoreExternalImpl,
     };

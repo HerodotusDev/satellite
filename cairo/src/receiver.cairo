@@ -9,7 +9,7 @@ pub mod HerodotusStarknet {
         access::ownable::OwnableComponent,
         upgrades::{UpgradeableComponent, interface::IUpgradeable},
     };
-    use herodotus_starknet::{
+    use crate::{
         evm_fact_registry::evm_fact_registry_component,
         mmr_core::{mmr_core_component, RootForHashingFunction}, state::state_component,
         evm_growing::evm_growing_component,

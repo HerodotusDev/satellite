@@ -21,7 +21,7 @@ pub trait IEvmGrowing<TContractState> {
 
 #[starknet::component]
 pub mod evm_growing_component {
-    use herodotus_starknet::{
+    use crate::{
         state::state_component, mmr_core::{POSEIDON_HASHING_FUNCTION, RootForHashingFunction},
         utils::{header_rlp_index, decoders::{decode_rlp, decode_block_number, decode_parent_hash}},
     };

@@ -13,6 +13,44 @@ import {
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 describe("EVM Fact Registry Ethereum Sepolia", () => {
+  it("Should prove header fields", async () => {
+    const { satellite, satelliteAddress } = await loadFixture(deploy);
+
+    const chainId = BigInt(11155111);
+    const blockNumber = BigInt(7344140);
+    const mmrId = BigInt(200);
+    const mmrSize = BigInt(1);
+    const blockHash =
+      "0xc333c02b080f9ba18c09cb87946c0a0fdf4d3ad9e804e85352d52375ab6c6713";
+    const mmrRoot = BigInt(
+      ethers.keccak256(toU256(mmrSize, BigInt(blockHash))),
+    );
+
+    await setMmrData(
+      satelliteAddress,
+      chainId,
+      mmrId,
+      KECCAK_HASHER,
+      false,
+      mmrSize,
+      mmrRoot,
+    );
+
+    const headerProof = {
+      mmrId,
+      mmrSize,
+      mmrLeafIndex: 1,
+      mmrPeaks: [blockHash],
+      mmrInclusionProof: [],
+      blockHeaderRlp:
+        "0xf90265a018b82986d853e1e2b7624ef9e14330dbd74bc6a15716f31ec0d2d2bfda70f281a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d4934794455e5aa18469bc6ccef49594645666c587a3a71ba0bd8967936dcac753885027317cfb97eff8ec90bbf952c3b4308f2928dec83fdda0e4938d93eb85918eb86e0cc84339f991b5e10f186dad45fb7c1817518c38b14ea00d6d2e3378a4079d1977017eeec1ff2ec52b15e796f6335c3ca615970f816133b901008148084dcc014422899c209e829a00000149c84085135860c200843004800192148600480820025448600441215c01892314268000a12e080d071a541d2c0854631265080b4c011a705baa1a2000c89004040728013400b1e0821b02942e72d36964280f0b510d4582a7a58210a049b802e908c4806884002008981e01a908010252040483826500608808018330a012101114231402028871450f45c482085d020a60100102c44088a04b4090c8905601816660ba02308a428421b2300818898b00126a260a8ab7007606bd9dd20226645401408001a1712113442208266b4480550014610c04d45d500401a940040681aa1834cc1216680985292838490014808370100c840225510083db271c84676a77f899d883010e0b846765746888676f312e32332e31856c696e7578a037423beb31682dd753561ca8dcab7addebe125f41a93c95105b195bfd6d7d235880000000000000000850886cb2404a059574b119ccf2b9cf5a54dee5b16c4943fb661971ed77837008228e984d4d08b830a00008404e00000a0cc666c56fbf798e23edfc0b9f29910c5ac09605ad17dc3e1b648deb8534d9484",
+    };
+
+    expect(
+      await satellite.headerFieldSafe(chainId, blockNumber, hf.PARENT_HASH),
+    ).to.deep.equal([false, toU256(0)]);
+  });
+
   it("Should prove account", async () => {
     const { satellite, satelliteAddress } = await loadFixture(deploy);
 

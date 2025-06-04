@@ -37,8 +37,9 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
     ) external {
         require(headersSerialized.length > 0, "ERR_EMPTY_BATCH");
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        require(s.mmrs[accumulatedChainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize != LibSatellite.NO_MMR_SIZE, "ERR_MMR_DOES_NOT_EXIST");
+        // Onchain grown mmrs are guaranteed to have only one hashing function
         require(s.mmrs[accumulatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown == false, "ERR_MMR_IS_SHARP_GROWN");
+        require(s.mmrs[accumulatedChainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize != LibSatellite.NO_MMR_SIZE, "ERR_MMR_DOES_NOT_EXIST");
 
         MMRGrowResult memory result;
 

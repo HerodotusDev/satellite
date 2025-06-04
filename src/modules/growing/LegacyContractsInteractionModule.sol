@@ -53,9 +53,16 @@ contract LegacyContractsInteractionModule is ILegacyContractsInteractionModule, 
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
-        s.mmrs[aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[size] = poseidonRoot;
-        s.mmrs[aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].latestSize = size;
-        s.mmrs[aggregatedChainId][newMmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown = true;
+        mapping(bytes32 => ISatellite.MmrInfo) storage mmrs = s.mmrs[aggregatedChainId][newMmrId];
+        require(
+            mmrs[POSEIDON_HASHING_FUNCTION].latestSize == LibSatellite.NO_MMR_SIZE && mmrs[KECCAK_HASHING_FUNCTION].latestSize == LibSatellite.NO_MMR_SIZE,
+            "MMR_ALREADY_EXISTS"
+        );
+
+        ISatellite.MmrInfo storage mmr = mmrs[POSEIDON_HASHING_FUNCTION];
+        mmr.mmrSizeToRoot[size] = poseidonRoot;
+        mmr.latestSize = size;
+        mmr.isOffchainGrown = true;
 
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](1);
         rootsForHashingFunctions[0].root = poseidonRoot;

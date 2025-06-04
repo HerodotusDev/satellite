@@ -144,11 +144,11 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
             revert AggregationError("MMR size mismatch");
         }
 
-        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown == false) {
+        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown != true) {
             revert AggregationError("Poseidon MMR is not offchain grown");
         }
 
-        if (s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown == false) {
+        if (s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown != true) {
             revert AggregationError("Keccak MMR is not offchain grown");
         }
 

@@ -26,11 +26,15 @@ enum CreatedFrom {
 interface IMmrCoreModule {
     // ========================= Other Satellite Modules Only Functions ========================= //
 
-    /// @notice Receiving a recent parent hash obtained on-chain directly on this chain or sent in a message from another one (eg. L1 -> L2)
-    /// @dev saves the parent hash of the block number (from a given chain) in the contract storage
+    /// @notice Receives a parent hash for a given blockNumber and hashingFunction on chainId.
+    /// @notice It can be obtained directly on-chain (via `blockhash` function or on parent hash) or sent from another chain (eg. L1 -> L2).
+    /// @dev Saves the received parentHash in satellite storage for later access.
+    /// @dev IMPORTANT: This function must only be called with data that is verified to be correct.
     function _receiveParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external;
 
-    /// @notice Creates a new branch from message sent from satellite on another chain
+    /// @notice Creates a new MMR with given data by copying MMR data from another (foreign) chain.
+    /// @dev Saves new MMR in satellite storage for later access.
+    /// @dev IMPORTANT:
     /// @param newMmrId the ID of the MMR to create
     /// @param rootsForHashingFunctions the roots of the MMR -> ABI encoded hashing function => MMR root
     /// @param mmrSize the size of the MMR
@@ -75,13 +79,9 @@ interface IMmrCoreModule {
 
     function KECCAK_MMR_INITIAL_ROOT() external view returns (bytes32);
 
-    function getMmrRoot(uint256 mmrId, uint256 mmrSize, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bytes32);
+    function getMmrAtSize(uint256 chainId, uint256 mmrId, bytes32 hashingFunction, uint256 mmrSize) external view returns (bytes32, bool);
 
-    function getLatestMmrRoot(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bytes32);
-
-    function getLatestMmrSize(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (uint256);
-
-    function isMmrOnlyOffchainGrown(uint256 mmrId, uint256 accumulatedChainId, bytes32 hashingFunction) external view returns (bool);
+    function getLatestMmr(uint256 chainId, uint256 mmrId, bytes32 hashingFunction) external view returns (bytes32, uint256, bool);
 
     function getReceivedParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber) external view returns (bytes32);
 

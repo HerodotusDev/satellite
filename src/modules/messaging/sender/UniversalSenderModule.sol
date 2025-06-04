@@ -47,8 +47,15 @@ contract UniversalSenderModule is IUniversalSenderModule {
         bool isOffchainGrownDestination,
         bytes calldata _xDomainMsgGasData
     ) external payable {
+        require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
+        require(hashingFunctions.length > 0, "INVALID_HASHING_FUNCTIONS_LENGTH");
+        if (isOffchainGrownDestination == false) {
+            // Onchain grown MMRs can have only one hashing function
+            require(hashingFunctions.length == 1, "INVALID_HASHING_FUNCTIONS_LENGTH");
+        }
+        require(originalMmrId != LibSatellite.EMPTY_MMR_ID, "ORIGINAL_MMR_ID_0_NOT_ALLOWED");
+
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        require(hashingFunctions.length > 0, "hashingFunctions array cannot be empty");
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](hashingFunctions.length);
 
         uint256 commonMmrSize = s.mmrs[accumulatedChainId][originalMmrId][hashingFunctions[0]].latestSize;
@@ -64,11 +71,6 @@ contract UniversalSenderModule is IUniversalSenderModule {
             require(isOffchainGrown == commonIsOffchainGrown, "isOffchainGrown mismatch");
 
             rootsForHashingFunctions[i] = RootForHashingFunction(root, hashingFunctions[i]);
-        }
-
-        // Offchain growing can only be turned off, not on
-        if (isOffchainGrownDestination == true) {
-            require(commonIsOffchainGrown == true, "isOffchainGrown cannot be overridden to true");
         }
 
         ILibSatellite.SatelliteConnection memory satellite = s.satelliteConnectionRegistry[destinationChainId];

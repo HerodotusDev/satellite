@@ -16,6 +16,8 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
     // poseidon_hash(1, "brave new world")
     bytes32 public constant POSEIDON_MMR_INITIAL_ROOT = 0x06759138078831011e3bc0b4a135af21c008dda64586363531697207fb5a2bae;
 
+    bytes32 public constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
+
     // ========================= Satellite Module Storage ========================= //
 
     bytes32 constant MODULE_STORAGE_POSITION = keccak256("diamond.standard.satellite.module.storage.starknet-sharp-mmr-growing");
@@ -119,8 +121,17 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
 
         // Retrieve from cache the parent hash of the block to start from
         bytes32 fromBlockPlusOneParentHash = s.receivedParentHashes[ms.aggregatedChainId][POSEIDON_HASHING_FUNCTION][fromBlockNumber + 1];
-        uint256 actualMmrSizePoseidon = s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize;
-        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown == false) {
+        mapping(bytes32 => ISatellite.MmrInfo) storage mmrs = s.mmrs[ms.aggregatedChainId][mmrId];
+        uint256 actualMmrSizePoseidon = mmrs[POSEIDON_HASHING_FUNCTION].latestSize;
+        if (actualMmrSizePoseidon == LibSatellite.NO_MMR_SIZE) {
+            revert AggregationError("Mmr does not exist");
+        }
+
+        if (mmrs[KECCAK_HASHING_FUNCTION].latestSize != LibSatellite.NO_MMR_SIZE) {
+            revert AggregationError("Mmr has keccak hashing function");
+        }
+
+        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown != true) {
             revert AggregationError("Mmr is not offchain grown");
         }
 

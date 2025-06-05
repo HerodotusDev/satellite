@@ -7,6 +7,9 @@ on:
 jobs:
     formatting-and-testing:
         runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: cairo
         steps:
             - name: Checkout repository
               uses: actions/checkout@v3

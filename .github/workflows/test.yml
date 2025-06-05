@@ -22,6 +22,10 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - uses: foundry-rs/foundry-toolchain@v1
 
+      - name: Go to solidity directory
+        run: |
+          cd solidity
+
       - name: Show Forge version
         run: |
           forge --version

@@ -1,11 +1,11 @@
-name: Continuous Integration - tests
+name: Cairo contract tests
 
 on:
     push:
     pull_request:
 
 jobs:
-    formatting-and-testing:
+    cairo-contract-tests:
         runs-on: ubuntu-latest
         defaults:
             run:
@@ -21,6 +21,8 @@ jobs:
 
             - name: Setup Snfoundry
               uses: foundry-rs/setup-snfoundry@v4
+              with:
+                  tool-versions: cairo/.tool-versions
 
             - name: Format code
               run: scarb fmt --check

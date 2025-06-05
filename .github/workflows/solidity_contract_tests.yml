@@ -1,19 +1,14 @@
-name: CI
+name: Solidity contract tests
 
 on:
     push:
     pull_request:
-    workflow_dispatch:
 
 env:
     FOUNDRY_PROFILE: ci
 
 jobs:
-    check:
-        strategy:
-            fail-fast: true
-
-        name: Solidity contract tests
+    solidity-contract-tests:
         runs-on: ubuntu-latest
         defaults:
             run:

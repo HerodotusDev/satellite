@@ -22,7 +22,7 @@ jobs:
             - name: Setup Snfoundry
               uses: foundry-rs/setup-snfoundry@v4
               with:
-                  starknet-foundry-version: '0.36.0'
+                  starknet-foundry-version: "0.36.0"
 
             - name: Check Cairo version
               run: snforge --version && cat .tool-versions

@@ -1,0 +1,52 @@
+name: CI
+
+on:
+    push:
+    pull_request:
+    workflow_dispatch:
+
+env:
+    FOUNDRY_PROFILE: ci
+
+jobs:
+    check:
+        strategy:
+            fail-fast: true
+
+        name: Solidity contract tests
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: solidity
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+            - uses: oven-sh/setup-bun@v2
+            - uses: foundry-rs/foundry-toolchain@v1
+
+            - name: Show Forge version
+              run: |
+                  forge --version
+
+            - name: Run Bun install
+              run: |
+                  bun install
+
+            - name: Init .env
+              env:
+                  CONFIG_SECRET: ${{ secrets.ENV_CONFIG }}
+              run: |
+                  printf "%s\n" "$CONFIG_SECRET" > .env
+
+            - name: Run Prettier Check
+              run: |
+                  bun prettier:check
+
+            - name: Run Hardhat build
+              run: |
+                  bun compile
+
+            - name: Run Hardhat test
+              run: |
+                  bun run test

@@ -20,9 +20,6 @@ jobs:
             - name: Setup Snfoundry
               uses: foundry-rs/setup-snfoundry@v4
 
-            - name: Check Cairo version
-              run: snforge --version && cat .tool-versions
-
             - name: Format code
               run: scarb fmt --check
 

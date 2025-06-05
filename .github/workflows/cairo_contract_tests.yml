@@ -16,6 +16,8 @@ jobs:
 
             - name: Setup Scarb
               uses: software-mansion/setup-scarb@v1
+              with:
+                  tool-versions: cairo/.tool-versions
 
             - name: Setup Snfoundry
               uses: foundry-rs/setup-snfoundry@v4

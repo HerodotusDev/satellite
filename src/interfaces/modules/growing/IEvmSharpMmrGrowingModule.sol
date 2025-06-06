@@ -3,8 +3,8 @@ pragma solidity ^0.8.27;
 
 import {Uint256Splitter} from "src/libraries/internal/Uint256Splitter.sol";
 import {IFactsRegistry} from "src/interfaces/external/IFactsRegistry.sol";
+import {IEvmFactRegistryModule} from "src/interfaces/modules/IEvmFactRegistryModule.sol";
 import {ISharpMmrGrowingCommon} from "src/interfaces/modules/common/ISharpMmrGrowingCommon.sol";
-import {ISatellite} from "src/interfaces/ISatellite.sol";
 
 interface IEvmSharpMmrGrowingModule is ISharpMmrGrowingCommon {
     // Representation of the Cairo program's output (raw unpacked)
@@ -58,5 +58,5 @@ interface IEvmSharpMmrGrowingModule is ISharpMmrGrowingCommon {
 
     function aggregateEvmSharpJobs(uint256 mmrId, JobOutputPacked[] calldata outputs) external;
 
-    function allowContinueEvmSharpGrowingFrom(ISatellite.BlockHeaderProof calldata headerProof) external;
+    function allowContinueEvmSharpGrowingFrom(IEvmFactRegistryModule.BlockHeaderProof calldata headerProof) external;
 }

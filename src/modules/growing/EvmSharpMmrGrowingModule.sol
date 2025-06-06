@@ -8,6 +8,7 @@ import {ISatellite} from "src/interfaces/ISatellite.sol";
 import {LibSatellite} from "src/libraries/LibSatellite.sol";
 import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "src/interfaces/modules/IMmrCoreModule.sol";
 import {AccessController} from "src/libraries/AccessController.sol";
+import {IEvmFactRegistryModule} from "src/interfaces/modules/IEvmFactRegistryModule.sol";
 
 contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController {
     // Using inline library for efficient splitting and joining of uint256 values
@@ -131,11 +132,10 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
         EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
         ISatellite satellite = ISatellite(address(this));
 
-        uint8 blockHeaderFieldCount = satellite.BLOCK_HEADER_FIELD_COUNT();
-        bytes32[blockHeaderFieldCount] memory fields = satellite.verifyHeader(ms.aggregatedChainId, headerProof);
+        bytes32[15] memory fields = satellite.verifyHeader(ms.aggregatedChainId, headerProof);
 
-        bytes32 parentHash = fields[uint8(ISatellite.BlockHeaderField.PARENT_HASH)];
-        uint256 blockNumber = uint256(fields[uint8(ISatellite.BlockHeaderField.NUMBER)]);
+        bytes32 parentHash = fields[uint8(IEvmFactRegistryModule.BlockHeaderField.PARENT_HASH)];
+        uint256 blockNumber = uint256(fields[uint8(IEvmFactRegistryModule.BlockHeaderField.NUMBER)]);
 
         satellite._receiveParentHash(ms.aggregatedChainId, KECCAK_HASHING_FUNCTION, blockNumber, parentHash);
     }

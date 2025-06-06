@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {Uint256Splitter} from "src/libraries/internal/Uint256Splitter.sol";
-import {IFactsRegistry} from "src/interfaces/external/IFactsRegistry.sol";
-import {IEvmSharpMmrGrowingModule} from "src/interfaces/modules/growing/IEvmSharpMmrGrowingModule.sol";
-import {ISatellite} from "src/interfaces/ISatellite.sol";
-import {LibSatellite} from "src/libraries/LibSatellite.sol";
-import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "src/interfaces/modules/IMmrCoreModule.sol";
-import {AccessController} from "src/libraries/AccessController.sol";
+import {Uint256Splitter} from "../../libraries/internal/Uint256Splitter.sol";
+import {IFactsRegistry} from "../../interfaces/external/IFactsRegistry.sol";
+import {IEvmSharpMmrGrowingModule} from "../../interfaces/modules/growing/IEvmSharpMmrGrowingModule.sol";
+import {ISatellite} from "../../interfaces/ISatellite.sol";
+import {LibSatellite} from "../../libraries/LibSatellite.sol";
+import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "../../interfaces/modules/IMmrCoreModule.sol";
+import {AccessController} from "../../libraries/AccessController.sol";
 
 contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController {
     // Using inline library for efficient splitting and joining of uint256 values

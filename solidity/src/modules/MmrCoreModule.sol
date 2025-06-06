@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {LibSatellite} from "src/libraries/LibSatellite.sol";
-import {RootForHashingFunction, IMmrCoreModule, CreatedFrom} from "src/interfaces/modules/IMmrCoreModule.sol";
-import {ISatellite} from "src/interfaces/ISatellite.sol";
-import {AccessController} from "src/libraries/AccessController.sol";
+import {LibSatellite} from "../libraries/LibSatellite.sol";
+import {RootForHashingFunction, IMmrCoreModule, CreatedFrom} from "../interfaces/modules/IMmrCoreModule.sol";
+import {ISatellite} from "../interfaces/ISatellite.sol";
+import {AccessController} from "../libraries/AccessController.sol";
 
 // Rules about MMRs:
 // isOffchainGrown = false (onchain grown MMRs) -> can have only one hashing function

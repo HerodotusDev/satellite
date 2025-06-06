@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {IAggregatorsFactory} from "src/interfaces/external/IAggregatorsFactory.sol";
-import {RootForHashingFunction} from "src/interfaces/modules/IMmrCoreModule.sol";
+import {IAggregatorsFactory} from "../../external/IAggregatorsFactory.sol";
+import {RootForHashingFunction} from "../IMmrCoreModule.sol";
 
 interface ILegacyContractsInteractionModule {
     function loadLegacyEvmAggregatorMmr(IAggregatorsFactory aggregatorsFactory, uint256 aggregatedChainId, uint256 legacyMmrId, uint256 newMmrId) external;

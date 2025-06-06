@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.19;
 
-import {ISatellite} from "src/interfaces/ISatellite.sol";
-import {ILibSatellite} from "src/interfaces/ILibSatellite.sol";
-import {IUniversalSenderModule} from "src/interfaces/modules/messaging/sender/IUniversalSenderModule.sol";
-import {LibSatellite} from "src/libraries/LibSatellite.sol";
-import {RootForHashingFunction} from "src/interfaces/modules/IMmrCoreModule.sol";
+import {ISatellite} from "../../../interfaces/ISatellite.sol";
+import {ILibSatellite} from "../../../interfaces/ILibSatellite.sol";
+import {IUniversalSenderModule} from "../../../interfaces/modules/messaging/sender/IUniversalSenderModule.sol";
+import {LibSatellite} from "../../../libraries/LibSatellite.sol";
+import {RootForHashingFunction} from "../../../interfaces/modules/IMmrCoreModule.sol";
 
 /// @notice Sender module that uses appropriate sender module depending on the destination chain
 /// @dev It uses Satellite Connection Registry to find function selector for the destination chain

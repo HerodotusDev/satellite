@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.19;
 
-import {LibSatellite} from "src/libraries/LibSatellite.sol";
-import {IApeChainInbox} from "src/interfaces/external/IApeChainInbox.sol";
-import {IArbitrumToApeChainSenderModule} from "src/interfaces/modules/messaging/sender/IArbitrumToApeChainSenderModule.sol";
-import {AccessController} from "src/libraries/AccessController.sol";
+import {LibSatellite} from "../../../libraries/LibSatellite.sol";
+import {IApeChainInbox} from "../../../interfaces/external/IApeChainInbox.sol";
+import {IArbitrumToApeChainSenderModule} from "../../../interfaces/modules/messaging/sender/IArbitrumToApeChainSenderModule.sol";
+import {AccessController} from "../../../libraries/AccessController.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract ArbitrumToApeChainSenderModule is IArbitrumToApeChainSenderModule, AccessController {

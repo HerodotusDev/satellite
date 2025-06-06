@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {RootForHashingFunction} from "src/interfaces/modules/IMmrCoreModule.sol";
+import {RootForHashingFunction} from "../../IMmrCoreModule.sol";
 
 /// @notice Receives messages from satellites deployed on other chains
 interface IReceiverModule {

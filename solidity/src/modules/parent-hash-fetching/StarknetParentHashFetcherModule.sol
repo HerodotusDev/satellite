@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {ISatellite} from "src/interfaces/ISatellite.sol";
-import {IStarknetParentHashFetcherModule} from "src/interfaces/modules/parent-hash-fetching/IStarknetParentHashFetcherModule.sol";
-import {IStarknet} from "src/interfaces/external/IStarknet.sol";
-import {AccessController} from "src/libraries/AccessController.sol";
+import {ISatellite} from "../../interfaces/ISatellite.sol";
+import {IStarknetParentHashFetcherModule} from "../../interfaces/modules/parent-hash-fetching/IStarknetParentHashFetcherModule.sol";
+import {IStarknet} from "../../interfaces/external/IStarknet.sol";
+import {AccessController} from "../../libraries/AccessController.sol";
 
 /// @notice Fetches parent hashes for Starknet
 /// @notice if deployed on Ethereum Sepolia, it fetches parent hashes from Starknet Sepolia

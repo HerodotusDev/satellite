@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {LibSatellite} from "src/libraries/LibSatellite.sol";
-import {ISatellite} from "src/interfaces/ISatellite.sol";
-import {IReceiverModule} from "src/interfaces/modules/messaging/receiver/IReceiverModule.sol";
-import {RootForHashingFunction} from "src/interfaces/modules/IMmrCoreModule.sol";
+import {LibSatellite} from "../../../libraries/LibSatellite.sol";
+import {ISatellite} from "../../../interfaces/ISatellite.sol";
+import {IReceiverModule} from "../../../interfaces/modules/messaging/receiver/IReceiverModule.sol";
+import {RootForHashingFunction} from "../../../interfaces/modules/IMmrCoreModule.sol";
 
 /// @notice Abstract contract for receiving messages from satellites deployed on other chains
 /// @notice It checks whether the message is coming from correct address (including aliasing cross-domain counterpart)

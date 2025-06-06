@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import {IFactsRegistry} from "src/interfaces/external/IFactsRegistry.sol";
-import {ModuleTask} from "src/libraries/internal/data-processor/ModuleCodecs.sol";
-import {IFactsRegistryCommon} from "src/interfaces/modules/common/IFactsRegistryCommon.sol";
+import {IFactsRegistry} from "../external/IFactsRegistry.sol";
+import {ModuleTask} from "../../libraries/internal/data-processor/ModuleCodecs.sol";
+import {IFactsRegistryCommon} from "../modules/common/IFactsRegistryCommon.sol";
 
 interface IDataProcessorModule is IFactsRegistryCommon {
     /// @notice The status of a task

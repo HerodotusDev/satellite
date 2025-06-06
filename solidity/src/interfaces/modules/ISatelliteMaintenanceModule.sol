@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {ILibSatellite} from "src/interfaces/ILibSatellite.sol";
+import {ILibSatellite} from "../ILibSatellite.sol";
 
 interface ISatelliteMaintenanceModule {
     /// @notice Add/replace/remove any number of functions and optionally exemaintenancee

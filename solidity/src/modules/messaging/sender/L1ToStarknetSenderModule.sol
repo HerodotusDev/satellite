@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.19;
 
-import {LibSatellite} from "src/libraries/LibSatellite.sol";
-import {IStarknetCore} from "src/interfaces/external/IStarknetCore.sol";
-import {IL1ToStarknetSenderModule} from "src/interfaces/modules/messaging/sender/IL1ToStarknetSenderModule.sol";
-import {AccessController} from "src/libraries/AccessController.sol";
-import {RootForHashingFunction} from "src/interfaces/modules/IMmrCoreModule.sol";
-import {Uint256Splitter} from "src/libraries/internal/Uint256Splitter.sol";
+import {LibSatellite} from "../../../libraries/LibSatellite.sol";
+import {IStarknetCore} from "../../../interfaces/external/IStarknetCore.sol";
+import {IL1ToStarknetSenderModule} from "../../../interfaces/modules/messaging/sender/IL1ToStarknetSenderModule.sol";
+import {AccessController} from "../../../libraries/AccessController.sol";
+import {RootForHashingFunction} from "../../../interfaces/modules/IMmrCoreModule.sol";
+import {Uint256Splitter} from "../../../libraries/internal/Uint256Splitter.sol";
 
 contract L1ToStarknetSenderModule is IL1ToStarknetSenderModule, AccessController {
     using Uint256Splitter for uint256;

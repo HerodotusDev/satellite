@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {ISatellite} from "src/interfaces/ISatellite.sol";
-import {IArbitrumParentHashFetcherModule, IERC20Outbox} from "src/interfaces/modules/parent-hash-fetching/IArbitrumParentHashFetcherModule.sol";
-import {AccessController} from "src/libraries/AccessController.sol";
-import {Lib_RLPReader as RLPReader} from "src/libraries/external/optimism/rlp/Lib_RLPReader.sol";
+import {ISatellite} from "../../interfaces/ISatellite.sol";
+import {IArbitrumParentHashFetcherModule, IERC20Outbox} from "../../interfaces/modules/parent-hash-fetching/IArbitrumParentHashFetcherModule.sol";
+import {AccessController} from "../../libraries/AccessController.sol";
+import {Lib_RLPReader as RLPReader} from "../../libraries/external/optimism/rlp/Lib_RLPReader.sol";
 
 /// @notice Fetches parent hashes for Arbitrum-like chains
 /// @notice if deployed on Ethereum Sepolia, it fetches parent hashes from Arbitrum Sepolia

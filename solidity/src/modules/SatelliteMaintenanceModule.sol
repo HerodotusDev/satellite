@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {ISatelliteMaintenanceModule} from "src/interfaces/modules/ISatelliteMaintenanceModule.sol";
-import {LibSatellite} from "src/libraries/LibSatellite.sol";
-import {ISatellite} from "src/interfaces/ISatellite.sol";
-import {AccessController} from "src/libraries/AccessController.sol";
+import {ISatelliteMaintenanceModule} from "../interfaces/modules/ISatelliteMaintenanceModule.sol";
+import {LibSatellite} from "../libraries/LibSatellite.sol";
+import {ISatellite} from "../interfaces/ISatellite.sol";
+import {AccessController} from "../libraries/AccessController.sol";
 
 contract SatelliteMaintenanceModule is ISatelliteMaintenanceModule, AccessController {
     /// @notice Add/replace/remove any number of functions and optionally exemaintenancee

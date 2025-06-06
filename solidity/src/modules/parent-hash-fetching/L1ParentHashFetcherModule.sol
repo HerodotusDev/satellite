@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {ISatellite} from "src/interfaces/ISatellite.sol";
-import {IL1ParentHashFetcherModule} from "src/interfaces/modules/parent-hash-fetching/IL1ParentHashFetcherModule.sol";
+import {ISatellite} from "../../interfaces/ISatellite.sol";
+import {IL1ParentHashFetcherModule} from "../../interfaces/modules/parent-hash-fetching/IL1ParentHashFetcherModule.sol";
 
 /// @notice Fetches parent hashes for the L1 chain.
 /// @notice For example if deployed on Apechain, it will fetch parent hashes from Ethereum.

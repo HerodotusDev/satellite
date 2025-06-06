@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {LibSatellite} from "src/libraries/LibSatellite.sol";
-import {ISatellite} from "src/interfaces/ISatellite.sol";
-import {ISatelliteInspectorModule} from "src/interfaces/modules/ISatelliteInspectorModule.sol";
+import {LibSatellite} from "../libraries/LibSatellite.sol";
+import {ISatellite} from "../interfaces/ISatellite.sol";
+import {ISatelliteInspectorModule} from "../interfaces/modules/ISatelliteInspectorModule.sol";
 
 contract SatelliteInspectorModule is ISatelliteInspectorModule {
     /// @notice Gets all modules and their selectors.

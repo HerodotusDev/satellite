@@ -67,6 +67,7 @@ interface IEvmFactRegistryModule {
         mapping(uint256 chainId => mapping(uint256 blockNumber => BlockHeader)) blockHeader;
     }
 
+    function BLOCK_HEADER_FIELD_COUNT() external view returns (uint8);
     function APECHAIN_SHARE_PRICE_ADDRESS() external view returns (address);
     function APECHAIN_SHARE_PRICE_SLOT() external view returns (bytes32);
 

@@ -303,9 +303,13 @@ async function compareModules(
     const compiledContract = selectorToCompiledModule.get(selector);
 
     if (!deployedContract) {
-      append(addedSelectors, compiledContract!, selector);
+      if (selectedModules.has(compiledContract!)) {
+        append(addedSelectors, compiledContract!, selector);
+      }
     } else if (!compiledContract) {
-      append(deletedSelectors, deployedContract, selector);
+      if (selectedModules.has(deployedContract)) {
+        append(deletedSelectors, deployedContract, selector);
+      }
     } else if (deployedContract === compiledContract) {
       if (preservedModules.find((x) => x.name === deployedContract)) continue;
 
@@ -350,6 +354,10 @@ async function compareModules(
     console.log("-", module + ":", selectors.join(", "));
   }
 
+  const addedModulesToDeploy = addedModules.filter(
+    (module) => module && selectedModules.has(module.name),
+  );
+
   const updatedModulesToDeploy = updatedModules.filter((module) =>
     selectedModules.has(module.name),
   );
@@ -365,7 +373,7 @@ async function compareModules(
   console.log("\n========================================\n");
 
   return {
-    addedModules,
+    addedModules: addedModulesToDeploy,
     deletedModules,
     updatedModules: updatedModulesToDeploy,
     preservedModules,
@@ -393,7 +401,8 @@ async function getMaintenanceActions(
     const maintenances = [];
     for (const [_module, selectors] of result.deletedSelectors) {
       maintenances.push({
-        moduleAddress: addresses[_module], // TODO: 0x0 when SatelliteMaintenanceModule is fixed
+        moduleAddress:
+          addresses[_module] ?? "0x0000000000000000000000000000000000000000",
         action: ACTION.Remove,
         functionSelectors: selectors,
       });
@@ -496,14 +505,13 @@ export async function main() {
   console.log("Running maintenance actions...");
   console.log(actions);
 
-  console.log(
-    "res",
-    await satellite.satelliteMaintenance(
-      actions as any,
-      "0x0000000000000000000000000000000000000000",
-      "0x",
-    ),
+  const tx = await satellite.satelliteMaintenance(
+    actions as any,
+    "0x0000000000000000000000000000000000000000",
+    "0x",
   );
+  await tx.wait();
+  console.log("Maintenance actions completed:", tx.hash);
 
   process.exit(0);
 }

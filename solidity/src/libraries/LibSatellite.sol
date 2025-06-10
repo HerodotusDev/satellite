@@ -64,7 +64,7 @@ library LibSatellite {
             } else if (action == ILibSatellite.ModuleMaintenanceAction.Replace) {
                 replaceFunctions(moduleMaintenance.moduleAddress, moduleMaintenance.functionSelectors);
             } else if (action == ILibSatellite.ModuleMaintenanceAction.Remove) {
-                removeFunctions(moduleMaintenance.moduleAddress, moduleMaintenance.functionSelectors);
+                removeFunctions(moduleMaintenance.functionSelectors);
             } else {
                 revert ILibSatellite.IncorrectModuleMaintenanceAction(action);
             }
@@ -124,13 +124,9 @@ library LibSatellite {
         }
     }
 
-    function removeFunctions(address _moduleAddress, bytes4[] memory _functionSelectors) internal {
+    function removeFunctions(bytes4[] memory _functionSelectors) internal {
         if (_functionSelectors.length == 0) {
             revert ILibSatellite.NoSelectorsInModuleToMaintenance();
-        }
-        // TODO: remove this if statement
-        if (_moduleAddress == address(0)) {
-            revert ILibSatellite.AddModuleAddressZero();
         }
 
         ILibSatellite.SatelliteStorage storage s = satelliteStorage();

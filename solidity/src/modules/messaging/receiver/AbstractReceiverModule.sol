@@ -11,10 +11,6 @@ import {RootForHashingFunction} from "../../../interfaces/modules/IMmrCoreModule
 abstract contract AbstractReceiverModule is IReceiverModule {
     function receiveParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash) external onlyCrossdomainCounterpart {
         ISatellite(address(this))._receiveParentHash(chainId, hashingFunction, blockNumber, parentHash);
-
-        // _receiveParentHash(uint256 chainId, bytes32 hashingFunction, uint256 blockNumber, bytes32 parentHash)
-        // emit ReceivedHash(messagesOriginChainId, parentHash, blockNumber);
-        // event is emitted in HeadersStore so this probably is not needed.
     }
 
     function receiveMmr(
@@ -26,7 +22,6 @@ abstract contract AbstractReceiverModule is IReceiverModule {
         uint256 originalMmrId,
         bool isOffchainGrown
     ) external onlyCrossdomainCounterpart {
-        // headersStore.createBranchFromMessage(keccakMMRRoot, mmrSize, aggregatorId, newMmrId);
         ISatellite(address(this))._createMmrFromForeign(newMmrId, rootsForHashingFunctions, mmrSize, accumulatedChainId, originChainId, originalMmrId, isOffchainGrown);
     }
 

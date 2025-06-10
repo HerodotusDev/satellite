@@ -629,12 +629,12 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "mmrId",
+        "name": "chainId",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "accumulatedChainId",
+        "name": "mmrId",
         "type": "uint256"
       },
       {
@@ -643,12 +643,22 @@
         "type": "bytes32"
       }
     ],
-    "name": "getLatestMmrRoot",
+    "name": "getLatestMmr",
     "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
       {
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -658,60 +668,36 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "mmrId",
+        "name": "chainId",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "accumulatedChainId",
+        "name": "mmrId",
         "type": "uint256"
       },
       {
         "internalType": "bytes32",
         "name": "hashingFunction",
         "type": "bytes32"
-      }
-    ],
-    "name": "getLatestMmrSize",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "mmrId",
-        "type": "uint256"
       },
       {
         "internalType": "uint256",
         "name": "mmrSize",
         "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "accumulatedChainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "hashingFunction",
-        "type": "bytes32"
       }
     ],
-    "name": "getMmrRoot",
+    "name": "getMmrAtSize",
     "outputs": [
       {
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -741,35 +727,6 @@
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "mmrId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "accumulatedChainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "hashingFunction",
-        "type": "bytes32"
-      }
-    ],
-    "name": "isMmrOnlyOffchainGrown",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -2025,11 +1982,60 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "l1ChainId",
+        "type": "uint256"
+      }
+    ],
+    "name": "initL1ParentHashFetcherModule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "blockNumber",
         "type": "uint256"
       }
     ],
-    "name": "nativeFetchParentHash",
+    "name": "l1FetchParentHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "rootHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes",
+        "name": "blockHeader",
+        "type": "bytes"
+      }
+    ],
+    "name": "arbitrumFetchParentHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "outboxAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      }
+    ],
+    "name": "initArbitrumParentHashFetcherModule",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2113,6 +2119,123 @@
       }
     ],
     "name": "receiveParentHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "destinationChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "accumulatedChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "originalMmrId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "newMmrId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "hashingFunctions",
+        "type": "bytes32[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "isOffchainGrownDestination",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_xDomainMsgGasData",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendMmr",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "destinationChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "accumulatedChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "hashingFunction",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_xDomainMsgGasData",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendParentHash",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "satelliteAddress",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "inboxAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_data",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_xDomainMsgGasData",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendMessageArbitrumToApeChain",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      }
+    ],
+    "name": "setApeChainTokenAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2280,6 +2403,19 @@
       }
     ],
     "name": "satelliteMaintenance",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      }
+    ],
+    "name": "nativeFetchParentHash",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2698,6 +2834,51 @@
   {
     "inputs": [
       {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "mmrId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint128",
+            "name": "mmrSize",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mmrLeafIndex",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrPeaks",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "mmrInclusionProof",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes",
+            "name": "blockHeaderRlp",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct IEvmFactRegistryModule.BlockHeaderProof",
+        "name": "headerProof",
+        "type": "tuple"
+      }
+    ],
+    "name": "allowContinueEvmSharpGrowingFrom",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "newMmrId",
         "type": "uint256"
@@ -2951,82 +3132,6 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "destinationChainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "accumulatedChainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "originalMmrId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "newMmrId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32[]",
-        "name": "hashingFunctions",
-        "type": "bytes32[]"
-      },
-      {
-        "internalType": "bool",
-        "name": "isOffchainGrownDestination",
-        "type": "bool"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_xDomainMsgGasData",
-        "type": "bytes"
-      }
-    ],
-    "name": "sendMmr",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "destinationChainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "accumulatedChainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "hashingFunction",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "blockNumber",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_xDomainMsgGasData",
-        "type": "bytes"
-      }
-    ],
-    "name": "sendParentHash",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "RECEIVE_MMR_L1_SELECTOR",
     "outputs": [
@@ -3102,6 +3207,34 @@
       }
     ],
     "name": "sendMessageL1ToStarknet",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "satelliteAddress",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "inboxAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_data",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_xDomainMsgGasData",
+        "type": "bytes"
+      }
+    ],
+    "name": "sendMessageL1ToArbitrum",
     "outputs": [],
     "stateMutability": "payable",
     "type": "function"
@@ -3221,83 +3354,6 @@
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "rootHash",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes",
-        "name": "blockHeader",
-        "type": "bytes"
-      }
-    ],
-    "name": "arbitrumFetchParentHash",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "outboxAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "chainId",
-        "type": "uint256"
-      }
-    ],
-    "name": "initArbitrumParentHashFetcherModule",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "satelliteAddress",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "inboxAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_data",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_xDomainMsgGasData",
-        "type": "bytes"
-      }
-    ],
-    "name": "sendMessageArbitrumToApeChain",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "tokenAddress",
-        "type": "address"
-      }
-    ],
-    "name": "setApeChainTokenAddress",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
       }
@@ -3324,34 +3380,6 @@
     "name": "setValid",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "satelliteAddress",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "inboxAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_data",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_xDomainMsgGasData",
-        "type": "bytes"
-      }
-    ],
-    "name": "sendMessageL1ToArbitrum",
-    "outputs": [],
-    "stateMutability": "payable",
     "type": "function"
   },
   {

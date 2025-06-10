@@ -8,6 +8,7 @@ import {ISatellite} from "../../interfaces/ISatellite.sol";
 import {LibSatellite} from "../../libraries/LibSatellite.sol";
 import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "../../interfaces/modules/IMmrCoreModule.sol";
 import {AccessController} from "../../libraries/AccessController.sol";
+import {IEvmFactRegistryModule} from "../../interfaces/modules/IEvmFactRegistryModule.sol";
 
 contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController {
     // Using inline library for efficient splitting and joining of uint256 values
@@ -123,6 +124,20 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
         rootsForHashingFunctions[1].hashingFunction = KECCAK_HASHING_FUNCTION;
 
         emit IMmrCoreModule.GrownMmr(fromBlock, toBlock, rootsForHashingFunctions, mmrNewSize, mmrId, ms.aggregatedChainId, GrownBy.EVM_SHARP_GROWER);
+    }
+
+    /// @notice Allows the contract to continue from a given block, the block must be in an MMR already.
+    /// @param headerProof The block header proof to verify and continue from
+    function allowContinueEvmSharpGrowingFrom(ISatellite.BlockHeaderProof calldata headerProof) external {
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        ISatellite satellite = ISatellite(address(this));
+
+        bytes32[15] memory fields = satellite.verifyHeader(ms.aggregatedChainId, headerProof);
+
+        bytes32 parentHash = fields[uint8(IEvmFactRegistryModule.BlockHeaderField.PARENT_HASH)];
+        uint256 blockNumber = uint256(fields[uint8(IEvmFactRegistryModule.BlockHeaderField.NUMBER)]);
+
+        satellite._receiveParentHash(ms.aggregatedChainId, KECCAK_HASHING_FUNCTION, blockNumber, parentHash);
     }
 
     /// @notice Ensures the job output is cryptographically sound to continue from

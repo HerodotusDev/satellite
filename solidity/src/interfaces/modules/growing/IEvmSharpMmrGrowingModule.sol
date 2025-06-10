@@ -3,6 +3,7 @@ pragma solidity ^0.8.27;
 
 import {Uint256Splitter} from "../../../libraries/internal/Uint256Splitter.sol";
 import {IFactsRegistry} from "../../../interfaces/external/IFactsRegistry.sol";
+import {IEvmFactRegistryModule} from "../../../interfaces/modules/IEvmFactRegistryModule.sol";
 import {ISharpMmrGrowingCommon} from "../../../interfaces/modules/common/ISharpMmrGrowingCommon.sol";
 
 interface IEvmSharpMmrGrowingModule is ISharpMmrGrowingCommon {
@@ -56,4 +57,6 @@ interface IEvmSharpMmrGrowingModule is ISharpMmrGrowingCommon {
     function createEvmSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
 
     function aggregateEvmSharpJobs(uint256 mmrId, JobOutputPacked[] calldata outputs) external;
+
+    function allowContinueEvmSharpGrowingFrom(IEvmFactRegistryModule.BlockHeaderProof calldata headerProof) external;
 }

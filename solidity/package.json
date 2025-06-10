@@ -1,0 +1,70 @@
+{
+  "name": "herodotus_satellite",
+  "version": "2.0.0",
+  "repository": "git@github.com:HerodotusDev/herodotus-evm-v2.git",
+  "author": "Herodotus Ltd <hello@herodotus.dev>",
+  "license": "GPL-3.0",
+  "files": [
+    "src/**/*.sol",
+    "lib/**/*.sol"
+  ],
+  "scripts": {
+    "preinstall": "npx only-allow bun",
+    "prettier": "prettier --write --list-different .",
+    "prettier:check": "prettier --check .",
+    "clear": "rm -rf out cache typechain-types ignition/deployments deployments-zk cache_hardhat cache_hardhat-zk broadcast artifacts artifacts-zk",
+    "clear:full": "bun run clear && rm -rf node_modules",
+    "compile": "bun hardhat compile",
+    "compile:zksync": "bun hardhat compile --network zkSyncSepolia",
+    "env": "bun run scripts/environment.ts",
+    "env:create": "bun run scripts/environmentCreate.ts",
+    "env:change": "bun run scripts/environmentChange.ts",
+    "env:delete": "bun run scripts/environmentDelete.ts",
+    "satellite:deploy": "bun run compile && bun run scripts/satelliteDeploy.ts",
+    "satellite:upgrade": "bun run compile && bun run scripts/satelliteUpgrade.ts",
+    "satellite:remove": "bun run scripts/satelliteRemove.ts",
+    "connection:register": "bun run scripts/connectionRegister.ts",
+    "connection:remove": "bun run scripts/connectionRemove.ts",
+    "generate_abi": "bun run scripts/generateAbi.ts",
+    "anvil": "anvil",
+    "anvil:fork": "bash scripts/anvilFork.bash",
+    "script": "bun run scripts/script.ts",
+    "script:local": "bun run scripts/script.ts 31337",
+    "test": "bun hardhat test"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-foundry": "^1.1.3",
+    "@nomicfoundation/hardhat-ignition": "^0.15.9",
+    "@nomicfoundation/hardhat-ignition-ethers": "^0.15.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@typechain/ethers-v6": "^0.5.0",
+    "@typechain/hardhat": "^9.0.0",
+    "@types/chai": "^4.2.0",
+    "@types/mocha": ">=9.1.0",
+    "@types/node": ">=18.0.0",
+    "bun-types": "latest",
+    "chai": "^5.2.0",
+    "ethers": "^6.4.0",
+    "hardhat-gas-reporter": "^1.0.8",
+    "only-allow": "^1.2.1",
+    "prettier": "^3.4.2",
+    "prettier-plugin-solidity": "^1.4.1",
+    "solidity-coverage": "^0.8.0",
+    "ts-node": ">=8.0.0",
+    "typechain": "^8.3.0",
+    "typescript": ">=4.5.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@matterlabs/hardhat-zksync": "^1.3.0",
+    "@matterlabs/hardhat-zksync-verify": "^1.7.1",
+    "dotenv": "^16.4.7",
+    "hardhat": "^2.22.18",
+    "zod": "^3.24.2"
+  }
+}

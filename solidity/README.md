@@ -86,6 +86,69 @@ Because of great complexity of the contract and need for fine-tuned upgradabilit
 - [Satellite Inspector]()
 - [Satellite Maintenance]()
 
+## Development
+
+### Setup
+
+```
+bun install
+forge install
+bun compile
+```
+
+> If you get any unexpected errors, run `bun clear`.
+
+### Local anvil
+
+To set up anvil and deploy satellite to it, run:
+
+```bash
+bun env:create local # or `bun env:change local` if you already have an environment
+bun anvil
+bun satellite:deploy 31337
+bun script:local scripts/TestScript.s.sol:TestScript --broadcast
+```
+
+If you want to remove the satellite, to deploy it again, run:
+
+```bash
+bun satellite:remove 31337
+rm -rf ignition/deployments/chain-31337
+```
+
+### Forked anvil
+
+To fork anvil from any chain, run:
+
+```bash
+bun anvil:fork *CHAIN_ID*
+```
+
+Then to run script for deployed satellite, run:
+
+```bash
+bun env:change stage # or whatever environment you want to use
+bun script:local scripts/TestScript.s.sol:TestScript --broadcast
+```
+
+### Real chain
+
+To run on any real chain, e.g. Ethereum Sepolia, run:
+
+```bash
+bun env:change stage # or whatever environment you want to use
+bun script 11155111 scripts/TestScript.s.sol:TestScript --broadcast
+
+```
+
+### Running tests
+
+To execute tests, run:
+
+```bash
+bun run test
+```
+
 ## Deployment
 
 1. Create `.env` file using `.env.example` template. You will need `PRIVATE_KEY` of EVM deployment account and `ALCHEMY_API_KEY` which you can get from [Alchemy dashboard](https://dashboard.alchemy.com). Make sure that you enabled chains you need. Additionally, you will need API key for block explorers of chains you want to deploy to (`*CHAIN_NAME*_ETHERSCAN_API_KEY`).
@@ -156,61 +219,6 @@ When all connections to/from satellite are removed, you can remove satellite wit
 
 ```
 bun satellite:remove CHAIN_ID
-```
-
-## Development
-
-> If you get any unexpected errors, run `bun clear`.
-
-### Local anvil
-
-To set up anvil and deploy satellite to it, run:
-
-```bash
-bun env:create local # or `bun env:change local` if you already have an environment
-bun anvil
-bun satellite:deploy 31337
-bun script:local scripts/TestScript.s.sol:TestScript --broadcast
-```
-
-If you want to remove the satellite, to deploy it again, run:
-
-```bash
-bun satellite:remove 31337
-rm -rf ignition/deployments/chain-31337
-```
-
-### Forked anvil
-
-To fork anvil from any chain, run:
-
-```bash
-bun anvil:fork *CHAIN_ID*
-```
-
-Then to run script for deployed satellite, run:
-
-```bash
-bun env:change stage # or whatever environment you want to use
-bun script:local scripts/TestScript.s.sol:TestScript --broadcast
-```
-
-### Real chain
-
-To run on any real chain, e.g. Ethereum Sepolia, run:
-
-```bash
-bun env:change stage # or whatever environment you want to use
-bun script 11155111 scripts/TestScript.s.sol:TestScript --broadcast
-
-```
-
-### Running tests
-
-To execute tests, run:
-
-```bash
-bun run test
 ```
 
 ## Documentation

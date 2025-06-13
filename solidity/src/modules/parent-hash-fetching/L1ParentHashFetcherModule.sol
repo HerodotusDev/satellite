@@ -22,10 +22,12 @@ contract L1ParentHashFetcherModule is IL1ParentHashFetcherModule, AccessControll
 
     /// @inheritdoc IL1ParentHashFetcherModule
     function l1FetchParentHash(uint256 blockNumber) external {
+        L1ParentHashFetcherModuleStorage storage s = moduleStorage();
+
         bytes32 parentHash = blockhash(blockNumber - 1);
         require(parentHash != bytes32(0), "ERR_PARENT_HASH_NOT_AVAILABLE");
 
-        ISatellite(address(this))._receiveParentHash(block.chainid, KECCAK_HASHING_FUNCTION, blockNumber, parentHash);
+        ISatellite(address(this))._receiveParentHash(s.l1ChainId, KECCAK_HASHING_FUNCTION, blockNumber, parentHash);
     }
 
     /// @inheritdoc IL1ParentHashFetcherModule

@@ -407,11 +407,11 @@ async function getMaintenanceActions(
         functionSelectors: selectors,
       });
     }
-    for (const [_from, to, selectors] of result.movedSelectors) {
+    for (const [selectors, _from, to] of result.movedSelectors) {
       maintenances.push({
         moduleAddress: addresses[to],
         action: ACTION.Replace,
-        functionSelectors: selectors,
+        functionSelectors: [selectors],
       });
     }
     for (const [module, selectors] of result.updatedModuleSelectors) {

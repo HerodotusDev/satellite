@@ -105,6 +105,9 @@ export const modules = (chainId: keyof typeof settings) =>
               },
             ],
           },
+          NativeArbitrumParentHashFetcherModule: {
+            interfaceName: "INativeParentHashFetcherModule",
+          },
         }
       : {}),
 

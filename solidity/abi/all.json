@@ -2408,6 +2408,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "arbSys",
+    "outputs": [
+      {
+        "internalType": "contract IArbSys",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",

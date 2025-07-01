@@ -13,4 +13,9 @@ abstract contract AccessController {
         LibSatellite.enforceIsContractOwner();
         _;
     }
+
+    modifier onlyAdmin() {
+        require(LibSatellite.isAdmin(msg.sender), "You are not an admin");
+        _;
+    }
 }

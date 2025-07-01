@@ -81,6 +81,10 @@ interface ILibSatellite {
         mapping(uint256 => SatelliteConnection) satelliteConnectionRegistry;
         /// @dev set of (aliased) addresses of satellites that can send messages to our chain
         mapping(address => bool) senderSatellites;
+        //
+        // ========================== Satellite Ownership ========================== //
+
+        mapping(address => bool) admins;
     }
 
     // ========================= Errors ========================= //

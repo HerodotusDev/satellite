@@ -14,7 +14,7 @@ export interface Module {
 export const modules = (chainId: keyof typeof settings) =>
   ({
     OwnershipModule: {
-      interfaceName: "IOwnershipModule",
+      interfaceName: "IExtendedOwnershipModule",
     },
 
     SatelliteInspectorModule: {

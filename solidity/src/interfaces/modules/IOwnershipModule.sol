@@ -14,3 +14,9 @@ interface IOwnershipModule {
     /// @param _newOwner The address of the new owner of the contract
     function transferOwnership(address _newOwner) external;
 }
+
+interface IExtendedOwnershipModule is IOwnershipModule {
+    function isAdmin(address account) external view returns (bool);
+
+    function manageAdmins(address[] calldata accounts, bool isAdmin) external;
+}

@@ -42,6 +42,17 @@ library LibSatellite {
         }
     }
 
+    function manageAdmins(address[] memory accounts, bool _isAdmin) internal {
+        ILibSatellite.SatelliteStorage storage s = satelliteStorage();
+        for(uint256 i = 0; i < accounts.length; i++) {
+            s.admins[accounts[i]] = _isAdmin;
+        }
+    }
+
+    function isAdmin(address account) internal view returns (bool) {
+        return satelliteStorage().admins[account];
+    }
+
     function enforceIsSatelliteModule() internal view {
         if (msg.sender != address(this)) {
             revert ILibSatellite.MustBeSatelliteModule();

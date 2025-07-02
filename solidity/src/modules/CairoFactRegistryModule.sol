@@ -17,6 +17,9 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     bytes32 constant MODULE_STORAGE_POSITION = keccak256("diamond.standard.satellite.module.storage.cairo-fact-registry-module");
 
     event MockedForInternalSet(bool isMocked);
+    event CairoFactRegistryExternalContractSet(address fallbackContract);
+    event CairoFactSet(bytes32 factHash);
+    event CairoMockedFactSet(bytes32 factHash);
 
     function moduleStorage() internal pure returns (CairoFactRegistryModuleStorage storage s) {
         bytes32 position = MODULE_STORAGE_POSITION;
@@ -42,10 +45,17 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     }
 
     /// @inheritdoc ICairoFactRegistryModule
+    function setCairoFactRegistryExternalContract(address fallbackContract) external {
+        moduleStorage().fallbackContract = IFactsRegistry(fallbackContract);
+        emit CairoFactRegistryExternalContractSet(fallbackContract);
+    }
+
+    /// @inheritdoc ICairoFactRegistryModule
     function storeCairoFact(bytes32 factHash) external {
         CairoFactRegistryModuleStorage storage ms = moduleStorage();
         require(ms.fallbackContract.isValid(factHash), "Fact hash not registered");
         ms.facts[factHash] = true;
+        emit CairoFactSet(factHash);
     }
 
     /// @inheritdoc ICairoFactRegistryModule
@@ -56,6 +66,7 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     /// @inheritdoc ICairoFactRegistryModule
     function setCairoMockedFact(bytes32 factHash) external onlyAdmin {
         moduleStorage().mockedFacts[factHash] = true;
+        emit CairoMockedFactSet(factHash);
     }
 
     // ========= For internal use in grower and data processor ========= //

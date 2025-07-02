@@ -10,6 +10,7 @@ import {ISatelliteMaintenanceModule} from "./modules/ISatelliteMaintenanceModule
 import {IEvmSharpMmrGrowingModule} from "./modules/growing/IEvmSharpMmrGrowingModule.sol";
 import {IStarknetSharpMmrGrowingModule} from "./modules/growing/IStarknetSharpMmrGrowingModule.sol";
 import {IEvmFactRegistryModule} from "./modules/IEvmFactRegistryModule.sol";
+import {ICairoFactRegistryModule} from './modules/ICairoFactRegistryModule.sol';
 import {INativeParentHashFetcherModule} from "./modules/parent-hash-fetching/INativeParentHashFetcherModule.sol";
 import {IStarknetParentHashFetcherModule} from "./modules/parent-hash-fetching/IStarknetParentHashFetcherModule.sol";
 import {IReceiverModule} from "./modules/messaging/receiver/IReceiverModule.sol";
@@ -32,6 +33,7 @@ interface ISatellite is
     ISatelliteMaintenanceModule,
     IEvmSharpMmrGrowingModule,
     IEvmFactRegistryModule,
+    ICairoFactRegistryModule,
     INativeParentHashFetcherModule,
     IEvmOnChainGrowingModule,
     IStarknetSharpMmrGrowingModule,

@@ -6,6 +6,7 @@ export const modules: ModuleName[] = [
   "SatelliteInspectorModule",
   "MmrCoreModule",
   "EvmFactRegistryModule",
+  "CairoFactRegistryModule",
   "EvmOnChainGrowingModule",
   "L1ParentHashFetcherModule",
   "ArbitrumParentHashFetcherModule",

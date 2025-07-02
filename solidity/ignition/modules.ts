@@ -33,8 +33,26 @@ export const modules = (chainId: keyof typeof settings) =>
       interfaceName: "IEvmFactRegistryModule",
     },
 
-    ...("DATA_PROCESSOR_FACTS_REGISTRY" in settings[chainId] &&
-    "DATA_PROCESSOR_PROGRAM_HASH" in settings[chainId]
+    EvmOnChainGrowingModule: {
+      interfaceName: "IEvmOnChainGrowingModule",
+    },
+
+    ...("CAIRO_FACT_REGISTRY_IS_MOCKED" in settings[chainId]
+      ? {
+          CairoFactRegistryModule: {
+            interfaceName: "ICairoFactRegistryModule",
+            initFunctions: [
+              {
+                name: "setMockedForInternal",
+                args: [settings[chainId].CAIRO_FACT_REGISTRY_IS_MOCKED],
+              },
+            ],
+          },
+        }
+      : {}),
+
+    ...("DATA_PROCESSOR_PROGRAM_HASH" in settings[chainId] &&
+    "CAIRO_FACT_REGISTRY_IS_MOCKED" in settings[chainId]
       ? {
           DataProcessorModule: {
             interfaceName: "IDataProcessorModule",
@@ -43,20 +61,13 @@ export const modules = (chainId: keyof typeof settings) =>
                 name: "setDataProcessorProgramHash",
                 args: [settings[chainId].DATA_PROCESSOR_PROGRAM_HASH],
               },
-              {
-                name: "setDataProcessorFactsRegistry",
-                args: [settings[chainId].DATA_PROCESSOR_FACTS_REGISTRY],
-              },
             ],
           },
         }
       : {}),
 
-    EvmOnChainGrowingModule: {
-      interfaceName: "IEvmOnChainGrowingModule",
-    },
-
-    ...("SHARP_FACT_REGISTRY" in settings[chainId]
+    ...("EVM_SHARP_GROWER_PROGRAM_HASH" in settings[chainId] &&
+    "CAIRO_FACT_REGISTRY_IS_MOCKED" in settings[chainId]
       ? {
           EvmSharpMmrGrowingModule: {
             interfaceName: "IEvmSharpMmrGrowingModule",
@@ -65,17 +76,13 @@ export const modules = (chainId: keyof typeof settings) =>
                 name: "initEvmSharpMmrGrowingModule",
                 args: [],
               },
-              {
-                name: "setEvmSharpMmrGrowingModuleFactsRegistry",
-                args: [settings[chainId].SHARP_FACT_REGISTRY],
-              },
             ],
           },
         }
       : {}),
 
-    ...("SHARP_FACT_REGISTRY" in settings[chainId] &&
-    "STARKNET_CHAIN_ID" in settings[chainId]
+    ...("STARKNET_CHAIN_ID" in settings[chainId] &&
+    "CAIRO_FACT_REGISTRY_IS_MOCKED" in settings[chainId]
       ? {
           StarknetSharpMmrGrowingModule: {
             interfaceName: "IStarknetSharpMmrGrowingModule",
@@ -83,10 +90,6 @@ export const modules = (chainId: keyof typeof settings) =>
               {
                 name: "initStarknetSharpMmrGrowingModule",
                 args: [settings[chainId].STARKNET_CHAIN_ID],
-              },
-              {
-                name: "setStarknetSharpMmrGrowingModuleFactsRegistry",
-                args: [settings[chainId].SHARP_FACT_REGISTRY],
               },
             ],
           },

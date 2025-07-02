@@ -14,6 +14,9 @@ interface ICairoFactRegistryModule {
     /// Returns address of the contract that stores verified facts.
     function getCairoFactRegistryExternalContract() external view returns (address);
 
+    /// Sets address of the contract that stores verified facts.
+    function setCairoFactRegistryExternalContract(address fallbackContract) external;
+
     /// Moves verified fact from external (fallback) contract to local storage.
     function storeCairoFact(bytes32 factHash) external;
 

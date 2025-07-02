@@ -2,8 +2,8 @@
 pragma solidity ^0.8.27;
 
 import {Uint256Splitter} from "../../libraries/internal/Uint256Splitter.sol";
-import {IFactsRegistry} from "../../interfaces/external/IFactsRegistry.sol";
 import {IEvmSharpMmrGrowingModule} from "../../interfaces/modules/growing/IEvmSharpMmrGrowingModule.sol";
+import {ICairoFactRegistryModule} from "../../interfaces/modules/ICairoFactRegistryModule.sol";
 import {ISatellite} from "../../interfaces/ISatellite.sol";
 import {LibSatellite} from "../../libraries/LibSatellite.sol";
 import {IMmrCoreModule, RootForHashingFunction, GrownBy} from "../../interfaces/modules/IMmrCoreModule.sol";
@@ -42,20 +42,10 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
         ms.aggregatedChainId = block.chainid;
     }
 
-    function setEvmSharpMmrGrowingModuleFactsRegistry(address factsRegistry) external onlyOwner {
-        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
-        ms.factsRegistry = IFactsRegistry(factsRegistry);
-    }
-
     // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
     function setEvmSharpMmrGrowingModuleProgramHash(uint256 programHash) external onlyOwner {
         EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
         ms.programHash = programHash;
-    }
-
-    function getEvmSharpMmrGrowingModuleFactsRegistry() external view returns (address) {
-        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
-        return address(ms.factsRegistry);
     }
 
     function getEvmSharpMmrGrowingModuleProgramHash() external view returns (uint256) {
@@ -227,7 +217,7 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
         bytes32 fact = keccak256(abi.encode(ms.programHash, outputHash));
 
         // We ensure this fact has been registered on SHARP Facts Registry
-        if (!ms.factsRegistry.isValid(fact)) {
+        if (!ICairoFactRegistryModule(address(this)).isCairoFactValidForInternal(fact)) {
             revert InvalidFact();
         }
     }

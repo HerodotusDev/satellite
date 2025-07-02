@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import {IFactsRegistry} from "../interfaces/external/IFactsRegistry.sol";
+import {ICairoFactRegistryModule} from "../interfaces/modules/ICairoFactRegistryModule.sol";
 import {ISatellite} from "../interfaces/ISatellite.sol";
 import {LibSatellite} from "../libraries/LibSatellite.sol";
 import {ModuleTask, ModuleCodecs} from "../libraries/internal/data-processor/ModuleCodecs.sol";
@@ -50,12 +50,6 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
             ms.authorizedProgramHashes[programHashes[i]] = false;
         }
         emit ProgramHashesDisabled(programHashes);
-    }
-
-    /// @inheritdoc IDataProcessorModule
-    function setDataProcessorFactsRegistry(IFactsRegistry factsRegistry) external onlyOwner {
-        DataProcessorModuleStorage storage ms = moduleStorage();
-        ms.factsRegistry = factsRegistry;
     }
 
     // ========================= Core Functions ========================= //
@@ -124,7 +118,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         bytes32 gpsFactHash = keccak256(abi.encode(taskData.programHash, programOutputHash));
 
         // Ensure GPS fact is registered
-        if (!ms.factsRegistry.isValid(gpsFactHash)) {
+        if (!ICairoFactRegistryModule(address(this)).isCairoFactValidForInternal(gpsFactHash)) {
             revert InvalidFact();
         }
 
@@ -136,12 +130,6 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
     }
 
     // ========================= View Functions ========================= //
-
-    /// @inheritdoc IDataProcessorModule
-    function getDataProcessorFactsRegistry() external view returns (address) {
-        DataProcessorModuleStorage storage ms = moduleStorage();
-        return address(ms.factsRegistry);
-    }
 
     /// @inheritdoc IDataProcessorModule
     function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32) {

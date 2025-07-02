@@ -2,7 +2,6 @@
 pragma solidity ^0.8.27;
 
 import {Uint256Splitter} from "../../../libraries/internal/Uint256Splitter.sol";
-import {IFactsRegistry} from "../../../interfaces/external/IFactsRegistry.sol";
 import {ISharpMmrGrowingCommon} from "../../../interfaces/modules/common/ISharpMmrGrowingCommon.sol";
 
 interface IStarknetSharpMmrGrowingModule is ISharpMmrGrowingCommon {
@@ -19,7 +18,7 @@ interface IStarknetSharpMmrGrowingModule is ISharpMmrGrowingCommon {
     }
 
     struct StarknetSharpMmrGrowingModuleStorage {
-        IFactsRegistry factsRegistry;
+        address _unused;
         // Either Starknet or Starknet Sepolia chain ID
         uint256 aggregatedChainId;
         // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
@@ -28,11 +27,7 @@ interface IStarknetSharpMmrGrowingModule is ISharpMmrGrowingCommon {
 
     function initStarknetSharpMmrGrowingModule(uint256 starknetChainId) external;
 
-    function setStarknetSharpMmrGrowingModuleFactsRegistry(address factsRegistry) external;
-
     function setStarknetSharpMmrGrowingModuleProgramHash(uint256 programHash) external;
-
-    function getStarknetSharpMmrGrowingModuleFactsRegistry() external view returns (address);
 
     function getStarknetSharpMmrGrowingModuleProgramHash() external view returns (uint256);
 

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {Uint256Splitter} from "../../libraries/internal/Uint256Splitter.sol";
-import {IFactsRegistry} from "../../interfaces/external/IFactsRegistry.sol";
+import {ICairoFactRegistryModule} from "../../interfaces/modules/ICairoFactRegistryModule.sol";
 import {IStarknetSharpMmrGrowingModule} from "../../interfaces/modules/growing/IStarknetSharpMmrGrowingModule.sol";
 import {ISatellite} from "../../interfaces/ISatellite.sol";
 import {LibSatellite} from "../../libraries/LibSatellite.sol";
@@ -34,20 +34,10 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
         ms.aggregatedChainId = starknetChainId;
     }
 
-    function setStarknetSharpMmrGrowingModuleFactsRegistry(address factsRegistry) external onlyOwner {
-        StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
-        ms.factsRegistry = IFactsRegistry(factsRegistry);
-    }
-
     // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
     function setStarknetSharpMmrGrowingModuleProgramHash(uint256 programHash) external onlyOwner {
         StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
         ms.programHash = programHash;
-    }
-
-    function getStarknetSharpMmrGrowingModuleFactsRegistry() external view returns (address) {
-        StarknetSharpMmrGrowingModuleStorage storage ms = moduleStorage();
-        return address(ms.factsRegistry);
     }
 
     function getStarknetSharpMmrGrowingModuleProgramHash() external view returns (uint256) {
@@ -172,7 +162,7 @@ contract StarknetSharpMmrGrowingModule is IStarknetSharpMmrGrowingModule, Access
         bytes32 fact = keccak256(abi.encode(ms.programHash, outputHash));
 
         // We ensure this fact has been registered on SHARP Facts Registry
-        if (!ms.factsRegistry.isValid(fact)) revert InvalidFact();
+        if (!ICairoFactRegistryModule(address(this)).isCairoFactValidForInternal(fact)) revert InvalidFact();
     }
 
     /// @notice Ensures the job outputs are correctly linked

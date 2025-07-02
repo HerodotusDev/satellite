@@ -16,6 +16,8 @@ struct CairoFactRegistryModuleStorage {
 contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     bytes32 constant MODULE_STORAGE_POSITION = keccak256("diamond.standard.satellite.module.storage.cairo-fact-registry-module");
 
+    event MockedForInternalSet(bool isMocked);
+
     function moduleStorage() internal pure returns (CairoFactRegistryModuleStorage storage s) {
         bytes32 position = MODULE_STORAGE_POSITION;
         assembly {
@@ -76,5 +78,6 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     /// @inheritdoc ICairoFactRegistryModule
     function setMockedForInternal(bool isMocked) external onlyOwner {
         moduleStorage().isMockedForInternal = isMocked;
+        emit MockedForInternalSet(isMocked);
     }
 }

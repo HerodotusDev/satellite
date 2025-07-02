@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import {IFactsRegistry} from "../external/IFactsRegistry.sol";
 import {ModuleTask} from "../../libraries/internal/data-processor/ModuleCodecs.sol";
 import {IFactsRegistryCommon} from "../modules/common/IFactsRegistryCommon.sol";
 
@@ -21,7 +20,7 @@ interface IDataProcessorModule is IFactsRegistryCommon {
 
     /// @notice Storage structure for the module
     struct DataProcessorModuleStorage {
-        IFactsRegistry factsRegistry;
+        address _unused;
         mapping(bytes32 => TaskResult) cachedTasksResult;
         mapping(bytes32 => bool) authorizedProgramHashes;
     }
@@ -81,9 +80,6 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     /// @notice Disable some program hashes
     function disableProgramHashes(bytes32[] calldata programHashes) external;
 
-    /// @notice Set the facts registry contract
-    function setDataProcessorFactsRegistry(IFactsRegistry factsRegistry) external;
-
     /// @notice Requests the execution of a task with a module
     /// @param moduleTask module task
     function requestDataProcessorExecutionOfTask(ModuleTask calldata moduleTask) external;
@@ -92,9 +88,6 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     ///         by verifying the locally computed fact with the FactsRegistry
     /// @param taskData The task data
     function authenticateDataProcessorTaskExecution(TaskData calldata taskData) external;
-
-    /// @notice Returns address of the facts registry
-    function getDataProcessorFactsRegistry() external view returns (address);
 
     /// @notice Returns the result of a finalized task
     function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32);

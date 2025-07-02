@@ -2,7 +2,6 @@
 pragma solidity ^0.8.27;
 
 import {Uint256Splitter} from "../../../libraries/internal/Uint256Splitter.sol";
-import {IFactsRegistry} from "../../../interfaces/external/IFactsRegistry.sol";
 import {IEvmFactRegistryModule} from "../../../interfaces/modules/IEvmFactRegistryModule.sol";
 import {ISharpMmrGrowingCommon} from "../../../interfaces/modules/common/ISharpMmrGrowingCommon.sol";
 
@@ -38,7 +37,7 @@ interface IEvmSharpMmrGrowingModule is ISharpMmrGrowingCommon {
     }
 
     struct EvmSharpMmrGrowingModuleStorage {
-        IFactsRegistry factsRegistry;
+        address _unused;
         uint256 aggregatedChainId;
         // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
         uint256 programHash;
@@ -48,11 +47,7 @@ interface IEvmSharpMmrGrowingModule is ISharpMmrGrowingCommon {
 
     function setEvmSharpMmrGrowingModuleProgramHash(uint256 programHash) external;
 
-    function setEvmSharpMmrGrowingModuleFactsRegistry(address factsRegistry) external;
-
     function getEvmSharpMmrGrowingModuleProgramHash() external view returns (uint256);
-
-    function getEvmSharpMmrGrowingModuleFactsRegistry() external view returns (address);
 
     function createEvmSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
 

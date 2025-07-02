@@ -63,7 +63,7 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     /// @inheritdoc ICairoFactRegistryModule
     function isCairoFactValidForInternal(bytes32 factHash) external view returns (bool) {
         CairoFactRegistryModuleStorage storage ms = moduleStorage();
-        if(ms.isMockedForInternal) {
+        if (ms.isMockedForInternal) {
             return ms.mockedFacts[factHash];
         } else {
             return ms.facts[factHash] || ms.fallbackContract.isValid(factHash);

@@ -13,6 +13,7 @@ pub mod StorageProofs {
         evm_fact_registry::evm_fact_registry_component,
         mmr_core::{mmr_core_component, RootForHashingFunction}, state::state_component,
         evm_growing::evm_growing_component, cairo_fact_registry::cairo_fact_registry_component,
+        data_processor::data_processor_component,
     };
     use starknet::{ClassHash, ContractAddress};
     use super::*;
@@ -27,6 +28,11 @@ pub mod StorageProofs {
         path: cairo_fact_registry_component,
         storage: cairo_fact_registry,
         event: CairoFactRegistryEvent,
+    );
+    component!(
+        path: data_processor_component,
+        storage: data_processor,
+        event: DataProcessorEvent,
     );
 
     // Ownable / Upgradeable
@@ -50,6 +56,8 @@ pub mod StorageProofs {
         evm_growing: evm_growing_component::Storage,
         #[substorage(v0)]
         cairo_fact_registry: cairo_fact_registry_component::Storage,
+        #[substorage(v0)]
+        data_processor: data_processor_component::Storage,
     }
 
     #[constructor]
@@ -121,6 +129,8 @@ pub mod StorageProofs {
         EvmGrowingEvent: evm_growing_component::Event,
         #[flat]
         CairoFactRegistryEvent: cairo_fact_registry_component::Event,
+        #[flat]
+        DataProcessorEvent: data_processor_component::Event,
     }
 
     #[abi(embed_v0)]
@@ -135,6 +145,12 @@ pub mod StorageProofs {
 
     #[abi(embed_v0)]
     impl EvmGrowingImpl = evm_growing_component::EvmGrowing<ContractState>;
+
+    #[abi(embed_v0)]
+    impl CairoFactRegistryImpl = cairo_fact_registry_component::CairoFactRegistry<ContractState>;
+
+    #[abi(embed_v0)]
+    impl DataProcessorImpl = data_processor_component::DataProcessor<ContractState>;
 
     // Ownable / Upgradeable
     #[abi(embed_v0)]

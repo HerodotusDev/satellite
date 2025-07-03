@@ -46,6 +46,7 @@ pub mod cairo_fact_registry_component {
     use openzeppelin::access::ownable::{
         OwnableComponent, OwnableComponent::InternalTrait as OwnableInternal,
     };
+    use integrity::Integrity;
     use super::*;
 
     #[storage]
@@ -94,7 +95,8 @@ pub mod cairo_fact_registry_component {
         impl Ownable: OwnableComponent::HasComponent<TContractState>,
     > of ICairoFactRegistry<ComponentState<TContractState>> {
         fn isCairoFactValid(self: @ComponentState<TContractState>, fact_hash: felt252) -> bool {
-            true // TODO:
+            Integrity::from_address(self.fallback_contract.read())
+                .is_fact_hash_valid_with_security(fact_hash, 96)
         }
 
         fn getCairoFactRegistryExternalContract(

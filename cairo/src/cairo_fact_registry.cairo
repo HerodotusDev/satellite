@@ -11,7 +11,9 @@ pub trait ICairoFactRegistry<TContractState> {
     fn getCairoFactRegistryExternalContract(self: @TContractState) -> ContractAddress;
 
     /// Sets address of the contract that stores verified facts.
-    fn setCairoFactRegistryExternalContract(ref self: TContractState, fallback_address: ContractAddress);
+    fn setCairoFactRegistryExternalContract(
+        ref self: TContractState, fallback_address: ContractAddress,
+    );
 
     /// Whether given fact was mocked.
     fn isCairoMockedFactValid(self: @TContractState, fact_hash: felt252) -> bool;
@@ -24,7 +26,7 @@ pub trait ICairoFactRegistry<TContractState> {
     fn isCairoFactValidForInternal(self: @TContractState, fact_hash: felt252) -> bool;
 
     fn isMockedForInternal(self: @TContractState) -> bool;
-    
+
     fn setMockedForInternal(ref self: TContractState, is_mocked: bool);
 
     // ======================= Admin management ======================== //
@@ -33,7 +35,6 @@ pub trait ICairoFactRegistry<TContractState> {
 
     fn manageAdmins(ref self: TContractState, accounts: Span<ContractAddress>, is_admin: bool);
 }
-
 
 #[starknet::component]
 pub mod cairo_fact_registry_component {
@@ -58,7 +59,7 @@ pub mod cairo_fact_registry_component {
 
     #[derive(Drop, starknet::Event)]
     struct MockedForInternalSet {
-        is_mocked: bool
+        is_mocked: bool,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -96,42 +97,55 @@ pub mod cairo_fact_registry_component {
             true // TODO:
         }
 
-        fn getCairoFactRegistryExternalContract(self: @ComponentState<TContractState>) -> ContractAddress {
+        fn getCairoFactRegistryExternalContract(
+            self: @ComponentState<TContractState>,
+        ) -> ContractAddress {
             self.fallback_contract.read()
         }
 
-        fn setCairoFactRegistryExternalContract(ref self: ComponentState<TContractState>, fallback_address: ContractAddress) {
+        fn setCairoFactRegistryExternalContract(
+            ref self: ComponentState<TContractState>, fallback_address: ContractAddress,
+        ) {
             get_dep_component!(@self, Ownable).assert_only_owner();
 
             self.fallback_contract.write(fallback_address);
-            self.emit(Event::CairoFactRegistryExternalContractSet(CairoFactRegistryExternalContractSet {fallback_address}));
+            self
+                .emit(
+                    Event::CairoFactRegistryExternalContractSet(
+                        CairoFactRegistryExternalContractSet { fallback_address },
+                    ),
+                );
         }
 
-        fn isCairoMockedFactValid(self: @ComponentState<TContractState>, fact_hash: felt252) -> bool {
+        fn isCairoMockedFactValid(
+            self: @ComponentState<TContractState>, fact_hash: felt252,
+        ) -> bool {
             self.mocked_facts.entry(fact_hash).read()
         }
-    
+
         fn setCairoMockedFact(ref self: ComponentState<TContractState>, fact_hash: felt252) {
             assert(self.isAdmin(get_caller_address()), 'ONLY_ADMIN');
 
             self.mocked_facts.entry(fact_hash).write(true);
-            self.emit(Event::CairoMockedFactSet(CairoMockedFactSet {fact_hash}));
+            self.emit(Event::CairoMockedFactSet(CairoMockedFactSet { fact_hash }));
         }
-    
+
         // ========= For internal use in grower and data processor ========= //
-    
-        fn isCairoFactValidForInternal(self: @ComponentState<TContractState>, fact_hash: felt252) -> bool {
+
+        fn isCairoFactValidForInternal(
+            self: @ComponentState<TContractState>, fact_hash: felt252,
+        ) -> bool {
             if self.is_mocked_for_internal.read() {
                 self.mocked_facts.entry(fact_hash).read()
             } else {
                 self.isCairoFactValid(fact_hash)
             }
         }
-    
+
         fn isMockedForInternal(self: @ComponentState<TContractState>) -> bool {
             self.is_mocked_for_internal.read()
         }
-    
+
         fn setMockedForInternal(ref self: ComponentState<TContractState>, is_mocked: bool) {
             get_dep_component!(@self, Ownable).assert_only_owner();
 
@@ -145,7 +159,11 @@ pub mod cairo_fact_registry_component {
             self.admins.entry(account).read()
         }
 
-        fn manageAdmins(ref self: ComponentState<TContractState>, accounts: Span<ContractAddress>, is_admin: bool) {
+        fn manageAdmins(
+            ref self: ComponentState<TContractState>,
+            accounts: Span<ContractAddress>,
+            is_admin: bool,
+        ) {
             get_dep_component!(@self, Ownable).assert_only_owner();
 
             for account in accounts {

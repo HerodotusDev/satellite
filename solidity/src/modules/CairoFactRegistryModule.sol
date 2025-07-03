@@ -45,7 +45,7 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     }
 
     /// @inheritdoc ICairoFactRegistryModule
-    function setCairoFactRegistryExternalContract(address fallbackContract) external  onlyOwner {
+    function setCairoFactRegistryExternalContract(address fallbackContract) external onlyOwner {
         moduleStorage().fallbackContract = IFactsRegistry(fallbackContract);
         emit CairoFactRegistryExternalContractSet(fallbackContract);
     }

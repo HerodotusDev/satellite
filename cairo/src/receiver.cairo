@@ -12,8 +12,7 @@ pub mod StorageProofs {
     use crate::{
         evm_fact_registry::evm_fact_registry_component,
         mmr_core::{mmr_core_component, RootForHashingFunction}, state::state_component,
-        evm_growing::evm_growing_component,
-        cairo_fact_registry::cairo_fact_registry_component,
+        evm_growing::evm_growing_component, cairo_fact_registry::cairo_fact_registry_component,
     };
     use starknet::{ClassHash, ContractAddress};
     use super::*;
@@ -24,7 +23,11 @@ pub mod StorageProofs {
     );
     component!(path: mmr_core_component, storage: mmr_core, event: MmrCoreEvent);
     component!(path: evm_growing_component, storage: evm_growing, event: EvmGrowingEvent);
-    component!(path: cairo_fact_registry_component, storage: cairo_fact_registry, event: CairoFactRegistryEvent);
+    component!(
+        path: cairo_fact_registry_component,
+        storage: cairo_fact_registry,
+        event: CairoFactRegistryEvent,
+    );
 
     // Ownable / Upgradeable
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);

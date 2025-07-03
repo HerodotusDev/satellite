@@ -4,6 +4,7 @@ pub mod mmr_core;
 pub mod receiver;
 pub mod evm_growing;
 pub mod utils;
+pub mod cairo_fact_registry;
 // Main contract is in receiver.cairo file
 // because L1 handlers cannot be defined in components
 

@@ -13,6 +13,7 @@ pub mod StorageProofs {
         evm_fact_registry::evm_fact_registry_component,
         mmr_core::{mmr_core_component, RootForHashingFunction}, state::state_component,
         evm_growing::evm_growing_component,
+        cairo_fact_registry::cairo_fact_registry_component,
     };
     use starknet::{ClassHash, ContractAddress};
     use super::*;
@@ -23,6 +24,7 @@ pub mod StorageProofs {
     );
     component!(path: mmr_core_component, storage: mmr_core, event: MmrCoreEvent);
     component!(path: evm_growing_component, storage: evm_growing, event: EvmGrowingEvent);
+    component!(path: cairo_fact_registry_component, storage: cairo_fact_registry, event: CairoFactRegistryEvent);
 
     // Ownable / Upgradeable
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
@@ -43,6 +45,8 @@ pub mod StorageProofs {
         mmr_core: mmr_core_component::Storage,
         #[substorage(v0)]
         evm_growing: evm_growing_component::Storage,
+        #[substorage(v0)]
+        cairo_fact_registry: cairo_fact_registry_component::Storage,
     }
 
     #[constructor]
@@ -112,6 +116,8 @@ pub mod StorageProofs {
         MmrCoreEvent: mmr_core_component::Event,
         #[flat]
         EvmGrowingEvent: evm_growing_component::Event,
+        #[flat]
+        CairoFactRegistryEvent: cairo_fact_registry_component::Event,
     }
 
     #[abi(embed_v0)]

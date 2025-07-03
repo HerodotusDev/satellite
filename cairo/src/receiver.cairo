@@ -29,11 +29,7 @@ pub mod StorageProofs {
         storage: cairo_fact_registry,
         event: CairoFactRegistryEvent,
     );
-    component!(
-        path: data_processor_component,
-        storage: data_processor,
-        event: DataProcessorEvent,
-    );
+    component!(path: data_processor_component, storage: data_processor, event: DataProcessorEvent);
 
     // Ownable / Upgradeable
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
@@ -147,7 +143,8 @@ pub mod StorageProofs {
     impl EvmGrowingImpl = evm_growing_component::EvmGrowing<ContractState>;
 
     #[abi(embed_v0)]
-    impl CairoFactRegistryImpl = cairo_fact_registry_component::CairoFactRegistry<ContractState>;
+    impl CairoFactRegistryImpl =
+        cairo_fact_registry_component::CairoFactRegistry<ContractState>;
 
     #[abi(embed_v0)]
     impl DataProcessorImpl = data_processor_component::DataProcessor<ContractState>;

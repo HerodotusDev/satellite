@@ -5,7 +5,7 @@ use cairo_lib::utils::bitwise::reverse_endianness_u256;
 enum TaskStatus {
     NONE,
     SCHEDULED,
-    FINALIZED
+    FINALIZED,
 }
 
 #[derive(Drop, Serde, starknet::Store)]
@@ -55,8 +55,9 @@ pub trait IDataProcessor<TContractState> {
 
     /// Requests the execution of a task with a module
     fn requestDataProcessorExecutionOfTask(ref self: TContractState, module_task: ModuleTask);
-    
-    /// Authenticates the execution of a task is finalized by verifying the locally computed fact with the FactsRegistry
+
+    /// Authenticates the execution of a task is finalized by verifying the locally computed fact
+    /// with the FactsRegistry
     fn authenticateDataProcessorTaskExecution(ref self: TContractState, task_data: TaskData);
 
     /// Returns the status of a task
@@ -69,8 +70,7 @@ pub trait IDataProcessor<TContractState> {
 #[starknet::component]
 pub mod data_processor_component {
     use crate::{
-        state::state_component,
-        mmr_core::mmr_core_component::MmrCoreExternalImpl,
+        state::state_component, mmr_core::mmr_core_component::MmrCoreExternalImpl,
         mmr_core::POSEIDON_HASHING_FUNCTION,
         cairo_fact_registry::{cairo_fact_registry_component, ICairoFactRegistry},
     };
@@ -136,54 +136,69 @@ pub mod data_processor_component {
     > of IDataProcessor<ComponentState<TContractState>> {
         // ========================= Setup Functions ========================= //
 
-        fn setDataProcessorProgramHash(ref self: ComponentState<TContractState>, program_hash: felt252) {
+        fn setDataProcessorProgramHash(
+            ref self: ComponentState<TContractState>, program_hash: felt252,
+        ) {
             get_dep_component!(@self, Ownable).assert_only_owner();
 
             self.authorizedProgramHashes.entry(program_hash).write(true);
-            self.emit(Event::ProgramHashEnabled(ProgramHashEnabled {program_hash}))
+            self.emit(Event::ProgramHashEnabled(ProgramHashEnabled { program_hash }))
         }
 
-        fn disableProgramHashes(ref self: ComponentState<TContractState>, program_hashes: Span<felt252>) {
+        fn disableProgramHashes(
+            ref self: ComponentState<TContractState>, program_hashes: Span<felt252>,
+        ) {
             get_dep_component!(@self, Ownable).assert_only_owner();
 
             for program_hash in program_hashes {
                 self.authorizedProgramHashes.entry(*program_hash).write(false);
             };
-            self.emit(Event::ProgramHashesDisabled(ProgramHashesDisabled{program_hashes}));
+            self.emit(Event::ProgramHashesDisabled(ProgramHashesDisabled { program_hashes }));
         }
 
-        fn isProgramHashAuthorized(self: @ComponentState<TContractState>, program_hash: felt252) -> bool {
+        fn isProgramHashAuthorized(
+            self: @ComponentState<TContractState>, program_hash: felt252,
+        ) -> bool {
             self.authorizedProgramHashes.entry(program_hash).read()
         }
 
         // ========================= Core Functions ========================= //
 
-        fn requestDataProcessorExecutionOfTask(ref self: ComponentState<TContractState>, module_task: ModuleTask) {
+        fn requestDataProcessorExecutionOfTask(
+            ref self: ComponentState<TContractState>, module_task: ModuleTask,
+        ) {
             let mut keccak_input = array![module_task.program_hash];
             for input in module_task.inputs {
                 keccak_input.append(*input);
             };
-            let task_commitment = reverse_endianness_u256(keccak_u256s_be_inputs(keccak_input.span()));
-            
+            let task_commitment = reverse_endianness_u256(
+                keccak_u256s_be_inputs(keccak_input.span()),
+            );
+
             let cached_result = self.cachedTasksResult.entry(task_commitment);
             let cached_result_status = cached_result.status.read();
             if cached_result_status == TaskStatus::FINALIZED {
-                self.emit(Event::TaskAlreadyStored(TaskAlreadyStored {task_commitment} ));
+                self.emit(Event::TaskAlreadyStored(TaskAlreadyStored { task_commitment }));
             } else {
                 // Ensure task is not already scheduled
                 assert(cached_result_status == TaskStatus::NONE, 'DOUBLE_REGISTRATION');
-    
+
                 // Store the task result
-                cached_result.write(TaskResult{status: TaskStatus::SCHEDULED, result: 0});
-    
-                self.emit(Event::ModuleTaskScheduled(ModuleTaskScheduled {module_task} ));
+                cached_result.write(TaskResult { status: TaskStatus::SCHEDULED, result: 0 });
+
+                self.emit(Event::ModuleTaskScheduled(ModuleTaskScheduled { module_task }));
             }
         }
 
-        fn authenticateDataProcessorTaskExecution(ref self: ComponentState<TContractState>, task_data: TaskData) {
-            let task_hash = u256 {low: task_data.task_hash_low, high: task_data.task_hash_high };
+        fn authenticateDataProcessorTaskExecution(
+            ref self: ComponentState<TContractState>, task_data: TaskData,
+        ) {
+            let task_hash = u256 { low: task_data.task_hash_low, high: task_data.task_hash_high };
 
-            assert(self.cachedTasksResult.entry(task_hash).status.read() != TaskStatus::FINALIZED, 'TaskAlreadyFinalized');
+            assert(
+                self.cachedTasksResult.entry(task_hash).status.read() != TaskStatus::FINALIZED,
+                'TaskAlreadyFinalized',
+            );
 
             assert(self.isProgramHashAuthorized(task_data.program_hash), 'UnauthorizedProgramHash');
 
@@ -200,7 +215,14 @@ pub mod data_processor_component {
 
             let state = get_dep_component!(@self, State);
             for mmr in task_data.mmr_data {
-                let mmr_root = state.mmrs.entry(*mmr.chain_id).entry(*mmr.mmr_id).entry(POSEIDON_HASHING_FUNCTION).mmr_size_to_root.entry(*mmr.mmr_size).read();
+                let mmr_root = state
+                    .mmrs
+                    .entry(*mmr.chain_id)
+                    .entry(*mmr.mmr_id)
+                    .entry(POSEIDON_HASHING_FUNCTION)
+                    .mmr_size_to_root
+                    .entry(*mmr.mmr_size)
+                    .read();
                 assert(mmr_root != 0, 'InvalidMmrRoot');
                 program_output.append((*mmr.mmr_id).try_into().expect('mmr_id not felt252'));
                 program_output.append((*mmr.mmr_size).try_into().expect('mmr_size not felt252'));
@@ -213,18 +235,27 @@ pub mod data_processor_component {
             let cairo_fact_registry = get_dep_component!(@self, CairoFactRegistry);
             assert(cairo_fact_registry.isCairoFactValidForInternal(fact_hash), 'Invalid fact');
 
-            let task_result = u256 {low: task_data.task_result_low, high: task_data.task_result_high};
+            let task_result = u256 {
+                low: task_data.task_result_low, high: task_data.task_result_high,
+            };
 
             // Store the task result
-            self.cachedTasksResult.entry(task_hash).write(TaskResult {status: TaskStatus::FINALIZED, result: task_result});
-            self.emit(Event::TaskFinalized(TaskFinalized {task_hash, task_result}));
+            self
+                .cachedTasksResult
+                .entry(task_hash)
+                .write(TaskResult { status: TaskStatus::FINALIZED, result: task_result });
+            self.emit(Event::TaskFinalized(TaskFinalized { task_hash, task_result }));
         }
 
-        fn getDataProcessorTaskStatus(self: @ComponentState<TContractState>, task_commitment: u256) -> TaskStatus {
+        fn getDataProcessorTaskStatus(
+            self: @ComponentState<TContractState>, task_commitment: u256,
+        ) -> TaskStatus {
             self.cachedTasksResult.entry(task_commitment).status.read()
         }
 
-        fn getDataProcessorFinalizedTaskResult(self: @ComponentState<TContractState>, task_commitment: u256) -> u256 {
+        fn getDataProcessorFinalizedTaskResult(
+            self: @ComponentState<TContractState>, task_commitment: u256,
+        ) -> u256 {
             let task_result = self.cachedTasksResult.entry(task_commitment).read();
 
             // Ensure task is finalized

@@ -29,7 +29,7 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     }
 
     /// @inheritdoc ICairoFactRegistryModule
-    function isCairoFactValid(bytes32 factHash) external view returns (bool) {
+    function isCairoFactValid(bytes32 factHash) public view returns (bool) {
         CairoFactRegistryModuleStorage storage ms = moduleStorage();
         return ms.facts[factHash] || ms.fallbackContract.isValid(factHash);
     }
@@ -45,7 +45,7 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     }
 
     /// @inheritdoc ICairoFactRegistryModule
-    function setCairoFactRegistryExternalContract(address fallbackContract) external {
+    function setCairoFactRegistryExternalContract(address fallbackContract) external  onlyOwner {
         moduleStorage().fallbackContract = IFactsRegistry(fallbackContract);
         emit CairoFactRegistryExternalContractSet(fallbackContract);
     }
@@ -77,7 +77,7 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
         if (ms.isMockedForInternal) {
             return ms.mockedFacts[factHash];
         } else {
-            return ms.facts[factHash] || ms.fallbackContract.isValid(factHash);
+            return isCairoFactValid(factHash);
         }
     }
 

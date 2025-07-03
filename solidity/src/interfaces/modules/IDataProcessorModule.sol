@@ -74,11 +74,18 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     /// @notice Emitted when some program hashes are disabled
     event ProgramHashesDisabled(bytes32[] disabledProgramHashes);
 
+    // ========================= Setup Functions ========================= //
+
     /// @notice Set the program hash for the HDP program
     function setDataProcessorProgramHash(bytes32 programHash) external;
 
     /// @notice Disable some program hashes
     function disableProgramHashes(bytes32[] calldata programHashes) external;
+
+    /// @notice Checks if a program hash is currently authorized
+    function isProgramHashAuthorized(bytes32 programHash) external view returns (bool);
+
+    // ========================= Core Functions ========================= //
 
     /// @notice Requests the execution of a task with a module
     /// @param moduleTask module task
@@ -89,12 +96,9 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     /// @param taskData The task data
     function authenticateDataProcessorTaskExecution(TaskData calldata taskData) external;
 
-    /// @notice Returns the result of a finalized task
-    function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32);
-
     /// @notice Returns the status of a task
     function getDataProcessorTaskStatus(bytes32 taskCommitment) external view returns (TaskStatus);
 
-    /// @notice Checks if a program hash is currently authorized
-    function isProgramHashAuthorized(bytes32 programHash) external view returns (bool);
+    /// @notice Returns the result of a finalized task
+    function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32);
 }

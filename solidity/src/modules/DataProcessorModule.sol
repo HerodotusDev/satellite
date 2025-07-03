@@ -33,7 +33,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         }
     }
 
-    // ========================= Owner-only Functions ========================= //
+    // ========================= Setup Functions ========================= //
 
     /// @inheritdoc IDataProcessorModule
     function setDataProcessorProgramHash(bytes32 programHash) external onlyOwner {
@@ -50,6 +50,12 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
             ms.authorizedProgramHashes[programHashes[i]] = false;
         }
         emit ProgramHashesDisabled(programHashes);
+    }
+
+    /// @inheritdoc IDataProcessorModule
+    function isProgramHashAuthorized(bytes32 programHash) public view returns (bool) {
+        DataProcessorModuleStorage storage ms = moduleStorage();
+        return ms.authorizedProgramHashes[programHash];
     }
 
     // ========================= Core Functions ========================= //
@@ -78,6 +84,8 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
     function authenticateDataProcessorTaskExecution(TaskData calldata taskData) external {
         DataProcessorModuleStorage storage ms = moduleStorage();
 
+        require(taskData.taskHashLow >> 128 == 0, "INVALID taskHashLow");
+        require(taskData.taskHashHigh >> 128 == 0, "INVALID taskHashHigh");
         bytes32 taskHash = bytes32((taskData.taskHashHigh << 128) | taskData.taskHashLow);
 
         if (ms.cachedTasksResult[taskHash].status == TaskStatus.FINALIZED) {
@@ -101,7 +109,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
 
         for (uint8 i = 0; i < taskData.mmrData.length; i++) {
             MmrData memory mmr = taskData.mmrData[i];
-            bytes32 usedMmrRoot = loadMmrRoot(mmr.mmrId, mmr.mmrSize, mmr.chainId);
+            bytes32 usedMmrRoot = LibSatellite.satelliteStorage().mmrs[mmr.chainId][mmr.mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmr.mmrSize];
             if (usedMmrRoot == bytes32(0)) {
                 revert InvalidMmrRoot();
             }
@@ -122,23 +130,13 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
             revert InvalidFact();
         }
 
+        require(taskData.taskResultHigh >> 128 == 0, "INVALID taskResultHigh");
+        require(taskData.taskResultLow >> 128 == 0, "INVALID taskResultLow");
         bytes32 taskResult = bytes32((taskData.taskResultHigh << 128) | taskData.taskResultLow);
 
         // Store the task result
         ms.cachedTasksResult[taskHash] = TaskResult({status: TaskStatus.FINALIZED, result: taskResult});
         emit TaskFinalized(taskHash, taskResult);
-    }
-
-    // ========================= View Functions ========================= //
-
-    /// @inheritdoc IDataProcessorModule
-    function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32) {
-        DataProcessorModuleStorage storage ms = moduleStorage();
-        // Ensure task is finalized
-        if (ms.cachedTasksResult[taskCommitment].status != TaskStatus.FINALIZED) {
-            revert NotFinalized();
-        }
-        return ms.cachedTasksResult[taskCommitment].result;
     }
 
     /// @inheritdoc IDataProcessorModule
@@ -148,23 +146,12 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
     }
 
     /// @inheritdoc IDataProcessorModule
-    function isProgramHashAuthorized(bytes32 programHash) public view returns (bool) {
+    function getDataProcessorFinalizedTaskResult(bytes32 taskCommitment) external view returns (bytes32) {
         DataProcessorModuleStorage storage ms = moduleStorage();
-        return ms.authorizedProgramHashes[programHash];
-    }
-
-    // ========================= Internal Functions ========================= //
-
-    /// @notice Load MMR root from cache with given mmrId and mmrSize
-    function loadMmrRoot(uint256 mmrId, uint256 mmrSize, uint256 chainId) internal view returns (bytes32) {
-        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        return s.mmrs[chainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrSize];
-    }
-
-    /// @notice Returns the leaf of standard merkle tree
-    function standardEvmHDPLeafHash(bytes32 value) internal pure returns (bytes32) {
-        bytes32 firstHash = keccak256(abi.encode(value));
-        bytes32 leaf = keccak256(abi.encode(firstHash));
-        return leaf;
+        // Ensure task is finalized
+        if (ms.cachedTasksResult[taskCommitment].status != TaskStatus.FINALIZED) {
+            revert NotFinalized();
+        }
+        return ms.cachedTasksResult[taskCommitment].result;
     }
 }

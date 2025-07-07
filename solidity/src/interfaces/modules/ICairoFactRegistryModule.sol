@@ -32,5 +32,5 @@ interface ICairoFactRegistryModule {
 
     function isMockedForInternal() external view returns (bool);
 
-    function setMockedForInternal(bool isMocked) external;
+    function setIsMockedForInternal(bool isMocked) external;
 }

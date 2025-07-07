@@ -75,6 +75,8 @@ contract UniversalSenderModule is IUniversalSenderModule {
 
         ILibSatellite.SatelliteConnection memory satellite = s.satelliteConnectionRegistry[destinationChainId];
 
+        require(satellite.inboxAddress != address(0x0), "Invalid destination chain");
+
         bytes memory data = abi.encodeWithSelector(
             satellite.sendMessageSelector,
             satellite.satelliteAddress,

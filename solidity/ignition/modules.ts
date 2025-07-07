@@ -43,7 +43,7 @@ export const modules = (chainId: keyof typeof settings) =>
             interfaceName: "ICairoFactRegistryModule",
             initFunctions: [
               {
-                name: "setMockedForInternal",
+                name: "setIsMockedForInternal",
                 args: [settings[chainId].CAIRO_FACT_REGISTRY_IS_MOCKED],
               },
             ],

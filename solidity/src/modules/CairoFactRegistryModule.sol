@@ -87,7 +87,7 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     }
 
     /// @inheritdoc ICairoFactRegistryModule
-    function setMockedForInternal(bool isMocked) external onlyOwner {
+    function setIsMockedForInternal(bool isMocked) external onlyOwner {
         moduleStorage().isMockedForInternal = isMocked;
         emit MockedForInternalSet(isMocked);
     }

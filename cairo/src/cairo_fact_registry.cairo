@@ -27,7 +27,7 @@ pub trait ICairoFactRegistry<TContractState> {
 
     fn isMockedForInternal(self: @TContractState) -> bool;
 
-    fn setMockedForInternal(ref self: TContractState, is_mocked: bool);
+    fn setIsMockedForInternal(ref self: TContractState, is_mocked: bool);
 
     // ======================= Admin management ======================== //
 
@@ -148,7 +148,7 @@ pub mod cairo_fact_registry_component {
             self.is_mocked_for_internal.read()
         }
 
-        fn setMockedForInternal(ref self: ComponentState<TContractState>, is_mocked: bool) {
+        fn setIsMockedForInternal(ref self: ComponentState<TContractState>, is_mocked: bool) {
             get_dep_component!(@self, Ownable).assert_only_owner();
 
             self.is_mocked_for_internal.write(is_mocked);

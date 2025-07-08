@@ -6,7 +6,7 @@ export async function main() {
     process.env.CONTRACT_ADDRESS as string,
   );
 
-  const tx = await contract.registerSatelliteConnection(
+  const tx = await contract.registerSatellite(
     ...(process.env.ARGS!.split(",") as any),
   );
 

@@ -45,14 +45,18 @@ interface ILibSatellite {
         mapping(uint256 => bytes32) mmrSizeToRoot;
     }
 
-    struct SatelliteConnection {
-        /// @notice satelliteAddress is the address of the satellite deployed on the destination chain
+    struct SatelliteData {
+        /// @notice satelliteAddress is the address of the satellite deployed on the chain given in the mapping
         /// @dev it is uint256 because Starknet addresses must fit
         uint256 satelliteAddress;
         /// @notice inboxAddress is the address of the contract that sends messages from our chain to the chain of the satellite
+        /// @dev if inboxAddress is non-zero, satellite can send messages to that chain
         address inboxAddress;
         /// @notice sendMessageSelector is the selector of the satellite's function that sends message to the destination chain
+        /// @dev if satellite is not connected (inboxAddress == 0x0), sendMessageSelector must be 0
         bytes4 sendMessageSelector;
+        /// @notice canReceive is true if this satellite can receive messages from the chain given in the mapping
+        bool canReceive;
     }
 
     struct SatelliteStorage {
@@ -77,8 +81,8 @@ interface ILibSatellite {
         //
         // ======================= Satellite Registry storage ======================= //
 
-        /// @dev mapping of ChainId => SatelliteConnection struct
-        mapping(uint256 => SatelliteConnection) satelliteConnectionRegistry;
+        /// @dev mapping of ChainId => SatelliteData struct
+        mapping(uint256 => SatelliteData) satelliteRegistry;
         /// @dev set of (aliased) addresses of satellites that can send messages to our chain
         mapping(address => bool) senderSatellites;
         //
@@ -122,4 +126,6 @@ interface ILibSatellite {
     event SatelliteMaintenance(ModuleMaintenance[] _satelliteMaintenance, address _init, bytes _calldata);
     /// @notice Event emitted when ownership is transferred
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    /// @notice Event emitted when admins are updated
+    event AdminsUpdated(address[] accounts, bool isAdmin);
 }

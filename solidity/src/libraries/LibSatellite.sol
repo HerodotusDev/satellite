@@ -47,6 +47,7 @@ library LibSatellite {
         for (uint256 i = 0; i < accounts.length; i++) {
             s.admins[accounts[i]] = _isAdmin;
         }
+        emit ILibSatellite.AdminsUpdated(accounts, _isAdmin);
     }
 
     function isAdmin(address account) internal view returns (bool) {

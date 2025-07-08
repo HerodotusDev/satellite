@@ -66,7 +66,7 @@ Because of great complexity of the contract and need for fine-tuned upgradabilit
   - [Evm On-Chain Growing](./src/modules/growing/EvmOnChainGrowingModule.sol) - processes all block data directly in the contract as described in [solution section](#solution)
   - [Evm Sharp Growing](./src/modules/growing/EvmSharpMmrGrowingModule.sol) - processes block data that was proven with ZK proof using SHARP as described in [reducing cost](#reducing-cost)
   - [Starknet Growing](./src/modules/growing/StarknetSharpMmrGrowingModule.sol) - TODO
-- [Satellite Registry](./src/modules/SatelliteConnectionRegistryModule.sol) - stores information about other satellites to/from which it can send/receive messages
+- [Satellite Registry](./src/modules/SatelliteRegistryModule.sol) - stores information about other satellites to/from which it can send/receive messages
 - Messaging modules - responsible for sending and receiving data to and from satellites deployed on other chains
   - Receiver modules
     - [Simple Receiver](./src/modules/messaging/receiver/SimpleReceiverModule.sol) - receives message on chains that set `msg.sender` for cross-chain messages to transaction sender on the source chain

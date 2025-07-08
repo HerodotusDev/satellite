@@ -3,7 +3,7 @@ pragma solidity ^0.8.27;
 
 import {ILibSatellite} from "./ILibSatellite.sol";
 import {IExtendedOwnershipModule} from "./modules/IOwnershipModule.sol";
-import {ISatelliteConnectionRegistryModule} from "./modules/ISatelliteConnectionRegistryModule.sol";
+import {ISatelliteRegistryModule} from "./modules/ISatelliteRegistryModule.sol";
 import {IMmrCoreModule} from "./modules/IMmrCoreModule.sol";
 import {ISatelliteInspectorModule} from "./modules/ISatelliteInspectorModule.sol";
 import {ISatelliteMaintenanceModule} from "./modules/ISatelliteMaintenanceModule.sol";
@@ -27,7 +27,7 @@ import {IArbitrumParentHashFetcherModule} from "./modules/parent-hash-fetching/I
 interface ISatellite is
     ILibSatellite,
     IExtendedOwnershipModule,
-    ISatelliteConnectionRegistryModule,
+    ISatelliteRegistryModule,
     IMmrCoreModule,
     ISatelliteInspectorModule,
     ISatelliteMaintenanceModule,

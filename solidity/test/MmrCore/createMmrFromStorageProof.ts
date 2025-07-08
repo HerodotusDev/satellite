@@ -262,12 +262,12 @@ describe("MMR from storage slots", () => {
       ],
     };
 
-    await destinationSatellite.registerSatelliteConnection(
+    await destinationSatellite.registerSatellite(
       sourceChainId,
       sourceSatelliteAddress,
       "0x0000000000000000000000000000000000000000",
-      "0x0000000000000000000000000000000000000000",
       "0x00000000",
+      "0x0000000000000000000000000000000000000000",
     );
 
     // 0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0 0x67d269191c92Caf3cD7723F116c85e6E9bf55933

@@ -153,7 +153,7 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
 
         ISatellite satellite = ISatellite(address(this));
 
-        uint256 accountU256 = satellite.getSatelliteConnection(originChainId).satelliteAddress;
+        uint256 accountU256 = satellite.getSatellite(originChainId).satelliteAddress;
         require(accountU256 >> 160 == 0, "NON_EVM_SATELLITE");
         address account = address(uint160(accountU256));
 

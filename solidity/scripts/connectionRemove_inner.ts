@@ -6,7 +6,7 @@ export async function main() {
     process.env.CONTRACT_ADDRESS as string,
   );
 
-  const tx = await contract.removeSatelliteConnection(
+  const tx = await contract.removeSatellite(
     ...(process.env.ARGS!.split(",") as any),
   );
 

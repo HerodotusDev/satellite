@@ -2,7 +2,7 @@ import buildSatelliteDeployment, { ModuleName } from "../SatelliteDeployment";
 
 export const modules: ModuleName[] = [
   "OwnershipModule",
-  "SatelliteConnectionRegistryModule",
+  "SatelliteRegistryModule",
   "SatelliteInspectorModule",
   "MmrCoreModule",
   "EvmFactRegistryModule",

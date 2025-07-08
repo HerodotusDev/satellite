@@ -8,6 +8,25 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "accounts",
+        "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isAdmin",
+        "type": "bool"
+      }
+    ],
+    "name": "AdminsUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": true,
         "internalType": "address",
         "name": "previousOwner",
@@ -22,6 +41,43 @@
     ],
     "name": "OwnershipTransferred",
     "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "isAdmin",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "accounts",
+        "type": "address[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "_isAdmin",
+        "type": "bool"
+      }
+    ],
+    "name": "manageAdmins",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
     "inputs": [],
@@ -50,6 +106,86 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "InvalidNonConnectedSatelliteParameters",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidSatelliteAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidSenderSatelliteAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "SatelliteAlreadyRegistered",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "SatelliteNotRegistered",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "SenderSatelliteAlreadyRegistered",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "satelliteAddress",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "canSendMessageTo",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "senderSatelliteAliased",
+        "type": "address"
+      }
+    ],
+    "name": "SatelliteRegistered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "satelliteAddress",
+        "type": "uint256"
+      }
+    ],
+    "name": "SatelliteRemoved",
+    "type": "event"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -57,7 +193,7 @@
         "type": "uint256"
       }
     ],
-    "name": "getSatelliteConnection",
+    "name": "getSatellite",
     "outputs": [
       {
         "components": [
@@ -75,9 +211,14 @@
             "internalType": "bytes4",
             "name": "sendMessageSelector",
             "type": "bytes4"
+          },
+          {
+            "internalType": "bool",
+            "name": "canReceive",
+            "type": "bool"
           }
         ],
-        "internalType": "struct ILibSatellite.SatelliteConnection",
+        "internalType": "struct ILibSatellite.SatelliteData",
         "name": "",
         "type": "tuple"
       }
@@ -94,7 +235,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "satellite",
+        "name": "satelliteAddress",
         "type": "uint256"
       },
       {
@@ -103,17 +244,17 @@
         "type": "address"
       },
       {
-        "internalType": "address",
-        "name": "senderSatelliteAlias",
-        "type": "address"
-      },
-      {
         "internalType": "bytes4",
         "name": "sendMessageSelector",
         "type": "bytes4"
+      },
+      {
+        "internalType": "address",
+        "name": "senderSatelliteAliased",
+        "type": "address"
       }
     ],
-    "name": "registerSatelliteConnection",
+    "name": "registerSatellite",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -131,7 +272,7 @@
         "type": "address"
       }
     ],
-    "name": "removeSatelliteConnection",
+    "name": "removeSatellite",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -629,6 +770,59 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "newMmrId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "originalMmrId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "accumulatedChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "mmrSize",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "hashingFunctions",
+        "type": "bytes32[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "originChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isOffchainGrown",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes[]",
+        "name": "storageSlotMptProofs",
+        "type": "bytes[]"
+      }
+    ],
+    "name": "createMmrFromStorageProof",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "chainId",
         "type": "uint256"
       },
@@ -730,6 +924,45 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "mmrId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "mmrSize",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "hashingFunctions",
+        "type": "bytes32[]"
+      }
+    ],
+    "name": "getStorageSlotsForMmrCreation",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "isOffchainGrownSlot",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "mmrSizeToRootSlot",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -1946,6 +2179,321 @@
     "type": "function"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "externalFactRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "CairoFactRegistryExternalContractSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "CairoFactSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "fallbackMockedContract",
+        "type": "address"
+      }
+    ],
+    "name": "CairoMockedFactRegistryFallbackContractSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "CairoMockedFactSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "IsMockedForInternalSet",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "_receiveCairoFactHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCairoFactRegistryExternalContract",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCairoMockedFactRegistryFallbackContract",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "getStorageSlotForCairoFact",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoFactStored",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoFactValid",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoFactValidForInternal",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoMockedFactValid",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isMockedForInternal",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "originChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "moveCairoFactFromStorageProof",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "externalFactRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "setCairoFactRegistryExternalContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setCairoMockedFact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "fallbackMockedContract",
+        "type": "address"
+      }
+    ],
+    "name": "setCairoMockedFactRegistryFallbackContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "setIsMockedForInternal",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "storeCairoFact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "DoubleRegistration",
     "type": "error"
@@ -2139,19 +2687,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "getDataProcessorFactsRegistry",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -2229,19 +2764,6 @@
       }
     ],
     "name": "requestDataProcessorExecutionOfTask",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract IFactsRegistry",
-        "name": "factsRegistry",
-        "type": "address"
-      }
-    ],
-    "name": "setDataProcessorFactsRegistry",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2459,19 +2981,6 @@
   },
   {
     "inputs": [],
-    "name": "getEvmSharpMmrGrowingModuleFactsRegistry",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "getEvmSharpMmrGrowingModuleProgramHash",
     "outputs": [
       {
@@ -2486,19 +2995,6 @@
   {
     "inputs": [],
     "name": "initEvmSharpMmrGrowingModule",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "factsRegistry",
-        "type": "address"
-      }
-    ],
-    "name": "setEvmSharpMmrGrowingModuleFactsRegistry",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

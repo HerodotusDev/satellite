@@ -8,35 +8,35 @@ import {LibSatellite} from "../../../libraries/LibSatellite.sol";
 import {RootForHashingFunction} from "../../../interfaces/modules/IMmrCoreModule.sol";
 
 /// @notice Sender module that uses appropriate sender module depending on the destination chain
-/// @dev It uses Satellite Connection Registry to find function selector for the destination chain
+/// @dev It uses Satellite Registry to find function selector for the destination chain
 contract UniversalSenderModule is IUniversalSenderModule {
-    /// @inheritdoc IUniversalSenderModule
-    function sendParentHash(
-        uint256 destinationChainId,
-        uint256 accumulatedChainId,
-        bytes32 hashingFunction,
-        uint256 blockNumber,
-        bytes calldata _xDomainMsgGasData
-    ) external payable {
-        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        bytes32 parentHash = s.receivedParentHashes[accumulatedChainId][hashingFunction][blockNumber];
-
-        require(parentHash != bytes32(0), "ERR_BLOCK_NOT_REGISTERED");
-
-        ILibSatellite.SatelliteConnection memory satellite = s.satelliteConnectionRegistry[destinationChainId];
-
-        require(satellite.inboxAddress != address(0x0), "Invalid destination chain");
+    function sendMessage(ISatellite.SatelliteData storage satelliteData, bytes memory functionSignature, bytes calldata _xDomainMsgGasData) internal {
+        require(satelliteData.inboxAddress != address(0x0), "Invalid destination chain");
 
         bytes memory data = abi.encodeWithSelector(
-            satellite.sendMessageSelector,
-            satellite.satelliteAddress,
-            satellite.inboxAddress,
-            abi.encodeWithSignature("receiveParentHash(uint256,bytes32,uint256,bytes32)", accumulatedChainId, hashingFunction, blockNumber, parentHash),
+            satelliteData.sendMessageSelector,
+            satelliteData.satelliteAddress,
+            satelliteData.inboxAddress,
+            functionSignature,
             _xDomainMsgGasData
         );
 
         (bool success, ) = address(this).call{value: msg.value}(data);
         require(success, "Function call failed");
+    }
+
+    /// @inheritdoc IUniversalSenderModule
+    function sendParentHash(uint256 destinationChainId, uint256 accumulatedChainId, bytes32 hashingFunction, uint256 blockNumber, bytes calldata gasData) external payable {
+        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
+        bytes32 parentHash = s.receivedParentHashes[accumulatedChainId][hashingFunction][blockNumber];
+
+        require(parentHash != bytes32(0), "ERR_BLOCK_NOT_REGISTERED");
+
+        sendMessage(
+            s.satelliteRegistry[destinationChainId],
+            abi.encodeWithSignature("receiveParentHash(uint256,bytes32,uint256,bytes32)", accumulatedChainId, hashingFunction, blockNumber, parentHash),
+            gasData
+        );
     }
 
     /// @inheritdoc IUniversalSenderModule
@@ -47,7 +47,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
         uint256 newMmrId,
         bytes32[] calldata hashingFunctions,
         bool isOffchainGrownDestination,
-        bytes calldata _xDomainMsgGasData
+        bytes calldata gasData
     ) external payable {
         require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
         require(hashingFunctions.length > 0, "INVALID_HASHING_FUNCTIONS_LENGTH");
@@ -75,14 +75,8 @@ contract UniversalSenderModule is IUniversalSenderModule {
             rootsForHashingFunctions[i] = RootForHashingFunction(root, hashingFunctions[i]);
         }
 
-        ILibSatellite.SatelliteConnection memory satellite = s.satelliteConnectionRegistry[destinationChainId];
-
-        require(satellite.inboxAddress != address(0x0), "Invalid destination chain");
-
-        bytes memory data = abi.encodeWithSelector(
-            satellite.sendMessageSelector,
-            satellite.satelliteAddress,
-            satellite.inboxAddress,
+        sendMessage(
+            s.satelliteRegistry[destinationChainId],
             abi.encodeWithSignature(
                 "receiveMmr(uint256,(bytes32,bytes32)[],uint256,uint256,uint256,uint256,bool)",
                 newMmrId,
@@ -93,14 +87,11 @@ contract UniversalSenderModule is IUniversalSenderModule {
                 originalMmrId,
                 isOffchainGrownDestination
             ),
-            _xDomainMsgGasData
+            gasData
         );
-
-        (bool success, ) = address(this).call{value: msg.value}(data);
-        require(success, "Function call failed");
     }
 
-    function sendCairoFactHash(uint256 destinationChainId, bytes32 factHash, bool isMocked, bytes calldata _xDomainMsgGasData) external payable {
+    function sendCairoFactHash(uint256 destinationChainId, bytes32 factHash, bool isMocked, bytes calldata gasData) external payable {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         if (isMocked) {
             require(ISatellite(address(this)).isCairoMockedFactValid(factHash), "ERR_FACT_NOT_VALID");
@@ -108,19 +99,6 @@ contract UniversalSenderModule is IUniversalSenderModule {
             require(ISatellite(address(this)).isCairoFactValid(factHash), "ERR_FACT_NOT_VALID");
         }
 
-        ILibSatellite.SatelliteConnection memory satellite = s.satelliteConnectionRegistry[destinationChainId];
-
-        require(satellite.inboxAddress != address(0x0), "Invalid destination chain");
-
-        bytes memory data = abi.encodeWithSelector(
-            satellite.sendMessageSelector,
-            satellite.satelliteAddress,
-            satellite.inboxAddress,
-            abi.encodeWithSignature("receiveCairoFactHash(bytes32,bool)", factHash, isMocked),
-            _xDomainMsgGasData
-        );
-
-        (bool success, ) = address(this).call{value: msg.value}(data);
-        require(success, "Function call failed");
+        sendMessage(s.satelliteRegistry[destinationChainId], abi.encodeWithSignature("receiveCairoFactHash(bytes32,bool)", factHash, isMocked), gasData);
     }
 }

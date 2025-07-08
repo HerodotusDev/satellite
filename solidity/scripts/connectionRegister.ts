@@ -82,13 +82,13 @@ async function main() {
     receiverChainId,
     receiverSatellite.contractAddress,
     connectionData.inboxContract,
-    "0x0000000000000000000000000000000000000000",
     ethers.FunctionFragment.getSelector(connectionData.sendFunction, [
       "uint256",
       "address",
       "bytes",
       "bytes",
     ]),
+    "0x0000000000000000000000000000000000000000",
   ];
 
   await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${senderSatellite.contractAddress} ARGS=${senderArgs.join(",")} bun hardhat --network ${settings[senderChainId].network} run scripts/connectionRegister_inner.ts`;
@@ -102,8 +102,8 @@ async function main() {
       senderChainId,
       senderSatellite.contractAddress,
       "0x0000000000000000000000000000000000000000",
-      alias(senderSatellite.contractAddress, connectionData.L2Alias),
       "0x00000000",
+      alias(senderSatellite.contractAddress, connectionData.L2Alias),
     ];
 
     await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${receiverSatellite.contractAddress} ARGS=${receiverArgs.join(",")} bun hardhat --network ${settings[receiverChainId].network} run scripts/connectionRegister_inner.ts`;

@@ -208,3 +208,5 @@ export function getHeaderRlp(block: Record<string, string>) {
   }
   return ethers.encodeRlp(data);
 }
+
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";

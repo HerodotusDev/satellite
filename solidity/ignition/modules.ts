@@ -21,8 +21,8 @@ export const modules = (chainId: keyof typeof settings) =>
       interfaceName: "ISatelliteInspectorModule",
     },
 
-    SatelliteConnectionRegistryModule: {
-      interfaceName: "ISatelliteConnectionRegistryModule",
+    SatelliteRegistryModule: {
+      interfaceName: "ISatelliteRegistryModule",
     },
 
     MmrCoreModule: {
@@ -46,6 +46,26 @@ export const modules = (chainId: keyof typeof settings) =>
                 name: "setIsMockedForInternal",
                 args: [settings[chainId].CAIRO_FACT_REGISTRY_IS_MOCKED],
               },
+              ...("CAIRO_FACT_REGISTRY_EXTERNAL_CONTRACT" in settings[chainId]
+                ? [
+                    {
+                      name: "setCairoFactRegistryExternalContract",
+                      args: [
+                        settings[chainId].CAIRO_FACT_REGISTRY_EXTERNAL_CONTRACT,
+                      ],
+                    },
+                  ]
+                : []),
+              ...("CAIRO_FACT_REGISTRY_MOCKED_FALLBACK" in settings[chainId]
+                ? [
+                    {
+                      name: "setCairoMockedFactRegistryFallbackContract",
+                      args: [
+                        settings[chainId].CAIRO_FACT_REGISTRY_MOCKED_FALLBACK,
+                      ],
+                    },
+                  ]
+                : []),
             ],
           },
         }

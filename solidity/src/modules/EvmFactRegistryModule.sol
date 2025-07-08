@@ -7,7 +7,6 @@ import {Lib_RLPReader as RLPReader} from "../libraries/external/optimism/rlp/Lib
 import {IEvmFactRegistryModule} from "../interfaces/modules/IEvmFactRegistryModule.sol";
 import {LibSatellite} from "../libraries/LibSatellite.sol";
 import {ISatellite} from "../interfaces/ISatellite.sol";
-import {console} from "forge-std/console.sol";
 
 contract EvmFactRegistryModule is IEvmFactRegistryModule {
     using RLPReader for bytes;

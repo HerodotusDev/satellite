@@ -125,17 +125,26 @@ export async function deploy() {
 }
 
 export async function deploy2() {
-  const { satellite: satellite1 } = await ignition.deploy(SatelliteModule, {
-    deploymentId: "id1",
-  });
-  const satelliteAddress1 = await satellite1.getAddress();
-  const { satellite: satellite2 } = await ignition.deploy(SatelliteModule, {
+  const { satellite } = await ignition.deploy(SatelliteModule, {
     deploymentId: "id2",
   });
-  const satelliteAddress2 = await satellite2.getAddress();
+  const satelliteAddress = await satellite.getAddress();
 
-  return { satellite1, satelliteAddress1, satellite2, satelliteAddress2 };
+  return { satellite, satelliteAddress };
 }
+
+// export async function deploy2() {
+//   const { satellite: satellite1 } = await ignition.deploy(SatelliteModule, {
+//     deploymentId: "id1",
+//   });
+//   const satelliteAddress1 = await satellite1.getAddress();
+//   const { satellite: satellite2 } = await ignition.deploy(SatelliteModule, {
+//     deploymentId: "id2",
+//   });
+//   const satelliteAddress2 = await satellite2.getAddress();
+
+//   return { satellite1, satelliteAddress1, satellite2, satelliteAddress2 };
+// }
 
 export const KECCAK_HASHER = BigInt(
   "0xdf35a135a69c769066bbb4d17b2fa3ec922c028d4e4bf9d0402e6f7c12b31813",

@@ -16,72 +16,74 @@ import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 
 describe("MMR from storage slots", () => {
   it("getStorageSlotsForMmrCreation", async () => {
-    // const { satellite, satelliteAddress } = await loadFixture(deploy);
-    // const chain_id = BigInt(11155111);
-    // const mmr_id = BigInt(123);
-    // const mmr_size = BigInt(10);
-    // const keccak_root = BigInt(
-    //   "0x4c466c582074f6351b729134d42c66b15b7e1218fa63f1bfd614045ea96cd66a",
-    // );
-    // const poseidon_root = BigInt(
-    //   "0x3c5f312ba85ad56867cd2de63d79e4ba910c90d9e82437d023846a044d10952",
-    // );
-    // const is_offchain_grown = true;
-    // for (const [r, f] of [
-    //   [keccak_root, KECCAK_HASHER],
-    //   [poseidon_root, POSEIDON_HASHER],
-    // ]) {
-    //   await setMmrData(
-    //     satelliteAddress,
-    //     chain_id,
-    //     mmr_id,
-    //     f,
-    //     is_offchain_grown,
-    //     mmr_size,
-    //     r,
-    //   );
-    // }
-    // const storageSlots = await satellite.getStorageSlotsForMmrCreation(
-    //   chain_id,
-    //   mmr_id,
-    //   mmr_size,
-    //   [toU256(KECCAK_HASHER), toU256(POSEIDON_HASHER)],
-    // );
-    // expect(storageSlots.length).to.equal(2);
-    // expect(storageSlots[0].length).to.equal(2);
-    // expect(storageSlots[1].length).to.equal(2);
-    // expect(
-    //   await ethers.provider.send("eth_getStorageAt", [
-    //     satelliteAddress,
-    //     toU256(BigInt(storageSlots[0][0])),
-    //   ]),
-    // ).to.equal(toU256(Number(is_offchain_grown)));
-    // expect(
-    //   await ethers.provider.send("eth_getStorageAt", [
-    //     satelliteAddress,
-    //     toU256(BigInt(storageSlots[1][0])),
-    //   ]),
-    // ).to.equal(toU256(keccak_root));
-    // expect(
-    //   await ethers.provider.send("eth_getStorageAt", [
-    //     satelliteAddress,
-    //     toU256(BigInt(storageSlots[0][1])),
-    //   ]),
-    // ).to.equal(toU256(Number(is_offchain_grown)));
-    // expect(
-    //   await ethers.provider.send("eth_getStorageAt", [
-    //     satelliteAddress,
-    //     toU256(BigInt(storageSlots[1][1])),
-    //   ]),
-    // ).to.equal(toU256(poseidon_root));
+    const { satellite, satelliteAddress } = await loadFixture(deploy);
+    const chain_id = BigInt(11155111);
+    const mmr_id = BigInt(123);
+    const mmr_size = BigInt(10);
+    const keccak_root = BigInt(
+      "0x4c466c582074f6351b729134d42c66b15b7e1218fa63f1bfd614045ea96cd66a",
+    );
+    const poseidon_root = BigInt(
+      "0x3c5f312ba85ad56867cd2de63d79e4ba910c90d9e82437d023846a044d10952",
+    );
+    const is_offchain_grown = true;
+    for (const [r, f] of [
+      [keccak_root, KECCAK_HASHER],
+      [poseidon_root, POSEIDON_HASHER],
+    ]) {
+      await setMmrData(
+        satelliteAddress,
+        chain_id,
+        mmr_id,
+        f,
+        is_offchain_grown,
+        mmr_size,
+        r,
+      );
+    }
+    const storageSlots = await satellite.getStorageSlotsForMmrCreation(
+      chain_id,
+      mmr_id,
+      mmr_size,
+      [toU256(KECCAK_HASHER), toU256(POSEIDON_HASHER)],
+    );
+    expect(storageSlots.length).to.equal(2);
+    expect(storageSlots[0].length).to.equal(2);
+    expect(storageSlots[1].length).to.equal(2);
+    expect(
+      await ethers.provider.send("eth_getStorageAt", [
+        satelliteAddress,
+        toU256(BigInt(storageSlots[0][0])),
+      ]),
+    ).to.equal(toU256(Number(is_offchain_grown)));
+    expect(
+      await ethers.provider.send("eth_getStorageAt", [
+        satelliteAddress,
+        toU256(BigInt(storageSlots[1][0])),
+      ]),
+    ).to.equal(toU256(keccak_root));
+    expect(
+      await ethers.provider.send("eth_getStorageAt", [
+        satelliteAddress,
+        toU256(BigInt(storageSlots[0][1])),
+      ]),
+    ).to.equal(toU256(Number(is_offchain_grown)));
+    expect(
+      await ethers.provider.send("eth_getStorageAt", [
+        satelliteAddress,
+        toU256(BigInt(storageSlots[1][1])),
+      ]),
+    ).to.equal(toU256(poseidon_root));
   });
 
   it("createMmrFromStorageProof", async () => {
     const {
-      satellite1: sourceSatellite,
-      satelliteAddress1: sourceSatelliteAddress,
-      satellite2: destinationSatellite,
-      satelliteAddress2: destinationSatelliteAddress,
+      satellite: sourceSatellite,
+      satelliteAddress: sourceSatelliteAddress,
+    } = await loadFixture(deploy);
+    const {
+      satellite: destinationSatellite,
+      satelliteAddress: destinationSatelliteAddress,
     } = await loadFixture(deploy2);
 
     const sourceChainId = BigInt(123001);

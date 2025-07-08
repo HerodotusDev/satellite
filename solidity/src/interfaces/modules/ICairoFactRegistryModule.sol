@@ -4,6 +4,8 @@ pragma solidity ^0.8.20;
 // This module stores fact hashes for verified or mocked facts.
 
 interface ICairoFactRegistryModule {
+    // ========= Fact registry with real verification ========= //
+
     /// Whether given fact was verified (not necessarily stored locally).
     function isCairoFactValid(bytes32 factHash) external view returns (bool);
 
@@ -20,11 +22,19 @@ interface ICairoFactRegistryModule {
     /// Moves verified fact from external (fallback) contract to local storage.
     function storeCairoFact(bytes32 factHash) external;
 
+    // ========= Mocked fact registry ========= //
+
     /// Whether given fact was mocked.
     function isCairoMockedFactValid(bytes32 factHash) external view returns (bool);
 
     /// Mocks given fact. Caller must be an admin.
     function setCairoMockedFact(bytes32 factHash) external;
+
+    /// Returns address of the contract that stores mocked facts.
+    function getCairoMockedFactRegistryFallbackContract() external view returns (address);
+
+    /// Sets address of the contract that stores mocked facts.
+    function setCairoMockedFactRegistryFallbackContract(address fallbackMockedContract) external;
 
     // ========= For internal use in grower and data processor ========= //
 

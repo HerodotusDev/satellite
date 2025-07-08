@@ -9,17 +9,19 @@ struct CairoFactRegistryModuleStorage {
     // It is stored here so that it can be storage proven between satellites.
     mapping(bytes32 => bool) facts;
     mapping(bytes32 => bool) mockedFacts;
-    IFactsRegistry fallbackContract;
+    IFactsRegistry externalFactRegistry;
     bool isMockedForInternal;
+    IFactsRegistry fallbackMockedContract;
 }
 
 contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     bytes32 constant MODULE_STORAGE_POSITION = keccak256("diamond.standard.satellite.module.storage.cairo-fact-registry-module");
 
-    event MockedForInternalSet(bool isMocked);
-    event CairoFactRegistryExternalContractSet(address fallbackContract);
     event CairoFactSet(bytes32 factHash);
+    event CairoFactRegistryExternalContractSet(address externalFactRegistry);
     event CairoMockedFactSet(bytes32 factHash);
+    event CairoMockedFactRegistryFallbackContractSet(address fallbackMockedContract);
+    event IsMockedForInternalSet(bool isMocked);
 
     function moduleStorage() internal pure returns (CairoFactRegistryModuleStorage storage s) {
         bytes32 position = MODULE_STORAGE_POSITION;
@@ -28,10 +30,12 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
         }
     }
 
+    // ========= Fact registry with real verification ========= //
+
     /// @inheritdoc ICairoFactRegistryModule
     function isCairoFactValid(bytes32 factHash) public view returns (bool) {
         CairoFactRegistryModuleStorage storage ms = moduleStorage();
-        return ms.facts[factHash] || ms.fallbackContract.isValid(factHash);
+        return ms.facts[factHash] || ms.externalFactRegistry.isValid(factHash);
     }
 
     /// @inheritdoc ICairoFactRegistryModule
@@ -41,32 +45,50 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
 
     /// @inheritdoc ICairoFactRegistryModule
     function getCairoFactRegistryExternalContract() external view returns (address) {
-        return address(moduleStorage().fallbackContract);
+        return address(moduleStorage().externalFactRegistry);
     }
 
     /// @inheritdoc ICairoFactRegistryModule
-    function setCairoFactRegistryExternalContract(address fallbackContract) external onlyOwner {
-        moduleStorage().fallbackContract = IFactsRegistry(fallbackContract);
-        emit CairoFactRegistryExternalContractSet(fallbackContract);
+    function setCairoFactRegistryExternalContract(address externalFactRegistry) external onlyOwner {
+        moduleStorage().externalFactRegistry = IFactsRegistry(externalFactRegistry);
+        emit CairoFactRegistryExternalContractSet(externalFactRegistry);
     }
 
     /// @inheritdoc ICairoFactRegistryModule
     function storeCairoFact(bytes32 factHash) external {
         CairoFactRegistryModuleStorage storage ms = moduleStorage();
-        require(ms.fallbackContract.isValid(factHash), "Fact hash not registered");
+        require(ms.externalFactRegistry.isValid(factHash), "Fact hash not registered");
         ms.facts[factHash] = true;
         emit CairoFactSet(factHash);
     }
 
+    // ========= Mocked fact registry ========= //
+
     /// @inheritdoc ICairoFactRegistryModule
     function isCairoMockedFactValid(bytes32 factHash) external view returns (bool) {
-        return moduleStorage().mockedFacts[factHash];
+        CairoFactRegistryModuleStorage storage ms = moduleStorage();
+        return ms.mockedFacts[factHash] || address(ms.fallbackMockedContract) != address(0) && ms.fallbackMockedContract.isValid(factHash);
     }
 
     /// @inheritdoc ICairoFactRegistryModule
     function setCairoMockedFact(bytes32 factHash) external onlyAdmin {
-        moduleStorage().mockedFacts[factHash] = true;
+        CairoFactRegistryModuleStorage storage ms = moduleStorage();
+        ms.mockedFacts[factHash] = true;
+        if (address(ms.fallbackMockedContract) != address(0)) {
+            ms.fallbackMockedContract.setValid(factHash);
+        }
         emit CairoMockedFactSet(factHash);
+    }
+
+    /// @inheritdoc ICairoFactRegistryModule
+    function getCairoMockedFactRegistryFallbackContract() external view returns (address) {
+        return address(moduleStorage().fallbackMockedContract);
+    }
+
+    /// @inheritdoc ICairoFactRegistryModule
+    function setCairoMockedFactRegistryFallbackContract(address fallbackMockedContract) external onlyOwner {
+        moduleStorage().fallbackMockedContract = IFactsRegistry(fallbackMockedContract);
+        emit CairoMockedFactRegistryFallbackContractSet(fallbackMockedContract);
     }
 
     // ========= For internal use in grower and data processor ========= //
@@ -89,6 +111,6 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     /// @inheritdoc ICairoFactRegistryModule
     function setIsMockedForInternal(bool isMocked) external onlyOwner {
         moduleStorage().isMockedForInternal = isMocked;
-        emit MockedForInternalSet(isMocked);
+        emit IsMockedForInternalSet(isMocked);
     }
 }

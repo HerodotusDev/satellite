@@ -94,7 +94,12 @@ interface IMmrCoreModule {
         bytes[] calldata storageSlotMptProofs
     ) external;
 
-    function getStorageSlotsForMmrCreation(uint256 chainId, uint256 mmrId, uint256 mmrSize, bytes32[] memory hashingFunctions) external pure returns (uint256[] memory isOffchainGrownSlot, uint256[] memory mmrSizeToRootSlot);
+    function getStorageSlotsForMmrCreation(
+        uint256 chainId,
+        uint256 mmrId,
+        uint256 mmrSize,
+        bytes32[] memory hashingFunctions
+    ) external pure returns (uint256[] memory isOffchainGrownSlot, uint256[] memory mmrSizeToRootSlot);
 
     // ========================= View functions ========================= //
 

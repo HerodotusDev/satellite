@@ -165,16 +165,16 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         bool[] memory isOffchainGrownValue = new bool[](noHashingFunctions);
         bytes32[] memory mmrSizeToRootValue = new bytes32[](noHashingFunctions);
         if (storageSlotMptProofs.length == 0) {
-            for(uint256 i = 0; i < noHashingFunctions; i++) {
+            for (uint256 i = 0; i < noHashingFunctions; i++) {
                 isOffchainGrownValue[i] = uint256(satellite.storageSlot(originChainId, blockNumber, account, bytes32(isOffchainGrownSlot[i]))) == 1;
                 mmrSizeToRootValue[i] = satellite.storageSlot(originChainId, blockNumber, account, bytes32(mmrSizeToRootSlot[i]));
             }
         } else {
-            require(storageSlotMptProofs.length == 2 * noHashingFunctions, 'INVALID_MPT_PROOFS_LENGTH');
+            require(storageSlotMptProofs.length == 2 * noHashingFunctions, "INVALID_MPT_PROOFS_LENGTH");
 
             bytes32 storageRoot = satellite.accountField(originChainId, blockNumber, account, IEvmFactRegistryModule.AccountField.STORAGE_ROOT);
 
-            for(uint256 i = 0; i < noHashingFunctions; i++) {
+            for (uint256 i = 0; i < noHashingFunctions; i++) {
                 isOffchainGrownValue[i] = uint256(satellite.verifyOnlyStorage(bytes32(isOffchainGrownSlot[i]), storageRoot, storageSlotMptProofs[2 * i])) == 1;
                 mmrSizeToRootValue[i] = satellite.verifyOnlyStorage(bytes32(mmrSizeToRootSlot[i]), storageRoot, storageSlotMptProofs[2 * i + 1]);
             }
@@ -200,7 +200,12 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, originChainId, CreatedFrom.STORAGE_PROOF, isOffchainGrown);
     }
 
-    function getStorageSlotsForMmrCreation(uint256 chainId, uint256 mmrId, uint256 mmrSize, bytes32[] memory hashingFunctions) public pure returns (uint256[] memory isOffchainGrownSlot, uint256[] memory mmrSizeToRootSlot) {
+    function getStorageSlotsForMmrCreation(
+        uint256 chainId,
+        uint256 mmrId,
+        uint256 mmrSize,
+        bytes32[] memory hashingFunctions
+    ) public pure returns (uint256[] memory isOffchainGrownSlot, uint256[] memory mmrSizeToRootSlot) {
         uint256 noHashingFunctions = hashingFunctions.length;
         isOffchainGrownSlot = new uint256[](noHashingFunctions);
         mmrSizeToRootSlot = new uint256[](noHashingFunctions);
@@ -209,7 +214,7 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         uint256 mmrsSlot = uint256(satelliteStorageBase) + 4; // 4 is offset of `mmrs` variable within `SatelliteStorage`
         uint256 mmrAtChainId = uint256(keccak256(abi.encodePacked(chainId, mmrsSlot)));
         uint256 mmrAtMmrId = uint256(keccak256(abi.encodePacked(mmrId, mmrAtChainId)));
-        for(uint256 i = 0; i < noHashingFunctions; i++) {
+        for (uint256 i = 0; i < noHashingFunctions; i++) {
             uint256 mmrBaseSlot = uint256(keccak256(abi.encodePacked(hashingFunctions[i], mmrAtMmrId)));
             uint256 mmrRootSlot = uint256(keccak256(abi.encodePacked(mmrSize, mmrBaseSlot + 2))); // `mmrSizeToRoot` is at 2nd slot within `MmrInfo`
             isOffchainGrownSlot[i] = mmrBaseSlot; // `isOffchainGrown` is at 0th slot within `MmrInfo`

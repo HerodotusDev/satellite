@@ -9,13 +9,7 @@ interface IUniversalSenderModule {
     /// @param hashingFunction the hashing function used to hash the parent hash
     /// @param blockNumber the block number being sent
     /// @param gasData the gas data for the cross-domain message, depends on the destination chain
-    function sendParentHash(
-        uint256 destinationChainId,
-        uint256 accumulatedChainId,
-        bytes32 hashingFunction,
-        uint256 blockNumber,
-        bytes calldata gasData
-    ) external payable;
+    function sendParentHash(uint256 destinationChainId, uint256 accumulatedChainId, bytes32 hashingFunction, uint256 blockNumber, bytes calldata gasData) external payable;
 
     /// @notice Send MMR that was registered on our chain to the destination chain
     /// @param destinationChainId the chain ID of the destination chain

@@ -72,16 +72,16 @@ async function setup_mmr_single_hashing_functions(
   const { satellite, satelliteAddress } = await loadFixture(deploy);
 
   // Set up some MMR for testing
-  let chain_id = BigInt(11155111);
-  let original_mmr_id = BigInt(123);
-  let mmr_size = BigInt(10);
-  let keccak_root = BigInt(
+  const chain_id = BigInt(11155111);
+  const original_mmr_id = BigInt(123);
+  const mmr_size = BigInt(10);
+  const keccak_root = BigInt(
     "0x4c466c582074f6351b729134d42c66b15b7e1218fa63f1bfd614045ea96cd66a",
   );
-  let poseidon_root = BigInt(
+  const poseidon_root = BigInt(
     "0x3c5f312ba85ad56867cd2de63d79e4ba910c90d9e82437d023846a044d10952",
   );
-  let roots_for_hashing_functions = [
+  const roots_for_hashing_functions = [
     { root: keccak_root, hashing_function: KECCAK_HASHER },
   ];
 

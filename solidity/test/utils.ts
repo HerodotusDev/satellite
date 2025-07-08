@@ -124,6 +124,19 @@ export async function deploy() {
   return { satellite, satelliteAddress };
 }
 
+export async function deploy2() {
+  const { satellite: satellite1 } = await ignition.deploy(SatelliteModule, {
+    deploymentId: "id1",
+  });
+  const satelliteAddress1 = await satellite1.getAddress();
+  const { satellite: satellite2 } = await ignition.deploy(SatelliteModule, {
+    deploymentId: "id2",
+  });
+  const satelliteAddress2 = await satellite2.getAddress();
+
+  return { satellite1, satelliteAddress1, satellite2, satelliteAddress2 };
+}
+
 export const KECCAK_HASHER = BigInt(
   "0xdf35a135a69c769066bbb4d17b2fa3ec922c028d4e4bf9d0402e6f7c12b31813",
 );
@@ -137,3 +150,52 @@ export const APECHAIN_SHARE_PRICE_ADDRESS =
 
 export const APECHAIN_SHARE_PRICE_SLOT =
   "0x15fed0451499512d95f3ec5a41c878b9de55f21878b5b4e190d4667ec709b432";
+
+export function pad(v: string, byteLength?: number | undefined) {
+  if (byteLength === undefined) {
+    if (v == "0x0") return "0x";
+    if (v.length % 2 == 0) return v;
+    return "0x0" + v.substring(2);
+  }
+  if (v.length >= 2 + byteLength * 2) return v;
+  return "0x" + v.substring(2).padStart(byteLength * 2, "0");
+}
+
+export function getHeaderRlp(block: Record<string, string>) {
+  const data = [
+    block.parentHash,
+    block.sha3Uncles,
+    block.miner,
+    block.stateRoot,
+    block.transactionsRoot,
+    block.receiptsRoot,
+    block.logsBloom,
+    pad(block.difficulty),
+    pad(block.number),
+    pad(block.gasLimit),
+    pad(block.gasUsed),
+    pad(block.timestamp),
+    block.extraData,
+    block.mixHash,
+    block.nonce,
+  ];
+  if (block.baseFeePerGas) {
+    data.push(pad(block.baseFeePerGas));
+  }
+  if (block.withdrawalsRoot) {
+    data.push(block.withdrawalsRoot);
+  }
+  if (block.blobGasUsed) {
+    data.push(pad(block.blobGasUsed));
+  }
+  if (block.excessBlobGas) {
+    data.push(pad(block.excessBlobGas));
+  }
+  if (block.parentBeaconBlockRoot) {
+    data.push(block.parentBeaconBlockRoot);
+  }
+  if (block.requestsHash) {
+    data.push(block.requestsHash);
+  }
+  return ethers.encodeRlp(data);
+}

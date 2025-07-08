@@ -20,7 +20,8 @@ enum GrownBy {
 
 enum CreatedFrom {
     FOREIGN,
-    DOMESTIC
+    DOMESTIC,
+    STORAGE_PROOF
 }
 
 interface IMmrCoreModule {
@@ -68,6 +69,32 @@ interface IMmrCoreModule {
         bytes32[] calldata hashingFunctions,
         bool isOffchainGrown
     ) external;
+
+    /// @notice Creates a new MMR that is a clone of MMR that exists in other satellite. Data about MMR is taken from storage slot proof for satellite at slot corresponding to `mmrs` mapping.
+    /// @param newMmrId the ID of the new MMR
+    /// @param originalMmrId the ID of the MMR from which the new MMR will be created, has to be non-zero
+    /// @param accumulatedChainId the ID of the chain that the MMR accumulates
+    /// @param mmrSize size at which the MMR will be copied
+    /// @param hashingFunctions the hashing functions used in the MMR - if more than one, the MMR will be sibling synced and require being a satellite module to call
+    /// @param originChainId the ID of the chain on which satellite that contains the MMR is deployed
+    /// @param blockNumber the block number at which the storage proof is verified
+    /// @param isOffchainGrown whether the new MMR can be grown with and only with either EVMSharpGrowingModule or StarknetSharpMmrGrowingModule
+    /// @param storageSlotMptProofs mpt proofs for storage slots whose indices are given by getStorageSlotsForMmrCreation function. It can either be empty or has twice the length of `hashingFunctions`.
+    /// @dev If non-empty array is provided, 2i indices correspond to isOffchainGrown slots and 2i+1 to mmrSizeToRoot slots. Also, STORAGE_ROOT field of the origin satellite account has to be proven.
+    /// @dev If the array is empty, then all above storage slots have to be proven before calling this function.
+    function createMmrFromStorageProof(
+        uint256 newMmrId,
+        uint256 originalMmrId,
+        uint256 accumulatedChainId,
+        uint256 mmrSize,
+        bytes32[] calldata hashingFunctions,
+        uint256 originChainId,
+        uint256 blockNumber,
+        bool isOffchainGrown,
+        bytes[] calldata storageSlotMptProofs
+    ) external;
+
+    function getStorageSlotsForMmrCreation(uint256 chainId, uint256 mmrId, uint256 mmrSize, bytes32[] memory hashingFunctions) external pure returns (uint256[] memory isOffchainGrownSlot, uint256[] memory mmrSizeToRootSlot);
 
     // ========================= View functions ========================= //
 

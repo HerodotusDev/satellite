@@ -3,6 +3,7 @@ pragma solidity ^0.8.27;
 
 import {LibSatellite} from "../libraries/LibSatellite.sol";
 import {RootForHashingFunction, IMmrCoreModule, CreatedFrom} from "../interfaces/modules/IMmrCoreModule.sol";
+import {IEvmFactRegistryModule} from "../interfaces/modules/IEvmFactRegistryModule.sol";
 import {ISatellite} from "../interfaces/ISatellite.sol";
 import {AccessController} from "../libraries/AccessController.sol";
 
@@ -127,6 +128,93 @@ contract MmrCoreModule is IMmrCoreModule, AccessController {
         }
 
         emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, block.chainid, CreatedFrom.DOMESTIC, isOffchainGrown);
+    }
+
+    /// @inheritdoc IMmrCoreModule
+    function createMmrFromStorageProof(
+        uint256 newMmrId,
+        uint256 originalMmrId,
+        uint256 accumulatedChainId,
+        uint256 mmrSize,
+        bytes32[] calldata hashingFunctions,
+        uint256 originChainId,
+        uint256 blockNumber,
+        bool isOffchainGrown,
+        bytes[] calldata storageSlotMptProofs
+    ) external {
+        require(newMmrId != LibSatellite.EMPTY_MMR_ID, "NEW_MMR_ID_0_NOT_ALLOWED");
+        require(originalMmrId != LibSatellite.EMPTY_MMR_ID, "ORIGINAL_MMR_ID_0_NOT_ALLOWED");
+        uint256 noHashingFunctions = hashingFunctions.length;
+        require(noHashingFunctions > 0, "INVALID_HASHING_FUNCTIONS_LENGTH");
+        if (isOffchainGrown == false) {
+            // Onchain grown MMRs can have only one hashing function
+            require(noHashingFunctions == 1, "INVALID_HASHING_FUNCTIONS_LENGTH");
+        }
+
+        ISatellite satellite = ISatellite(address(this));
+
+        uint256 accountU256 = satellite.getSatelliteConnection(originChainId).satelliteAddress;
+        require(accountU256 >> 160 == 0, "NON_EVM_SATELLITE");
+        address account = address(uint160(accountU256));
+
+        RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](noHashingFunctions);
+        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
+        require(_doesMmrExist(s.mmrs[accumulatedChainId][newMmrId]) == false, "NEW_MMR_ALREADY_EXISTS");
+
+        (uint256[] memory isOffchainGrownSlot, uint256[] memory mmrSizeToRootSlot) = getStorageSlotsForMmrCreation(accumulatedChainId, originalMmrId, mmrSize, hashingFunctions);
+        bool[] memory isOffchainGrownValue = new bool[](noHashingFunctions);
+        bytes32[] memory mmrSizeToRootValue = new bytes32[](noHashingFunctions);
+        if (storageSlotMptProofs.length == 0) {
+            for(uint256 i = 0; i < noHashingFunctions; i++) {
+                isOffchainGrownValue[i] = uint256(satellite.storageSlot(originChainId, blockNumber, account, bytes32(isOffchainGrownSlot[i]))) == 1;
+                mmrSizeToRootValue[i] = satellite.storageSlot(originChainId, blockNumber, account, bytes32(mmrSizeToRootSlot[i]));
+            }
+        } else {
+            require(storageSlotMptProofs.length == 2 * noHashingFunctions, 'INVALID_MPT_PROOFS_LENGTH');
+
+            bytes32 storageRoot = satellite.accountField(originChainId, blockNumber, account, IEvmFactRegistryModule.AccountField.STORAGE_ROOT);
+
+            for(uint256 i = 0; i < noHashingFunctions; i++) {
+                isOffchainGrownValue[i] = uint256(satellite.verifyOnlyStorage(bytes32(isOffchainGrownSlot[i]), storageRoot, storageSlotMptProofs[2 * i])) == 1;
+                mmrSizeToRootValue[i] = satellite.verifyOnlyStorage(bytes32(mmrSizeToRootSlot[i]), storageRoot, storageSlotMptProofs[2 * i + 1]);
+            }
+        }
+
+        bool commonIsOffchainGrown = isOffchainGrownValue[0];
+        for (uint256 i = 0; i < noHashingFunctions; i++) {
+            // Load existing MMR data
+            bytes32 mmrRoot = mmrSizeToRootValue[i];
+            // Ensure the given MMR exists
+            require(mmrRoot != LibSatellite.NO_MMR_ROOT, "SRC_MMR_NOT_FOUND");
+            // Ensure the given MMR has the same isOffchainGrown value
+            require(isOffchainGrownValue[i] == commonIsOffchainGrown, "isOffchainGrown mismatch");
+
+            // Copy the MMR data to the new MMR
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].latestSize = mmrSize;
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].mmrSizeToRoot[mmrSize] = mmrRoot;
+            s.mmrs[accumulatedChainId][newMmrId][hashingFunctions[i]].isOffchainGrown = isOffchainGrown;
+
+            rootsForHashingFunctions[i] = RootForHashingFunction({hashingFunction: hashingFunctions[i], root: mmrRoot});
+        }
+
+        emit CreatedMmr(newMmrId, mmrSize, accumulatedChainId, originalMmrId, rootsForHashingFunctions, originChainId, CreatedFrom.STORAGE_PROOF, isOffchainGrown);
+    }
+
+    function getStorageSlotsForMmrCreation(uint256 chainId, uint256 mmrId, uint256 mmrSize, bytes32[] memory hashingFunctions) public pure returns (uint256[] memory isOffchainGrownSlot, uint256[] memory mmrSizeToRootSlot) {
+        uint256 noHashingFunctions = hashingFunctions.length;
+        isOffchainGrownSlot = new uint256[](noHashingFunctions);
+        mmrSizeToRootSlot = new uint256[](noHashingFunctions);
+
+        bytes32 satelliteStorageBase = LibSatellite.DIAMOND_STORAGE_POSITION;
+        uint256 mmrsSlot = uint256(satelliteStorageBase) + 4; // 4 is offset of `mmrs` variable within `SatelliteStorage`
+        uint256 mmrAtChainId = uint256(keccak256(abi.encodePacked(chainId, mmrsSlot)));
+        uint256 mmrAtMmrId = uint256(keccak256(abi.encodePacked(mmrId, mmrAtChainId)));
+        for(uint256 i = 0; i < noHashingFunctions; i++) {
+            uint256 mmrBaseSlot = uint256(keccak256(abi.encodePacked(hashingFunctions[i], mmrAtMmrId)));
+            uint256 mmrRootSlot = uint256(keccak256(abi.encodePacked(mmrSize, mmrBaseSlot + 2))); // `mmrSizeToRoot` is at 2nd slot within `MmrInfo`
+            isOffchainGrownSlot[i] = mmrBaseSlot; // `isOffchainGrown` is at 0th slot within `MmrInfo`
+            mmrSizeToRootSlot[i] = mmrRootSlot;
+        }
     }
 
     /// ========================= Internal functions ========================= //

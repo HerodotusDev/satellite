@@ -6,8 +6,6 @@ export const modules = [
   "SatelliteInspectorModule",
   "MmrCoreModule",
   "EvmFactRegistryModule",
-  "CairoFactRegistryModule",
-  // "DataProcessorModule",
   "EvmOnChainGrowingModule",
   // "NativeParentHashFetcherModule", // TODO: check if ZKSync supports blockhash function correctly
   "SimpleReceiverModule",

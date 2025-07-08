@@ -7,10 +7,8 @@ export const modules: ModuleName[] = [
   "MmrCoreModule",
   "EvmFactRegistryModule",
   "CairoFactRegistryModule",
-  // "DataProcessorModule",
   "EvmOnChainGrowingModule",
   "EvmSharpMmrGrowingModule",
-  "L1ParentHashFetcherModule",
   "NativeArbitrumParentHashFetcherModule",
   "SimpleReceiverModule",
 ];

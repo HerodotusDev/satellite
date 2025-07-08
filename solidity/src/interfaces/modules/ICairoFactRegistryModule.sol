@@ -43,4 +43,12 @@ interface ICairoFactRegistryModule {
     function isMockedForInternal() external view returns (bool);
 
     function setIsMockedForInternal(bool isMocked) external;
+
+    // ========= Moving facts ========= //
+
+    function _receiveCairoFactHash(bytes32 factHash, bool isMocked) external;
+
+    function getStorageSlotForCairoFact(bytes32 factHash, bool isMocked) external pure returns (bytes32);
+
+    function moveCairoFactFromStorageProof(uint256 originChainId, uint256 blockNumber, bytes32 factHash, bool isMocked) external;
 }

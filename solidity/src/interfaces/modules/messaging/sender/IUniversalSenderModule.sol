@@ -34,4 +34,11 @@ interface IUniversalSenderModule {
         bool isOffchainGrownDestination,
         bytes calldata _xDomainMsgGasData
     ) external payable;
+
+    /// @notice Send Cairo fact hash that was registered on our chain to the destination chain
+    /// @param destinationChainId the chain ID of the destination chain
+    /// @param factHash the hash of the fact
+    /// @param isMocked if true, the fact is mocked
+    /// @param _xDomainMsgGasData the gas data for the cross-domain message, depends on the destination chain
+    function sendCairoFactHash(uint256 destinationChainId, bytes32 factHash, bool isMocked, bytes calldata _xDomainMsgGasData) external payable;
 }

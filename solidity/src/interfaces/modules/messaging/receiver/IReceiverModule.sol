@@ -16,4 +16,6 @@ interface IReceiverModule {
         uint256 originalMmrId,
         bool isSiblingSynced
     ) external;
+
+    function receiveCairoFactHash(bytes32 factHash, bool isMocked) external;
 }

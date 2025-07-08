@@ -25,6 +25,8 @@ contract UniversalSenderModule is IUniversalSenderModule {
 
         ILibSatellite.SatelliteConnection memory satellite = s.satelliteConnectionRegistry[destinationChainId];
 
+        require(satellite.inboxAddress != address(0x0), "Invalid destination chain");
+
         bytes memory data = abi.encodeWithSelector(
             satellite.sendMessageSelector,
             satellite.satelliteAddress,
@@ -91,6 +93,30 @@ contract UniversalSenderModule is IUniversalSenderModule {
                 originalMmrId,
                 isOffchainGrownDestination
             ),
+            _xDomainMsgGasData
+        );
+
+        (bool success, ) = address(this).call{value: msg.value}(data);
+        require(success, "Function call failed");
+    }
+
+    function sendCairoFactHash(uint256 destinationChainId, bytes32 factHash, bool isMocked, bytes calldata _xDomainMsgGasData) external payable {
+        ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
+        if (isMocked) {
+            require(ISatellite(address(this)).isCairoMockedFactValid(factHash), "ERR_FACT_NOT_VALID");
+        } else {
+            require(ISatellite(address(this)).isCairoFactValid(factHash), "ERR_FACT_NOT_VALID");
+        }
+
+        ILibSatellite.SatelliteConnection memory satellite = s.satelliteConnectionRegistry[destinationChainId];
+
+        require(satellite.inboxAddress != address(0x0), "Invalid destination chain");
+
+        bytes memory data = abi.encodeWithSelector(
+            satellite.sendMessageSelector,
+            satellite.satelliteAddress,
+            satellite.inboxAddress,
+            abi.encodeWithSignature("receiveCairoFactHash(bytes32,bool)", factHash, isMocked),
             _xDomainMsgGasData
         );
 

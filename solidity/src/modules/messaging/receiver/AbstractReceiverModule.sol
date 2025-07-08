@@ -25,6 +25,10 @@ abstract contract AbstractReceiverModule is IReceiverModule {
         ISatellite(address(this))._createMmrFromForeign(newMmrId, rootsForHashingFunctions, mmrSize, accumulatedChainId, originChainId, originalMmrId, isOffchainGrown);
     }
 
+    function receiveCairoFactHash(bytes32 factHash, bool isMocked) external onlyCrossdomainCounterpart {
+        ISatellite(address(this))._receiveCairoFactHash(factHash, isMocked);
+    }
+
     modifier onlyCrossdomainCounterpart() {
         require(isCrossdomainCounterpart(), "Only crossdomain counterpart allowed");
         _;

@@ -4,6 +4,12 @@ pragma solidity ^0.8.20;
 // This module stores fact hashes for verified or mocked facts.
 
 interface ICairoFactRegistryModule {
+    event CairoFactSet(bytes32 factHash);
+    event CairoFactRegistryExternalContractSet(address externalFactRegistry);
+    event CairoMockedFactSet(bytes32 factHash);
+    event CairoMockedFactRegistryFallbackContractSet(address fallbackMockedContract);
+    event IsMockedForInternalSet(bool isMocked);
+
     // ========= Fact registry with real verification ========= //
 
     /// Whether given fact was verified (not necessarily stored locally).

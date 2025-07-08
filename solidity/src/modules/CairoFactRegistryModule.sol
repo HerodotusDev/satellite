@@ -18,12 +18,6 @@ struct CairoFactRegistryModuleStorage {
 contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     bytes32 constant MODULE_STORAGE_POSITION = keccak256("diamond.standard.satellite.module.storage.cairo-fact-registry-module");
 
-    event CairoFactSet(bytes32 factHash);
-    event CairoFactRegistryExternalContractSet(address externalFactRegistry);
-    event CairoMockedFactSet(bytes32 factHash);
-    event CairoMockedFactRegistryFallbackContractSet(address fallbackMockedContract);
-    event IsMockedForInternalSet(bool isMocked);
-
     function moduleStorage() internal pure returns (CairoFactRegistryModuleStorage storage s) {
         bytes32 position = MODULE_STORAGE_POSITION;
         assembly {
@@ -66,7 +60,7 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     // ========= Mocked fact registry ========= //
 
     /// @inheritdoc ICairoFactRegistryModule
-    function isCairoMockedFactValid(bytes32 factHash) external view returns (bool) {
+    function isCairoMockedFactValid(bytes32 factHash) public view returns (bool) {
         CairoFactRegistryModuleStorage storage ms = moduleStorage();
         return ms.mockedFacts[factHash] || (address(ms.fallbackMockedContract) != address(0) && ms.fallbackMockedContract.isValid(factHash));
     }
@@ -98,7 +92,7 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     function isCairoFactValidForInternal(bytes32 factHash) external view returns (bool) {
         CairoFactRegistryModuleStorage storage ms = moduleStorage();
         if (ms.isMockedForInternal) {
-            return ms.mockedFacts[factHash];
+            return isCairoMockedFactValid(factHash);
         } else {
             return isCairoFactValid(factHash);
         }

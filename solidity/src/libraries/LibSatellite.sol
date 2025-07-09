@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
-import {console} from "forge-std/console.sol";
 import {ISatellite} from "../interfaces/ISatellite.sol";
 import {ILibSatellite} from "../interfaces/ILibSatellite.sol";
 

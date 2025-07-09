@@ -101,7 +101,9 @@ pub mod cairo_fact_registry_component {
         +Drop<TContractState>,
         impl Ownable: OwnableComponent::HasComponent<TContractState>,
     > of ICairoFactRegistry<ComponentState<TContractState>> {
-        fn isCairoFactValid(self: @ComponentState<TContractState>, fact_hash: felt252, is_mocked: bool) -> bool {
+        fn isCairoFactValid(
+            self: @ComponentState<TContractState>, fact_hash: felt252, is_mocked: bool,
+        ) -> bool {
             if is_mocked {
                 self.mocked_facts.entry(fact_hash).read()
             } else {
@@ -109,7 +111,9 @@ pub mod cairo_fact_registry_component {
             }
         }
 
-        fn isCairoVerifiedFactValid(self: @ComponentState<TContractState>, fact_hash: felt252) -> bool {
+        fn isCairoVerifiedFactValid(
+            self: @ComponentState<TContractState>, fact_hash: felt252,
+        ) -> bool {
             Integrity::from_address(self.fallback_contract.read())
                 .is_fact_hash_valid_with_security(fact_hash, 96)
         }

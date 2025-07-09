@@ -233,7 +233,9 @@ pub mod data_processor_component {
             let fact_hash = calculate_fact_hash(task_data.program_hash, program_output.span());
 
             let cairo_fact_registry = get_dep_component!(@self, CairoFactRegistry);
-            assert(cairo_fact_registry.isCairoVerifiedFactValidForInternal(fact_hash), 'Invalid fact');
+            assert(
+                cairo_fact_registry.isCairoVerifiedFactValidForInternal(fact_hash), 'Invalid fact',
+            );
 
             let task_result = u256 {
                 low: task_data.task_result_low, high: task_data.task_result_high,

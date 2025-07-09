@@ -24,33 +24,43 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
             s.slot := position
         }
     }
+    // ========= Main function for end user ========= //
+
+    /// @inheritdoc ICairoFactRegistryModule
+    function isCairoFactValid(bytes32 factHash, bool isMocked) public view returns (bool) {
+        if (isMocked) {
+            return isCairoMockedFactValid(factHash);
+        } else {
+            return isCairoVerifiedFactValid(factHash);
+        }
+    }
 
     // ========= Fact registry with real verification ========= //
 
     /// @inheritdoc ICairoFactRegistryModule
-    function isCairoFactValid(bytes32 factHash) public view returns (bool) {
+    function isCairoVerifiedFactValid(bytes32 factHash) public view returns (bool) {
         CairoFactRegistryModuleStorage storage ms = moduleStorage();
         return ms.facts[factHash] || ms.externalFactRegistry.isValid(factHash);
     }
 
     /// @inheritdoc ICairoFactRegistryModule
-    function isCairoFactStored(bytes32 factHash) external view returns (bool) {
+    function isCairoVerifiedFactStored(bytes32 factHash) external view returns (bool) {
         return moduleStorage().facts[factHash];
     }
 
     /// @inheritdoc ICairoFactRegistryModule
-    function getCairoFactRegistryExternalContract() external view returns (address) {
+    function getCairoVerifiedFactRegistryContract() external view returns (address) {
         return address(moduleStorage().externalFactRegistry);
     }
 
     /// @inheritdoc ICairoFactRegistryModule
-    function setCairoFactRegistryExternalContract(address externalFactRegistry) external onlyOwner {
+    function setCairoVerifiedFactRegistryContract(address externalFactRegistry) external onlyOwner {
         moduleStorage().externalFactRegistry = IFactsRegistry(externalFactRegistry);
         emit CairoFactRegistryExternalContractSet(externalFactRegistry);
     }
 
     /// @inheritdoc ICairoFactRegistryModule
-    function storeCairoFact(bytes32 factHash) external {
+    function storeCairoVerifiedFact(bytes32 factHash) external {
         CairoFactRegistryModuleStorage storage ms = moduleStorage();
         require(ms.externalFactRegistry.isValid(factHash), "Fact hash not registered");
         ms.facts[factHash] = true;
@@ -89,17 +99,12 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     // ========= For internal use in grower and data processor ========= //
 
     /// @inheritdoc ICairoFactRegistryModule
-    function isCairoFactValidForInternal(bytes32 factHash) external view returns (bool) {
-        CairoFactRegistryModuleStorage storage ms = moduleStorage();
-        if (ms.isMockedForInternal) {
-            return isCairoMockedFactValid(factHash);
-        } else {
-            return isCairoFactValid(factHash);
-        }
+    function isCairoVerifiedFactValidForInternal(bytes32 factHash) external view returns (bool) {
+        return isCairoFactValid(factHash, isMockedForInternal());
     }
 
     /// @inheritdoc ICairoFactRegistryModule
-    function isMockedForInternal() external view returns (bool) {
+    function isMockedForInternal() public view returns (bool) {
         return moduleStorage().isMockedForInternal;
     }
 

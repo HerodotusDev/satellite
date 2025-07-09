@@ -217,7 +217,7 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
         bytes32 fact = keccak256(abi.encode(ms.programHash, outputHash));
 
         // We ensure this fact has been registered on SHARP Facts Registry
-        if (!ICairoFactRegistryModule(address(this)).isCairoFactValidForInternal(fact)) {
+        if (!ICairoFactRegistryModule(address(this)).isCairoVerifiedFactValidForInternal(fact)) {
             revert InvalidFact();
         }
     }

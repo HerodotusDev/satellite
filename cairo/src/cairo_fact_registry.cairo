@@ -4,14 +4,21 @@ use starknet::ContractAddress;
 
 #[starknet::interface]
 pub trait ICairoFactRegistry<TContractState> {
+    // ========= Main function for end user ========= //
+
+    /// Whether given fact is valid (mocked or verified).
+    fn isCairoFactValid(self: @TContractState, fact_hash: felt252, is_mocked: bool) -> bool;
+
+    // ========= Fact registry with real verification ========= //
+
     /// Whether given fact was verified (not necessarily stored locally).
-    fn isCairoFactValid(self: @TContractState, fact_hash: felt252) -> bool;
+    fn isCairoVerifiedFactValid(self: @TContractState, fact_hash: felt252) -> bool;
 
     /// Returns address of the contract that stores verified facts.
-    fn getCairoFactRegistryExternalContract(self: @TContractState) -> ContractAddress;
+    fn getCairoVerifiedFactRegistryContract(self: @TContractState) -> ContractAddress;
 
     /// Sets address of the contract that stores verified facts.
-    fn setCairoFactRegistryExternalContract(
+    fn setCairoVerifiedFactRegistryContract(
         ref self: TContractState, fallback_address: ContractAddress,
     );
 
@@ -23,7 +30,7 @@ pub trait ICairoFactRegistry<TContractState> {
 
     // ========= For internal use in grower and data processor ========= //
 
-    fn isCairoFactValidForInternal(self: @TContractState, fact_hash: felt252) -> bool;
+    fn isCairoVerifiedFactValidForInternal(self: @TContractState, fact_hash: felt252) -> bool;
 
     fn isMockedForInternal(self: @TContractState) -> bool;
 
@@ -94,18 +101,26 @@ pub mod cairo_fact_registry_component {
         +Drop<TContractState>,
         impl Ownable: OwnableComponent::HasComponent<TContractState>,
     > of ICairoFactRegistry<ComponentState<TContractState>> {
-        fn isCairoFactValid(self: @ComponentState<TContractState>, fact_hash: felt252) -> bool {
+        fn isCairoFactValid(self: @ComponentState<TContractState>, fact_hash: felt252, is_mocked: bool) -> bool {
+            if is_mocked {
+                self.mocked_facts.entry(fact_hash).read()
+            } else {
+                self.isCairoVerifiedFactValid(fact_hash)
+            }
+        }
+
+        fn isCairoVerifiedFactValid(self: @ComponentState<TContractState>, fact_hash: felt252) -> bool {
             Integrity::from_address(self.fallback_contract.read())
                 .is_fact_hash_valid_with_security(fact_hash, 96)
         }
 
-        fn getCairoFactRegistryExternalContract(
+        fn getCairoVerifiedFactRegistryContract(
             self: @ComponentState<TContractState>,
         ) -> ContractAddress {
             self.fallback_contract.read()
         }
 
-        fn setCairoFactRegistryExternalContract(
+        fn setCairoVerifiedFactRegistryContract(
             ref self: ComponentState<TContractState>, fallback_address: ContractAddress,
         ) {
             get_dep_component!(@self, Ownable).assert_only_owner();
@@ -134,14 +149,10 @@ pub mod cairo_fact_registry_component {
 
         // ========= For internal use in grower and data processor ========= //
 
-        fn isCairoFactValidForInternal(
+        fn isCairoVerifiedFactValidForInternal(
             self: @ComponentState<TContractState>, fact_hash: felt252,
         ) -> bool {
-            if self.is_mocked_for_internal.read() {
-                self.mocked_facts.entry(fact_hash).read()
-            } else {
-                self.isCairoFactValid(fact_hash)
-            }
+            self.isCairoFactValid(fact_hash, self.is_mocked_for_internal.read())
         }
 
         fn isMockedForInternal(self: @ComponentState<TContractState>) -> bool {

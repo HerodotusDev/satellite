@@ -9,32 +9,32 @@ describe("CairoFactRegistry", () => {
     const { satellite } = await loadFixture(deploy);
     const { factsRegistry } = await ignition.deploy(MockFactsRegistry);
 
-    expect(await satellite.getCairoFactRegistryExternalContract()).to.equal(
+    expect(await satellite.getCairoVerifiedFactRegistryContract()).to.equal(
       "0x0000000000000000000000000000000000000000",
     );
-    await satellite.setCairoFactRegistryExternalContract(
+    await satellite.setCairoVerifiedFactRegistryContract(
       await factsRegistry.getAddress(),
     );
-    expect(await satellite.getCairoFactRegistryExternalContract()).to.equal(
+    expect(await satellite.getCairoVerifiedFactRegistryContract()).to.equal(
       await factsRegistry.getAddress(),
     );
 
     const hash = ethers.randomBytes(32);
 
-    expect(await satellite.isCairoFactValid(hash)).to.equal(false);
-    expect(await satellite.isCairoFactStored(hash)).to.equal(false);
+    expect(await satellite.isCairoVerifiedFactValid(hash)).to.equal(false);
+    expect(await satellite.isCairoVerifiedFactStored(hash)).to.equal(false);
 
     await factsRegistry.setValid(hash);
 
-    expect(await satellite.isCairoFactValid(hash)).to.equal(true);
-    expect(await satellite.isCairoFactStored(hash)).to.equal(false);
+    expect(await satellite.isCairoVerifiedFactValid(hash)).to.equal(true);
+    expect(await satellite.isCairoVerifiedFactStored(hash)).to.equal(false);
 
-    await expect(satellite.storeCairoFact(hash))
+    await expect(satellite.storeCairoVerifiedFact(hash))
       .to.emit(satellite, "CairoFactSet")
       .withArgs(hash);
 
-    expect(await satellite.isCairoFactValid(hash)).to.equal(true);
-    expect(await satellite.isCairoFactStored(hash)).to.equal(true);
+    expect(await satellite.isCairoVerifiedFactValid(hash)).to.equal(true);
+    expect(await satellite.isCairoVerifiedFactStored(hash)).to.equal(true);
   });
 
   it("Mocked fact registry no fallback", async () => {
@@ -65,10 +65,10 @@ describe("CairoFactRegistry", () => {
     const [owner, admin, user] = await ethers.getSigners();
     const { factsRegistry } = await ignition.deploy(MockFactsRegistry);
 
-    await (satellite.connect(owner) as S).setCairoFactRegistryExternalContract(
+    await (satellite.connect(owner) as S).setCairoVerifiedFactRegistryContract(
       await factsRegistry.getAddress(),
     );
-    expect(await satellite.getCairoFactRegistryExternalContract()).to.equal(
+    expect(await satellite.getCairoVerifiedFactRegistryContract()).to.equal(
       await factsRegistry.getAddress(),
     );
 
@@ -78,22 +78,38 @@ describe("CairoFactRegistry", () => {
     const hash2 = ethers.randomBytes(32);
 
     await (satellite.connect(owner) as S).setIsMockedForInternal(true);
-    expect(await satellite.isCairoFactValidForInternal(hash1)).to.equal(false);
-    expect(await satellite.isCairoFactValidForInternal(hash2)).to.equal(false);
+    expect(await satellite.isCairoVerifiedFactValidForInternal(hash1)).to.equal(
+      false,
+    );
+    expect(await satellite.isCairoVerifiedFactValidForInternal(hash2)).to.equal(
+      false,
+    );
 
     await (satellite.connect(owner) as S).setIsMockedForInternal(false);
-    expect(await satellite.isCairoFactValidForInternal(hash1)).to.equal(false);
-    expect(await satellite.isCairoFactValidForInternal(hash2)).to.equal(false);
+    expect(await satellite.isCairoVerifiedFactValidForInternal(hash1)).to.equal(
+      false,
+    );
+    expect(await satellite.isCairoVerifiedFactValidForInternal(hash2)).to.equal(
+      false,
+    );
 
     await factsRegistry.setValid(hash1);
     await (satellite.connect(admin) as S).setCairoMockedFact(hash2);
 
     await (satellite.connect(owner) as S).setIsMockedForInternal(true);
-    expect(await satellite.isCairoFactValidForInternal(hash1)).to.equal(false);
-    expect(await satellite.isCairoFactValidForInternal(hash2)).to.equal(true);
+    expect(await satellite.isCairoVerifiedFactValidForInternal(hash1)).to.equal(
+      false,
+    );
+    expect(await satellite.isCairoVerifiedFactValidForInternal(hash2)).to.equal(
+      true,
+    );
 
     await (satellite.connect(owner) as S).setIsMockedForInternal(false);
-    expect(await satellite.isCairoFactValidForInternal(hash1)).to.equal(true);
-    expect(await satellite.isCairoFactValidForInternal(hash2)).to.equal(false);
+    expect(await satellite.isCairoVerifiedFactValidForInternal(hash1)).to.equal(
+      true,
+    );
+    expect(await satellite.isCairoVerifiedFactValidForInternal(hash2)).to.equal(
+      false,
+    );
   });
 });

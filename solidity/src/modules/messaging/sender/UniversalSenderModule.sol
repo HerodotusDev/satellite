@@ -96,7 +96,7 @@ contract UniversalSenderModule is IUniversalSenderModule {
         if (isMocked) {
             require(ISatellite(address(this)).isCairoMockedFactValid(factHash), "ERR_FACT_NOT_VALID");
         } else {
-            require(ISatellite(address(this)).isCairoFactValid(factHash), "ERR_FACT_NOT_VALID");
+            require(ISatellite(address(this)).isCairoVerifiedFactValid(factHash), "ERR_FACT_NOT_VALID");
         }
 
         sendMessage(s.satelliteRegistry[destinationChainId], abi.encodeWithSignature("receiveCairoFactHash(bytes32,bool)", factHash, isMocked), gasData);

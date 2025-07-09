@@ -10,23 +10,28 @@ interface ICairoFactRegistryModule {
     event CairoMockedFactRegistryFallbackContractSet(address fallbackMockedContract);
     event IsMockedForInternalSet(bool isMocked);
 
+    // ========= Main function for end user ========= //
+
+    /// Whether given fact is valid (mocked or verified).
+    function isCairoFactValid(bytes32 factHash, bool isMocked) external view returns (bool);
+
     // ========= Fact registry with real verification ========= //
 
     /// Whether given fact was verified (not necessarily stored locally).
-    function isCairoFactValid(bytes32 factHash) external view returns (bool);
+    function isCairoVerifiedFactValid(bytes32 factHash) external view returns (bool);
 
     /// Whether given fact hash was verified and stored locally.
     /// Verified facts can be moved if and only if this function returns true.
-    function isCairoFactStored(bytes32 factHash) external view returns (bool);
+    function isCairoVerifiedFactStored(bytes32 factHash) external view returns (bool);
 
     /// Returns address of the contract that stores verified facts.
-    function getCairoFactRegistryExternalContract() external view returns (address);
+    function getCairoVerifiedFactRegistryContract() external view returns (address);
 
     /// Sets address of the contract that stores verified facts.
-    function setCairoFactRegistryExternalContract(address fallbackContract) external;
+    function setCairoVerifiedFactRegistryContract(address contractAddress) external;
 
     /// Moves verified fact from external (fallback) contract to local storage.
-    function storeCairoFact(bytes32 factHash) external;
+    function storeCairoVerifiedFact(bytes32 factHash) external;
 
     // ========= Mocked fact registry ========= //
 
@@ -44,7 +49,7 @@ interface ICairoFactRegistryModule {
 
     // ========= For internal use in grower and data processor ========= //
 
-    function isCairoFactValidForInternal(bytes32 factHash) external view returns (bool);
+    function isCairoVerifiedFactValidForInternal(bytes32 factHash) external view returns (bool);
 
     function isMockedForInternal() external view returns (bool);
 

@@ -49,7 +49,7 @@ export const modules = (chainId: keyof typeof settings) =>
               ...("CAIRO_FACT_REGISTRY_EXTERNAL_CONTRACT" in settings[chainId]
                 ? [
                     {
-                      name: "setCairoFactRegistryExternalContract",
+                      name: "setCairoVerifiedFactRegistryContract",
                       args: [
                         settings[chainId].CAIRO_FACT_REGISTRY_EXTERNAL_CONTRACT,
                       ],

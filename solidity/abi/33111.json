@@ -2263,7 +2263,7 @@
   },
   {
     "inputs": [],
-    "name": "getCairoFactRegistryExternalContract",
+    "name": "getCairoMockedFactRegistryFallbackContract",
     "outputs": [
       {
         "internalType": "address",
@@ -2276,7 +2276,7 @@
   },
   {
     "inputs": [],
-    "name": "getCairoMockedFactRegistryFallbackContract",
+    "name": "getCairoVerifiedFactRegistryContract",
     "outputs": [
       {
         "internalType": "address",
@@ -2317,25 +2317,11 @@
         "internalType": "bytes32",
         "name": "factHash",
         "type": "bytes32"
-      }
-    ],
-    "name": "isCairoFactStored",
-    "outputs": [
+      },
       {
         "internalType": "bool",
-        "name": "",
+        "name": "isMocked",
         "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "factHash",
-        "type": "bytes32"
       }
     ],
     "name": "isCairoFactValid",
@@ -2357,7 +2343,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "isCairoFactValidForInternal",
+    "name": "isCairoMockedFactValid",
     "outputs": [
       {
         "internalType": "bool",
@@ -2376,7 +2362,45 @@
         "type": "bytes32"
       }
     ],
-    "name": "isCairoMockedFactValid",
+    "name": "isCairoVerifiedFactStored",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoVerifiedFactValid",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoVerifiedFactValidForInternal",
     "outputs": [
       {
         "internalType": "bool",
@@ -2431,19 +2455,6 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "externalFactRegistry",
-        "type": "address"
-      }
-    ],
-    "name": "setCairoFactRegistryExternalContract",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "bytes32",
         "name": "factHash",
         "type": "bytes32"
@@ -2470,6 +2481,19 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "externalFactRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "setCairoVerifiedFactRegistryContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bool",
         "name": "isMocked",
         "type": "bool"
@@ -2488,7 +2512,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "storeCairoFact",
+    "name": "storeCairoVerifiedFact",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

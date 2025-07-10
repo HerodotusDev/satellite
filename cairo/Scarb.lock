@@ -9,7 +9,7 @@ source = "git+https://github.com/HerodotusDev/cairo-lib.git?branch=cairo_2.11#8b
 [[package]]
 name = "integrity"
 version = "2.0.0"
-source = "git+https://github.com/HerodotusDev/integrity.git#f3beacec88cd225a88945649627f3c3ea2232077"
+source = "git+https://github.com/HerodotusDev/integrity.git#fc39dd8c447de088d8c43e106a08869f5282e00e"
 
 [[package]]
 name = "openzeppelin"

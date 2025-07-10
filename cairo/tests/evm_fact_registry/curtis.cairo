@@ -3,7 +3,7 @@ use storage_proofs::{
         evm_fact_registry_component::{EvmFactRegistryInternalImpl, EvmFactRegistryImpl},
         BlockHeaderField, AccountField,
     },
-    mmr_core::{mmr_core_component::MmrCoreInternalImpl}, receiver::StorageProofs,
+    mmr_core::{mmr_core_component::MmrCoreInternalImpl}, receiver::Satellite,
 };
 use starknet::EthAddress;
 use crate::_utils::create_mmr_with_block;
@@ -257,7 +257,7 @@ fn get_slot_non_inclusion_curtis() -> (Span<Span<u64>>, u256) {
 fn read_header_fields() {
     // https://rs-indexer.api.herodotus.cloud/blocks/?chain_id=33111&from_block_number_inclusive=18179561&to_block_number_inclusive=18179561&hashing_function=keccak
 
-    let mut contract = StorageProofs::contract_state_for_testing();
+    let mut contract = Satellite::contract_state_for_testing();
     let (header_rlp, _) = get_header_curtis();
     let result = contract._readBlockHeaderFields(header_rlp);
 
@@ -285,7 +285,7 @@ fn read_header_fields() {
 
 #[test]
 fn prove_header() {
-    let mut contract = StorageProofs::contract_state_for_testing();
+    let mut contract = Satellite::contract_state_for_testing();
 
     let chain_id = 33111;
     let (header_rlp, block_number) = get_header_curtis();
@@ -412,7 +412,7 @@ fn prove_header() {
 
 #[test]
 fn prove_account() {
-    let mut contract = StorageProofs::contract_state_for_testing();
+    let mut contract = Satellite::contract_state_for_testing();
 
     let chain_id = 33111;
     let (header_rlp, block_number) = get_header_curtis();
@@ -462,7 +462,7 @@ fn prove_account() {
 
 #[test]
 fn prove_slot_inclusion() {
-    let mut contract = StorageProofs::contract_state_for_testing();
+    let mut contract = Satellite::contract_state_for_testing();
 
     let chain_id = 33111;
     let (header_rlp, block_number) = get_header_curtis();
@@ -483,7 +483,7 @@ fn prove_slot_inclusion() {
 
 #[test]
 fn prove_slot_non_inclusion() {
-    let mut contract = StorageProofs::contract_state_for_testing();
+    let mut contract = Satellite::contract_state_for_testing();
 
     let chain_id = 33111;
     let (header_rlp, block_number) = get_header_curtis();

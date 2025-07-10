@@ -6,12 +6,12 @@ use storage_proofs::{
     mmr_core::{
         mmr_core_component::MmrCoreInternalImpl, RootForHashingFunction, POSEIDON_HASHING_FUNCTION,
     },
-    receiver::StorageProofs,
+    receiver::Satellite,
 };
 use cairo_lib::{hashing::poseidon::hash_words64, data_structures::mmr::utils::compute_root};
 
 pub fn create_mmr_with_block(
-    ref contract: StorageProofs::ContractState, header_rlp: Span<u64>, chain_id: u256, mmr_id: u256,
+    ref contract: Satellite::ContractState, header_rlp: Span<u64>, chain_id: u256, mmr_id: u256,
 ) -> BlockHeaderProof {
     let mmr_size = 1;
     let leaf_hash = hash_words64(header_rlp);

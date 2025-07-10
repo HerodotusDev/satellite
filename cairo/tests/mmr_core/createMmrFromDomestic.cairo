@@ -6,14 +6,14 @@ use storage_proofs::{
         mmr_core_component::{MmrCoreInternalImpl, MmrCoreExternalImpl}, RootForHashingFunction,
         POSEIDON_HASHING_FUNCTION, KECCAK_HASHING_FUNCTION,
     },
-    receiver::StorageProofs,
+    receiver::Satellite,
 };
 
 
 fn setup_mmr_multiple_hashing_functions() -> (
-    StorageProofs::ContractState, u256, u256, u256, u256, u256,
+    Satellite::ContractState, u256, u256, u256, u256, u256,
 ) {
-    let mut contract = StorageProofs::contract_state_for_testing();
+    let mut contract = Satellite::contract_state_for_testing();
 
     // Set up some MMR for testing
     let chain_id = 11155111;
@@ -57,8 +57,8 @@ fn setup_mmr_multiple_hashing_functions() -> (
 
 fn setup_mmr_single_hashing_functions(
     original_is_offchain_grown: bool,
-) -> (StorageProofs::ContractState, u256, u256, u256, u256) {
-    let mut contract = StorageProofs::contract_state_for_testing();
+) -> (Satellite::ContractState, u256, u256, u256, u256) {
+    let mut contract = Satellite::contract_state_for_testing();
 
     // Set up some MMR for testing
     let chain_id = 11155111;

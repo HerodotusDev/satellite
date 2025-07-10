@@ -3,7 +3,7 @@ use storage_proofs::{
         evm_fact_registry_component::{EvmFactRegistryInternalImpl, EvmFactRegistryImpl},
         BlockHeaderField, AccountField,
     },
-    mmr_core::{mmr_core_component::MmrCoreInternalImpl}, receiver::StorageProofs,
+    mmr_core::{mmr_core_component::MmrCoreInternalImpl}, receiver::Satellite,
 };
 use starknet::EthAddress;
 use crate::_utils::create_mmr_with_block;
@@ -215,7 +215,7 @@ fn get_account_mainnet() -> (Span<Span<u64>>, EthAddress) {
 fn read_header_fields() {
     // https://rs-indexer.api.herodotus.cloud/blocks/?chain_id=1&from_block_number_inclusive=22578043&to_block_number_inclusive=22578043&hashing_function=keccak
 
-    let mut contract = StorageProofs::contract_state_for_testing();
+    let mut contract = Satellite::contract_state_for_testing();
     let (header_rlp, _) = get_header_mainnet();
     let result = contract._readBlockHeaderFields(header_rlp);
 
@@ -243,7 +243,7 @@ fn read_header_fields() {
 
 #[test]
 fn prove_header() {
-    let mut contract = StorageProofs::contract_state_for_testing();
+    let mut contract = Satellite::contract_state_for_testing();
 
     let chain_id = 1;
     let (header_rlp, block_number) = get_header_mainnet();
@@ -370,7 +370,7 @@ fn prove_header() {
 
 #[test]
 fn prove_account() {
-    let mut contract = StorageProofs::contract_state_for_testing();
+    let mut contract = Satellite::contract_state_for_testing();
 
     let chain_id = 1;
     let (header_rlp, block_number) = get_header_mainnet();

@@ -1,14 +1,12 @@
-use storage_proofs::{
-    evm_fact_registry::{
-        evm_fact_registry_component::{EvmFactRegistryInternalImpl, EvmFactRegistryImpl},
-        BlockHeaderProof,
-    },
-    mmr_core::{
-        mmr_core_component::MmrCoreInternalImpl, RootForHashingFunction, POSEIDON_HASHING_FUNCTION,
-    },
-    receiver::Satellite,
+use cairo_lib::data_structures::mmr::utils::compute_root;
+use cairo_lib::hashing::poseidon::hash_words64;
+use storage_proofs::evm_fact_registry::BlockHeaderProof;
+use storage_proofs::evm_fact_registry::evm_fact_registry_component::{
+    EvmFactRegistryImpl, EvmFactRegistryInternalImpl,
 };
-use cairo_lib::{hashing::poseidon::hash_words64, data_structures::mmr::utils::compute_root};
+use storage_proofs::mmr_core::mmr_core_component::MmrCoreInternalImpl;
+use storage_proofs::mmr_core::{POSEIDON_HASHING_FUNCTION, RootForHashingFunction};
+use storage_proofs::receiver::Satellite;
 
 pub fn create_mmr_with_block(
     ref contract: Satellite::ContractState, header_rlp: Span<u64>, chain_id: u256, mmr_id: u256,

@@ -1,11 +1,10 @@
-use storage_proofs::{
-    evm_fact_registry::{
-        evm_fact_registry_component::{EvmFactRegistryInternalImpl, EvmFactRegistryImpl},
-        BlockHeaderField, AccountField,
-    },
-    mmr_core::{mmr_core_component::MmrCoreInternalImpl}, receiver::Satellite,
-};
 use starknet::EthAddress;
+use storage_proofs::evm_fact_registry::evm_fact_registry_component::{
+    EvmFactRegistryImpl, EvmFactRegistryInternalImpl,
+};
+use storage_proofs::evm_fact_registry::{AccountField, BlockHeaderField};
+use storage_proofs::mmr_core::mmr_core_component::MmrCoreInternalImpl;
+use storage_proofs::receiver::Satellite;
 use crate::_utils::create_mmr_with_block;
 
 

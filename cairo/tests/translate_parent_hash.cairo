@@ -1,10 +1,10 @@
-use storage_proofs::{
-    mmr_core::{ICoreMmrExternal, KECCAK_HASHING_FUNCTION, POSEIDON_HASHING_FUNCTION},
-    receiver::Satellite,
-};
 use core::starknet::storage::{
-    StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry,
+    StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
 };
+use storage_proofs::mmr_core::{
+    ICoreMmrExternal, KECCAK_HASHING_FUNCTION, POSEIDON_HASHING_FUNCTION,
+};
+use storage_proofs::receiver::Satellite;
 
 fn get_example_1() -> (Span<u64>, u256, u256, u256) {
     let header_rlp = [

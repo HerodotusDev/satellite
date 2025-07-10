@@ -1,13 +1,11 @@
-use storage_proofs::{
-    evm_fact_registry::evm_fact_registry_component::{
-        EvmFactRegistryInternalImpl, EvmFactRegistryImpl,
-    },
-    mmr_core::{
-        mmr_core_component::{MmrCoreInternalImpl, MmrCoreExternalImpl}, RootForHashingFunction,
-        POSEIDON_HASHING_FUNCTION, KECCAK_HASHING_FUNCTION,
-    },
-    receiver::Satellite,
+use storage_proofs::evm_fact_registry::evm_fact_registry_component::{
+    EvmFactRegistryImpl, EvmFactRegistryInternalImpl,
 };
+use storage_proofs::mmr_core::mmr_core_component::{MmrCoreExternalImpl, MmrCoreInternalImpl};
+use storage_proofs::mmr_core::{
+    KECCAK_HASHING_FUNCTION, POSEIDON_HASHING_FUNCTION, RootForHashingFunction,
+};
+use storage_proofs::receiver::Satellite;
 
 
 fn setup_mmr_multiple_hashing_functions() -> (

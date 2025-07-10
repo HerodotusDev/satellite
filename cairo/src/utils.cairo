@@ -6,10 +6,8 @@ pub mod header_rlp_index {
 }
 
 pub mod decoders {
-    use cairo_lib::{
-        encoding::rlp::{rlp_decode_list_lazy, RLPItem},
-        utils::{types::words64::{Words64, Words64Trait, reverse_endianness_u64}},
-    };
+    use cairo_lib::encoding::rlp::{RLPItem, rlp_decode_list_lazy};
+    use cairo_lib::utils::types::words64::{Words64, Words64Trait, reverse_endianness_u64};
 
     pub fn decode_rlp(input: Words64, lazy: Span<usize>) -> (Span<(Words64, usize)>, usize) {
         match rlp_decode_list_lazy(input, lazy) {

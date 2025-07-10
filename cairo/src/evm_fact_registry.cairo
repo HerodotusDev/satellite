@@ -1,14 +1,14 @@
+use cairo_lib::data_structures::eth_mpt::MPTTrait;
+use cairo_lib::data_structures::mmr::mmr::MmrSize;
+use cairo_lib::data_structures::mmr::peaks::Peaks;
+use cairo_lib::data_structures::mmr::proof::Proof;
+use cairo_lib::encoding::rlp::{RLPItem, rlp_decode, rlp_decode_list_lazy};
+use cairo_lib::hashing::keccak::keccak_cairo_words64;
+use cairo_lib::hashing::poseidon::hash_words64;
+use cairo_lib::utils::bitwise::reverse_endianness_u256;
+use cairo_lib::utils::types::words64::{Words64, Words64Trait, reverse_endianness_u64};
+use core::num::traits::{Bounded, Pow};
 use starknet::EthAddress;
-use cairo_lib::{
-    data_structures::{mmr::{mmr::MmrSize, peaks::Peaks, proof::Proof}, eth_mpt::MPTTrait},
-    hashing::{poseidon::hash_words64, keccak::keccak_cairo_words64},
-    encoding::rlp::{RLPItem, rlp_decode, rlp_decode_list_lazy},
-    utils::{
-        types::words64::{Words64, Words64Trait, reverse_endianness_u64},
-        bitwise::reverse_endianness_u256,
-    },
-};
-use core::num::traits::{Pow, Bounded};
 use starknet::storage::Map;
 
 type MmrId = u256;
@@ -427,13 +427,12 @@ pub trait IEvmFactRegistryInternal<TContractState> {
 
 #[starknet::component]
 pub mod evm_fact_registry_component {
-    use crate::{
-        state::state_component, mmr_core::mmr_core_component,
-        mmr_core::mmr_core_component::MmrCoreExternalImpl,
-    };
     use starknet::storage::{
-        StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map,
+        Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
     };
+    use crate::mmr_core::mmr_core_component;
+    use crate::mmr_core::mmr_core_component::MmrCoreExternalImpl;
+    use crate::state::state_component;
     use super::*;
 
     #[storage]
@@ -671,7 +670,7 @@ pub mod evm_fact_registry_component {
                     header.fields.entry(i).write(value);
                 }
                 header_fields_to_save /= 2;
-            };
+            }
 
             self
                 .emit(

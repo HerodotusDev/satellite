@@ -5,17 +5,16 @@ pub trait IReceiver<TContractState> {
 
 #[starknet::contract]
 pub mod Satellite {
-    use openzeppelin::{
-        access::ownable::OwnableComponent,
-        upgrades::{UpgradeableComponent, interface::IUpgradeable},
-    };
-    use crate::{
-        evm_fact_registry::evm_fact_registry_component,
-        mmr_core::{mmr_core_component, RootForHashingFunction}, state::state_component,
-        evm_growing::evm_growing_component, cairo_fact_registry::cairo_fact_registry_component,
-        data_processor::data_processor_component,
-    };
+    use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin::upgrades::UpgradeableComponent;
+    use openzeppelin::upgrades::interface::IUpgradeable;
     use starknet::{ClassHash, ContractAddress};
+    use crate::cairo_fact_registry::cairo_fact_registry_component;
+    use crate::data_processor::data_processor_component;
+    use crate::evm_fact_registry::evm_fact_registry_component;
+    use crate::evm_growing::evm_growing_component;
+    use crate::mmr_core::{RootForHashingFunction, mmr_core_component};
+    use crate::state::state_component;
     use super::*;
 
     component!(path: state_component, storage: state, event: StateEvent);

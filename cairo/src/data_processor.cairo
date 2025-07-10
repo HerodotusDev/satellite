@@ -1,5 +1,5 @@
-use core::keccak::keccak_u256s_be_inputs;
 use cairo_lib::utils::bitwise::reverse_endianness_u256;
+use core::keccak::keccak_u256s_be_inputs;
 
 #[derive(Drop, Serde, starknet::Store, PartialEq)]
 enum TaskStatus {
@@ -70,18 +70,16 @@ pub trait IDataProcessor<TContractState> {
 
 #[starknet::component]
 pub mod data_processor_component {
-    use crate::{
-        state::state_component, mmr_core::mmr_core_component::MmrCoreExternalImpl,
-        mmr_core::POSEIDON_HASHING_FUNCTION,
-        cairo_fact_registry::{cairo_fact_registry_component, ICairoFactRegistry},
-    };
-    use starknet::storage::{
-        StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map,
-    };
-    use openzeppelin::access::ownable::{
-        OwnableComponent, OwnableComponent::InternalTrait as OwnableInternal,
-    };
     use integrity::calculate_fact_hash;
+    use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin::access::ownable::OwnableComponent::InternalTrait as OwnableInternal;
+    use starknet::storage::{
+        Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
+    };
+    use crate::cairo_fact_registry::{ICairoFactRegistry, cairo_fact_registry_component};
+    use crate::mmr_core::POSEIDON_HASHING_FUNCTION;
+    use crate::mmr_core::mmr_core_component::MmrCoreExternalImpl;
+    use crate::state::state_component;
     use super::*;
 
     #[storage]
@@ -153,7 +151,7 @@ pub mod data_processor_component {
 
             for program_hash in program_hashes {
                 self.authorizedProgramHashes.entry(*program_hash).write(false);
-            };
+            }
             self.emit(Event::ProgramHashesDisabled(ProgramHashesDisabled { program_hashes }));
         }
 
@@ -171,7 +169,7 @@ pub mod data_processor_component {
             let mut keccak_input = array![module_task.program_hash];
             for input in module_task.inputs {
                 keccak_input.append(*input);
-            };
+            }
             let task_commitment = reverse_endianness_u256(
                 keccak_u256s_be_inputs(keccak_input.span()),
             );
@@ -229,7 +227,7 @@ pub mod data_processor_component {
                 program_output.append((*mmr.mmr_size).try_into().expect('mmr_size not felt252'));
                 program_output.append((*mmr.chain_id).try_into().expect('chain_id not felt252'));
                 program_output.append(mmr_root.try_into().expect('mmr_root not felt252'));
-            };
+            }
 
             let fact_hash = calculate_fact_hash(task_data.program_hash, program_output.span());
 

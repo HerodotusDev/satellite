@@ -1,4 +1,4 @@
-use cairo_lib::data_structures::mmr::mmr::{MMR, MMRImpl, MmrElement, MmrSize, Proof, Peaks};
+use cairo_lib::data_structures::mmr::mmr::{MMR, MMRImpl, MmrElement, MmrSize, Peaks, Proof};
 use cairo_lib::utils::types::words64::Words64;
 
 pub const POSEIDON_HASHING_FUNCTION: u256 =
@@ -100,12 +100,12 @@ pub trait ICoreMmrExternal<TContractState> {
 
 #[starknet::component]
 pub mod mmr_core_component {
+    use cairo_lib::encoding::rlp::rlp_decode_list_lazy;
+    use cairo_lib::hashing::keccak::keccak_cairo_words64;
+    use cairo_lib::hashing::poseidon::hash_words64;
+    use cairo_lib::utils::bitwise::reverse_endianness_u256;
+    use starknet::storage::{StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess};
     use crate::state::state_component;
-    use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry};
-    use cairo_lib::{
-        utils::bitwise::reverse_endianness_u256, hashing::keccak::keccak_cairo_words64,
-        encoding::rlp::rlp_decode_list_lazy, hashing::poseidon::hash_words64,
-    };
     use super::*;
 
     #[storage]
@@ -221,7 +221,7 @@ pub mod mmr_core_component {
                 mmr.latest_size.write(mmr_size);
                 mmr.is_offchain_grown.write(is_offchain_grown);
                 mmr.mmr_size_to_root.entry(mmr_size).write(*r.root);
-            };
+            }
 
             self
                 .emit(
@@ -332,7 +332,7 @@ pub mod mmr_core_component {
                 new_mmr.mmr_size_to_root.entry(mmr_size).write(root);
                 roots_for_hashing_functions
                     .append(RootForHashingFunction { hashing_function: *hashing_function, root });
-            };
+            }
 
             self
                 .emit(

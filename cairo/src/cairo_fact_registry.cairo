@@ -45,15 +45,14 @@ pub trait ICairoFactRegistry<TContractState> {
 
 #[starknet::component]
 pub mod cairo_fact_registry_component {
-    use crate::mmr_core::mmr_core_component::MmrCoreExternalImpl;
-    use starknet::storage::{
-        StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map,
-    };
-    use starknet::get_caller_address;
-    use openzeppelin::access::ownable::{
-        OwnableComponent, OwnableComponent::InternalTrait as OwnableInternal,
-    };
     use integrity::Integrity;
+    use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin::access::ownable::OwnableComponent::InternalTrait as OwnableInternal;
+    use starknet::get_caller_address;
+    use starknet::storage::{
+        Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
+    };
+    use crate::mmr_core::mmr_core_component::MmrCoreExternalImpl;
     use super::*;
 
     #[storage]

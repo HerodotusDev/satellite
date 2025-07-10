@@ -1,9 +1,9 @@
-use cairo_lib::{
-    data_structures::{mmr::{mmr::{MMR, MMRTrait, MmrSize}, peaks::Peaks, proof::Proof}},
-    utils::{types::words64::Words64},
-};
+use cairo_lib::data_structures::mmr::mmr::{MMR, MMRTrait, MmrSize};
+use cairo_lib::data_structures::mmr::peaks::Peaks;
+use cairo_lib::data_structures::mmr::proof::Proof;
 use cairo_lib::hashing::keccak::keccak_cairo_words64;
 use cairo_lib::hashing::poseidon::hash_words64;
+use cairo_lib::utils::types::words64::Words64;
 
 #[starknet::interface]
 pub trait IEvmGrowing<TContractState> {
@@ -21,11 +21,11 @@ pub trait IEvmGrowing<TContractState> {
 
 #[starknet::component]
 pub mod evm_growing_component {
-    use crate::{
-        state::state_component, mmr_core::{POSEIDON_HASHING_FUNCTION, RootForHashingFunction},
-        utils::{header_rlp_index, decoders::{decode_rlp, decode_block_number, decode_parent_hash}},
-    };
-    use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry};
+    use starknet::storage::{StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess};
+    use crate::mmr_core::{POSEIDON_HASHING_FUNCTION, RootForHashingFunction};
+    use crate::state::state_component;
+    use crate::utils::decoders::{decode_block_number, decode_parent_hash, decode_rlp};
+    use crate::utils::header_rlp_index;
     use super::*;
 
     #[storage]
@@ -159,7 +159,7 @@ pub mod evm_growing_component {
 
                 let (_, p) = mmr.append(poseidon_hash, peaks).expect('MMR_APPEND_FAILED');
                 peaks = p;
-            };
+            }
 
             mmr_data.mmr_size_to_root.write(mmr.last_pos, mmr.root.into());
             mmr_data.latest_size.write(mmr.last_pos);

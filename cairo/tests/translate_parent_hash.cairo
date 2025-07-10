@@ -1,4 +1,4 @@
-use core::starknet::storage::{
+use starknet::storage::{
     StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
 };
 use storage_proofs::mmr_core::{

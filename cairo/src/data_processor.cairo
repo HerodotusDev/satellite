@@ -3,6 +3,7 @@ use cairo_lib::utils::bitwise::reverse_endianness_u256;
 
 #[derive(Drop, Serde, starknet::Store, PartialEq)]
 enum TaskStatus {
+    #[default]
     NONE,
     SCHEDULED,
     FINALIZED,

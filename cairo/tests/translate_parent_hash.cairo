@@ -1,6 +1,4 @@
-use starknet::storage::{
-    StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
-};
+use starknet::storage::{StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess};
 use storage_proofs::mmr_core::{
     ICoreMmrExternal, KECCAK_HASHING_FUNCTION, POSEIDON_HASHING_FUNCTION,
 };

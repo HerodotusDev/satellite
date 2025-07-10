@@ -49,7 +49,7 @@ interface ICairoFactRegistryModule {
 
     // ========= For internal use in grower and data processor ========= //
 
-    function isCairoVerifiedFactValidForInternal(bytes32 factHash) external view returns (bool);
+    function isCairoFactValidForInternal(bytes32 factHash) external view returns (bool);
 
     function isMockedForInternal() external view returns (bool);
 

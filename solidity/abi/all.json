@@ -2882,7 +2882,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "isCairoVerifiedFactValidForInternal",
+    "name": "isCairoFactValidForInternal",
     "outputs": [
       {
         "internalType": "bool",

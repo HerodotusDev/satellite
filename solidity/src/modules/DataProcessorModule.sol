@@ -126,7 +126,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         bytes32 gpsFactHash = keccak256(abi.encode(taskData.programHash, programOutputHash));
 
         // Ensure GPS fact is registered
-        if (!ICairoFactRegistryModule(address(this)).isCairoVerifiedFactValidForInternal(gpsFactHash)) {
+        if (!ICairoFactRegistryModule(address(this)).isCairoFactValidForInternal(gpsFactHash)) {
             revert InvalidFact();
         }
 

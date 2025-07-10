@@ -99,7 +99,7 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     // ========= For internal use in grower and data processor ========= //
 
     /// @inheritdoc ICairoFactRegistryModule
-    function isCairoVerifiedFactValidForInternal(bytes32 factHash) external view returns (bool) {
+    function isCairoFactValidForInternal(bytes32 factHash) external view returns (bool) {
         return isCairoFactValid(factHash, isMockedForInternal());
     }
 

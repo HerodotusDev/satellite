@@ -9,8 +9,7 @@ source = "git+https://github.com/HerodotusDev/cairo-lib.git?branch=cairo_2.11#8b
 [[package]]
 name = "integrity"
 version = "2.0.0"
-source = "registry+https://scarbs.xyz/"
-checksum = "sha256:f5e91cd5280bc0c02cfb12ce1a521e25064956dd12f3e38fca3d841c538723a0"
+source = "git+https://github.com/HerodotusDev/integrity.git#f3beacec88cd225a88945649627f3c3ea2232077"
 
 [[package]]
 name = "openzeppelin"

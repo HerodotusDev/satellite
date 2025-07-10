@@ -1,6 +1,6 @@
 [[call]]
 call_type = "deploy"
-class_hash = "0x079284a96a0f551aa50144b4a12bd964ae809781ff2d0121059afb15e477224d"
+class_hash = "0x3882f2ca3e0b40f478124895b68c23d065f4e3b9c1da66a6c3ffd2b15d3e083"
 inputs = [
     "0x534e5f4d41494e4e4554",
     "0",

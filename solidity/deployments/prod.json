@@ -13,6 +13,10 @@
       "contractAddress": "0x82F29Af756036132Ec188FFbB48447895a8D339e"
     },
     {
+      "chainId": "480",
+      "contractAddress": "0x82F29Af756036132Ec188FFbB48447895a8D339e"
+    },
+    {
       "chainId": "393402131332719809807700",
       "contractAddress": "0x01ba7d4b5707f8878c22fb335763abfc26c2ae157c434d597f6416fe6a79bf2e"
     },
@@ -81,6 +85,10 @@
     {
       "from": "1",
       "to": "42161"
+    },
+    {
+      "from": "1",
+      "to": "480"
     }
   ]
 }

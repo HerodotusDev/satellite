@@ -36,7 +36,7 @@ struct OptimismParentHashFetcherModuleStorage {
 interface IOptimismParentHashFetcherModule {
     event OptimismParentHashFetcherInitialized(uint256 chainId, address disputeGameFactory, address trustedGameProposer);
 
-    function initOptimismParentHashFetcherModule(uint256 chainId, address disputeGameFactory, address trustedGameProposer) external;
+    function addOptimismParentHashFetcher(uint256 chainId, address disputeGameFactory, address trustedGameProposer) external;
 
     function optimismFetchParentHash(uint256 chainId, uint256 gameIndex, bytes32 versionByte, bytes32 stateRoot, bytes32 withdrawalStorageRoot, bytes memory blockHeader) external;
 }

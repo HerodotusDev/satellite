@@ -29,7 +29,7 @@ contract OptimismParentHashFetcherModule is IOptimismParentHashFetcherModule, Ac
 
     // ========================= Core Functions ========================= //
 
-    function initOptimismParentHashFetcherModule(uint256 chainId, address disputeGameFactory, address trustedGameProposer) external onlyOwner {
+    function addOptimismParentHashFetcher(uint256 chainId, address disputeGameFactory, address trustedGameProposer) external onlyOwner {
         OptimismFetcherChainInfo storage chainInfo = moduleStorage().chainInfo[chainId];
         chainInfo.disputeGameFactory = IDisputeGameFactory(disputeGameFactory);
         chainInfo.trustedGameProposer = trustedGameProposer;

@@ -49,6 +49,7 @@
     "bun-types": "latest",
     "chai": "^5.2.0",
     "ethers": "^6.4.0",
+    "forge-std": "^1.1.2",
     "only-allow": "^1.2.1",
     "prettier": "^3.4.2",
     "prettier-plugin-solidity": "^1.4.1",

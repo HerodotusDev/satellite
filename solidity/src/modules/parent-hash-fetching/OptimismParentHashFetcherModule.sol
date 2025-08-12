@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {ISatellite} from "../../interfaces/ISatellite.sol";
-import {IOptimismParentHashFetcherModule, IDisputeGameFactory, IFaultDisputeGame} from "../../interfaces/modules/parent-hash-fetching/IOptimismParentHashFetcherModule.sol";
+import {IOptimismParentHashFetcherModule, OptimismParentHashFetcherModuleStorage, IDisputeGameFactory, IFaultDisputeGame} from "../../interfaces/modules/parent-hash-fetching/IOptimismParentHashFetcherModule.sol";
 import {AccessController} from "../../libraries/AccessController.sol";
 import {Lib_RLPReader as RLPReader} from "../../libraries/external/optimism/rlp/Lib_RLPReader.sol";
 
@@ -36,11 +36,10 @@ contract OptimismParentHashFetcherModule is IOptimismParentHashFetcherModule, Ac
         ms.trustedGameProposer = trustedGameProposer;
     }
 
-    /// @param rootHash Root hash that is key of the mapping `roots` of `ERC20Outbox` contract
     function optimismFetchParentHash(uint256 gameIndex, bytes32 versionByte, bytes32 stateRoot, bytes32 withdrawalStorageRoot, bytes memory blockHeader) external {
         OptimismParentHashFetcherModuleStorage storage ms = moduleStorage();
 
-        (uint32 gameType, uint64 timestamp, address proxy) = ms.disputeGameFactory.gameAtIndex(gameIndex);
+        (, , address proxy) = ms.disputeGameFactory.gameAtIndex(gameIndex);
         require(proxy != address(0), "ERR_GAME_NOT_FOUND");
 
         IFaultDisputeGame game = IFaultDisputeGame(proxy);
@@ -57,8 +56,8 @@ contract OptimismParentHashFetcherModule is IOptimismParentHashFetcherModule, Ac
         bytes32 rootClaim = game.rootClaim();
 
         bytes32 blockHash = keccak256(blockHeader);
-        bytes32 payload = abi.encodePacked(stateRoot, withdrawalStorageRoot, blockHash);
-        bytes32 fullInput = abi.encodePacked(versionByte, payload);
+        bytes memory payload = abi.encode(stateRoot, withdrawalStorageRoot, blockHash);
+        bytes memory fullInput = bytes.concat(bytes32(versionByte), payload);
         bytes32 calculatedRoot = keccak256(fullInput);
 
         require(rootClaim == calculatedRoot, "ERR_ROOT_CLAIM_MISMATCH");

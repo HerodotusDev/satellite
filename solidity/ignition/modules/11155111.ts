@@ -13,6 +13,7 @@ export const modules: ModuleName[] = [
   "StarknetSharpMmrGrowingModule",
   "NativeParentHashFetcherModule",
   "StarknetParentHashFetcherModule",
+  "OptimismParentHashFetcherModule",
   "UniversalSenderModule",
   "L1ToArbitrumSenderModule",
   "L1ToOptimismSenderModule",

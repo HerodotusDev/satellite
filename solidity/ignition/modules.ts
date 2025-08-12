@@ -160,6 +160,28 @@ export const modules = (chainId: keyof typeof settings) =>
         }
       : {}),
 
+    ...("OPTIMISM_FETCHERS" in settings[chainId]
+      ? {
+          OptimismParentHashFetcherModule: {
+            interfaceName: "IOptimismParentHashFetcherModule",
+            initFunctions: (
+              settings[chainId].OPTIMISM_FETCHERS as {
+                chainId: string;
+                disputeGameFactory: string;
+                trustedGameProposer: string;
+              }[]
+            ).map((fetcher) => ({
+              name: "addOptimismParentHashFetcher",
+              args: [
+                fetcher.chainId,
+                fetcher.disputeGameFactory,
+                fetcher.trustedGameProposer,
+              ],
+            })),
+          },
+        }
+      : {}),
+
     UniversalSenderModule: {
       interfaceName: "IUniversalSenderModule",
     },

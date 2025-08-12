@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {ISatellite} from "../../interfaces/ISatellite.sol";
-import {IOptimismParentHashFetcherModule, OptimismParentHashFetcherModuleStorage, IDisputeGameFactory, IFaultDisputeGame} from "../../interfaces/modules/parent-hash-fetching/IOptimismParentHashFetcherModule.sol";
+import {IOptimismParentHashFetcherModule, OptimismFetcherChainInfo, OptimismParentHashFetcherModuleStorage, IDisputeGameFactory, IFaultDisputeGame} from "../../interfaces/modules/parent-hash-fetching/IOptimismParentHashFetcherModule.sol";
 import {AccessController} from "../../libraries/AccessController.sol";
 import {Lib_RLPReader as RLPReader} from "../../libraries/external/optimism/rlp/Lib_RLPReader.sol";
 
@@ -30,16 +30,18 @@ contract OptimismParentHashFetcherModule is IOptimismParentHashFetcherModule, Ac
     // ========================= Core Functions ========================= //
 
     function initOptimismParentHashFetcherModule(uint256 chainId, address disputeGameFactory, address trustedGameProposer) external onlyOwner {
-        OptimismParentHashFetcherModuleStorage storage ms = moduleStorage();
-        ms.chainId = chainId;
-        ms.disputeGameFactory = IDisputeGameFactory(disputeGameFactory);
-        ms.trustedGameProposer = trustedGameProposer;
+        OptimismFetcherChainInfo storage chainInfo = moduleStorage().chainInfo[chainId];
+        chainInfo.disputeGameFactory = IDisputeGameFactory(disputeGameFactory);
+        chainInfo.trustedGameProposer = trustedGameProposer;
+
+        emit OptimismParentHashFetcherInitialized(chainId, disputeGameFactory, trustedGameProposer);
     }
 
-    function optimismFetchParentHash(uint256 gameIndex, bytes32 versionByte, bytes32 stateRoot, bytes32 withdrawalStorageRoot, bytes memory blockHeader) external {
-        OptimismParentHashFetcherModuleStorage storage ms = moduleStorage();
+    function optimismFetchParentHash(uint256 chainId, uint256 gameIndex, bytes32 versionByte, bytes32 stateRoot, bytes32 withdrawalStorageRoot, bytes memory blockHeader) external {
+        OptimismFetcherChainInfo storage chainInfo = moduleStorage().chainInfo[chainId];
+        require(chainInfo.disputeGameFactory != IDisputeGameFactory(address(0)) && chainInfo.trustedGameProposer != address(0), "ERR_CHAIN_NOT_SUPPORTED_FOR_OPTIMISM");
 
-        (, , address proxy) = ms.disputeGameFactory.gameAtIndex(gameIndex);
+        (, , address proxy) = chainInfo.disputeGameFactory.gameAtIndex(gameIndex);
         require(proxy != address(0), "ERR_GAME_NOT_FOUND");
 
         IFaultDisputeGame game = IFaultDisputeGame(proxy);
@@ -47,7 +49,7 @@ contract OptimismParentHashFetcherModule is IOptimismParentHashFetcherModule, Ac
 
         if (status == 1) {
             revert("ERR_GAME_FAILED");
-        } else if (status == 0 && game.gameCreator() != ms.trustedGameProposer) {
+        } else if (status == 0 && game.gameCreator() != chainInfo.trustedGameProposer) {
             revert("ERR_UNFINISHED_GAME_NOT_TRUSTED");
         } else if (status != 2) {
             revert("ERR_UNKNOWN_GAME_STATUS");
@@ -64,7 +66,7 @@ contract OptimismParentHashFetcherModule is IOptimismParentHashFetcherModule, Ac
 
         uint256 blockNumber = _decodeBlockNumber(blockHeader);
 
-        ISatellite(address(this))._receiveParentHash(ms.chainId, KECCAK_HASHING_FUNCTION, blockNumber + 1, blockHash);
+        ISatellite(address(this))._receiveParentHash(chainId, KECCAK_HASHING_FUNCTION, blockNumber + 1, blockHash);
     }
 
     // ========================= Helper Functions ========================= //

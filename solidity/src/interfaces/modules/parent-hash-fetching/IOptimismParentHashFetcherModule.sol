@@ -19,19 +19,24 @@ interface IFaultDisputeGame {
     function gameCreator() external view returns (address);
 }
 
-struct OptimismParentHashFetcherModuleStorage {
-    // Chain ID of blocks being fetched
-    uint256 chainId;
+struct OptimismFetcherChainInfo {
     // Dispute game factory
     IDisputeGameFactory disputeGameFactory;
     // Dispute game
     address trustedGameProposer;
 }
 
+struct OptimismParentHashFetcherModuleStorage {
+    // Chain ID of blocks being fetched
+    mapping(uint256 chainId => OptimismFetcherChainInfo) chainInfo;
+}
+
 /// @notice Module that fetches the parent hash of blocks from Arbitrum
 /// @dev It needs to be deployed on the chain that Arbitrum settles on (L1)
 interface IOptimismParentHashFetcherModule {
+    event OptimismParentHashFetcherInitialized(uint256 chainId, address disputeGameFactory, address trustedGameProposer);
+
     function initOptimismParentHashFetcherModule(uint256 chainId, address disputeGameFactory, address trustedGameProposer) external;
 
-    function optimismFetchParentHash(uint256 gameIndex, bytes32 versionByte, bytes32 stateRoot, bytes32 withdrawalStorageRoot, bytes memory blockHeader) external;
+    function optimismFetchParentHash(uint256 chainId, uint256 gameIndex, bytes32 versionByte, bytes32 stateRoot, bytes32 withdrawalStorageRoot, bytes memory blockHeader) external;
 }

@@ -13,9 +13,11 @@ export const modules: ModuleName[] = [
   "StarknetSharpMmrGrowingModule",
   "NativeParentHashFetcherModule",
   "StarknetParentHashFetcherModule",
+  "OptimismParentHashFetcherModule",
   "UniversalSenderModule",
   "L1ToStarknetSenderModule",
   "L1ToArbitrumSenderModule",
+  "L1ToOptimismSenderModule",
   "LegacyContractsInteractionModule",
 ];
 export default buildSatelliteDeployment("11155111", modules);

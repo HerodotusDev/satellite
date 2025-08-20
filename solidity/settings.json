@@ -8,6 +8,13 @@
     "CAIRO_FACT_REGISTRY_IS_MOCKED": false,
     "CAIRO_FACT_REGISTRY_EXTERNAL_CONTRACT": "0x47312450B3Ac8b5b8e247a6bB6d523e7605bDb60",
     "CAIRO_FACT_REGISTRY_MOCKED_FALLBACK": "0x0ed8c44415e882F3033B4F3AFF916BbB4997f915",
+    "OPTIMISM_FETCHERS": [
+      {
+        "chainId": "10",
+        "disputeGameFactory": "0xe5965Ab5962eDc7477C8520243A95517CD252fA9",
+        "trustedGameProposer": "0x473300df21D047806A082244b417f96b32f13A33"
+      }
+    ],
 
     "connections": [
       {

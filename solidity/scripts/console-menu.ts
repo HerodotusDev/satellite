@@ -13,7 +13,10 @@ export class ConsoleMenu {
   constructor(options: Option[]) {
     this.options = options;
     while (this.options[this.cursor].switchable !== true) {
-      this.cursor = (this.cursor + 1) % this.options.length;
+      if (this.cursor + 1 === this.options.length) {
+        break;
+      }
+      this.cursor++;
     }
   }
 

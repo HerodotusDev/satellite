@@ -81,6 +81,16 @@ const config: HardhatUserConfig = {
       accounts: [process.env.PRIVATE_KEY as string],
       chainId: 480,
     },
+    baseSepolia: {
+      url: `https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      accounts: [process.env.PRIVATE_KEY as string],
+      chainId: 84532,
+    },
+    base: {
+      url: `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      accounts: [process.env.PRIVATE_KEY as string],
+      chainId: 8453,
+    },
   },
   etherscan: {
     // apiKey: {
@@ -179,11 +189,27 @@ const config: HardhatUserConfig = {
         },
       },
       {
+        network: "baseSepolia",
+        chainId: 84532,
+        urls: {
+          apiURL: "https://api.etherscan.io/v2/api",
+          browserURL: "https://sepolia.basescan.org",
+        },
+      },
+      {
         network: "localhost",
         chainId: 31337,
         urls: {
           apiURL: "http://localhost:8545",
           browserURL: "http://localhost:8545",
+        },
+      },
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://api.etherscan.io/v2/api",
+          browserURL: "https://basescan.org",
         },
       },
     ],

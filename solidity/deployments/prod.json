@@ -47,6 +47,14 @@
     {
       "chainId": "393402133025997798000961",
       "contractAddress": "0x00421cd95f9ddabdd090db74c9429f257cb6bc1ccc339278d1db1de39156676e"
+    },
+    {
+      "chainId": "84532",
+      "contractAddress": "0x40D8dc2E3979A769c6F0712eD96d651f228d37e5"
+    },
+    {
+      "chainId": "8453",
+      "contractAddress": "0xb036f7Bdd9C7A5984323f148064f815f4C75174b"
     }
   ],
   "connections": [
@@ -89,6 +97,14 @@
     {
       "from": "1",
       "to": "480"
+    },
+    {
+      "from": "11155111",
+      "to": "84532"
+    },
+    {
+      "from": "1",
+      "to": "8453"
     }
   ]
 }

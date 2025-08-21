@@ -35,6 +35,10 @@
     {
       "chainId": "23448594291968334",
       "contractAddress": "0x0373d8a2c0f57f178b218fffff787015dc84a68de8ede2a1ba42fb273b3e0b62"
+    },
+    {
+      "chainId": "84532",
+      "contractAddress": "0xb18a66Fbab151C42A81E7C53D11810B6C632987B"
     }
   ],
   "connections": [
@@ -61,6 +65,10 @@
     {
       "from": "11155111",
       "to": "393402133025997798000961"
+    },
+    {
+      "from": "11155111",
+      "to": "84532"
     }
   ]
 }

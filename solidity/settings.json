@@ -34,6 +34,12 @@
         "inboxContract": "0xf931a81D18B1766d15695ffc7c1920a62b7e710a",
         "sendFunction": "sendMessageL1ToOptimism",
         "L2Alias": "0x0"
+      },
+      {
+        "to": "8453",
+        "inboxContract": "0x866E82a600A1414e583f7F13623F1aC5d58b0Afa",
+        "sendFunction": "sendMessageL1ToOptimism",
+        "L2Alias": "0x0"
       }
     ]
   },
@@ -62,6 +68,12 @@
     "network": "worldChain",
     "CAIRO_FACT_REGISTRY_IS_MOCKED": true,
     "DATA_PROCESSOR_PROGRAM_HASH": "0x0000000000000000000000000000000000000000000000000000000000000000",
+
+    "connections": []
+  },
+  "8453": {
+    "network": "base",
+    "CAIRO_FACT_REGISTRY_IS_MOCKED": true,
 
     "connections": []
   },
@@ -113,6 +125,12 @@
         "inboxContract": "0xE2Bb56ee936fd6433DC0F6e7e3b8365C906AA057",
         "sendFunction": "sendMessageL1ToStarknet",
         "L2Alias": "0x0"
+      },
+      {
+        "to": "84532",
+        "inboxContract": "0xC34855F4De64F1840e5686e64278da901e261f20",
+        "sendFunction": "sendMessageL1ToOptimism",
+        "L2Alias": "0x0"
       }
     ]
   },
@@ -155,13 +173,19 @@
 
     "connections": []
   },
+  "84532": {
+    "network": "baseSepolia",
+    "CAIRO_FACT_REGISTRY_IS_MOCKED": true,
+
+    "connections": []
+  },
   "393402133025997798000961": {
     "network": "starknetSepolia",
 
     "connections": []
   },
   "23448594291968334": {
-    "network": "sepolia",
+    "network": "starknet",
 
     "connections": []
   },

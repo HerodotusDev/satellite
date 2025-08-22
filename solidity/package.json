@@ -1,9 +1,5 @@
 {
-  "name": "herodotus_satellite",
-  "version": "2.0.0",
-  "repository": "git@github.com:HerodotusDev/herodotus-evm-v2.git",
-  "author": "Herodotus Ltd <hello@herodotus.dev>",
-  "license": "GPL-3.0",
+  "name": "satellite-solidity",
   "files": [
     "src/**/*.sol",
     "lib/**/*.sol"

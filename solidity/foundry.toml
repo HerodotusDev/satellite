@@ -1,9 +1,7 @@
 [profile.default]
 remappings = [
     "@openzeppelin=lib/openzeppelin-contracts",
-    "@solidity-mmr=lib/solidity-mmr/src",
-    # "libraries=src/libraries",
-    # "interfaces=src/interfaces",
+    "@HerodotusDev/solidity-mmr=lib/solidity-mmr",
 ]
 src = "src"
 out = "out"

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.19;
 
-import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
+import {StatelessMmr} from "@HerodotusDev/solidity-mmr/src/lib/StatelessMmr.sol";
 import {Lib_SecureMerkleTrie as SecureMerkleTrie} from "../libraries/external/optimism/trie/Lib_SecureMerkleTrie.sol";
 import {Lib_RLPReader as RLPReader} from "../libraries/external/optimism/rlp/Lib_RLPReader.sol";
 import {IEvmFactRegistryModule} from "../interfaces/modules/IEvmFactRegistryModule.sol";

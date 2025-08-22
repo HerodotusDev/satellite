@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {Lib_RLPReader as RLPReader} from "../../../libraries/external/optimism/rlp/Lib_RLPReader.sol";
-import {StatelessMmr} from "@solidity-mmr/lib/StatelessMmr.sol";
+import {StatelessMmr} from "@HerodotusDev/solidity-mmr/src/lib/StatelessMmr.sol";
 
 interface IEvmOnChainGrowingModule {
     // ========================= Types ========================= //

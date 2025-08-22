@@ -1,12 +1,10 @@
 [profile.default]
 remappings = [
     "@openzeppelin=solidity/lib/openzeppelin-contracts",
-    "@solidity-mmr=solidity/lib/solidity-mmr/src",
-    # "libraries=src/libraries",
-    # "interfaces=src/interfaces",
+    "@HerodotusDev/solidity-mmr=solidity/lib/solidity-mmr",
 ]
-src = "src"
-out = "out"
+src = "solidity/src"
+out = "solidity/out"
 libs = ["lib", "libraries"]
 optimize = true
 optimizer_runs = 200

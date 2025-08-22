@@ -9,7 +9,7 @@
     "solidity/lib/**/*.sol"
   ],
   "dependencies": {
-    "@solidity-mmr": "github:HerodotusDev/solidity-mmr#main:src",
+    "@HerodotusDev/solidity-mmr": "github:HerodotusDev/solidity-mmr",
     "@openzeppelin": "github:openzeppelin/openzeppelin-contracts"
   }
 }

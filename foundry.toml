@@ -1,20 +1,11 @@
 [profile.default]
 remappings = [
-    "@openzeppelin=lib/openzeppelin-contracts",
-    "@solidity-mmr=lib/solidity-mmr/src",
-    # "libraries=src/libraries",
-    # "interfaces=src/interfaces",
+    "@openzeppelin=solidity/lib/openzeppelin-contracts",
+    "@HerodotusDev/solidity-mmr=solidity/lib/solidity-mmr",
 ]
-src = "src"
-out = "out"
+src = "solidity/src"
+out = "solidity/out"
 libs = ["lib", "libraries"]
 optimize = true
 optimizer_runs = 200
 via_ir = true
-
-
-[rpc_endpoints]
-sepolia = "${SEPOLIA_RPC_URL}"
-
-[etherscan]
-sepolia = { key = "${ETHERSCAN_API_KEY}" }

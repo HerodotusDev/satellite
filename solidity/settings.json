@@ -1,0 +1,202 @@
+{
+  "1": {
+    "network": "mainnet",
+    "STARKNET_CORE": "0xc662c410C0ECf747543f5bA90660f6ABeBD9C8c4",
+    "EVM_SHARP_GROWER_PROGRAM_HASH": "0x24635cb1e1e20ed5d3af014f21c457b43f1297912d4a2db706999cf4117fbc2",
+    "DATA_PROCESSOR_PROGRAM_HASH": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "STARKNET_CHAIN_ID": "23448594291968334",
+    "CAIRO_FACT_REGISTRY_IS_MOCKED": false,
+    "CAIRO_FACT_REGISTRY_EXTERNAL_CONTRACT": "0x47312450B3Ac8b5b8e247a6bB6d523e7605bDb60",
+    "CAIRO_FACT_REGISTRY_MOCKED_FALLBACK": "0x0ed8c44415e882F3033B4F3AFF916BbB4997f915",
+    "OPTIMISM_FETCHERS": [
+      {
+        "chainId": "10",
+        "disputeGameFactory": "0xe5965Ab5962eDc7477C8520243A95517CD252fA9",
+        "trustedGameProposer": "0x473300df21D047806A082244b417f96b32f13A33"
+      }
+    ],
+
+    "connections": [
+      {
+        "to": "23448594291968334",
+        "inboxContract": "0xc662c410C0ECf747543f5bA90660f6ABeBD9C8c4",
+        "sendFunction": "sendMessageL1ToStarknet",
+        "L2Alias": "0x0"
+      },
+      {
+        "to": "42161",
+        "inboxContract": "0x4Dbd4fc535Ac27206064B68FfCf827b0A60BAB3f",
+        "sendFunction": "sendMessageL1ToArbitrum",
+        "L2Alias": "0x1111000000000000000000000000000000001111"
+      },
+      {
+        "to": "480",
+        "inboxContract": "0xf931a81D18B1766d15695ffc7c1920a62b7e710a",
+        "sendFunction": "sendMessageL1ToOptimism",
+        "L2Alias": "0x0"
+      },
+      {
+        "to": "8453",
+        "inboxContract": "0x866E82a600A1414e583f7F13623F1aC5d58b0Afa",
+        "sendFunction": "sendMessageL1ToOptimism",
+        "L2Alias": "0x0"
+      }
+    ]
+  },
+  "42161": {
+    "network": "arbitrumOne",
+    "APE_CHAIN_TOKEN_ADDRESS": "0x7f9FBf9bDd3F4105C478b996B648FE6e828a1e98",
+    "ARBITRUM_FETCHER_OUTBOX_ADDRESS": "0x4F405BA65291063d8A524c2bDf55d4e67405c2aF",
+    "ARBITRUM_FETCHER_CHAIN_ID": "33139",
+
+    "connections": [
+      {
+        "to": "33139",
+        "inboxContract": "0x1B98e4ED82Ee1a91A65a38C690e2266364064D15",
+        "sendFunction": "sendMessageArbitrumToApeChain",
+        "L2Alias": "0x1111000000000000000000000000000000001111"
+      }
+    ]
+  },
+  "33139": {
+    "network": "apechain",
+    "CAIRO_FACT_REGISTRY_IS_MOCKED": true,
+
+    "connections": []
+  },
+  "480": {
+    "network": "worldChain",
+    "CAIRO_FACT_REGISTRY_IS_MOCKED": true,
+    "DATA_PROCESSOR_PROGRAM_HASH": "0x0000000000000000000000000000000000000000000000000000000000000000",
+
+    "connections": []
+  },
+  "8453": {
+    "network": "base",
+    "CAIRO_FACT_REGISTRY_IS_MOCKED": true,
+
+    "connections": []
+  },
+  "11155111": {
+    "network": "sepolia",
+    "EVM_SHARP_GROWER_PROGRAM_HASH": "0x24635cb1e1e20ed5d3af014f21c457b43f1297912d4a2db706999cf4117fbc2",
+    "STARKNET_CORE": "0xE2Bb56ee936fd6433DC0F6e7e3b8365C906AA057",
+    "DATA_PROCESSOR_FACTS_REGISTRY": "0x07ec0D28e50322Eb0C159B9090ecF3aeA8346DFe",
+    "DATA_PROCESSOR_PROGRAM_HASH": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "STARKNET_CHAIN_ID": "393402133025997798000961",
+    "CAIRO_FACT_REGISTRY_IS_MOCKED": false,
+    "CAIRO_FACT_REGISTRY_EXTERNAL_CONTRACT": "0x07ec0D28e50322Eb0C159B9090ecF3aeA8346DFe",
+    "CAIRO_FACT_REGISTRY_MOCKED_FALLBACK": "0x0ed8c44415e882F3033B4F3AFF916BbB4997f915",
+    "OPTIMISM_FETCHERS": [
+      {
+        "chainId": "11155420",
+        "disputeGameFactory": "0x05F9613aDB30026FFd634f38e5C4dFd30a197Fa1",
+        "trustedGameProposer": "0x49277EE36A024120Ee218127354c4a3591dc90A9"
+      }
+    ],
+
+    "connections": [
+      {
+        "to": "11155420",
+        "inboxContract": "0x58Cc85b8D04EA49cC6DBd3CbFFd00B4B8D6cb3ef",
+        "sendFunction": "sendMessageL1ToOptimism",
+        "L2Alias": "0x0"
+      },
+      {
+        "to": "421614",
+        "inboxContract": "0xaAe29B0366299461418F5324a79Afc425BE5ae21",
+        "sendFunction": "sendMessageL1ToArbitrum",
+        "L2Alias": "0x1111000000000000000000000000000000001111"
+      },
+      {
+        "to": "300",
+        "inboxContract": "0x9A6DE0f62Aa270A8bCB1e2610078650D539B1Ef9",
+        "sendFunction": "sendMessageL1ToZkSync",
+        "L2Alias": "0x1111000000000000000000000000000000001111"
+      },
+      {
+        "to": "4801",
+        "inboxContract": "0x7768c821200554d8F359A8902905Ba9eDe5659a9",
+        "sendFunction": "sendMessageL1ToOptimism",
+        "L2Alias": "0x0"
+      },
+      {
+        "to": "393402133025997798000961",
+        "inboxContract": "0xE2Bb56ee936fd6433DC0F6e7e3b8365C906AA057",
+        "sendFunction": "sendMessageL1ToStarknet",
+        "L2Alias": "0x0"
+      },
+      {
+        "to": "84532",
+        "inboxContract": "0xC34855F4De64F1840e5686e64278da901e261f20",
+        "sendFunction": "sendMessageL1ToOptimism",
+        "L2Alias": "0x0"
+      }
+    ]
+  },
+  "300": {
+    "network": "zkSyncSepolia",
+
+    "connections": []
+  },
+  "11155420": {
+    "network": "optimismSepolia",
+
+    "connections": []
+  },
+  "421614": {
+    "network": "arbitrumSepolia",
+    "APE_CHAIN_TOKEN_ADDRESS": "0x6Cb8Cc1e323357Af5da49d90FCb7160B7f09e6Cd",
+    "ARBITRUM_FETCHER_OUTBOX_ADDRESS": "0x7B5fda237527B280224000A275eAa1B8b8149334",
+    "ARBITRUM_FETCHER_CHAIN_ID": "33111",
+
+    "connections": [
+      {
+        "to": "33111",
+        "inboxContract": "0x990A3402F3358A1Ac9886c42d12A5C47aD97cb94",
+        "sendFunction": "sendMessageArbitrumToApeChain",
+        "L2Alias": "0x1111000000000000000000000000000000001111"
+      }
+    ]
+  },
+  "33111": {
+    "network": "curtis",
+    "EVM_SHARP_GROWER_PROGRAM_HASH": "0x24635cb1e1e20ed5d3af014f21c457b43f1297912d4a2db706999cf4117fbc2",
+    "CAIRO_FACT_REGISTRY_IS_MOCKED": false,
+
+    "connections": []
+  },
+  "4801": {
+    "network": "worldChainSepolia",
+    "CAIRO_FACT_REGISTRY_IS_MOCKED": true,
+    "DATA_PROCESSOR_PROGRAM_HASH": "0x0000000000000000000000000000000000000000000000000000000000000000",
+
+    "connections": []
+  },
+  "84532": {
+    "network": "baseSepolia",
+    "CAIRO_FACT_REGISTRY_IS_MOCKED": true,
+
+    "connections": []
+  },
+  "393402133025997798000961": {
+    "network": "starknetSepolia",
+
+    "connections": []
+  },
+  "23448594291968334": {
+    "network": "starknet",
+
+    "connections": []
+  },
+  "31337": {
+    "network": "hardhat",
+    "STARKNET_CORE": "0x0",
+    "STARKNET_CHAIN_ID": "0x0",
+    "DATA_PROCESSOR_PROGRAM_HASH": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "EVM_SHARP_GROWER_PROGRAM_HASH": "0x24635cb1e1e20ed5d3af014f21c457b43f1297912d4a2db706999cf4117fbc2",
+    "CAIRO_FACT_REGISTRY_IS_MOCKED": true,
+
+    "connections": []
+  }
+}

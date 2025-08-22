@@ -1,0 +1,16 @@
+[[call]]
+call_type = "deploy"
+class_hash = "0x5589e2791261df71ab33f11d53bdca615df68f60b517571d2b52b359f820b96"
+inputs = [
+    "0x534e5f4d41494e4e4554",
+    "0",
+    "0x07e4986c03d8a4fea74db3fa5a31467bea98d622570ae9daa74a94fb8dc71817"
+]
+id = "herodotus_starknet"
+unique = false
+
+[[call]]
+call_type = "invoke"
+contract_address = "herodotus_starknet"
+function = "setL1MessageSender"
+inputs = ["0x8c26F9caD52c1F6b6fFaA5991bC71e3F6F2cd693"]

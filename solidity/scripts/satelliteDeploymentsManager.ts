@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export async function getActiveEnvironmentSafe() {
   try {
-    return fs.readFileSync("deployments/_activeEnvironment", "utf8").trim();
+    return fs.readFileSync("../deployments/_activeEnvironment", "utf8").trim();
   } catch {
     return null;
   }
@@ -21,14 +21,14 @@ export async function getActiveEnvironment() {
 }
 
 export async function getDeployedSatellitesFilename() {
-  return `deployments/${await getActiveEnvironment()}.json`;
+  return `../deployments/${await getActiveEnvironment()}.json`;
 }
 
 export async function changeEnvironment(name: string | null) {
   if (name === null) {
-    await Bun.file(`deployments/_activeEnvironment`).delete();
+    await Bun.file(`../deployments/_activeEnvironment`).delete();
   } else {
-    await Bun.write(`deployments/_activeEnvironment`, name);
+    await Bun.write(`../deployments/_activeEnvironment`, name);
   }
 }
 
@@ -75,7 +75,7 @@ export async function isEnvironmentValid(
   name: string,
 ): Promise<boolean | null> {
   try {
-    const file = await Bun.file(`deployments/${name}.json`).json();
+    const file = await Bun.file(`../deployments/${name}.json`).json();
     const parsed = DeployedSatellitesSchema.safeParse(file);
     return parsed.success;
   } catch (e) {
@@ -84,5 +84,5 @@ export async function isEnvironmentValid(
 }
 
 export function doesEnvironmentExist(name: string): Promise<boolean> {
-  return Bun.file(`deployments/${name}.json`).exists();
+  return Bun.file(`../deployments/${name}.json`).exists();
 }

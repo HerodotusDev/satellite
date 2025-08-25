@@ -49,8 +49,9 @@ contract OptimismParentHashFetcherModule is IOptimismParentHashFetcherModule, Ac
 
         if (status == 1) {
             revert("ERR_GAME_FAILED");
-        } else if (status == 0 && game.gameCreator() != chainInfo.trustedGameProposer) {
-            revert("ERR_UNFINISHED_GAME_NOT_TRUSTED");
+        } else if (status == 0) {
+            // On sepolia trustedGameProposer should not be checked and then it is set to 0x0
+            require(chainInfo.trustedGameProposer == address(0) || game.gameCreator() == chainInfo.trustedGameProposer, "ERR_UNFINISHED_GAME_NOT_TRUSTED");
         } else if (status != 2) {
             revert("ERR_UNKNOWN_GAME_STATUS");
         }

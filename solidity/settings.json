@@ -91,7 +91,7 @@
       {
         "chainId": "11155420",
         "disputeGameFactory": "0x05F9613aDB30026FFd634f38e5C4dFd30a197Fa1",
-        "trustedGameProposer": "0x49277EE36A024120Ee218127354c4a3591dc90A9"
+        "trustedGameProposer": "0x0000000000000000000000000000000000000000"
       }
     ],
 

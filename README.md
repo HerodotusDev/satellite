@@ -1,26 +1,65 @@
 ![](/banner.png)
 
-# Herodotus EVM V2 Smart Contracts
+# Herodotus Satellite Smart Contracts
 
 ## Quick start for end-users
 
-This contract provides cross-chain and historical data on EVM blockchains, e.g. reading balance of Ethereum account `0x123` at block `456` from Optimism contract. To get exact data you need into this contract, you should use [Storage Proof API](TODO: link). If data is present in this contract, you can be sure that it is correct without needing to trust its owner or anyone (for more details see [design section](#design)).
+This contract provides cross-chain and historical data on EVM blockchains, e.g. reading balance of Ethereum account `0x123` at block `456` from Optimism contract. To get exact data you need into this contract, you should use [Storage Proof API](https://docs.herodotus.cloud/storage-proofs-api). If data is present in this contract, you can be sure that it is correct without needing to trust its owner or anyone (for more details see [design section](#design)).
 
 Those are function that you probably need:
 
-#### [`accountField(uint256 chainId, address account, uint256 blockNumber, AccountField field) returns (bytes32)`](./src/interfaces/modules/IEvmFactRegistryModule.sol#L44-L45)
+#### [`accountField(uint256 chainId, address account, uint256 blockNumber, AccountField field) returns (bytes32)`](./solidity/src/interfaces/modules/IEvmFactRegistryModule.sol#L44-L45)
 
 Returns value of `field` (which is either `NONCE`, `BALANCE`, `STORAGE_ROOT` or `CODE_HASH`) for `account` at `blockNumber` on chain with id `chainId`.
 
-#### [`storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) returns (bytes32)`](./src/interfaces/modules/IEvmFactRegistryModule.sol#L47-L48)
+#### [`storageSlot(uint256 chainId, address account, uint256 blockNumber, bytes32 slot) returns (bytes32)`](./solidity/src/interfaces/modules/IEvmFactRegistryModule.sol#L47-L48)
 
 Returns value of storage slot number `slot` of `account` at `blockNumber` on chain with id `chainId`.
 
-#### [`timestamp(uint256 chainId, uint256 timestamp) returns (uint256)`](./src/interfaces/modules/IEvmFactRegistryModule.sol#L49-50)
+#### [`timestamp(uint256 chainId, uint256 timestamp) returns (uint256)`](./solidity/src/interfaces/modules/IEvmFactRegistryModule.sol#L49-50)
 
 Returns block number of the closest block with timestamp less than or equal to the given `timestamp` on chain with id `chainId`.
 
 ## [Deployed Contracts](./deployments)
+
+## Importing interfaces
+
+If you want to use interface for Satellite contract in your solidity project, you can import this repository as a dependency.
+
+### Submodule
+
+```bash
+npm install https://github.com/HerodotusDev/satellite
+```
+
+```solidity
+import {ISatellite} from "@HerodotusDev/satellite/solidity/src/interfaces/ISatellite.sol";
+```
+
+### Git submodule
+
+```bash
+forge install HerodotusDev/satellite
+```
+
+```solidity
+import {ISatellite} from "lib/satellite/solidity/src/interfaces/ISatellite.sol";
+```
+
+Or you can add a remapping to your `foundry.toml` file:
+
+```toml
+remappings = [
+  # Your other remappings here
+  "@HerodotusDev/satellite/=lib/satellite/",
+]
+```
+
+and then you can import it like this:
+
+```solidity
+import {ISatellite} from "@HerodotusDev/satellite/solidity/src/interfaces/ISatellite.sol";
+```
 
 ## Design
 
@@ -60,37 +99,38 @@ TODO: multiple MMRs, MMR IDs, different hash functions.
 
 Because of great complexity of the contract and need for fine-tuned upgradability, we decided to use [Diamond Proxy Patter](TODO: link) with following facets (or as we will call them - modules):
 
-- [EVM Fact Registry](./src/modules/EvmFactRegistryModule.sol) - stores accounts and storage data that was proven
-- [MMR Core](./src/modules/MmrCoreModule.sol) - responsible for storing and moving MMR data
-- Growing modules - append new blocks to existing MMR
-  - [Evm On-Chain Growing](./src/modules/growing/EvmOnChainGrowingModule.sol) - processes all block data directly in the contract as described in [solution section](#solution)
-  - [Evm Sharp Growing](./src/modules/growing/EvmSharpMmrGrowingModule.sol) - processes block data that was proven with ZK proof using SHARP as described in [reducing cost](#reducing-cost)
-  - [Starknet Growing](./src/modules/growing/StarknetSharpMmrGrowingModule.sol) - TODO
-- [Satellite Registry](./src/modules/SatelliteRegistryModule.sol) - stores information about other satellites to/from which it can send/receive messages
-- Messaging modules - responsible for sending and receiving data to and from satellites deployed on other chains
-  - Receiver modules
-    - [Simple Receiver](./src/modules/messaging/receiver/SimpleReceiverModule.sol) - receives message on chains that set `msg.sender` for cross-chain messages to transaction sender on the source chain
-    - [Optimism Receiver](./src/modules/messaging/receiver/OptimismReceiverModule.sol) - receive messages on optimism (which [handles messaging differently](./src/modules/messaging/receiver/OptimismReceiverModule.sol#L12-L17))
-  - Sender modules
-    - [Universal Sender](./src/modules/messaging/sender/UniversalSenderModule.sol) - prepares and sends messages that move MMRs and Parent Hashes regardless of the destination chain (uses specific senders under the hood)
-    - [L1 to Starknet](./src/modules/messaging/sender/L1ToStarknetSenderModule.sol)
-    - [L1 to Optimism](./src/modules/messaging/sender/L1ToOptimismSenderModule.sol) - sends message to Optimism (or similar chains like WorldChain)
-    - [L1 to ZkSync](./src/modules/messaging/sender/L1ToZkSyncSenderModule.sol)
-    - [L1 to Arbitrum](./src/modules/messaging/sender/L1ToArbitrumSenderModule.sol)
-    - [Arbitrum to ApeChain](./src/modules/messaging/sender/ArbitrumToApeChainSenderModule.sol)
-- Parent Hash Fetching modules
-  - [Native Parent Hash Fetcher]() - fetches one of latest 256 parent hashes from the chain the satellite is deployed at
-  - [Starknet Parent Hash Fetcher]()
-- [DataProcessor]()
-- [Ownership]()
-- [Satellite Inspector]()
-- [Satellite Maintenance]()
+-   [EVM Fact Registry](./src/modules/EvmFactRegistryModule.sol) - stores accounts and storage data that was proven
+-   [MMR Core](./src/modules/MmrCoreModule.sol) - responsible for storing and moving MMR data
+-   Growing modules - append new blocks to existing MMR
+    -   [Evm On-Chain Growing](./src/modules/growing/EvmOnChainGrowingModule.sol) - processes all block data directly in the contract as described in [solution section](#solution)
+    -   [Evm Sharp Growing](./src/modules/growing/EvmSharpMmrGrowingModule.sol) - processes block data that was proven with ZK proof using SHARP as described in [reducing cost](#reducing-cost)
+    -   [Starknet Growing](./src/modules/growing/StarknetSharpMmrGrowingModule.sol) - TODO
+-   [Satellite Registry](./src/modules/SatelliteRegistryModule.sol) - stores information about other satellites to/from which it can send/receive messages
+-   Messaging modules - responsible for sending and receiving data to and from satellites deployed on other chains
+    -   Receiver modules
+        -   [Simple Receiver](./src/modules/messaging/receiver/SimpleReceiverModule.sol) - receives message on chains that set `msg.sender` for cross-chain messages to transaction sender on the source chain
+        -   [Optimism Receiver](./src/modules/messaging/receiver/OptimismReceiverModule.sol) - receive messages on optimism (which [handles messaging differently](./src/modules/messaging/receiver/OptimismReceiverModule.sol#L12-L17))
+    -   Sender modules
+        -   [Universal Sender](./src/modules/messaging/sender/UniversalSenderModule.sol) - prepares and sends messages that move MMRs and Parent Hashes regardless of the destination chain (uses specific senders under the hood)
+        -   [L1 to Starknet](./src/modules/messaging/sender/L1ToStarknetSenderModule.sol)
+        -   [L1 to Optimism](./src/modules/messaging/sender/L1ToOptimismSenderModule.sol) - sends message to Optimism (or similar chains like WorldChain)
+        -   [L1 to ZkSync](./src/modules/messaging/sender/L1ToZkSyncSenderModule.sol)
+        -   [L1 to Arbitrum](./src/modules/messaging/sender/L1ToArbitrumSenderModule.sol)
+        -   [Arbitrum to ApeChain](./src/modules/messaging/sender/ArbitrumToApeChainSenderModule.sol)
+-   Parent Hash Fetching modules
+    -   [Native Parent Hash Fetcher]() - fetches one of latest 256 parent hashes from the chain the satellite is deployed at
+    -   [Starknet Parent Hash Fetcher]()
+-   [DataProcessor]()
+-   [Ownership]()
+-   [Satellite Inspector]()
+-   [Satellite Maintenance]()
 
 ## Development
 
 ### Setup
 
-```
+```bash
+cd solidity
 bun install
 forge install
 bun compile
@@ -151,7 +191,7 @@ bun run test
 
 ## Deployment
 
-1. Create `.env` file using `.env.example` template. You will need `PRIVATE_KEY` of EVM deployment account and `ALCHEMY_API_KEY` which you can get from [Alchemy dashboard](https://dashboard.alchemy.com). Make sure that you enabled chains you need. Additionally, you will need API key for block explorers of chains you want to deploy to (`*CHAIN_NAME*_ETHERSCAN_API_KEY`).
+1. Create `solidity/.env` file using `solidity/.env.example` template. You will need `PRIVATE_KEY` of EVM deployment account and `ALCHEMY_API_KEY` which you can get from [Alchemy dashboard](https://dashboard.alchemy.com). Make sure that you enabled chains you need. Additionally, you will need API key for block explorers of chains you want to deploy to (`*CHAIN_NAME*_ETHERSCAN_API_KEY`).
 
 2. Compile your contract with
 
@@ -225,13 +265,9 @@ bun satellite:remove CHAIN_ID
 
 Here are some useful links for further reading:
 
-- [Herodotus Cloud Documentation](https://docs.herodotus.cloud)
-- [Herodotus Documentation](https://docs.herodotus.dev)
+-   [Herodotus Cloud Documentation](https://docs.herodotus.cloud)
+-   [Herodotus Documentation](https://docs.herodotus.dev)
 
 ## License
 
-Copyright 2024 - Herodotus Dev Ltd
-
-```
-
-```
+Copyright 2025 - Herodotus Dev Ltd

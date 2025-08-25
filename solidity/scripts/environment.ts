@@ -11,7 +11,7 @@ export async function main() {
   }
 
   console.log(`Available environments:`);
-  const files = fs.readdirSync("deployments");
+  const files = fs.readdirSync("../deployments");
   for (const file of files) {
     if (file.endsWith(".json")) {
       const env = file.substring(0, file.length - 5);

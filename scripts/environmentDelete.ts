@@ -1,5 +1,6 @@
 import {
   changeEnvironment,
+  deleteEnvironment,
   doesEnvironmentExist,
   getActiveEnvironment,
 } from "./satelliteDeploymentsManager";
@@ -16,9 +17,7 @@ async function main() {
     process.exit(1);
   }
 
-  const file = Bun.file(`../deployments/${environment}.json`);
-  // if it errors here, you have an old version of bun
-  await file.delete();
+  await deleteEnvironment(environment);
 
   if (environment == (await getActiveEnvironment())) {
     await changeEnvironment(null);

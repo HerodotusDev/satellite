@@ -1,27 +1,27 @@
 name: Cairo contract tests
 
 on:
-    push:
-    pull_request:
+  push:
+  pull_request:
 
 jobs:
-    cairo-contract-tests:
-        runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: cairo
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v3
+  cairo-contract-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cairo
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-            - name: Setup Scarb
-              uses: software-mansion/setup-scarb@v1
+      - name: Setup Scarb
+        uses: software-mansion/setup-scarb@v1
 
-            - name: Setup Snfoundry
-              uses: foundry-rs/setup-snfoundry@v4
+      - name: Setup Snfoundry
+        uses: foundry-rs/setup-snfoundry@v4
 
-            - name: Format code
-              run: scarb fmt --check
+      - name: Format code
+        run: scarb fmt --check
 
-            - name: Run tests
-              run: scarb test
+      - name: Run tests
+        run: scarb test

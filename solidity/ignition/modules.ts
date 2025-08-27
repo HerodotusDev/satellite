@@ -87,16 +87,17 @@ export const modules = (chainId: keyof typeof settings) =>
       : {}),
 
     ...("EVM_SHARP_GROWER_PROGRAM_HASH" in settings[chainId] &&
-    "CAIRO_FACT_REGISTRY_IS_MOCKED" in settings[chainId]
+    "CAIRO_FACT_REGISTRY_IS_MOCKED" in settings[chainId] &&
+    "EVM_SHARP_GROWER_CHAIN_IDS" in settings[chainId]
       ? {
           EvmSharpMmrGrowingModule: {
             interfaceName: "IEvmSharpMmrGrowingModule",
-            initFunctions: [
-              {
-                name: "initEvmSharpMmrGrowingModule",
-                args: [],
-              },
-            ],
+            initFunctions: (
+              settings[chainId].EVM_SHARP_GROWER_CHAIN_IDS as any[]
+            ).map((chainId) => ({
+              name: "enableChainIdForEvmSharpMmrGrowingModule",
+              args: [chainId],
+            })),
           },
         }
       : {}),

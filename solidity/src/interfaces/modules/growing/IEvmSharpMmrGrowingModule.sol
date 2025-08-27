@@ -38,20 +38,23 @@ interface IEvmSharpMmrGrowingModule is ISharpMmrGrowingCommon {
 
     struct EvmSharpMmrGrowingModuleStorage {
         address _unused;
-        uint256 aggregatedChainId;
+        uint256 _unused2;
         // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
         uint256 programHash;
+        mapping(uint256 => bool) chainIds;
     }
 
-    function initEvmSharpMmrGrowingModule() external;
+    event ChainIdEnabledForEvmSharpMmrGrowingModule(uint256 chainId);
+
+    function enableChainIdForEvmSharpMmrGrowingModule(uint256 chainId) external;
 
     function setEvmSharpMmrGrowingModuleProgramHash(uint256 programHash) external;
 
     function getEvmSharpMmrGrowingModuleProgramHash() external view returns (uint256);
 
-    function createEvmSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
+    function createEvmSharpMmr(uint256 chainId, uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external;
 
-    function aggregateEvmSharpJobs(uint256 mmrId, JobOutputPacked[] calldata outputs) external;
+    function aggregateEvmSharpJobs(uint256 chainId, uint256 mmrId, JobOutputPacked[] calldata outputs) external;
 
-    function allowContinueEvmSharpGrowingFrom(IEvmFactRegistryModule.BlockHeaderProof calldata headerProof) external;
+    function allowContinueEvmSharpGrowingFrom(uint256 chainId, IEvmFactRegistryModule.BlockHeaderProof calldata headerProof) external;
 }

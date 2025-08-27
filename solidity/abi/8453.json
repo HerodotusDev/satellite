@@ -439,6 +439,345 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "address",
+        "name": "externalFactRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "CairoFactRegistryExternalContractSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "CairoFactSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "fallbackMockedContract",
+        "type": "address"
+      }
+    ],
+    "name": "CairoMockedFactRegistryFallbackContractSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "CairoMockedFactSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "IsMockedForInternalSet",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "_receiveCairoFactHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCairoMockedFactRegistryFallbackContract",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCairoVerifiedFactRegistryContract",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "getStorageSlotForCairoFact",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "isCairoFactValid",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoFactValidForInternal",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoMockedFactValid",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoVerifiedFactStored",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoVerifiedFactValid",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isMockedForInternal",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "originChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "moveCairoFactFromStorageProof",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setCairoMockedFact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "fallbackMockedContract",
+        "type": "address"
+      }
+    ],
+    "name": "setCairoMockedFactRegistryFallbackContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "externalFactRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "setCairoVerifiedFactRegistryContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "setIsMockedForInternal",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "storeCairoVerifiedFact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "newMmrId",
         "type": "uint256"
@@ -2179,345 +2518,6 @@
     "type": "function"
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "externalFactRegistry",
-        "type": "address"
-      }
-    ],
-    "name": "CairoFactRegistryExternalContractSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "bytes32",
-        "name": "factHash",
-        "type": "bytes32"
-      }
-    ],
-    "name": "CairoFactSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "fallbackMockedContract",
-        "type": "address"
-      }
-    ],
-    "name": "CairoMockedFactRegistryFallbackContractSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "bytes32",
-        "name": "factHash",
-        "type": "bytes32"
-      }
-    ],
-    "name": "CairoMockedFactSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "isMocked",
-        "type": "bool"
-      }
-    ],
-    "name": "IsMockedForInternalSet",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "factHash",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bool",
-        "name": "isMocked",
-        "type": "bool"
-      }
-    ],
-    "name": "_receiveCairoFactHash",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getCairoMockedFactRegistryFallbackContract",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getCairoVerifiedFactRegistryContract",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "factHash",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bool",
-        "name": "isMocked",
-        "type": "bool"
-      }
-    ],
-    "name": "getStorageSlotForCairoFact",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "pure",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "factHash",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bool",
-        "name": "isMocked",
-        "type": "bool"
-      }
-    ],
-    "name": "isCairoFactValid",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "factHash",
-        "type": "bytes32"
-      }
-    ],
-    "name": "isCairoFactValidForInternal",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "factHash",
-        "type": "bytes32"
-      }
-    ],
-    "name": "isCairoMockedFactValid",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "factHash",
-        "type": "bytes32"
-      }
-    ],
-    "name": "isCairoVerifiedFactStored",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "factHash",
-        "type": "bytes32"
-      }
-    ],
-    "name": "isCairoVerifiedFactValid",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "isMockedForInternal",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "originChainId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "blockNumber",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "factHash",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bool",
-        "name": "isMocked",
-        "type": "bool"
-      }
-    ],
-    "name": "moveCairoFactFromStorageProof",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "factHash",
-        "type": "bytes32"
-      }
-    ],
-    "name": "setCairoMockedFact",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "fallbackMockedContract",
-        "type": "address"
-      }
-    ],
-    "name": "setCairoMockedFactRegistryFallbackContract",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "externalFactRegistry",
-        "type": "address"
-      }
-    ],
-    "name": "setCairoVerifiedFactRegistryContract",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bool",
-        "name": "isMocked",
-        "type": "bool"
-      }
-    ],
-    "name": "setIsMockedForInternal",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "factHash",
-        "type": "bytes32"
-      }
-    ],
-    "name": "storeCairoVerifiedFact",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -2548,19 +2548,6 @@
     "name": "onchainEvmAppendBlocksBatch",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "arbSys",
-    "outputs": [
-      {
-        "internalType": "contract IArbSys",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {

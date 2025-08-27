@@ -24,7 +24,9 @@ async function main() {
   }
 
   const connectionsOut = Object.keys(satellite.connections ?? {});
-  const connectionsIn = Object.entries(deployedSatellites.satellites).filter(([_, s]) => s.connections?.[chainId]).map(([id]) => id);
+  const connectionsIn = Object.entries(deployedSatellites.satellites)
+    .filter(([_, s]) => s.connections?.[chainId])
+    .map(([id]) => id);
   if (connectionsIn.length > 0 || connectionsOut.length > 0) {
     console.error(
       `Satellite ${chainId} is connected to ${connectionsOut} other satellites`,

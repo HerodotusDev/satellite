@@ -28,7 +28,8 @@ async function main() {
     console.error(`Unknown chain id: ${Bun.argv[2]}`);
     process.exit(1);
   }
-  const senderSettings = settings[senderChainId.toString() as keyof typeof settings];
+  const senderSettings =
+    settings[senderChainId.toString() as keyof typeof settings];
   if (!senderSettings) {
     console.error(`No settings found for chain id: ${Bun.argv[2]}`);
     process.exit(1);
@@ -39,7 +40,8 @@ async function main() {
     console.error(`Unknown chain id: ${Bun.argv[3]}`);
     process.exit(1);
   }
-  const receiverSettings = settings[receiverChainId.toString() as keyof typeof settings];
+  const receiverSettings =
+    settings[receiverChainId.toString() as keyof typeof settings];
   if (!receiverSettings) {
     console.error(`No settings found for chain id: ${Bun.argv[3]}`);
     process.exit(1);
@@ -75,10 +77,12 @@ async function main() {
     "0x0000000000000000000000000000000000000000",
   ];
 
-  await $`bun hardhat --network ${senderSettings.network} run scripts/connectionRemove_inner.ts`.env({
-    CONTRACT_ADDRESS: senderSatellite.contractAddress,
-    ARGS: senderArgs.join(",")
-  });
+  await $`bun hardhat --network ${senderSettings.network} run scripts/connectionRemove_inner.ts`.env(
+    {
+      CONTRACT_ADDRESS: senderSatellite.contractAddress,
+      ARGS: senderArgs.join(","),
+    },
+  );
 
   // TODO: handle starknet
   if (STARKNET_CHAIN_IDS.includes(receiverChainId)) {
@@ -87,10 +91,12 @@ async function main() {
       alias(senderSatellite.contractAddress, connectionData.L2Alias),
     ];
 
-    await $`bun hardhat --network ${receiverSettings.network} run scripts/connectionRemove_inner.ts`.env({
-      CONTRACT_ADDRESS: receiverSatellite.contractAddress,
-      ARGS: receiverArgs.join(","),
-    });
+    await $`bun hardhat --network ${receiverSettings.network} run scripts/connectionRemove_inner.ts`.env(
+      {
+        CONTRACT_ADDRESS: receiverSatellite.contractAddress,
+        ARGS: receiverArgs.join(","),
+      },
+    );
   }
 
   delete senderSatellite.connections?.[receiverChainId];

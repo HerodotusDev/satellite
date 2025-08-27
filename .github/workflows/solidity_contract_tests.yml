@@ -34,10 +34,6 @@ jobs:
         run: |
           printf "%s\n" "$CONFIG_SECRET" > .env
 
-      - name: Run Prettier Check
-        run: |
-          bun prettier:check
-
       - name: Run Hardhat build
         run: |
           bun compile

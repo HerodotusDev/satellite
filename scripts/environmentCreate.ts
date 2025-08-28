@@ -18,7 +18,7 @@ async function main() {
 
   changeEnvironment(environment);
 
-  writeDeployedSatellites({ satellites: [], connections: [] });
+  writeDeployedSatellites({ satellites: {} });
 }
 
 main();

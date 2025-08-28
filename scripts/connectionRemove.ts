@@ -23,25 +23,23 @@ async function main() {
     process.exit(1);
   }
 
-  const senderChainId = parseChainId(Bun.argv[2]!);
-  if (senderChainId === null) {
+  const senderChainId = parseChainId(Bun.argv[2]!)?.toString();
+  if (senderChainId === undefined) {
     console.error(`Unknown chain id: ${Bun.argv[2]}`);
     process.exit(1);
   }
-  const senderSettings =
-    settings[senderChainId.toString() as keyof typeof settings];
+  const senderSettings = settings[senderChainId as keyof typeof settings];
   if (!senderSettings) {
     console.error(`No settings found for chain id: ${Bun.argv[2]}`);
     process.exit(1);
   }
 
-  const receiverChainId = parseChainId(Bun.argv[3]!);
-  if (receiverChainId === null) {
+  const receiverChainId = parseChainId(Bun.argv[3]!)?.toString();
+  if (receiverChainId === undefined) {
     console.error(`Unknown chain id: ${Bun.argv[3]}`);
     process.exit(1);
   }
-  const receiverSettings =
-    settings[receiverChainId.toString() as keyof typeof settings];
+  const receiverSettings = settings[receiverChainId as keyof typeof settings];
   if (!receiverSettings) {
     console.error(`No settings found for chain id: ${Bun.argv[3]}`);
     process.exit(1);
@@ -49,20 +47,22 @@ async function main() {
 
   const deployedSatellites = await getDeployedSatellites();
 
-  const senderSatellite = deployedSatellites.satellites[senderChainId];
+  const senderSatellite =
+    deployedSatellites.satellites[senderChainId.toString()];
   if (!senderSatellite) {
     console.error(`No satellite deployment found for ${senderChainId}`);
     process.exit(1);
   }
 
-  const receiverSatellite = deployedSatellites.satellites[receiverChainId];
+  const receiverSatellite =
+    deployedSatellites.satellites[receiverChainId.toString()];
   if (!receiverSatellite) {
     console.error(`No satellite deployment found for ${receiverChainId}`);
     process.exit(1);
   }
 
   const connectionData = senderSettings.connections.find(
-    (c) => parseInt(c.to) === receiverChainId,
+    (c) => c.to === receiverChainId,
   );
 
   if (!connectionData) {
@@ -84,8 +84,9 @@ async function main() {
     },
   );
 
-  // TODO: handle starknet
-  if (STARKNET_CHAIN_IDS.includes(receiverChainId)) {
+  if (receiverChainId in STARKNET_CHAIN_IDS) {
+    // TODO: handle starknet
+  } else {
     const receiverArgs = [
       senderChainId,
       alias(senderSatellite.contractAddress, connectionData.L2Alias),

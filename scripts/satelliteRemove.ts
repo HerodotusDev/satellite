@@ -10,8 +10,8 @@ async function main() {
     process.exit(1);
   }
 
-  const chainId = parseChainId(Bun.argv[2]!);
-  if (chainId === null) {
+  const chainId = parseChainId(Bun.argv[2]!)?.toString();
+  if (chainId === undefined) {
     console.error("Invalid chainId");
     process.exit(1);
   }

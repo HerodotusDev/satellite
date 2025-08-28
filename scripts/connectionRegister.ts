@@ -23,15 +23,15 @@ async function main() {
     process.exit(1);
   }
 
-  const senderChainId = parseChainId(Bun.argv[2]!);
-  const receiverChainId = parseChainId(Bun.argv[3]!);
+  const senderChainId = parseChainId(Bun.argv[2]!)?.toString();
+  const receiverChainId = parseChainId(Bun.argv[3]!)?.toString();
 
-  if (senderChainId === null) {
+  if (senderChainId === undefined) {
     console.error(`Invalid senderChainId: ${Bun.argv[2]}`);
     process.exit(1);
   }
 
-  if (receiverChainId === null) {
+  if (receiverChainId === undefined) {
     console.error(`Invalid receiverChainId: ${Bun.argv[3]}`);
     process.exit(1);
   }
@@ -57,13 +57,11 @@ async function main() {
     process.exit(1);
   }
 
-  const senderSettings =
-    settings[senderChainId.toString() as keyof typeof settings];
-  const receiverSettings =
-    settings[receiverChainId.toString() as keyof typeof settings];
+  const senderSettings = settings[senderChainId as keyof typeof settings];
+  const receiverSettings = settings[receiverChainId as keyof typeof settings];
 
   const connectionData = senderSettings.connections.find(
-    (c) => parseInt(c.to) === receiverChainId,
+    (c) => c.to === receiverChainId,
   );
   if (!connectionData) {
     console.error(

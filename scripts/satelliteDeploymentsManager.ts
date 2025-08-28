@@ -1,6 +1,5 @@
 import fs from "fs";
 import { z } from "zod";
-import settings from "../solidity/settings.json";
 
 const DEPLOYMENTS_DIR =
   import.meta.dir.split("/").slice(0, -1).join("/") + "/deployments";
@@ -101,21 +100,25 @@ export function doesEnvironmentExist(name: string): Promise<boolean> {
   return Bun.file(`${DEPLOYMENTS_DIR}/${name}.json`).exists();
 }
 
-export const STARKNET_CHAIN_IDS = [23448594291968334, 393402133025997798000961];
+export const STARKNET_CHAIN_IDS = {
+  "23448594291968334": "mainnet",
+  "393402133025997798000961": "sepolia",
+} as const;
 
 export function parseChainId(chainId: string) {
-  let asInt = parseInt(chainId);
-  if (!isNaN(asInt)) return asInt;
-  else
-    asInt = parseInt(
-      chainId
-        .split("")
-        .map((x) => x.charCodeAt(0).toString(16).padStart(2, ""))
-        .join(""),
-      16,
-    );
+  try {
+    return BigInt(chainId);
+  } catch {}
 
-  if (isNaN(asInt)) return null;
-  if (asInt in settings) return asInt;
-  return null;
+  try {
+    return BigInt(
+      "0x" +
+        chainId
+          .split("")
+          .map((x) => x.charCodeAt(0).toString(16).padStart(2, ""))
+          .join(""),
+    );
+  } catch {
+    return null;
+  }
 }

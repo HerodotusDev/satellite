@@ -11,5 +11,30 @@
   "dependencies": {
     "@HerodotusDev/solidity-mmr": "github:HerodotusDev/solidity-mmr",
     "@openzeppelin": "github:openzeppelin/openzeppelin-contracts"
+  },
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "prettier": "^3.4.2",
+    "prettier-plugin-solidity": "^1.4.1",
+    "zod": "^4.1.3",
+    "ethers": "^6.4.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "prettier": "prettier --write --list-different .",
+    "prettier:check": "prettier --check .",
+    "env": "bun run scripts/environment.ts",
+    "env:create": "bun run scripts/environmentCreate.ts",
+    "env:change": "bun run scripts/environmentChange.ts",
+    "env:delete": "bun run scripts/environmentDelete.ts",
+    "satellite:remove": "bun run scripts/satelliteRemove.ts",
+    "satellite:deploy": "bun run scripts/satelliteDeploy.ts",
+    "satellite:upgrade": "bun run scripts/satelliteUpgrade.ts",
+    "connection:register": "bun run scripts/connectionRegister.ts",
+    "connection:remove": "bun run scripts/connectionRemove.ts"
   }
 }

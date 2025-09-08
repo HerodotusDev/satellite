@@ -33,19 +33,23 @@ async function main() {
   }
 }
 
-export async function upgradeStarknetSatellite(chainId: keyof typeof STARKNET_CHAIN_IDS) {
+export async function upgradeStarknetSatellite(
+  chainId: keyof typeof STARKNET_CHAIN_IDS,
+) {
   const deployedSatellites = await getDeployedSatellites();
 
-  const satelliteAddress = deployedSatellites.satellites[chainId]?.contractAddress
+  const satelliteAddress =
+    deployedSatellites.satellites[chainId]?.contractAddress;
   if (!satelliteAddress) {
-    console.error(`Satellite ${chainId} not deployed`)
+    console.error(`Satellite ${chainId} not deployed`);
     process.exit(1);
   }
 
   const classHash = await starknetDeclare(STARKNET_CHAIN_IDS[chainId]);
-  await starknetUpgrade(STARKNET_CHAIN_IDS[chainId], satelliteAddress, classHash);
+  await starknetUpgrade(
+    STARKNET_CHAIN_IDS[chainId],
+    satelliteAddress,
+    classHash,
+  );
 }
-main();
-
-
 main();

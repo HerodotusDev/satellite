@@ -6,7 +6,11 @@ import {
   writeDeployedSatellites,
 } from "./satelliteDeploymentsManager";
 import fs from "fs";
-import { starknetDeclare, starknetDeploy, starknetGetAccount } from "./starknet";
+import {
+  starknetDeclare,
+  starknetDeploy,
+  starknetGetAccount,
+} from "./starknet";
 
 async function main() {
   if (Bun.argv.length != 3) {
@@ -34,7 +38,9 @@ async function main() {
   }
 }
 
-export async function deployStarknetSatellite(chainId: keyof typeof STARKNET_CHAIN_IDS) {
+export async function deployStarknetSatellite(
+  chainId: keyof typeof STARKNET_CHAIN_IDS,
+) {
   const deployedSatellites = await getDeployedSatellites();
 
   if (deployedSatellites.satellites[chainId]) {

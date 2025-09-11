@@ -4,12 +4,24 @@ import { ethers } from "ethers";
 import { Module, modules as moduleList } from "./modules";
 import settings from "../settings.json";
 
-export function getSelector(interfaceName: string) {
+export function getSelectorWithName(interfaceName: string) {
   const artifacts = hre.artifacts.readArtifactSync(interfaceName);
   const selectors = artifacts.abi
     .filter((fragment) => fragment.type === "function")
-    .map((fragment) => ethers.FunctionFragment.from(fragment).selector);
+    .map((fragment) => {
+      const f = ethers.FunctionFragment.from(fragment);
+      return {
+        name: f.name,
+        selector: f.selector,
+      };
+    });
   return selectors;
+}
+
+export function getSelector(interfaceName: string) {
+  return getSelectorWithName(interfaceName).map(
+    (selector) => selector.selector,
+  );
 }
 
 export type ModuleName = keyof ReturnType<typeof moduleList>;

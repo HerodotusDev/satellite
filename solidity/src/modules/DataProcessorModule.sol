@@ -115,7 +115,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         programOutput[5] = taskData.mmrCollection.keccakMmr.length;
 
         // Proccess Poseidon MMRs 
-        for (uint8 i = 0; i < taskData.mmrCollection.poseidonMmr.length; i++) {
+        for (uint256 i = 0; i < taskData.mmrCollection.poseidonMmr.length; i++) {
             MmrData memory mmr = taskData.mmrCollection.poseidonMmr[i];
             bytes32 usedMmrRoot = LibSatellite.satelliteStorage().mmrs[mmr.chainId][mmr.mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmr.mmrSize];
             if (usedMmrRoot == bytes32(0)) {
@@ -129,7 +129,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
 
 
          // Proccess Keccak MMRs 
-        for (uint8 i = 0; i < taskData.mmrCollection.keccakMmr.length; i++) {
+        for (uint256 i = 0; i < taskData.mmrCollection.keccakMmr.length; i++) {
             MmrData memory mmr = taskData.mmrCollection.keccakMmr[i];
             bytes32 usedMmrRoot = LibSatellite.satelliteStorage().mmrs[mmr.chainId][mmr.mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmr.mmrSize];
             if (usedMmrRoot == bytes32(0)) {

@@ -135,11 +135,17 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
             if (usedMmrRoot == bytes32(0)) {
                 revert InvalidMmrRoot();
             }
-            programOutput[4 + i * 4] = mmr.mmrId;
-            programOutput[4 + i * 4 + 1] = mmr.mmrSize;
-            programOutput[4 + i * 4 + 2] = mmr.chainId;
-            programOutput[4 + i * 4 + 3] = uint256(usedMmrRootLow);
-            programOutput[4 + i * 4 + 4] = uint256(usedMmrRootHigh);
+
+            uint256 usedMmrRootLow = uint256(uint128(uint256(usedMmrRoot)));
+            uint256 usedMmrRootHigh = uint256(uint128(uint256(usedMmrRoot >> 128)));
+
+            uint256 offset = 6 + taskData.mmrCollection.poseidonMmr.length*4;
+
+            programOutput[offset + i * 5] = mmr.mmrId;
+            programOutput[offset + i * 5 + 1] = mmr.mmrSize;
+            programOutput[offset + i * 5 + 2] = mmr.chainId;
+            programOutput[offset + i * 5 + 3] = uint256(usedMmrRootLow);
+            programOutput[offset + i * 5 + 4] = uint256(usedMmrRootHigh);
         }
 
         // Compute program output hash

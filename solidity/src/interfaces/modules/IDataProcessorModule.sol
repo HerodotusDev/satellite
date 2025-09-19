@@ -25,20 +25,26 @@ interface IDataProcessorModule is IFactsRegistryCommon {
         mapping(bytes32 => bool) authorizedProgramHashes;
     }
 
-    struct MmrData {
+
+     struct MmrData {
         uint256 chainId;
         uint256 mmrId;
         uint256 mmrSize;
     }
 
-    /// @param mmrData For each used MMR, its chain ID, ID and size
+    struct MmrCollection {
+        MmrData[] poseidonMmr;
+        MmrData[] keccakMmr;
+    }
+
+    /// @param mmrCollection Grouped Poseidon & Keccak MMR data
     /// @param taskResultLow The low part of the task result
     /// @param taskResultHigh The high part of the task result
     /// @param taskHashLow The low part of the task hash
     /// @param taskHashHigh The high part of the task hash
     /// @param programHash The program hash that was used to compute the task
     struct TaskData {
-        MmrData[] mmrData;
+        MmrCollection[] mmrCollection;
         uint256 taskResultLow;
         uint256 taskResultHigh;
         uint256 taskHashLow;

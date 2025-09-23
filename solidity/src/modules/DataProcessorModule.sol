@@ -121,10 +121,10 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
             if (usedMmrRoot == bytes32(0)) {
                 revert InvalidMmrRoot();
             }
-            programOutput[4 + i * 4] = mmr.mmrId;
-            programOutput[4 + i * 4 + 1] = mmr.mmrSize;
-            programOutput[4 + i * 4 + 2] = mmr.chainId;
-            programOutput[4 + i * 4 + 3] = uint256(usedMmrRoot);
+            programOutput[6 + i * 4] = mmr.mmrId;
+            programOutput[6 + i * 4 + 1] = mmr.mmrSize;
+            programOutput[6 + i * 4 + 2] = mmr.chainId;
+            programOutput[6 + i * 4 + 3] = uint256(usedMmrRoot);
         }
 
 

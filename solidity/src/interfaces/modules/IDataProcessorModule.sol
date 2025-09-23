@@ -44,7 +44,7 @@ interface IDataProcessorModule is IFactsRegistryCommon {
     /// @param taskHashHigh The high part of the task hash
     /// @param programHash The program hash that was used to compute the task
     struct TaskData {
-        MmrCollection[] mmrCollection;
+        MmrCollection mmrCollection;
         uint256 taskResultLow;
         uint256 taskResultHigh;
         uint256 taskHashLow;

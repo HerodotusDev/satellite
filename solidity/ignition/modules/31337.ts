@@ -12,7 +12,6 @@ export const modules: ModuleName[] = [
   "EvmSharpMmrGrowingModule",
   // "StarknetSharpMmrGrowingModule",
   "NativeParentHashFetcherModule",
-  "OptimismParentHashFetcherModule",
   // "StarknetParentHashFetcherModule",
   "MockFactsRegistry",
 ];

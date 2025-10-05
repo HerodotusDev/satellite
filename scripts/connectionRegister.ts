@@ -1,12 +1,11 @@
 import { $ } from "bun";
-import fs from "fs";
 import { ethers } from "ethers";
-import settings from "../settings.json";
+import settings from "../solidity/settings.json";
 import {
   getDeployedSatellites,
+  parseChainId,
   writeDeployedSatellites,
 } from "./satelliteDeploymentsManager";
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 function alias(address: string, shift: string) {
   const addressInt = BigInt(address);
@@ -24,51 +23,44 @@ async function main() {
     process.exit(1);
   }
 
-  const senderChainId = Bun.argv[2] as keyof typeof settings;
-  const receiverChainId = Bun.argv[3] as keyof typeof settings;
+  const senderChainId = parseChainId(Bun.argv[2]!)?.toString();
+  const receiverChainId = parseChainId(Bun.argv[3]!)?.toString();
 
-  if (!(senderChainId in settings)) {
-    console.error(`No settings found for ${senderChainId}`);
+  if (senderChainId === undefined) {
+    console.error(`Invalid senderChainId: ${Bun.argv[2]}`);
     process.exit(1);
   }
 
-  if (!(receiverChainId in settings)) {
-    console.error(`No settings found for ${receiverChainId}`);
+  if (receiverChainId === undefined) {
+    console.error(`Invalid receiverChainId: ${Bun.argv[3]}`);
     process.exit(1);
   }
 
   const deployedSatellites = await getDeployedSatellites();
 
-  const senderSatellite = deployedSatellites.satellites.find(
-    (s) => s.chainId === senderChainId,
-  );
+  const senderSatellite = deployedSatellites.satellites[senderChainId];
   if (!senderSatellite) {
     console.error(`No satellite deployment found for ${senderChainId}`);
     process.exit(1);
   }
 
-  const receiverSatellite = deployedSatellites.satellites.find(
-    (s) => s.chainId === receiverChainId,
-  );
+  const receiverSatellite = deployedSatellites.satellites[receiverChainId];
   if (!receiverSatellite) {
     console.error(`No satellite deployment found for ${receiverChainId}`);
     process.exit(1);
   }
 
-  if (
-    (deployedSatellites.connections as any[]).find(
-      (c) =>
-        parseInt(c.from) === parseInt(senderChainId) &&
-        parseInt(c.to) === parseInt(receiverChainId),
-    )
-  ) {
+  if (senderSatellite.connections?.[receiverChainId]) {
     console.error(
       `Connection ${senderChainId} -> ${receiverChainId} already exists`,
     );
     process.exit(1);
   }
 
-  const connectionData = settings[senderChainId].connections.find(
+  const senderSettings = settings[senderChainId as keyof typeof settings];
+  const receiverSettings = settings[receiverChainId as keyof typeof settings];
+
+  const connectionData = senderSettings.connections.find(
     (c) => c.to === receiverChainId,
   );
   if (!connectionData) {
@@ -91,12 +83,18 @@ async function main() {
     "0x0000000000000000000000000000000000000000",
   ];
 
-  await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${senderSatellite.contractAddress} ARGS=${senderArgs.join(",")} bun hardhat --network ${settings[senderChainId].network} run scripts/connectionRegister_inner.ts`;
+  await $`bun hardhat --network ${senderSettings.network} run scripts/connectionRegisterEvm.ts`
+    .env({
+      ...process.env,
+      CONTRACT_ADDRESS: senderSatellite.contractAddress,
+      ARGS: senderArgs.join(","),
+    })
+    .cwd("./solidity");
 
   // TODO: handle starknet
   if (
-    settings[receiverChainId].network != "starknetSepolia" &&
-    settings[receiverChainId].network != "starknet"
+    receiverSettings.network != "starknetSepolia" &&
+    receiverSettings.network != "starknet"
   ) {
     const receiverArgs = [
       senderChainId,
@@ -106,13 +104,19 @@ async function main() {
       alias(senderSatellite.contractAddress, connectionData.L2Alias),
     ];
 
-    await $`PRIVATE_KEY=${PRIVATE_KEY} CONTRACT_ADDRESS=${receiverSatellite.contractAddress} ARGS=${receiverArgs.join(",")} bun hardhat --network ${settings[receiverChainId].network} run scripts/connectionRegister_inner.ts`;
+    await $`bun hardhat --network ${receiverSettings.network} run scripts/connectionRegisterEvm.ts`
+      .env({
+        ...process.env,
+        CONTRACT_ADDRESS: receiverSatellite.contractAddress,
+        ARGS: receiverArgs.join(","),
+      })
+      .cwd("./solidity");
   }
 
-  (deployedSatellites.connections as any[]).push({
-    from: senderChainId,
-    to: receiverChainId,
-  });
+  if (!senderSatellite.connections) {
+    senderSatellite.connections = {};
+  }
+  senderSatellite.connections[receiverChainId] = {};
 
   writeDeployedSatellites(deployedSatellites);
 }

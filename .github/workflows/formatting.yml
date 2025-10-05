@@ -1,0 +1,26 @@
+name: Formatting
+
+on:
+  push:
+  pull_request:
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  formatting:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Run Bun install
+        run: |
+          bun install
+
+      - name: Run Prettier Check
+        run: |
+          bun run prettier:check

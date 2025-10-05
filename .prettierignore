@@ -1,0 +1,7 @@
+solidity/lib
+LICENSE
+banner.png
+solidity/artifacts
+solidity/cache_hardhat
+solidity/ignition/deployments
+solidity/typechain-types

@@ -37,9 +37,10 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
 
     // ========================= Core Functions ========================= //
 
-    function initEvmSharpMmrGrowingModule() external onlyOwner {
+    function enableChainIdForEvmSharpMmrGrowingModule(uint256 chainId) external onlyOwner {
         EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
-        ms.aggregatedChainId = block.chainid;
+        ms.chainIds[chainId] = true;
+        emit ChainIdEnabledForEvmSharpMmrGrowingModule(chainId);
     }
 
     // Cairo program hash calculated with Poseidon (i.e., the off-chain block headers accumulator program)
@@ -53,17 +54,21 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
         return ms.programHash;
     }
 
-    function createEvmSharpMmr(uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external {
+    function createEvmSharpMmr(uint256 chainId, uint256 newMmrId, uint256 originalMmrId, uint256 mmrSize) external {
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        require(ms.chainIds[chainId], "Chain ID not supported");
+
         bytes32[] memory hashingFunctions = new bytes32[](2);
         hashingFunctions[0] = KECCAK_HASHING_FUNCTION;
         hashingFunctions[1] = POSEIDON_HASHING_FUNCTION;
 
-        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
-
-        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, ms.aggregatedChainId, mmrSize, hashingFunctions, true);
+        ISatellite(address(this)).createMmrFromDomestic(newMmrId, originalMmrId, chainId, mmrSize, hashingFunctions, true);
     }
 
-    function aggregateEvmSharpJobs(uint256 mmrId, IEvmSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external {
+    function aggregateEvmSharpJobs(uint256 chainId, uint256 mmrId, IEvmSharpMmrGrowingModule.JobOutputPacked[] calldata outputs) external {
+        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        require(ms.chainIds[chainId], "Chain ID not supported");
+
         // Ensuring at least one job output is provided
         if (outputs.length < 1) {
             revert NotEnoughJobs();
@@ -73,7 +78,7 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
         (uint256 fromBlock, ) = firstOutput.blockNumbersPacked.split128();
 
         // Ensure the first job is continuable
-        _validateOutput(mmrId, fromBlock, firstOutput);
+        _validateOutput(chainId, mmrId, fromBlock, firstOutput);
 
         uint256 limit = outputs.length - 1;
 
@@ -93,19 +98,18 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
         (, uint256 mmrNewSize) = lastOutput.mmrSizesPacked.split128();
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
 
-        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
-        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize = mmrNewSize;
-        s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown = true;
+        s.mmrs[chainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootPoseidon;
+        s.mmrs[chainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize = mmrNewSize;
+        s.mmrs[chainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown = true;
 
-        s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootKeccak;
-        s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize = mmrNewSize;
-        s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown = true;
+        s.mmrs[chainId][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrNewSize] = lastOutput.mmrNewRootKeccak;
+        s.mmrs[chainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize = mmrNewSize;
+        s.mmrs[chainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown = true;
 
         (, uint256 toBlock) = lastOutput.blockNumbersPacked.split128();
 
-        ISatellite(address(this))._receiveParentHash(ms.aggregatedChainId, KECCAK_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
+        ISatellite(address(this))._receiveParentHash(chainId, KECCAK_HASHING_FUNCTION, toBlock, lastOutput.blockNMinusRPlusOneParentHash);
 
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](2);
         rootsForHashingFunctions[0].root = lastOutput.mmrNewRootPoseidon;
@@ -113,57 +117,57 @@ contract EvmSharpMmrGrowingModule is IEvmSharpMmrGrowingModule, AccessController
         rootsForHashingFunctions[1].root = lastOutput.mmrNewRootKeccak;
         rootsForHashingFunctions[1].hashingFunction = KECCAK_HASHING_FUNCTION;
 
-        emit IMmrCoreModule.GrownMmr(fromBlock, toBlock, rootsForHashingFunctions, mmrNewSize, mmrId, ms.aggregatedChainId, GrownBy.EVM_SHARP_GROWER);
+        emit IMmrCoreModule.GrownMmr(fromBlock, toBlock, rootsForHashingFunctions, mmrNewSize, mmrId, chainId, GrownBy.EVM_SHARP_GROWER);
     }
 
     /// @notice Allows the contract to continue from a given block, the block must be in an MMR already.
     /// @param headerProof The block header proof to verify and continue from
-    function allowContinueEvmSharpGrowingFrom(ISatellite.BlockHeaderProof calldata headerProof) external {
+    function allowContinueEvmSharpGrowingFrom(uint256 chainId, ISatellite.BlockHeaderProof calldata headerProof) external {
         EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
+        require(ms.chainIds[chainId], "Chain ID not supported");
+
         ISatellite satellite = ISatellite(address(this));
 
-        bytes32[15] memory fields = satellite.verifyHeader(ms.aggregatedChainId, headerProof);
+        bytes32[15] memory fields = satellite.verifyHeader(chainId, headerProof);
 
         bytes32 parentHash = fields[uint8(IEvmFactRegistryModule.BlockHeaderField.PARENT_HASH)];
         uint256 blockNumber = uint256(fields[uint8(IEvmFactRegistryModule.BlockHeaderField.NUMBER)]);
 
-        satellite._receiveParentHash(ms.aggregatedChainId, KECCAK_HASHING_FUNCTION, blockNumber, parentHash);
+        satellite._receiveParentHash(chainId, KECCAK_HASHING_FUNCTION, blockNumber, parentHash);
     }
 
     /// @notice Ensures the job output is cryptographically sound to continue from
     /// @param mmrId The MMR ID to validate the output for
     /// @param fromBlockNumber The parent hash of the block to start from
     /// @param firstOutput The job output to check
-    function _validateOutput(uint256 mmrId, uint256 fromBlockNumber, IEvmSharpMmrGrowingModule.JobOutputPacked memory firstOutput) internal view {
+    function _validateOutput(uint256 chainId, uint256 mmrId, uint256 fromBlockNumber, IEvmSharpMmrGrowingModule.JobOutputPacked memory firstOutput) internal view {
         (uint256 mmrPreviousSize, ) = firstOutput.mmrSizesPacked.split128();
 
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
-        EvmSharpMmrGrowingModuleStorage storage ms = moduleStorage();
         // Retrieve from cache the parent hash of the block to start from
-        bytes32 fromBlockPlusOneParentHash = s.receivedParentHashes[ms.aggregatedChainId][KECCAK_HASHING_FUNCTION][fromBlockNumber + 1];
-        uint256 actualMmrSizePoseidon = s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize;
-        uint256 actualMmrSizeKeccak = s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize;
+        bytes32 fromBlockPlusOneParentHash = s.receivedParentHashes[chainId][KECCAK_HASHING_FUNCTION][fromBlockNumber + 1];
+        uint256 actualMmrSizePoseidon = s.mmrs[chainId][mmrId][POSEIDON_HASHING_FUNCTION].latestSize;
+        uint256 actualMmrSizeKeccak = s.mmrs[chainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize;
 
         // Check that the job's previous MMR size is the same as the one stored in the contract state
         if (mmrPreviousSize != actualMmrSizePoseidon || mmrPreviousSize != actualMmrSizeKeccak) {
             revert AggregationError("MMR size mismatch");
         }
 
-        if (s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown != true) {
+        if (s.mmrs[chainId][mmrId][POSEIDON_HASHING_FUNCTION].isOffchainGrown != true) {
             revert AggregationError("Poseidon MMR is not offchain grown");
         }
 
-        if (s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown != true) {
+        if (s.mmrs[chainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown != true) {
             revert AggregationError("Keccak MMR is not offchain grown");
         }
 
         // Check that the job's previous Poseidon MMR root is the same as the one stored in the contract state
-        if (firstOutput.mmrPreviousRootPoseidon != s.mmrs[ms.aggregatedChainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrPreviousSize])
+        if (firstOutput.mmrPreviousRootPoseidon != s.mmrs[chainId][mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmrPreviousSize])
             revert AggregationError("Poseidon root mismatch");
 
         // Check that the job's previous Keccak MMR root is the same as the one stored in the contract state
-        if (firstOutput.mmrPreviousRootKeccak != s.mmrs[ms.aggregatedChainId][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrPreviousSize])
-            revert AggregationError("Keccak root mismatch");
+        if (firstOutput.mmrPreviousRootKeccak != s.mmrs[chainId][mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmrPreviousSize]) revert AggregationError("Keccak root mismatch");
 
         // If not present in the cache, hash is not authenticated and we cannot continue from it
         if (fromBlockPlusOneParentHash == bytes32(0)) {

@@ -3,7 +3,7 @@ pragma solidity ^0.8.27;
 
 import {Script} from "./AbstractScript.sol";
 import {console} from "forge-std/console.sol";
-import {IEvmSharpMmrGrowingModule} from "src/interfaces/modules/growing/IEvmSharpMmrGrowingModule.sol";
+import {IEvmSharpMmrGrowingModule} from "../src/interfaces/modules/growing/IEvmSharpMmrGrowingModule.sol";
 
 contract TestScript is Script {
     function run() public {

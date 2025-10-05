@@ -1,10 +1,9 @@
 import { $ } from "bun";
 import hre from "hardhat";
-import fs from "fs";
 import {
   getDeployedSatellites,
   writeDeployedSatellites,
-} from "./satelliteDeploymentsManager";
+} from "../../scripts/satelliteDeploymentsManager";
 
 async function main() {
   if (Bun.argv.length != 3) {
@@ -29,9 +28,7 @@ async function main() {
 
   const [chainName, chainConfig] = chainConfigs[0];
 
-  if (
-    (deployedSatellites.satellites as any[]).find((s) => s.chainId == chainId)
-  ) {
+  if (deployedSatellites.satellites[chainId]) {
     console.error(
       `Satellite ${chainId} already deployed\nHint: you may use "bun satellite:remove ${chainId}" or change the active environment with "bun env:change"`,
     );
@@ -40,19 +37,21 @@ async function main() {
 
   let output: string;
   let regex: RegExp;
-  if (chainConfig.zksync) {
+  // if (chainConfig.zksync) {
+  //   output = (
+  //     await $`bun run compile:zksync && bun hardhat deploy-zksync --script deploy.ts --network ${chainName}`
+  //   ).text();
+  //   regex = /^Satellite (\w+)$/;
+  // } else
+  // "compile:zksync": "bun hardhat compile --network zkSyncSepolia",
+  if (chainName == "hardhat") {
     output = (
-      await $`bun run compile:zksync && bun hardhat deploy-zksync --script deploy.ts --network ${chainName}`
-    ).text();
-    regex = /^Satellite (\w+)$/;
-  } else if (chainName == "hardhat") {
-    output = (
-      await $`bun run compile && bun hardhat ignition deploy ./ignition/modules/${chainId}.ts --network localhost`
+      await $`bun hardhat ignition deploy ./ignition/modules/${chainId}.ts --network localhost`
     ).text();
     regex = /^Satellite_\d+\#ISatellite - (\w+)$/;
   } else {
     output = (
-      await $`bun run compile && bun hardhat ignition deploy ./ignition/modules/${chainId}.ts --network ${chainName} --verify`
+      await $`bun hardhat ignition deploy ./ignition/modules/${chainId}.ts --network ${chainName} --verify`
     ).text();
     regex = /^Satellite_\d+\#ISatellite - (\w+)$/;
   }
@@ -70,10 +69,9 @@ async function main() {
     process.exit(1);
   }
 
-  (deployedSatellites.satellites as any[]).push({
-    chainId,
+  deployedSatellites.satellites[chainId] = {
     contractAddress: address,
-  });
+  };
 
   writeDeployedSatellites(deployedSatellites);
 }

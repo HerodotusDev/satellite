@@ -1,5 +1,5 @@
 import { $ } from "bun";
-import { getDeployedSatellites } from "./satelliteDeploymentsManager";
+import { getDeployedSatellites } from "../../scripts/satelliteDeploymentsManager";
 
 async function runTestScript() {
   if (Bun.argv.length < 4) {
@@ -43,9 +43,7 @@ async function runTestScript() {
   }
   const forkedChainId = parseInt((await forkedChainIdResponse.json()).result);
 
-  const satellite = deployedSatellites.satellites.find(
-    (s) => parseInt(s.chainId) === forkedChainId,
-  );
+  const satellite = deployedSatellites.satellites[forkedChainId];
   if (!satellite) {
     console.error(`Satellite not deployed for chain ${forkedChainId}`);
     process.exit(1);
@@ -55,7 +53,16 @@ async function runTestScript() {
 
   $.nothrow();
 
-  await $`ETHERSCAN_API_KEY="" SATELLITE_ADDRESS=${satelliteAddress} FORK_CHAIN_ID=${forkedChainId} forge script ${scriptPath} --rpc-url ${rpcUrl} -vvv --chain ${chainId} ${Bun.argv.slice(4).join(" ")}`;
+  await $`forge script ${scriptPath} --rpc-url ${rpcUrl} -vvv --chain ${chainId} ${Bun.argv.slice(4).join(" ")}`.env(
+    {
+      ...process.env,
+      FORCE_COLOR: "1",
+      ETHERSCAN_API_KEY: "",
+      ETHERSCAN_API_URL: "",
+      SATELLITE_ADDRESS: satelliteAddress,
+      FORK_CHAIN_ID: forkedChainId.toString(),
+    },
+  );
 }
 
 runTestScript();

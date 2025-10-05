@@ -5,7 +5,7 @@
       "name": "@HerodotusDev/satellite",
       "dependencies": {
         "@HerodotusDev/solidity-mmr": "github:HerodotusDev/solidity-mmr",
-        "@openzeppelin": "github:openzeppelin/openzeppelin-contracts",
+        "@openzeppelin/contracts": "^5.4.0",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -98,7 +98,7 @@
 
     "@noble/secp256k1": ["@noble/secp256k1@1.7.1", "", {}, "sha512-hOUk6AyBFmqVrv7k5WAw/LpszxVbj9gGN4JRkIX52fdFAj1UA61KXmZDvqVEm+pOyec3+fIeZB02LYa/pWOArw=="],
 
-    "@openzeppelin": ["openzeppelin-solidity@github:openzeppelin/openzeppelin-contracts#be8ee86", {}, "OpenZeppelin-openzeppelin-contracts-be8ee86"],
+    "@openzeppelin/contracts": ["@openzeppelin/contracts@5.4.0", "", {}, "sha512-eCYgWnLg6WO+X52I16TZt8uEjbtdkgLC0SUX/xnAksjjrQI4Xfn4iBRoI5j55dmlOhDv1Y7BoR3cU7e3WWhC6A=="],
 
     "@solidity-parser/parser": ["@solidity-parser/parser@0.20.2", "", {}, "sha512-rbu0bzwNvMcwAjH86hiEAcOeRI2EeK8zCkHDrFykh/Al8mvJeFmjy3UrE7GYQjNwOgbGUUtCn5/k8CB8zIu7QA=="],
 

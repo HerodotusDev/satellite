@@ -10,7 +10,7 @@
   ],
   "dependencies": {
     "@HerodotusDev/solidity-mmr": "github:HerodotusDev/solidity-mmr",
-    "@openzeppelin": "github:openzeppelin/openzeppelin-contracts"
+    "@openzeppelin": "@openzeppelin/contracts"
   },
   "type": "module",
   "private": true,

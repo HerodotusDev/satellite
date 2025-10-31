@@ -39,7 +39,7 @@ contract OptimismParentHashFetcherModule is IOptimismParentHashFetcherModule, Ac
 
     function optimismFetchParentHash(uint256 chainId, uint256 gameIndex, bytes32 versionByte, bytes32 stateRoot, bytes32 withdrawalStorageRoot, bytes memory blockHeader) external {
         OptimismFetcherChainInfo storage chainInfo = moduleStorage().chainInfo[chainId];
-        require(chainInfo.disputeGameFactory != IDisputeGameFactory(address(0)) && chainInfo.trustedGameProposer != address(0), "ERR_CHAIN_NOT_SUPPORTED_FOR_OPTIMISM");
+        require(chainInfo.disputeGameFactory != IDisputeGameFactory(address(0)), "ERR_CHAIN_NOT_SUPPORTED_FOR_OPTIMISM");
 
         (, , address proxy) = chainInfo.disputeGameFactory.gameAtIndex(gameIndex);
         require(proxy != address(0), "ERR_GAME_NOT_FOUND");

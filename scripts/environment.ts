@@ -1,5 +1,7 @@
-import fs from "fs";
-import { getActiveEnvironmentSafe } from "./satelliteDeploymentsManager";
+import {
+  getActiveEnvironmentSafe,
+  getAllEnvironments,
+} from "./satelliteDeploymentsManager";
 
 export async function main() {
   const activeEnvironment = await getActiveEnvironmentSafe();
@@ -11,12 +13,9 @@ export async function main() {
   }
 
   console.log(`Available environments:`);
-  const files = fs.readdirSync("../deployments");
-  for (const file of files) {
-    if (file.endsWith(".json")) {
-      const env = file.substring(0, file.length - 5);
-      console.log(`${env == activeEnvironment ? ">>" : " -"} ${env}`);
-    }
+  const envs = await getAllEnvironments();
+  for (const env of envs) {
+    console.log(`${env == activeEnvironment ? ">>" : " -"} ${env}`);
   }
   console.log(
     `\nRun "bun env:change <environment>" to change the active environment`,

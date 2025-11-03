@@ -23,7 +23,6 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
     bytes32 constant POSEIDON_HASHING_FUNCTION = keccak256("poseidon");
     bytes32 constant KECCAK_HASHING_FUNCTION = keccak256("keccak");
 
-
     // ========================= Satellite Module Storage ========================= //
 
     bytes32 constant MODULE_STORAGE_POSITION = keccak256("diamond.standard.satellite.module.storage.data-processor");
@@ -99,10 +98,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         }
 
         // Initialize an array of uint256 to store the program output
-        uint256[] memory programOutput = new uint256[](
-            6 + taskData.mmrCollection.poseidonMmr.length * 4 
-            + taskData.mmrCollection.keccakMmr.length * 5
-        );
+        uint256[] memory programOutput = new uint256[](6 + taskData.mmrCollection.poseidonMmr.length * 4 + taskData.mmrCollection.keccakMmr.length * 5);
 
         // Assign values to the program output array
         // This needs to be compatible with cairo program
@@ -114,7 +110,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
         programOutput[4] = taskData.mmrCollection.poseidonMmr.length;
         programOutput[5] = taskData.mmrCollection.keccakMmr.length;
 
-        // Proccess Poseidon MMRs 
+        // Proccess Poseidon MMRs
         for (uint256 i = 0; i < taskData.mmrCollection.poseidonMmr.length; i++) {
             MmrData memory mmr = taskData.mmrCollection.poseidonMmr[i];
             bytes32 usedMmrRoot = LibSatellite.satelliteStorage().mmrs[mmr.chainId][mmr.mmrId][POSEIDON_HASHING_FUNCTION].mmrSizeToRoot[mmr.mmrSize];
@@ -127,8 +123,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
             programOutput[6 + i * 4 + 3] = uint256(usedMmrRoot);
         }
 
-
-         // Proccess Keccak MMRs 
+        // Proccess Keccak MMRs
         for (uint256 i = 0; i < taskData.mmrCollection.keccakMmr.length; i++) {
             MmrData memory mmr = taskData.mmrCollection.keccakMmr[i];
             bytes32 usedMmrRoot = LibSatellite.satelliteStorage().mmrs[mmr.chainId][mmr.mmrId][KECCAK_HASHING_FUNCTION].mmrSizeToRoot[mmr.mmrSize];
@@ -139,7 +134,7 @@ contract DataProcessorModule is IDataProcessorModule, AccessController {
             uint256 usedMmrRootLow = uint256(uint128(uint256(usedMmrRoot)));
             uint256 usedMmrRootHigh = uint256(uint128(uint256(usedMmrRoot >> 128)));
 
-            uint256 offset = 6 + taskData.mmrCollection.poseidonMmr.length*4;
+            uint256 offset = 6 + taskData.mmrCollection.poseidonMmr.length * 4;
 
             programOutput[offset + i * 5] = mmr.mmrId;
             programOutput[offset + i * 5 + 1] = mmr.mmrSize;

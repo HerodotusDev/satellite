@@ -25,8 +25,7 @@ interface IDataProcessorModule is IFactsRegistryCommon {
         mapping(bytes32 => bool) authorizedProgramHashes;
     }
 
-
-     struct MmrData {
+    struct MmrData {
         uint256 chainId;
         uint256 mmrId;
         uint256 mmrSize;

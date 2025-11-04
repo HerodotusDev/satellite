@@ -83,8 +83,8 @@ pub mod data_processor_component {
         Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
     };
     use crate::cairo_fact_registry::{ICairoFactRegistry, cairo_fact_registry_component};
-    use crate::mmr_core::{POSEIDON_HASHING_FUNCTION, KECCAK_HASHING_FUNCTION};
     use crate::mmr_core::mmr_core_component::MmrCoreExternalImpl;
+    use crate::mmr_core::{KECCAK_HASHING_FUNCTION, POSEIDON_HASHING_FUNCTION};
     use crate::state::state_component;
     use super::*;
 
@@ -251,7 +251,7 @@ pub mod data_processor_component {
                 program_output.append((*mmr.mmr_size).try_into().expect('mmr_size not felt252'));
                 program_output.append((*mmr.chain_id).try_into().expect('chain_id not felt252'));
 
-                 // Split 256-bit root into two 128-bit limbs
+                // Split 256-bit root into two 128-bit limbs
                 let mmr_root_low: u128 = mmr_root.low;
                 let mmr_root_high: u128 = mmr_root.high;
 

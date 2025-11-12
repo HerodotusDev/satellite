@@ -40,7 +40,7 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     /// @inheritdoc ICairoFactRegistryModule
     function isCairoVerifiedFactValid(bytes32 factHash) public view returns (bool) {
         CairoFactRegistryModuleStorage storage ms = moduleStorage();
-        return ms.facts[factHash] || ms.externalFactRegistry.isValid(factHash);
+        return ms.facts[factHash] || address(ms.externalFactRegistry) != address(0) && ms.externalFactRegistry.isValid(factHash);
     }
 
     /// @inheritdoc ICairoFactRegistryModule

@@ -77,7 +77,7 @@ pub trait IDataProcessor<TContractState> {
 #[starknet::component]
 pub mod data_processor_component {
     use integrity::{
-        calculate_fact_hash,
+        calculate_bootloaded_fact_hash,
         SHARP_BOOTLOADER_PROGRAM_HASH
     };
     use openzeppelin::access::ownable::OwnableComponent;

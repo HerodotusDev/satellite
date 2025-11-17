@@ -35,7 +35,6 @@ struct TaskData {
     task_result_high: u128,
     task_hash_low: u128,
     task_hash_high: u128,
-    module_hash: u256,
     program_hash: felt252,
 }
 
@@ -76,10 +75,7 @@ pub trait IDataProcessor<TContractState> {
 
 #[starknet::component]
 pub mod data_processor_component {
-    use integrity::{
-        calculate_bootloaded_fact_hash,
-        SHARP_BOOTLOADER_PROGRAM_HASH
-    };
+    use integrity::{SHARP_BOOTLOADER_PROGRAM_HASH, calculate_bootloaded_fact_hash};
     use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::access::ownable::OwnableComponent::InternalTrait as OwnableInternal;
     use starknet::storage::{
@@ -263,9 +259,7 @@ pub mod data_processor_component {
             }
 
             let fact_hash = calculate_bootloaded_fact_hash(
-                SHARP_BOOTLOADER_PROGRAM_HASH,
-                task_data.program_hash,
-                program_output.span()
+                SHARP_BOOTLOADER_PROGRAM_HASH, task_data.program_hash, program_output.span(),
             );
 
             let cairo_fact_registry = get_dep_component!(@self, CairoFactRegistry);

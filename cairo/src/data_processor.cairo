@@ -76,7 +76,10 @@ pub trait IDataProcessor<TContractState> {
 
 #[starknet::component]
 pub mod data_processor_component {
-    use integrity::calculate_fact_hash;
+    use integrity::{
+        calculate_fact_hash,
+        SHARP_BOOTLOADER_PROGRAM_HASH
+    };
     use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::access::ownable::OwnableComponent::InternalTrait as OwnableInternal;
     use starknet::storage::{
@@ -259,7 +262,11 @@ pub mod data_processor_component {
                 program_output.append(mmr_root_high.try_into().expect('mmr_root_high not felt252'));
             }
 
-            let fact_hash = calculate_fact_hash(task_data.program_hash, program_output.span());
+            let fact_hash = calculate_bootloaded_fact_hash(
+                SHARP_BOOTLOADER_PROGRAM_HASH,
+                task_data.program_hash,
+                program_output.span()
+            );
 
             let cairo_fact_registry = get_dep_component!(@self, CairoFactRegistry);
             assert(cairo_fact_registry.isCairoFactValidForInternal(fact_hash), 'Invalid fact');
@@ -294,4 +301,3 @@ pub mod data_processor_component {
         }
     }
 }
-

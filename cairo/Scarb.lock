@@ -8,8 +8,8 @@ source = "git+https://github.com/HerodotusDev/cairo-lib.git?branch=cairo_2.11#8b
 
 [[package]]
 name = "integrity"
-version = "2.0.0"
-source = "git+https://github.com/HerodotusDev/integrity.git#fc39dd8c447de088d8c43e106a08869f5282e00e"
+version = "2.1.0"
+source = "git+https://github.com/HerodotusDev/integrity.git#331bd29a437452f5321bc5c6d31cdb13b649929b"
 
 [[package]]
 name = "openzeppelin"

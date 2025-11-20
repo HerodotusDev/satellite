@@ -3150,24 +3150,53 @@
           {
             "components": [
               {
-                "internalType": "uint256",
-                "name": "chainId",
-                "type": "uint256"
+                "components": [
+                  {
+                    "internalType": "uint256",
+                    "name": "chainId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "mmrId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "mmrSize",
+                    "type": "uint256"
+                  }
+                ],
+                "internalType": "struct IDataProcessorModule.MmrData[]",
+                "name": "poseidonMmr",
+                "type": "tuple[]"
               },
               {
-                "internalType": "uint256",
-                "name": "mmrId",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "mmrSize",
-                "type": "uint256"
+                "components": [
+                  {
+                    "internalType": "uint256",
+                    "name": "chainId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "mmrId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "mmrSize",
+                    "type": "uint256"
+                  }
+                ],
+                "internalType": "struct IDataProcessorModule.MmrData[]",
+                "name": "keccakMmr",
+                "type": "tuple[]"
               }
             ],
-            "internalType": "struct IDataProcessorModule.MmrData[]",
-            "name": "mmrData",
-            "type": "tuple[]"
+            "internalType": "struct IDataProcessorModule.MmrCollection",
+            "name": "mmrCollection",
+            "type": "tuple"
           },
           {
             "internalType": "uint256",

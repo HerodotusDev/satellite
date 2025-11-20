@@ -75,10 +75,8 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
         uint256 accumulatedChainId,
         bytes32 hashingFunction
     ) internal returns (MMRGrowResult memory result) {
-        (uint256 proofMmrId, uint256 referenceProofLeafIndex, bytes32[] memory referenceProof, bytes32[] memory referencePeaks, bytes memory referenceHeaderSerialized) = abi.decode(
-            ctx,
-            (uint256, uint256, bytes32[], bytes32[], bytes)
-        );
+        (uint256 proofMmrId, uint256 referenceProofLeafIndex, bytes32[] memory referenceProof, bytes32[] memory referencePeaks, bytes memory referenceHeaderSerialized) = abi
+            .decode(ctx, (uint256, uint256, bytes32[], bytes32[], bytes));
 
         _validateParentBlockAndProveIntegrity(proofMmrId, referenceProofLeafIndex, referenceProof, referencePeaks, referenceHeaderSerialized, accumulatedChainId, hashingFunction);
 
@@ -104,7 +102,7 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
         uint256 accumulatedChainId,
         bytes32 hashingFunction
     ) internal returns (MMRGrowResult memory result) {
-        (uint256 blockNumber) = abi.decode(ctx, (uint256)); // First appended block (reference block - 1)
+        uint256 blockNumber = abi.decode(ctx, (uint256)); // First appended block (reference block - 1)
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
         bytes32 expectedHash = s.receivedParentHashes[accumulatedChainId][hashingFunction][blockNumber + 1];

@@ -4,9 +4,17 @@ use cairo_lib::data_structures::mmr::proof::Proof;
 use cairo_lib::hashing::keccak::keccak_cairo_words64;
 use cairo_lib::hashing::poseidon::hash_words64;
 use cairo_lib::utils::types::words64::Words64;
+use starknet::ContractAddress;
+
+// Growing module is separated into different contract to reduce class size of the Satellite
+// contract.
 
 #[starknet::interface]
 pub trait IEvmGrowing<TContractState> {
+    fn _setGrowingInnerContractAddress(
+        ref self: TContractState, inner_contract_address: ContractAddress,
+    );
+
     fn onchainEvmAppendBlocksBatch(
         ref self: TContractState,
         chain_id: u256,
@@ -21,15 +29,17 @@ pub trait IEvmGrowing<TContractState> {
 
 #[starknet::component]
 pub mod evm_growing_component {
+    use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin::access::ownable::OwnableComponent::InternalTrait as OwnableInternal;
     use starknet::storage::{StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess};
     use crate::mmr_core::{POSEIDON_HASHING_FUNCTION, RootForHashingFunction};
     use crate::state::state_component;
-    use crate::utils::decoders::{decode_block_number, decode_parent_hash, decode_rlp};
-    use crate::utils::header_rlp_index;
     use super::*;
 
     #[storage]
-    struct Storage {}
+    struct Storage {
+        inner_contract_address: ContractAddress,
+    }
 
     #[derive(Drop, Serde)]
     enum GrownBy {
@@ -59,7 +69,15 @@ pub mod evm_growing_component {
         +HasComponent<TContractState>,
         +Drop<TContractState>,
         impl State: state_component::HasComponent<TContractState>,
+        impl Ownable: OwnableComponent::HasComponent<TContractState>,
     > of IEvmGrowing<ComponentState<TContractState>> {
+        fn _setGrowingInnerContractAddress(
+            ref self: ComponentState<TContractState>, inner_contract_address: ContractAddress,
+        ) {
+            get_dep_component!(@self, Ownable).assert_only_owner();
+            self.inner_contract_address.write(inner_contract_address);
+        }
+
         fn onchainEvmAppendBlocksBatch(
             ref self: ComponentState<TContractState>,
             chain_id: u256,
@@ -86,6 +104,102 @@ pub mod evm_growing_component {
                     .try_into()
                     .expect('ROOT_DOES_NOT_FIT'),
             };
+
+            let initial_blockhash = if mmr_proof.is_none() {
+                let reference_block = reference_block.unwrap();
+                Some(
+                    state
+                        .received_parent_hashes
+                        .entry(chain_id)
+                        .entry(POSEIDON_HASHING_FUNCTION)
+                        .entry(reference_block)
+                        .read(),
+                )
+            } else {
+                None
+            };
+
+            let (mmr, start_block, end_block) = IEvmGrowingInternalDispatcher {
+                contract_address: self.inner_contract_address.read(),
+            }
+                .inner_onchainEvmAppendBlocksBatch(
+                    chain_id,
+                    headers_rlp,
+                    mmr_peaks,
+                    mmr_id,
+                    reference_block,
+                    mmr_index,
+                    mmr_proof,
+                    mmr,
+                    initial_blockhash,
+                );
+
+            mmr_data.mmr_size_to_root.write(mmr.last_pos, mmr.root.into());
+            mmr_data.latest_size.write(mmr.last_pos);
+
+            self
+                .emit(
+                    Event::GrownMmr(
+                        GrownMmr {
+                            first_appended_block: start_block,
+                            last_appended_block: end_block,
+                            roots_for_hashing_functions: [
+                                RootForHashingFunction {
+                                    hashing_function: POSEIDON_HASHING_FUNCTION,
+                                    root: mmr.root.into(),
+                                }
+                            ]
+                                .span(),
+                            mmr_size: mmr.last_pos,
+                            mmr_id,
+                            accumulated_chain_id: chain_id,
+                            grown_by: GrownBy::EvmOnChainGrowing,
+                        },
+                    ),
+                );
+        }
+    }
+}
+
+#[starknet::interface]
+trait IEvmGrowingInternal<TContractState> {
+    fn inner_onchainEvmAppendBlocksBatch(
+        self: @TContractState,
+        chain_id: u256,
+        headers_rlp: Span<Words64>,
+        mmr_peaks: Peaks,
+        mmr_id: u256,
+        reference_block: Option<u256>,
+        mmr_index: Option<MmrSize>,
+        mmr_proof: Option<Proof>,
+        mmr: MMR,
+        initial_blockhash: Option<u256>,
+    ) -> (MMR, u256, u256);
+}
+
+#[starknet::contract]
+pub mod evm_growing_contract {
+    use crate::utils::decoders::{decode_block_number, decode_parent_hash, decode_rlp};
+    use crate::utils::header_rlp_index;
+    use super::*;
+
+    #[storage]
+    struct Storage {}
+
+    #[abi(embed_v0)]
+    impl EvmGrowingInternalImpl of IEvmGrowingInternal<ContractState> {
+        fn inner_onchainEvmAppendBlocksBatch(
+            self: @ContractState,
+            chain_id: u256,
+            mut headers_rlp: Span<Words64>,
+            mmr_peaks: Peaks,
+            mmr_id: u256,
+            reference_block: Option<u256>,
+            mmr_index: Option<MmrSize>,
+            mmr_proof: Option<Proof>,
+            mut mmr: MMR,
+            initial_blockhash: Option<u256>,
+        ) -> (MMR, u256, u256) {
             assert(mmr.root != 0, 'SRC_MMR_NOT_FOUND');
 
             let headers_rlp_len = headers_rlp.len();
@@ -128,13 +242,7 @@ pub mod evm_growing_component {
                 start_block = reference_block - 1;
                 end_block = (start_block + 1) - headers_rlp_len.into();
 
-                let initial_blockhash = state
-                    .received_parent_hashes
-                    .entry(chain_id)
-                    .entry(POSEIDON_HASHING_FUNCTION)
-                    .entry(reference_block)
-                    .read();
-
+                let initial_blockhash = initial_blockhash.unwrap();
                 assert(initial_blockhash != 0, 'BLOCK_NOT_RECEIVED');
                 assert(initial_blockhash == poseidon_hash.into(), 'INVALID_INITIAL_HEADER_RLP');
 
@@ -161,29 +269,7 @@ pub mod evm_growing_component {
                 peaks = p;
             }
 
-            mmr_data.mmr_size_to_root.write(mmr.last_pos, mmr.root.into());
-            mmr_data.latest_size.write(mmr.last_pos);
-
-            self
-                .emit(
-                    Event::GrownMmr(
-                        GrownMmr {
-                            first_appended_block: start_block,
-                            last_appended_block: end_block,
-                            roots_for_hashing_functions: [
-                                RootForHashingFunction {
-                                    hashing_function: POSEIDON_HASHING_FUNCTION,
-                                    root: mmr.root.into(),
-                                }
-                            ]
-                                .span(),
-                            mmr_size: mmr.last_pos,
-                            mmr_id,
-                            accumulated_chain_id: chain_id,
-                            grown_by: GrownBy::EvmOnChainGrowing,
-                        },
-                    ),
-                );
+            (mmr, start_block, end_block)
         }
     }
 }

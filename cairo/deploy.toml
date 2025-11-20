@@ -1,6 +1,6 @@
 [[call]]
 call_type = "deploy"
-class_hash = "$CLASS_HASH"
+class_hash = "0x19ed1f90f98ede33ad93ee15a82759afa27c270169a4a3af80c3ea7915bed0c"
 inputs = [
     "$CHAIN_ID",
     "0",
@@ -15,3 +15,16 @@ call_type = "invoke"
 contract_address = "satellite"
 function = "setL1MessageSender"
 inputs = ["$L1_ADDRESS"]
+
+[[call]]
+call_type = "deploy"
+class_hash = "0x438e4f756b6339f3ec78c93daf15a9ab69b42836eae40b2f75defe0f04158a6"
+inputs = []
+id = "evm-growing-inner"
+unique = false
+
+[[call]]
+call_type = "invoke"
+contract_address = "satellite"
+function = "_setGrowingInnerContractAddress"
+inputs = ["evm-growing-inner"]

@@ -1,10 +1,10 @@
 [[call]]
 call_type = "deploy"
-class_hash = "0x19ed1f90f98ede33ad93ee15a82759afa27c270169a4a3af80c3ea7915bed0c"
+class_hash = "0x33d8074c4d5283cbad5d8b6c8d7b261b9bf11a56f6195f0c65f49f45a289c6b"
 inputs = [
-    "$CHAIN_ID",
+    "393402133025997798000961",
     "0",
-    "$OWNER"
+    "0x5a6c0f84179d695f0b598cc5d0be50421c247da95cfe63e4cd66fc27f32dfe6"
     # "0x07e4986c03d8a4fea74db3fa5a31467bea98d622570ae9daa74a94fb8dc71817"
 ]
 id = "satellite"
@@ -14,11 +14,11 @@ unique = false
 call_type = "invoke"
 contract_address = "satellite"
 function = "setL1MessageSender"
-inputs = ["$L1_ADDRESS"]
+inputs = ["0x0"]
 
 [[call]]
 call_type = "deploy"
-class_hash = "0x438e4f756b6339f3ec78c93daf15a9ab69b42836eae40b2f75defe0f04158a6"
+class_hash = "0x1a3b5f5e4d864a1a4f5ea6f63d65a6d7efbad80ef5a0ed2a5f99bff3f2a132"
 inputs = []
 id = "evm-growing-inner"
 unique = false

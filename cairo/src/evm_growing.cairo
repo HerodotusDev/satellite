@@ -9,6 +9,24 @@ use starknet::ContractAddress;
 // Growing module is separated into different contract to reduce class size of the Satellite
 // contract.
 
+#[derive(Drop, Serde)]
+struct FromMmrProof {
+    mmr_index: MmrSize,
+    mmr_proof: Proof,
+    proof_mmr_peaks: Peaks,
+}
+
+#[derive(Drop, Serde)]
+struct FromParentHashProof {
+    reference_block: u256,
+}
+
+#[derive(Drop, Serde)]
+enum ProofType {
+    FromMmr: FromMmrProof,
+    FromParentHash: FromParentHashProof,
+}
+
 #[starknet::interface]
 pub trait IEvmGrowing<TContractState> {
     fn _setGrowingInnerContractAddress(
@@ -19,11 +37,9 @@ pub trait IEvmGrowing<TContractState> {
         ref self: TContractState,
         chain_id: u256,
         headers_rlp: Span<Words64>,
-        mmr_peaks: Peaks,
-        mmr_id: u256,
-        reference_block: Option<u256>,
-        mmr_index: Option<MmrSize>,
-        mmr_proof: Option<Proof>,
+        grow_mmr_peaks: Peaks,
+        grow_mmr_id: u256,
+        proof_type: ProofType,
     );
 }
 
@@ -81,18 +97,16 @@ pub mod evm_growing_component {
         fn onchainEvmAppendBlocksBatch(
             ref self: ComponentState<TContractState>,
             chain_id: u256,
-            mut headers_rlp: Span<Words64>,
-            mmr_peaks: Peaks,
-            mmr_id: u256,
-            reference_block: Option<u256>,
-            mmr_index: Option<MmrSize>,
-            mmr_proof: Option<Proof>,
+            headers_rlp: Span<Words64>,
+            grow_mmr_peaks: Peaks,
+            grow_mmr_id: u256,
+            proof_type: ProofType,
         ) {
             let mut state = get_dep_component_mut!(ref self, State);
             let mut mmr_data = state
                 .mmrs
                 .entry(chain_id)
-                .entry(mmr_id)
+                .entry(grow_mmr_id)
                 .entry(POSEIDON_HASHING_FUNCTION);
 
             let mmr_size = mmr_data.latest_size.read();
@@ -105,18 +119,18 @@ pub mod evm_growing_component {
                     .expect('ROOT_DOES_NOT_FIT'),
             };
 
-            let initial_blockhash = if mmr_proof.is_none() {
-                let reference_block = reference_block.unwrap();
-                Some(
-                    state
-                        .received_parent_hashes
-                        .entry(chain_id)
-                        .entry(POSEIDON_HASHING_FUNCTION)
-                        .entry(reference_block)
-                        .read(),
-                )
-            } else {
-                None
+            let initial_blockhash = match @proof_type {
+                ProofType::FromParentHash(FromParentHashProof { reference_block }) => {
+                    Some(
+                        state
+                            .received_parent_hashes
+                            .entry(chain_id)
+                            .entry(POSEIDON_HASHING_FUNCTION)
+                            .entry(*reference_block)
+                            .read(),
+                    )
+                },
+                _ => None
             };
 
             let (mmr, start_block, end_block) = IEvmGrowingInternalDispatcher {
@@ -125,11 +139,9 @@ pub mod evm_growing_component {
                 .inner_onchainEvmAppendBlocksBatch(
                     chain_id,
                     headers_rlp,
-                    mmr_peaks,
-                    mmr_id,
-                    reference_block,
-                    mmr_index,
-                    mmr_proof,
+                    grow_mmr_peaks,
+                    grow_mmr_id,
+                    proof_type,
                     mmr,
                     initial_blockhash,
                 );
@@ -151,7 +163,7 @@ pub mod evm_growing_component {
                             ]
                                 .span(),
                             mmr_size: mmr.last_pos,
-                            mmr_id,
+                            mmr_id: grow_mmr_id,
                             accumulated_chain_id: chain_id,
                             grown_by: GrownBy::EvmOnChainGrowing,
                         },
@@ -167,11 +179,9 @@ trait IEvmGrowingInternal<TContractState> {
         self: @TContractState,
         chain_id: u256,
         headers_rlp: Span<Words64>,
-        mmr_peaks: Peaks,
-        mmr_id: u256,
-        reference_block: Option<u256>,
-        mmr_index: Option<MmrSize>,
-        mmr_proof: Option<Proof>,
+        grow_mmr_peaks: Peaks,
+        grow_mmr_id: u256,
+        proof_type: ProofType,
         mmr: MMR,
         initial_blockhash: Option<u256>,
     ) -> (MMR, u256, u256);
@@ -192,11 +202,9 @@ pub mod evm_growing_contract {
             self: @ContractState,
             chain_id: u256,
             mut headers_rlp: Span<Words64>,
-            mmr_peaks: Peaks,
-            mmr_id: u256,
-            reference_block: Option<u256>,
-            mmr_index: Option<MmrSize>,
-            mmr_proof: Option<Proof>,
+            grow_mmr_peaks: Peaks,
+            grow_mmr_id: u256,
+            proof_type: ProofType,
             mut mmr: MMR,
             initial_blockhash: Option<u256>,
         ) -> (MMR, u256, u256) {
@@ -205,49 +213,50 @@ pub mod evm_growing_contract {
             let headers_rlp_len = headers_rlp.len();
             let header_rlp_first = *headers_rlp.pop_front().unwrap();
             let poseidon_hash = hash_words64(header_rlp_first);
-            let mut peaks = mmr_peaks;
+            let mut peaks = grow_mmr_peaks;
             let mut start_block: u256 = 0;
             let mut end_block: u256 = 0;
 
             let mut previous_parent_hash: u256 = 0;
 
-            if mmr_proof.is_some() {
-                // Start from block that is present in different mmr
-                // requires mmr_proof and mmr_index, reference_block to be None
+            match proof_type {
+                ProofType::FromMmr(FromMmrProof { mmr_index, mmr_proof, proof_mmr_peaks }) => {
+                    // Start from block that is present in different mmr
+                    // requires mmr_proof and mmr_index, reference_block to be None
 
-                assert(reference_block.is_none(), 'PROOF_AND_REF_BLOCK_NOT_ALLOWED');
-                assert(headers_rlp_len >= 2, 'INVALID_HEADER_RLP');
+                    assert(headers_rlp_len >= 2, 'INVALID_HEADER_RLP');
 
-                let (d, _) = decode_rlp(
-                    header_rlp_first,
-                    [header_rlp_index::PARENT_HASH, header_rlp_index::BLOCK_NUMBER].span(),
-                );
-                previous_parent_hash = decode_parent_hash(*d.at(0));
-                start_block = decode_block_number(*d.at(1)) - 1;
+                    let (d, _) = decode_rlp(
+                        header_rlp_first,
+                        [header_rlp_index::PARENT_HASH, header_rlp_index::BLOCK_NUMBER].span(),
+                    );
+                    previous_parent_hash = decode_parent_hash(*d.at(0));
+                    start_block = decode_block_number(*d.at(1)) - 1;
 
-                mmr
-                    .verify_proof(mmr_index.unwrap(), poseidon_hash, mmr_peaks, mmr_proof.unwrap())
-                    .expect('INVALID_MMR_PROOF');
+                    mmr
+                        .verify_proof(mmr_index, poseidon_hash, proof_mmr_peaks, mmr_proof)
+                        .expect('INVALID_MMR_PROOF');
 
-                end_block = (start_block + 2) - headers_rlp_len.into();
-            } else {
-                // Start from block for which we know the parent hash
+                    end_block = (start_block + 2) - headers_rlp_len.into();
+                },
+                ProofType::FromParentHash(FromParentHashProof { reference_block }) => {
+                    // Start from block for which we know the parent hash
 
-                assert(headers_rlp_len >= 1, 'INVALID_HEADER_RLP');
+                    assert(headers_rlp_len >= 1, 'INVALID_HEADER_RLP');
 
-                let (d, _) = decode_rlp(header_rlp_first, [header_rlp_index::PARENT_HASH].span());
-                previous_parent_hash = decode_parent_hash(*d.at(0));
+                    let (d, _) = decode_rlp(header_rlp_first, [header_rlp_index::PARENT_HASH].span());
+                    previous_parent_hash = decode_parent_hash(*d.at(0));
 
-                let reference_block = reference_block.unwrap();
-                start_block = reference_block - 1;
-                end_block = (start_block + 1) - headers_rlp_len.into();
+                    start_block = reference_block - 1;
+                    end_block = (start_block + 1) - headers_rlp_len.into();
 
-                let initial_blockhash = initial_blockhash.unwrap();
-                assert(initial_blockhash != 0, 'BLOCK_NOT_RECEIVED');
-                assert(initial_blockhash == poseidon_hash.into(), 'INVALID_INITIAL_HEADER_RLP');
+                    let initial_blockhash = initial_blockhash.unwrap();
+                    assert(initial_blockhash != 0, 'BLOCK_NOT_RECEIVED');
+                    assert(initial_blockhash == poseidon_hash.into(), 'INVALID_INITIAL_HEADER_RLP');
 
-                let (_, p) = mmr.append(poseidon_hash, mmr_peaks).expect('MMR_APPEND_FAILED');
-                peaks = p;
+                    let (_, p) = mmr.append(poseidon_hash, peaks).expect('MMR_APPEND_FAILED');
+                    peaks = p;
+                }
             }
 
             for header_rlp in headers_rlp {

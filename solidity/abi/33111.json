@@ -2526,8 +2526,13 @@
       },
       {
         "internalType": "uint256",
-        "name": "mmrId",
+        "name": "growMmrId",
         "type": "uint256"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "growMmrPeaks",
+        "type": "bytes32[]"
       },
       {
         "internalType": "bool",

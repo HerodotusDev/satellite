@@ -22,7 +22,7 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
     /// @notice Processes & appends a batch of blocks
     /// @dev We sometimes refer to appending blocks as "processing" or "accumulating" them
     /// @param accumulatedChainId the ID of the chain that the MMR accumulates
-    /// @param mmrId the ID of the MMR to update
+    /// @param growMmrId the ID of the MMR to update
     /// @param processFromReceivedBlockHash whether processing should start from the received block hash or look for the reference header in the MMR
     /// @param ctx the context of the batch, encoded as bytes.
     ///    If the reference header is accumulated, the context contains the MMR proof and peaks.
@@ -30,7 +30,8 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
     /// @param headersSerialized the serialized headers of the batch
     function onchainEvmAppendBlocksBatch(
         uint256 accumulatedChainId,
-        uint256 mmrId,
+        uint256 growMmrId,
+        bytes32[] calldata growMmrPeaks,
         bool processFromReceivedBlockHash,
         bytes calldata ctx,
         bytes[] calldata headersSerialized
@@ -38,15 +39,15 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
         require(headersSerialized.length > 0, "ERR_EMPTY_BATCH");
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         // Onchain grown mmrs are guaranteed to have only one hashing function
-        require(s.mmrs[accumulatedChainId][mmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown == false, "ERR_MMR_IS_SHARP_GROWN");
-        require(s.mmrs[accumulatedChainId][mmrId][KECCAK_HASHING_FUNCTION].latestSize != LibSatellite.NO_MMR_SIZE, "ERR_MMR_DOES_NOT_EXIST");
+        require(s.mmrs[accumulatedChainId][growMmrId][KECCAK_HASHING_FUNCTION].isOffchainGrown == false, "ERR_MMR_IS_SHARP_GROWN");
+        require(s.mmrs[accumulatedChainId][growMmrId][KECCAK_HASHING_FUNCTION].latestSize != LibSatellite.NO_MMR_SIZE, "ERR_MMR_DOES_NOT_EXIST");
 
         MMRGrowResult memory result;
 
         if (processFromReceivedBlockHash) {
-            result = _processBatchFromReceivedBlockHash(mmrId, ctx, headersSerialized, accumulatedChainId, KECCAK_HASHING_FUNCTION);
+            result = _processBatchFromReceivedBlockHash(growMmrId, growMmrPeaks, ctx, headersSerialized, accumulatedChainId, KECCAK_HASHING_FUNCTION);
         } else {
-            result = _processBatchFromAccumulated(mmrId, ctx, headersSerialized, accumulatedChainId, KECCAK_HASHING_FUNCTION);
+            result = _processBatchFromAccumulated(growMmrId, growMmrPeaks, ctx, headersSerialized, accumulatedChainId, KECCAK_HASHING_FUNCTION);
         }
 
         RootForHashingFunction[] memory rootsForHashingFunctions = new RootForHashingFunction[](1);
@@ -58,7 +59,7 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
             result.lastAppendedBlock,
             rootsForHashingFunctions,
             result.newMMRSize,
-            mmrId,
+            growMmrId,
             accumulatedChainId,
             GrownBy.EVM_ON_CHAIN_GROWER
         );
@@ -67,18 +68,17 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
     /// ========================= Internal functions ========================= //
 
     function _processBatchFromAccumulated(
-        uint256 treeId,
+        uint256 grownMmrId,
+        bytes32[] memory growMmrPeaks,
         bytes memory ctx,
         bytes[] memory headersSerialized,
         uint256 accumulatedChainId,
         bytes32 hashingFunction
     ) internal returns (MMRGrowResult memory result) {
-        (uint256 referenceProofLeafIndex, bytes32[] memory referenceProof, bytes32[] memory mmrPeaks, bytes memory referenceHeaderSerialized) = abi.decode(
-            ctx,
-            (uint256, bytes32[], bytes32[], bytes)
-        );
+        (uint256 proofMmrId, uint256 referenceProofLeafIndex, bytes32[] memory referenceProof, bytes32[] memory referencePeaks, bytes memory referenceHeaderSerialized) = abi
+            .decode(ctx, (uint256, uint256, bytes32[], bytes32[], bytes));
 
-        _validateParentBlockAndProveIntegrity(treeId, referenceProofLeafIndex, referenceProof, mmrPeaks, referenceHeaderSerialized, accumulatedChainId, hashingFunction);
+        _validateParentBlockAndProveIntegrity(proofMmrId, referenceProofLeafIndex, referenceProof, referencePeaks, referenceHeaderSerialized, accumulatedChainId, hashingFunction);
 
         bytes32[] memory headersHashes = new bytes32[](headersSerialized.length);
         headersHashes[0] = _decodeParentHash(referenceHeaderSerialized);
@@ -89,19 +89,20 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
             headersHashes[i] = _decodeParentHash(headersSerialized[i - 1]);
             require(_isHeaderValid(headersHashes[i], headersSerialized[i]), "ERR_INVALID_CHAIN_ELEMENT");
         }
-        (result.newMMRSize, result.newMMRRoot) = _appendMultipleBlockhashesToMMR(headersHashes, mmrPeaks, treeId, accumulatedChainId, hashingFunction);
+        (result.newMMRSize, result.newMMRRoot) = _appendMultipleBlockhashesToMMR(headersHashes, growMmrPeaks, grownMmrId, accumulatedChainId, hashingFunction);
         result.firstAppendedBlock = _decodeBlockNumber(headersSerialized[0]);
         result.lastAppendedBlock = result.firstAppendedBlock - headersSerialized.length + 1;
     }
 
     function _processBatchFromReceivedBlockHash(
-        uint256 treeId,
+        uint256 growMmrId,
+        bytes32[] memory growMmrPeaks,
         bytes memory ctx,
         bytes[] memory headersSerialized,
         uint256 accumulatedChainId,
         bytes32 hashingFunction
     ) internal returns (MMRGrowResult memory result) {
-        (uint256 blockNumber, bytes32[] memory mmrPeaks) = abi.decode(ctx, (uint256, bytes32[]));
+        uint256 blockNumber = abi.decode(ctx, (uint256)); // First appended block (reference block - 1)
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
 
         bytes32 expectedHash = s.receivedParentHashes[accumulatedChainId][hashingFunction][blockNumber + 1];
@@ -114,7 +115,7 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
             expectedHash = _decodeParentHash(headersSerialized[i]);
         }
 
-        (result.newMMRSize, result.newMMRRoot) = _appendMultipleBlockhashesToMMR(headersHashes, mmrPeaks, treeId, accumulatedChainId, hashingFunction);
+        (result.newMMRSize, result.newMMRRoot) = _appendMultipleBlockhashesToMMR(headersHashes, growMmrPeaks, growMmrId, accumulatedChainId, hashingFunction);
         result.firstAppendedBlock = blockNumber;
         result.lastAppendedBlock = result.firstAppendedBlock - headersSerialized.length + 1;
     }

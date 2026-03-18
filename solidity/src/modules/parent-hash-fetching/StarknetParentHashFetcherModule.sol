@@ -49,8 +49,8 @@ contract StarknetParentHashFetcherModule is IStarknetParentHashFetcherModule, Ac
     function starknetFetchParentHashAtBlock(
         bytes calldata blockHeader,
         bytes calldata accountMptProof,
-        bytes calldata storageSlotMptProof1,
-        bytes calldata storageSlotMptProof2
+        bytes calldata storageSlotMptProofBlockNumber,
+        bytes calldata storageSlotMptProofBlockHash
     ) external {
         StarknetParentHashFetcherModuleStorage storage ms = moduleStorage();
 
@@ -66,8 +66,10 @@ contract StarknetParentHashFetcherModule is IStarknetParentHashFetcherModule, Ac
 
         (, , , bytes32 storageRoot) = IEvmFactRegistryModule(address(this)).verifyOnlyAccount(ms.chainId, address(ms.starknetContract), stateRoot, accountMptProof);
 
-        uint256 starknetBlockNumber = uint256(IEvmFactRegistryModule(address(this)).verifyOnlyStorage(STARKNET_CONTRACT_BLOCK_NUMBER_SLOT, storageRoot, storageSlotMptProof1));
-        bytes32 starknetBlockHash = IEvmFactRegistryModule(address(this)).verifyOnlyStorage(STARKNET_CONTRACT_BLOCK_HASH_SLOT, storageRoot, storageSlotMptProof2);
+        uint256 starknetBlockNumber = uint256(
+            IEvmFactRegistryModule(address(this)).verifyOnlyStorage(STARKNET_CONTRACT_BLOCK_NUMBER_SLOT, storageRoot, storageSlotMptProofBlockNumber)
+        );
+        bytes32 starknetBlockHash = IEvmFactRegistryModule(address(this)).verifyOnlyStorage(STARKNET_CONTRACT_BLOCK_HASH_SLOT, storageRoot, storageSlotMptProofBlockHash);
 
         ISatellite(address(this))._receiveParentHash(ms.chainId, POSEIDON_HASHING_FUNCTION, starknetBlockNumber + 1, starknetBlockHash);
     }

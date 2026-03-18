@@ -5,15 +5,18 @@ use cairo_lib::hashing::keccak::keccak_cairo_words64;
 use cairo_lib::hashing::poseidon::hash_words64;
 use cairo_lib::utils::types::words64::Words64;
 use starknet::ContractAddress;
+use crate::evm_fact_registry::MmrId;
 
 // Growing module is separated into different contract to reduce class size of the Satellite
 // contract.
 
 #[derive(Drop, Serde)]
 struct FromMmrProof {
-    mmr_index: MmrSize,
+    mmr_id: MmrId,
+    mmr_index: MmrSize, // leaf index
     mmr_proof: Proof,
     proof_mmr_peaks: Peaks,
+    mmr_size: MmrSize,
 }
 
 #[derive(Drop, Serde)]
@@ -94,6 +97,10 @@ pub mod evm_growing_component {
             self.inner_contract_address.write(inner_contract_address);
         }
 
+        // This function is split into another contract to reduce class size of the Satellite.
+        // All data from satellite storage is fetched inside this function and later verified in the
+        // other contract.
+        // Also, all events are emitted here.
         fn onchainEvmAppendBlocksBatch(
             ref self: ComponentState<TContractState>,
             chain_id: u256,
@@ -110,7 +117,7 @@ pub mod evm_growing_component {
                 .entry(POSEIDON_HASHING_FUNCTION);
 
             let mmr_size = mmr_data.latest_size.read();
-            let mut mmr = MMR {
+            let mut grown_mmr = MMR {
                 last_pos: mmr_size,
                 root: mmr_data
                     .mmr_size_to_root
@@ -119,21 +126,40 @@ pub mod evm_growing_component {
                     .expect('ROOT_DOES_NOT_FIT'),
             };
 
-            let initial_blockhash = match @proof_type {
-                ProofType::FromParentHash(FromParentHashProof { reference_block }) => {
-                    Some(
-                        state
-                            .received_parent_hashes
-                            .entry(chain_id)
-                            .entry(POSEIDON_HASHING_FUNCTION)
-                            .entry(*reference_block)
-                            .read(),
+            let (initial_blockhash, proof_mmr_root) = match @proof_type {
+                ProofType::FromParentHash(FromParentHashProof {
+                    reference_block,
+                }) => {
+                    (
+                        Some(
+                            state
+                                .received_parent_hashes
+                                .entry(chain_id)
+                                .entry(POSEIDON_HASHING_FUNCTION)
+                                .entry(*reference_block)
+                                .read(),
+                        ),
+                        None,
                     )
                 },
-                _ => None
+                ProofType::FromMmr(FromMmrProof {
+                    mmr_id, mmr_size, ..,
+                }) => {
+                    let proof_mmr_data = state
+                        .mmrs
+                        .entry(chain_id)
+                        .entry(*mmr_id)
+                        .entry(POSEIDON_HASHING_FUNCTION);
+                    let root: u256 = proof_mmr_data
+                        .mmr_size_to_root
+                        .read(*mmr_size)
+                        .try_into()
+                        .expect('ROOT_DOES_NOT_FIT');
+                    (None, Some(root))
+                },
             };
 
-            let (mmr, start_block, end_block) = IEvmGrowingInternalDispatcher {
+            let (grown_mmr, start_block, end_block) = IEvmGrowingInternalDispatcher {
                 contract_address: self.inner_contract_address.read(),
             }
                 .inner_onchainEvmAppendBlocksBatch(
@@ -142,12 +168,13 @@ pub mod evm_growing_component {
                     grow_mmr_peaks,
                     grow_mmr_id,
                     proof_type,
-                    mmr,
+                    grown_mmr,
                     initial_blockhash,
+                    proof_mmr_root,
                 );
 
-            mmr_data.mmr_size_to_root.write(mmr.last_pos, mmr.root.into());
-            mmr_data.latest_size.write(mmr.last_pos);
+            mmr_data.mmr_size_to_root.write(grown_mmr.last_pos, grown_mmr.root.into());
+            mmr_data.latest_size.write(grown_mmr.last_pos);
 
             self
                 .emit(
@@ -158,11 +185,11 @@ pub mod evm_growing_component {
                             roots_for_hashing_functions: [
                                 RootForHashingFunction {
                                     hashing_function: POSEIDON_HASHING_FUNCTION,
-                                    root: mmr.root.into(),
+                                    root: grown_mmr.root.into(),
                                 }
                             ]
                                 .span(),
-                            mmr_size: mmr.last_pos,
+                            mmr_size: grown_mmr.last_pos,
                             mmr_id: grow_mmr_id,
                             accumulated_chain_id: chain_id,
                             grown_by: GrownBy::EvmOnChainGrowing,
@@ -182,8 +209,9 @@ trait IEvmGrowingInternal<TContractState> {
         grow_mmr_peaks: Peaks,
         grow_mmr_id: u256,
         proof_type: ProofType,
-        mmr: MMR,
+        grown_mmr: MMR,
         initial_blockhash: Option<u256>,
+        proof_mmr_root: Option<u256>,
     ) -> (MMR, u256, u256);
 }
 
@@ -198,6 +226,9 @@ pub mod evm_growing_contract {
 
     #[abi(embed_v0)]
     impl EvmGrowingInternalImpl of IEvmGrowingInternal<ContractState> {
+        // This function should only be called by the Satellite contract's
+        // onchainEvmAppendBlocksBatch function.
+        // It does not verify if arguments are valid, so it has to be called in correct way.
         fn inner_onchainEvmAppendBlocksBatch(
             self: @ContractState,
             chain_id: u256,
@@ -205,10 +236,11 @@ pub mod evm_growing_contract {
             grow_mmr_peaks: Peaks,
             grow_mmr_id: u256,
             proof_type: ProofType,
-            mut mmr: MMR,
+            mut grown_mmr: MMR,
             initial_blockhash: Option<u256>,
+            proof_mmr_root: Option<u256>,
         ) -> (MMR, u256, u256) {
-            assert(mmr.root != 0, 'SRC_MMR_NOT_FOUND');
+            assert(grown_mmr.root != 0, 'SRC_MMR_NOT_FOUND');
 
             let headers_rlp_len = headers_rlp.len();
             let header_rlp_first = *headers_rlp.pop_front().unwrap();
@@ -220,7 +252,9 @@ pub mod evm_growing_contract {
             let mut previous_parent_hash: u256 = 0;
 
             match proof_type {
-                ProofType::FromMmr(FromMmrProof { mmr_index, mmr_proof, proof_mmr_peaks }) => {
+                ProofType::FromMmr(FromMmrProof {
+                    mmr_id: _, mmr_index, mmr_proof, proof_mmr_peaks, mmr_size,
+                }) => {
                     // Start from block that is present in different mmr
                     // requires mmr_proof and mmr_index, reference_block to be None
 
@@ -233,18 +267,29 @@ pub mod evm_growing_contract {
                     previous_parent_hash = decode_parent_hash(*d.at(0));
                     start_block = decode_block_number(*d.at(1)) - 1;
 
-                    mmr
+                    let proof_mmr = MMR {
+                        last_pos: mmr_size,
+                        root: proof_mmr_root
+                            .expect('ROOT_REQUIRED')
+                            .try_into()
+                            .expect('ROOT_DOES_NOT_FIT'),
+                    };
+                    proof_mmr
                         .verify_proof(mmr_index, poseidon_hash, proof_mmr_peaks, mmr_proof)
                         .expect('INVALID_MMR_PROOF');
 
                     end_block = (start_block + 2) - headers_rlp_len.into();
                 },
-                ProofType::FromParentHash(FromParentHashProof { reference_block }) => {
+                ProofType::FromParentHash(FromParentHashProof {
+                    reference_block,
+                }) => {
                     // Start from block for which we know the parent hash
 
                     assert(headers_rlp_len >= 1, 'INVALID_HEADER_RLP');
 
-                    let (d, _) = decode_rlp(header_rlp_first, [header_rlp_index::PARENT_HASH].span());
+                    let (d, _) = decode_rlp(
+                        header_rlp_first, [header_rlp_index::PARENT_HASH].span(),
+                    );
                     previous_parent_hash = decode_parent_hash(*d.at(0));
 
                     start_block = reference_block - 1;
@@ -254,9 +299,9 @@ pub mod evm_growing_contract {
                     assert(initial_blockhash != 0, 'BLOCK_NOT_RECEIVED');
                     assert(initial_blockhash == poseidon_hash.into(), 'INVALID_INITIAL_HEADER_RLP');
 
-                    let (_, p) = mmr.append(poseidon_hash, peaks).expect('MMR_APPEND_FAILED');
+                    let (_, p) = grown_mmr.append(poseidon_hash, peaks).expect('MMR_APPEND_FAILED');
                     peaks = p;
-                }
+                },
             }
 
             for header_rlp in headers_rlp {
@@ -274,11 +319,11 @@ pub mod evm_growing_contract {
 
                 let poseidon_hash = hash_words64(current_rlp);
 
-                let (_, p) = mmr.append(poseidon_hash, peaks).expect('MMR_APPEND_FAILED');
+                let (_, p) = grown_mmr.append(poseidon_hash, peaks).expect('MMR_APPEND_FAILED');
                 peaks = p;
             }
 
-            (mmr, start_block, end_block)
+            (grown_mmr, start_block, end_block)
         }
     }
 }

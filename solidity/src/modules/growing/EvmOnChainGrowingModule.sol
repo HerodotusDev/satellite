@@ -75,10 +75,25 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
         uint256 accumulatedChainId,
         bytes32 hashingFunction
     ) internal returns (MMRGrowResult memory result) {
-        (uint256 proofMmrId, uint256 referenceProofLeafIndex, bytes32[] memory referenceProof, bytes32[] memory referencePeaks, bytes memory referenceHeaderSerialized) = abi
-            .decode(ctx, (uint256, uint256, bytes32[], bytes32[], bytes));
+        (
+            uint256 proofMmrId,
+            uint256 referenceProofLeafIndex,
+            bytes32[] memory referenceProof,
+            bytes32[] memory referencePeaks,
+            uint256 referenceMmrSize,
+            bytes memory referenceHeaderSerialized
+        ) = abi.decode(ctx, (uint256, uint256, bytes32[], bytes32[], uint256, bytes));
 
-        _validateParentBlockAndProveIntegrity(proofMmrId, referenceProofLeafIndex, referenceProof, referencePeaks, referenceHeaderSerialized, accumulatedChainId, hashingFunction);
+        _validateParentBlockAndProveIntegrity(
+            proofMmrId,
+            referenceProofLeafIndex,
+            referenceProof,
+            referencePeaks,
+            referenceMmrSize,
+            referenceHeaderSerialized,
+            accumulatedChainId,
+            hashingFunction
+        );
 
         bytes32[] memory headersHashes = new bytes32[](headersSerialized.length);
         headersHashes[0] = _decodeParentHash(referenceHeaderSerialized);
@@ -163,14 +178,15 @@ contract EvmOnChainGrowingModule is IEvmOnChainGrowingModule {
         uint256 referenceProofLeafIndex,
         bytes32[] memory referenceProof,
         bytes32[] memory mmrPeaks,
+        uint256 mmrSize,
         bytes memory referenceHeaderSerialized,
         uint256 accumulatedChainId,
         bytes32 hashingFunction
     ) internal view {
         ISatellite.SatelliteStorage storage s = LibSatellite.satelliteStorage();
         // Verify the reference block is in the MMR and the proof is valid
-        uint256 mmrSize = s.mmrs[accumulatedChainId][mmrId][hashingFunction].latestSize;
         bytes32 root = s.mmrs[accumulatedChainId][mmrId][hashingFunction].mmrSizeToRoot[mmrSize];
+        require(root != bytes32(0), "ERR_MMR_ROOT_NOT_FOUND");
         StatelessMmr.verifyProof(referenceProofLeafIndex, keccak256(referenceHeaderSerialized), referenceProof, mmrPeaks, mmrSize, root);
     }
 }

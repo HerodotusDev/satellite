@@ -7,8 +7,9 @@ import {Lib_RLPReader as RLPReader} from "../libraries/external/optimism/rlp/Lib
 import {IEvmFactRegistryModule} from "../interfaces/modules/IEvmFactRegistryModule.sol";
 import {LibSatellite} from "../libraries/LibSatellite.sol";
 import {ISatellite} from "../interfaces/ISatellite.sol";
+import {BlockHeaderReader} from "../libraries/BlockHeaderReader.sol";
 
-contract EvmFactRegistryModule is IEvmFactRegistryModule {
+contract EvmFactRegistryModule is IEvmFactRegistryModule, BlockHeaderReader {
     using RLPReader for bytes;
     using RLPReader for RLPReader.RLPItem;
 
@@ -25,8 +26,6 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
     uint8 private constant APECHAIN_ACCOUNT_DELEGATE_INDEX = 5;
     uint8 private constant APECHAIN_ACCOUNT_CODE_HASH_INDEX = 6;
     uint8 private constant APECHAIN_ACCOUNT_STORAGE_ROOT_INDEX = 7;
-
-    uint8 private constant BLOCK_HEADER_FIELD_COUNT = 15;
 
     bytes32 private constant EMPTY_TRIE_ROOT_HASH = 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421;
     bytes32 private constant EMPTY_CODE_HASH = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
@@ -435,15 +434,6 @@ contract EvmFactRegistryModule is IEvmFactRegistryModule {
         delegate = accountFields[APECHAIN_ACCOUNT_DELEGATE_INDEX].readUint256();
         codeHash = accountFields[APECHAIN_ACCOUNT_CODE_HASH_INDEX].readBytes32();
         storageRoot = accountFields[APECHAIN_ACCOUNT_STORAGE_ROOT_INDEX].readBytes32();
-    }
-
-    function _readBlockHeaderFields(bytes memory headerRlp) internal pure returns (bytes32[BLOCK_HEADER_FIELD_COUNT] memory fields) {
-        RLPReader.RLPItem[] memory headerFields = RLPReader.toRLPItem(headerRlp).readList();
-        for (uint8 i = 0; i < BLOCK_HEADER_FIELD_COUNT; i++) {
-            // Logs bloom is longer than 32 bytes, so it's not supported
-            if (i == uint8(BlockHeaderField.LOGS_BLOOM)) continue;
-            fields[i] = headerFields[i].readBytes32();
-        }
     }
 
     function readBitAtIndexFromRight(uint8 bitmap, uint8 index) internal pure returns (bool value) {

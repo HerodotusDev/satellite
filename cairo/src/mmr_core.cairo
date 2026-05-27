@@ -253,7 +253,6 @@ pub mod mmr_core_component {
                 KECCAK_INITIAL_ROOT
             } else {
                 panic!("INVALID_HASHING_FUNCTION");
-                0
             }
         }
     }

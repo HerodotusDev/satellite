@@ -16,4 +16,12 @@ interface IStarknetParentHashFetcherModule {
 
     /// @notice Fetches the parent hash of the latest block
     function starknetFetchParentHash() external;
+
+    /// @notice Fetches the parent hash that was the latest at given L1 block
+    function starknetFetchParentHashAtBlock(
+        bytes calldata blockHeader,
+        bytes calldata accountMptProof,
+        bytes calldata storageSlotMptProofBlockNumber,
+        bytes calldata storageSlotMptProofBlockHash
+    ) external;
 }

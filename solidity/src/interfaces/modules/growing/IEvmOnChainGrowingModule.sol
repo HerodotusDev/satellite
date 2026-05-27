@@ -18,7 +18,8 @@ interface IEvmOnChainGrowingModule {
 
     function onchainEvmAppendBlocksBatch(
         uint256 accumulatedChainId,
-        uint256 mmrId,
+        uint256 growMmrId,
+        bytes32[] calldata growMmrPeaks,
         bool processFromReceivedBlockHash,
         bytes calldata ctx,
         bytes[] calldata headersSerialized

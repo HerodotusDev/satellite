@@ -4,6 +4,8 @@ export const modules: ModuleName[] = [
   "OwnershipModule",
   "SatelliteRegistryModule",
   "SatelliteInspectorModule",
+  "CairoFactRegistryModule",
+  "DataProcessorModule",
   "MmrCoreModule",
   "EvmFactRegistryModule",
   "EvmOnChainGrowingModule",

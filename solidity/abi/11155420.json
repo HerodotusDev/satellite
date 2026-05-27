@@ -439,6 +439,662 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "address",
+        "name": "externalFactRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "CairoFactRegistryExternalContractSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "CairoFactSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "fallbackMockedContract",
+        "type": "address"
+      }
+    ],
+    "name": "CairoMockedFactRegistryFallbackContractSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "CairoMockedFactSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "IsMockedForInternalSet",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "_receiveCairoFactHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCairoMockedFactRegistryFallbackContract",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCairoVerifiedFactRegistryContract",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "getStorageSlotForCairoFact",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "isCairoFactValid",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoFactValidForInternal",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoMockedFactValid",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoVerifiedFactStored",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isCairoVerifiedFactValid",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isMockedForInternal",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "originChainId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "moveCairoFactFromStorageProof",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setCairoMockedFact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "fallbackMockedContract",
+        "type": "address"
+      }
+    ],
+    "name": "setCairoMockedFactRegistryFallbackContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "externalFactRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "setCairoVerifiedFactRegistryContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "isMocked",
+        "type": "bool"
+      }
+    ],
+    "name": "setIsMockedForInternal",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "factHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "storeCairoVerifiedFact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DoubleRegistration",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidFact",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidMmrRoot",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotFinalized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotInBatch",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TaskAlreadyFinalized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "UnauthorizedProgramHash",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "programHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "inputs",
+            "type": "bytes32[]"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct ModuleTask",
+        "name": "moduleTask",
+        "type": "tuple"
+      }
+    ],
+    "name": "ModuleTaskScheduled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "enabledProgramHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ProgramHashEnabled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32[]",
+        "name": "disabledProgramHashes",
+        "type": "bytes32[]"
+      }
+    ],
+    "name": "ProgramHashesDisabled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "result",
+        "type": "bytes32"
+      }
+    ],
+    "name": "TaskAlreadyStored",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "taskHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "taskResult",
+        "type": "bytes32"
+      }
+    ],
+    "name": "TaskFinalized",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "components": [
+              {
+                "components": [
+                  {
+                    "internalType": "uint256",
+                    "name": "chainId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "mmrId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "mmrSize",
+                    "type": "uint256"
+                  }
+                ],
+                "internalType": "struct IDataProcessorModule.MmrData[]",
+                "name": "poseidonMmr",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "uint256",
+                    "name": "chainId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "mmrId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "mmrSize",
+                    "type": "uint256"
+                  }
+                ],
+                "internalType": "struct IDataProcessorModule.MmrData[]",
+                "name": "keccakMmr",
+                "type": "tuple[]"
+              }
+            ],
+            "internalType": "struct IDataProcessorModule.MmrCollection",
+            "name": "mmrCollection",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256",
+            "name": "taskResultLow",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "taskResultHigh",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "taskHashLow",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "taskHashHigh",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "programHash",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct IDataProcessorModule.TaskData",
+        "name": "taskData",
+        "type": "tuple"
+      }
+    ],
+    "name": "authenticateDataProcessorTaskExecution",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "programHashes",
+        "type": "bytes32[]"
+      }
+    ],
+    "name": "disableProgramHashes",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "taskCommitment",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getDataProcessorFinalizedTaskResult",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "taskCommitment",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getDataProcessorTaskStatus",
+    "outputs": [
+      {
+        "internalType": "enum IDataProcessorModule.TaskStatus",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "programHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isProgramHashAuthorized",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "programHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "inputs",
+            "type": "bytes32[]"
+          }
+        ],
+        "internalType": "struct ModuleTask",
+        "name": "moduleTask",
+        "type": "tuple"
+      }
+    ],
+    "name": "requestDataProcessorExecutionOfTask",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "programHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setDataProcessorProgramHash",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "newMmrId",
         "type": "uint256"
@@ -2187,8 +2843,13 @@
       },
       {
         "internalType": "uint256",
-        "name": "mmrId",
+        "name": "growMmrId",
         "type": "uint256"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "growMmrPeaks",
+        "type": "bytes32[]"
       },
       {
         "internalType": "bool",

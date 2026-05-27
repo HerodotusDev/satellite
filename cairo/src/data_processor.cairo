@@ -23,13 +23,18 @@ struct MmrData {
 }
 
 #[derive(Drop, Serde)]
+struct MmrCollection {
+    poseidon_mmr: Span<MmrData>,
+    keccak_mmr: Span<MmrData>,
+}
+
+#[derive(Drop, Serde)]
 struct TaskData {
-    mmr_data: Span<MmrData>,
+    mmr_collection: MmrCollection,
     task_result_low: u128,
     task_result_high: u128,
     task_hash_low: u128,
     task_hash_high: u128,
-    module_hash: u256,
     program_hash: felt252,
 }
 
@@ -70,15 +75,15 @@ pub trait IDataProcessor<TContractState> {
 
 #[starknet::component]
 pub mod data_processor_component {
-    use integrity::calculate_fact_hash;
+    use integrity::{SHARP_BOOTLOADER_PROGRAM_HASH, calculate_bootloaded_fact_hash};
     use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::access::ownable::OwnableComponent::InternalTrait as OwnableInternal;
     use starknet::storage::{
         Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
     };
     use crate::cairo_fact_registry::{ICairoFactRegistry, cairo_fact_registry_component};
-    use crate::mmr_core::POSEIDON_HASHING_FUNCTION;
     use crate::mmr_core::mmr_core_component::MmrCoreExternalImpl;
+    use crate::mmr_core::{KECCAK_HASHING_FUNCTION, POSEIDON_HASHING_FUNCTION};
     use crate::state::state_component;
     use super::*;
 
@@ -211,9 +216,11 @@ pub mod data_processor_component {
             program_output.append(task_data.task_hash_high.into());
             program_output.append(task_data.task_result_low.into());
             program_output.append(task_data.task_result_high.into());
+            program_output.append(task_data.mmr_collection.poseidon_mmr.len().into());
+            program_output.append(task_data.mmr_collection.keccak_mmr.len().into());
 
             let state = get_dep_component!(@self, State);
-            for mmr in task_data.mmr_data {
+            for mmr in task_data.mmr_collection.poseidon_mmr {
                 let mmr_root = state
                     .mmrs
                     .entry(*mmr.chain_id)
@@ -229,7 +236,31 @@ pub mod data_processor_component {
                 program_output.append(mmr_root.try_into().expect('mmr_root not felt252'));
             }
 
-            let fact_hash = calculate_fact_hash(task_data.program_hash, program_output.span());
+            for mmr in task_data.mmr_collection.keccak_mmr {
+                let mmr_root = state
+                    .mmrs
+                    .entry(*mmr.chain_id)
+                    .entry(*mmr.mmr_id)
+                    .entry(KECCAK_HASHING_FUNCTION)
+                    .mmr_size_to_root
+                    .entry(*mmr.mmr_size)
+                    .read();
+                assert(mmr_root != 0, 'InvalidMmrRoot');
+                program_output.append((*mmr.mmr_id).try_into().expect('mmr_id not felt252'));
+                program_output.append((*mmr.mmr_size).try_into().expect('mmr_size not felt252'));
+                program_output.append((*mmr.chain_id).try_into().expect('chain_id not felt252'));
+
+                // Split 256-bit root into two 128-bit limbs
+                let mmr_root_low: u128 = mmr_root.low;
+                let mmr_root_high: u128 = mmr_root.high;
+
+                program_output.append(mmr_root_low.try_into().expect('mmr_root_low not felt252'));
+                program_output.append(mmr_root_high.try_into().expect('mmr_root_high not felt252'));
+            }
+
+            let fact_hash = calculate_bootloaded_fact_hash(
+                SHARP_BOOTLOADER_PROGRAM_HASH, task_data.program_hash, program_output.span(),
+            );
 
             let cairo_fact_registry = get_dep_component!(@self, CairoFactRegistry);
             assert(cairo_fact_registry.isCairoFactValidForInternal(fact_hash), 'Invalid fact');
@@ -264,4 +295,3 @@ pub mod data_processor_component {
         }
     }
 }
-

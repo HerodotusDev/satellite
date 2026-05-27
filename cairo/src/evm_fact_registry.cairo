@@ -11,7 +11,7 @@ use core::num::traits::{Bounded, Pow};
 use starknet::EthAddress;
 use starknet::storage::Map;
 
-type MmrId = u256;
+pub type MmrId = u256;
 
 #[derive(Drop, Serde)]
 pub struct BlockHeaderProof {

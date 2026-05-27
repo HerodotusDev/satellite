@@ -23,6 +23,7 @@ import {IArbitrumToApeChainSenderModule} from "./modules/messaging/sender/IArbit
 import {IL1ToStarknetSenderModule} from "./modules/messaging/sender/IL1ToStarknetSenderModule.sol";
 import {ILegacyContractsInteractionModule} from "./modules/growing/ILegacyContractsInteractionModule.sol";
 import {IArbitrumParentHashFetcherModule} from "./modules/parent-hash-fetching/IArbitrumParentHashFetcherModule.sol";
+import {ISP1FactRegistryModule} from "./modules/ISP1FactRegistryModule.sol";
 
 interface ISatellite is
     ILibSatellite,
@@ -46,5 +47,6 @@ interface ISatellite is
     IDataProcessorModule,
     IArbitrumToApeChainSenderModule,
     IL1ToStarknetSenderModule,
-    ILegacyContractsInteractionModule
+    ILegacyContractsInteractionModule,
+    ISP1FactRegistryModule
 {}

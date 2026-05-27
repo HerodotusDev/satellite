@@ -70,11 +70,7 @@ contract SP1FactRegistryModuleTest is Test {
         cairoSelectors[11] = CairoFactRegistryModule.isMockedForInternal.selector;
         cairoSelectors[12] = CairoFactRegistryModule.setIsMockedForInternal.selector;
         cairoSelectors[13] = CairoFactRegistryModule._receiveCairoFactHash.selector;
-        cuts[1] = ILibSatellite.ModuleMaintenance({
-            moduleAddress: address(cairoModule),
-            action: ILibSatellite.ModuleMaintenanceAction.Add,
-            functionSelectors: cairoSelectors
-        });
+        cuts[1] = ILibSatellite.ModuleMaintenance({moduleAddress: address(cairoModule), action: ILibSatellite.ModuleMaintenanceAction.Add, functionSelectors: cairoSelectors});
 
         // SP1FactRegistryModule selectors
         bytes4[] memory sp1Selectors = new bytes4[](6);
@@ -84,11 +80,7 @@ contract SP1FactRegistryModuleTest is Test {
         sp1Selectors[3] = SP1FactRegistryModule.setSP1Verifier.selector;
         sp1Selectors[4] = SP1FactRegistryModule.getSP1Verifier.selector;
         sp1Selectors[5] = SP1FactRegistryModule.getProgramVKey.selector;
-        cuts[2] = ILibSatellite.ModuleMaintenance({
-            moduleAddress: address(sp1Module),
-            action: ILibSatellite.ModuleMaintenanceAction.Add,
-            functionSelectors: sp1Selectors
-        });
+        cuts[2] = ILibSatellite.ModuleMaintenance({moduleAddress: address(sp1Module), action: ILibSatellite.ModuleMaintenanceAction.Add, functionSelectors: sp1Selectors});
 
         // Execute Diamond cut
         satellite.satelliteMaintenance(cuts, address(0), "");
@@ -115,11 +107,7 @@ contract SP1FactRegistryModuleTest is Test {
     }
 
     function _mockVerifierOk(bytes memory publicValues, bytes memory proofBytes) internal {
-        vm.mockCall(
-            VERIFIER,
-            abi.encodeWithSelector(ISP1Verifier.verifyProof.selector, VKEY, publicValues, proofBytes),
-            ""
-        );
+        vm.mockCall(VERIFIER, abi.encodeWithSelector(ISP1Verifier.verifyProof.selector, VKEY, publicValues, proofBytes), "");
     }
 
     // ========================= Happy Path ========================= //
@@ -145,11 +133,7 @@ contract SP1FactRegistryModuleTest is Test {
     function test_verifyAndRegister_invalidProof_reverts() public {
         bytes memory publicValues = _publicValues(FACT);
         bytes memory proofBytes = hex"deadbeef";
-        vm.mockCallRevert(
-            VERIFIER,
-            abi.encodeWithSelector(ISP1Verifier.verifyProof.selector, VKEY, publicValues, proofBytes),
-            bytes("InvalidProof")
-        );
+        vm.mockCallRevert(VERIFIER, abi.encodeWithSelector(ISP1Verifier.verifyProof.selector, VKEY, publicValues, proofBytes), bytes("InvalidProof"));
 
         vm.expectRevert(bytes("InvalidProof"));
         satellite.verifyAndRegisterSP1Fact(publicValues, proofBytes);
@@ -173,10 +157,7 @@ contract SP1FactRegistryModuleTest is Test {
 
         bytes32 sig = keccak256("SP1FactRegistered(bytes32,address)");
         for (uint256 i = 0; i < logs.length; i++) {
-            assertFalse(
-                logs[i].emitter == satelliteAddr && logs[i].topics.length > 0 && logs[i].topics[0] == sig,
-                "SP1FactRegistered emitted on idempotent call"
-            );
+            assertFalse(logs[i].emitter == satelliteAddr && logs[i].topics.length > 0 && logs[i].topics[0] == sig, "SP1FactRegistered emitted on idempotent call");
         }
         assertTrue(satellite.isFactValid(FACT));
     }
@@ -241,11 +222,7 @@ contract SP1FactRegistryModuleTest is Test {
         bytes memory proofBytes = hex"deadbeef";
 
         // Mock with NEW vkey
-        vm.mockCall(
-            VERIFIER,
-            abi.encodeWithSelector(ISP1Verifier.verifyProof.selector, newVKey, publicValues, proofBytes),
-            ""
-        );
+        vm.mockCall(VERIFIER, abi.encodeWithSelector(ISP1Verifier.verifyProof.selector, newVKey, publicValues, proofBytes), "");
 
         vm.prank(alice);
         satellite.verifyAndRegisterSP1Fact(publicValues, proofBytes);
@@ -278,19 +255,11 @@ contract SP1FactRegistryModuleTest is Test {
 
         bytes4[] memory cairoSelectors = new bytes4[](1);
         cairoSelectors[0] = CairoFactRegistryModule._receiveCairoFactHash.selector;
-        cuts[0] = ILibSatellite.ModuleMaintenance({
-            moduleAddress: address(cairoModule),
-            action: ILibSatellite.ModuleMaintenanceAction.Add,
-            functionSelectors: cairoSelectors
-        });
+        cuts[0] = ILibSatellite.ModuleMaintenance({moduleAddress: address(cairoModule), action: ILibSatellite.ModuleMaintenanceAction.Add, functionSelectors: cairoSelectors});
 
         bytes4[] memory sp1Selectors = new bytes4[](1);
         sp1Selectors[0] = SP1FactRegistryModule.verifyAndRegisterSP1Fact.selector;
-        cuts[1] = ILibSatellite.ModuleMaintenance({
-            moduleAddress: address(sp1Module),
-            action: ILibSatellite.ModuleMaintenanceAction.Add,
-            functionSelectors: sp1Selectors
-        });
+        cuts[1] = ILibSatellite.ModuleMaintenance({moduleAddress: address(sp1Module), action: ILibSatellite.ModuleMaintenanceAction.Add, functionSelectors: sp1Selectors});
 
         freshSatellite.satelliteMaintenance(cuts, address(0), "");
 

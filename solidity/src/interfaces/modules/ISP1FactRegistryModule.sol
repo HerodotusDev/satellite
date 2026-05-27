@@ -7,13 +7,9 @@ interface ISP1FactRegistryModule {
     event SP1VerifierUpdated(address indexed oldVerifier, address indexed newVerifier);
 
     /// @notice Verify an SP1 proof and register the committed fact hash.
-    /// @dev Reverts if the SP1 verifier rejects the proof. Idempotent: re-submitting a proof
-    ///      for an already-registered fact is a no-op (no state change, no event).
+    /// @dev Reverts if the SP1 verifier rejects the proof. Re-submitting re-emits SP1FactRegistered;
+    ///      fact storage is a no-op if the hash is already registered.
     function verifyAndRegisterSP1Fact(bytes calldata publicValues, bytes calldata proofBytes) external;
-
-    /// @notice Whether given fact hash has been verified via SP1 or other means.
-    /// @dev Delegates to isCairoFactValid(factHash, false).
-    function isFactValid(bytes32 factHash) external view returns (bool);
 
     /// @notice Rotate the SP1 program verification key.
     function setProgramVKey(bytes32 newVKey) external;

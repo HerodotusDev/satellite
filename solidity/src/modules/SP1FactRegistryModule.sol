@@ -30,19 +30,12 @@ contract SP1FactRegistryModule is ISP1FactRegistryModule, AccessController {
 
         bytes32 factHash = abi.decode(publicValues, (bytes32));
 
-        if (!ISatellite(address(this)).isCairoVerifiedFactStored(factHash)) {
-            ISatellite(address(this))._receiveCairoFactHash(factHash, false);
-            emit SP1FactRegistered(factHash, msg.sender);
-        }
+        ISatellite(address(this))._receiveCairoFactHash(factHash, false);
+        emit SP1FactRegistered(factHash, msg.sender);
     }
 
     /// @inheritdoc ISP1FactRegistryModule
-    function isFactValid(bytes32 factHash) external view returns (bool) {
-        return ISatellite(address(this)).isCairoFactValid(factHash, false);
-    }
-
-    /// @inheritdoc ISP1FactRegistryModule
-    function setProgramVKey(bytes32 newVKey) external onlyAdmin {
+    function setProgramVKey(bytes32 newVKey) external onlyOwner {
         SP1FactRegistryModuleStorage storage ms = moduleStorage();
         bytes32 oldVKey = ms.programVKey;
         ms.programVKey = newVKey;

@@ -73,13 +73,12 @@ contract SP1FactRegistryModuleTest is Test {
         cuts[1] = ILibSatellite.ModuleMaintenance({moduleAddress: address(cairoModule), action: ILibSatellite.ModuleMaintenanceAction.Add, functionSelectors: cairoSelectors});
 
         // SP1FactRegistryModule selectors
-        bytes4[] memory sp1Selectors = new bytes4[](6);
+        bytes4[] memory sp1Selectors = new bytes4[](5);
         sp1Selectors[0] = SP1FactRegistryModule.verifyAndRegisterSP1Fact.selector;
-        sp1Selectors[1] = SP1FactRegistryModule.isFactValid.selector;
-        sp1Selectors[2] = SP1FactRegistryModule.setProgramVKey.selector;
-        sp1Selectors[3] = SP1FactRegistryModule.setSP1Verifier.selector;
-        sp1Selectors[4] = SP1FactRegistryModule.getSP1Verifier.selector;
-        sp1Selectors[5] = SP1FactRegistryModule.getProgramVKey.selector;
+        sp1Selectors[1] = SP1FactRegistryModule.setProgramVKey.selector;
+        sp1Selectors[2] = SP1FactRegistryModule.setSP1Verifier.selector;
+        sp1Selectors[3] = SP1FactRegistryModule.getSP1Verifier.selector;
+        sp1Selectors[4] = SP1FactRegistryModule.getProgramVKey.selector;
         cuts[2] = ILibSatellite.ModuleMaintenance({moduleAddress: address(sp1Module), action: ILibSatellite.ModuleMaintenanceAction.Add, functionSelectors: sp1Selectors});
 
         // Execute Diamond cut
@@ -96,7 +95,6 @@ contract SP1FactRegistryModuleTest is Test {
 
         // Configure SP1 module
         satellite.setSP1Verifier(VERIFIER);
-        vm.prank(admin);
         satellite.setProgramVKey(VKEY);
     }
 
@@ -123,9 +121,8 @@ contract SP1FactRegistryModuleTest is Test {
         vm.prank(alice);
         satellite.verifyAndRegisterSP1Fact(publicValues, proofBytes);
 
-        assertTrue(satellite.isFactValid(FACT));
-        assertTrue(satellite.isCairoVerifiedFactStored(FACT));
         assertTrue(satellite.isCairoFactValid(FACT, false));
+        assertTrue(satellite.isCairoVerifiedFactStored(FACT));
     }
 
     // ========================= Invalid Proof ========================= //
@@ -138,52 +135,48 @@ contract SP1FactRegistryModuleTest is Test {
         vm.expectRevert(bytes("InvalidProof"));
         satellite.verifyAndRegisterSP1Fact(publicValues, proofBytes);
 
-        assertFalse(satellite.isFactValid(FACT));
+        assertFalse(satellite.isCairoFactValid(FACT, false));
     }
 
-    // ========================= Idempotency ========================= //
+    // ========================= Re-submission ========================= //
 
-    function test_verifyAndRegister_idempotent() public {
+    function test_verifyAndRegister_canBeCalledTwice() public {
         bytes memory publicValues = _publicValues(FACT);
         bytes memory proofBytes = hex"deadbeef";
         _mockVerifierOk(publicValues, proofBytes);
 
         satellite.verifyAndRegisterSP1Fact(publicValues, proofBytes);
-        assertTrue(satellite.isFactValid(FACT));
+        assertTrue(satellite.isCairoFactValid(FACT, false));
 
-        vm.recordLogs();
+        vm.expectEmit(true, true, true, true, satelliteAddr);
+        emit ISP1FactRegistryModule.SP1FactRegistered(FACT, address(this));
+
         satellite.verifyAndRegisterSP1Fact(publicValues, proofBytes);
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-
-        bytes32 sig = keccak256("SP1FactRegistered(bytes32,address)");
-        for (uint256 i = 0; i < logs.length; i++) {
-            assertFalse(logs[i].emitter == satelliteAddr && logs[i].topics.length > 0 && logs[i].topics[0] == sig, "SP1FactRegistered emitted on idempotent call");
-        }
-        assertTrue(satellite.isFactValid(FACT));
+        assertTrue(satellite.isCairoFactValid(FACT, false));
     }
 
     // ========================= VKey Management ========================= //
 
-    function test_setProgramVKey_byAdmin() public {
+    function test_setProgramVKey_byOwner() public {
         bytes32 newVKey = bytes32(uint256(0x9999));
 
         vm.expectEmit(true, true, true, true, satelliteAddr);
         emit ISP1FactRegistryModule.VKeyUpdated(VKEY, newVKey);
 
-        vm.prank(admin);
         satellite.setProgramVKey(newVKey);
 
         assertEq(satellite.getProgramVKey(), newVKey);
     }
 
-    function test_setProgramVKey_byNonAdmin_reverts() public {
+    function test_setProgramVKey_byNonOwner_reverts() public {
         vm.prank(alice);
-        vm.expectRevert("You are not an admin");
+        vm.expectRevert(abi.encodeWithSelector(ILibSatellite.MustBeContractOwner.selector));
         satellite.setProgramVKey(bytes32(uint256(0x9999)));
     }
 
-    function test_setProgramVKey_byOwner_reverts() public {
-        vm.expectRevert("You are not an admin");
+    function test_setProgramVKey_byAdmin_reverts() public {
+        vm.prank(admin);
+        vm.expectRevert(abi.encodeWithSelector(ILibSatellite.MustBeContractOwner.selector));
         satellite.setProgramVKey(bytes32(uint256(0x9999)));
     }
 
@@ -215,7 +208,6 @@ contract SP1FactRegistryModuleTest is Test {
 
     function test_verifyAfterVKeyRotation() public {
         bytes32 newVKey = bytes32(uint256(0x5678));
-        vm.prank(admin);
         satellite.setProgramVKey(newVKey);
 
         bytes memory publicValues = _publicValues(FACT);
@@ -226,7 +218,7 @@ contract SP1FactRegistryModuleTest is Test {
 
         vm.prank(alice);
         satellite.verifyAndRegisterSP1Fact(publicValues, proofBytes);
-        assertTrue(satellite.isFactValid(FACT));
+        assertTrue(satellite.isCairoFactValid(FACT, false));
     }
 
     // ========================= Getters ========================= //
@@ -236,8 +228,8 @@ contract SP1FactRegistryModuleTest is Test {
         assertEq(satellite.getProgramVKey(), VKEY);
     }
 
-    function test_isFactValid_unregistered_returnsFalse() public view {
-        assertFalse(satellite.isFactValid(bytes32(uint256(0xDEAD))));
+    function test_isCairoFactValid_unregistered_returnsFalse() public view {
+        assertFalse(satellite.isCairoFactValid(bytes32(uint256(0xDEAD)), false));
     }
 
     // ========================= Verifier Not Set ========================= //

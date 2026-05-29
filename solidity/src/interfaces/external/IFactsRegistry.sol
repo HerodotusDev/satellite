@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.27;
 
+interface IReadOnlyFactsRegistry {
+    function isValid(bytes32 fact) external view returns (bool);
+}
+
 interface IFactsRegistry {
     function isValid(bytes32 fact) external view returns (bool);
 

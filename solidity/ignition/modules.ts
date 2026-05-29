@@ -71,6 +71,25 @@ export const modules = (chainId: keyof typeof settings) =>
         }
       : {}),
 
+    ...("SP1_VERIFIER_ADDRESS" in settings[chainId] &&
+    "SP1_VERIFIER_VKEY" in settings[chainId]
+      ? {
+          SP1FactRegistryModule: {
+            interfaceName: "ISP1FactRegistryModule",
+            initFunctions: [
+              {
+                name: "setSP1Verifier",
+                args: [settings[chainId].SP1_VERIFIER_ADDRESS],
+              },
+              {
+                name: "setProgramVKey",
+                args: [settings[chainId].SP1_VERIFIER_VKEY],
+              },
+            ],
+          },
+        }
+      : {}),
+
     ...("DATA_PROCESSOR_PROGRAM_HASH" in settings[chainId] &&
     "CAIRO_FACT_REGISTRY_IS_MOCKED" in settings[chainId]
       ? {
@@ -234,4 +253,4 @@ export const modules = (chainId: keyof typeof settings) =>
       interfaceName: "IFactsRegistry",
       isExternal: true,
     },
-  }) satisfies Record<string, Module>;
+  } satisfies Record<string, Module>);

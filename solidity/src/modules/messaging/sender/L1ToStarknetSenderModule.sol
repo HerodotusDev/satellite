@@ -13,8 +13,10 @@ contract L1ToStarknetSenderModule is IL1ToStarknetSenderModule, AccessController
 
     bytes4 public constant RECEIVE_MMR_L1_SELECTOR = bytes4(keccak256("receiveMmr(uint256,(bytes32,bytes32)[],uint256,uint256,uint256,uint256,bool)"));
     bytes4 public constant RECEIVE_PARENT_HASH_L1_SELECTOR = bytes4(keccak256("receiveParentHash(uint256,bytes32,uint256,bytes32)"));
+    bytes4 public constant RECEIVE_CAIRO_FACT_HASH_L1_SELECTOR = bytes4(keccak256("receiveCairoFactHash(bytes32,bool)"));
     uint256 public constant RECEIVE_MMR_L2_SELECTOR = 0x03b0888423d829a33dcfd4acf7bfe4d08132cdd35debb0e74af5f0f3a395d2e6;
     uint256 public constant RECEIVE_PARENT_HASH_L2_SELECTOR = 0x03e956c16ad6daeda6a681c48ddd8b98ae1b6b9d03e7618decfb89d1646b6911;
+    uint256 public constant RECEIVE_CAIRO_FACT_HASH_L2_SELECTOR = 0x01eaefe708a56daf1ec1690fade884790beeb9441aecef331e631fe2ddfec31f;
 
     /// @inheritdoc IL1ToStarknetSenderModule
     function sendMessageL1ToStarknet(uint256 satelliteAddress, address inboxAddress, bytes calldata _data, bytes memory) external payable onlyModule {
@@ -28,6 +30,7 @@ contract L1ToStarknetSenderModule is IL1ToStarknetSenderModule, AccessController
         uint256 l2Selector;
         if (selector == RECEIVE_MMR_L1_SELECTOR) (starknetData, l2Selector) = _receiveMmr(encodedParams);
         else if (selector == RECEIVE_PARENT_HASH_L1_SELECTOR) (starknetData, l2Selector) = _receiveParentHash(encodedParams);
+        else if (selector == RECEIVE_CAIRO_FACT_HASH_L1_SELECTOR) (starknetData, l2Selector) = _receiveCairoFactHash(encodedParams);
         else revert("Invalid selector");
 
         IStarknetCore(inboxAddress).sendMessageToL2{value: msg.value}(satelliteAddress, l2Selector, starknetData);
@@ -99,5 +102,16 @@ contract L1ToStarknetSenderModule is IL1ToStarknetSenderModule, AccessController
         (starknetData[2], starknetData[3]) = uint256(hashingFunction).split128();
         (starknetData[4], starknetData[5]) = blockNumber.split128();
         (starknetData[6], starknetData[7]) = uint256(parentHash).split128();
+    }
+
+    function _receiveCairoFactHash(bytes memory encodedData) internal pure returns (uint256[] memory starknetData, uint256 l2Selector) {
+        (bytes32 factHash, bool isMocked) = abi.decode(encodedData, (bytes32, bool));
+
+        l2Selector = RECEIVE_CAIRO_FACT_HASH_L2_SELECTOR;
+
+        starknetData = new uint256[](3);
+
+        (starknetData[0], starknetData[1]) = uint256(factHash).split128();
+        starknetData[2] = uint256(isMocked ? 1 : 0);
     }
 }

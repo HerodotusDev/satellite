@@ -253,4 +253,4 @@ export const modules = (chainId: keyof typeof settings) =>
       interfaceName: "IFactsRegistry",
       isExternal: true,
     },
-  } satisfies Record<string, Module>);
+  }) satisfies Record<string, Module>;

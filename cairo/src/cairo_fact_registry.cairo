@@ -78,6 +78,10 @@ pub trait ICairoFactRegistry<TContractState> {
 
     fn isKeccakFactHashValid(self: @TContractState, fact_hash: u256, is_mocked: bool) -> bool;
 
+    fn isKeccakVerifiedFactHashValid(self: @TContractState, fact_hash: u256) -> bool;
+
+    fn isKeccakMockedFactHashValid(self: @TContractState, fact_hash: u256) -> bool;
+
     fn translateFactHash(
         ref self: TContractState, program_hash: felt252, output: Span<felt252>, is_mocked: bool,
     );
@@ -367,6 +371,18 @@ pub mod cairo_fact_registry_component {
             self: @ComponentState<TContractState>, fact_hash: u256, is_mocked: bool,
         ) -> bool {
             self.keccak_facts.entry((fact_hash, is_mocked)).read()
+        }
+
+        fn isKeccakVerifiedFactHashValid(
+            self: @ComponentState<TContractState>, fact_hash: u256,
+        ) -> bool {
+            self.keccak_facts.entry((fact_hash, false)).read()
+        }
+
+        fn isKeccakMockedFactHashValid(
+            self: @ComponentState<TContractState>, fact_hash: u256,
+        ) -> bool {
+            self.keccak_facts.entry((fact_hash, true)).read()
         }
 
         fn translateFactHash(

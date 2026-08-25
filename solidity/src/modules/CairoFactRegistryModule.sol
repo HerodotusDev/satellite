@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {ICairoFactRegistryModule} from "../interfaces/modules/ICairoFactRegistryModule.sol";
-import {IFactsRegistry} from "../interfaces/external/IFactsRegistry.sol";
+import {IFactsRegistry, IReadOnlyFactsRegistry} from "../interfaces/external/IFactsRegistry.sol";
 import {AccessController} from "../libraries/AccessController.sol";
 import {ISatellite} from "../interfaces/ISatellite.sol";
 
@@ -10,7 +10,7 @@ struct CairoFactRegistryModuleStorage {
     // It is stored here so that it can be storage proven between satellites.
     mapping(bytes32 => bool) facts;
     mapping(bytes32 => bool) mockedFacts;
-    IFactsRegistry externalFactRegistry;
+    IReadOnlyFactsRegistry externalFactRegistry;
     bool isMockedForInternal;
     IFactsRegistry fallbackMockedContract;
 }
@@ -40,7 +40,7 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
     /// @inheritdoc ICairoFactRegistryModule
     function isCairoVerifiedFactValid(bytes32 factHash) public view returns (bool) {
         CairoFactRegistryModuleStorage storage ms = moduleStorage();
-        return ms.facts[factHash] || ms.externalFactRegistry.isValid(factHash);
+        return ms.facts[factHash] || (address(ms.externalFactRegistry) != address(0) && ms.externalFactRegistry.isValid(factHash));
     }
 
     /// @inheritdoc ICairoFactRegistryModule
@@ -55,7 +55,7 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
 
     /// @inheritdoc ICairoFactRegistryModule
     function setCairoVerifiedFactRegistryContract(address externalFactRegistry) external onlyOwner {
-        moduleStorage().externalFactRegistry = IFactsRegistry(externalFactRegistry);
+        moduleStorage().externalFactRegistry = IReadOnlyFactsRegistry(externalFactRegistry);
         emit CairoFactRegistryExternalContractSet(externalFactRegistry);
     }
 
@@ -125,9 +125,6 @@ contract CairoFactRegistryModule is ICairoFactRegistryModule, AccessController {
             }
         } else {
             ms.facts[factHash] = true;
-            if (address(ms.externalFactRegistry) != address(0)) {
-                ms.externalFactRegistry.setValid(factHash);
-            }
         }
     }
 

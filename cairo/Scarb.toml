@@ -12,7 +12,7 @@ openzeppelin = "0.20.0"
 integrity = { git = "https://github.com/HerodotusDev/integrity.git" }
 
 [dev-dependencies]
-snforge_std = "0.46.0"
+snforge_std = "0.52.0"
 assert_macros = "2.11.4"
 
 [[target.starknet-contract]]

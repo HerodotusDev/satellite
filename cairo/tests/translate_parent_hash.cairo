@@ -67,6 +67,40 @@ fn get_example_2() -> (Span<u64>, u256, u256, u256) {
     (header_rlp, block_number, hash_keccak, hash_poseidon)
 }
 
+fn get_example_3() -> (Span<u64>, u256, u256, u256) {
+    let header_rlp = [
+        0x7f8bbfe6a08c02f9, 0x52e9b75990c003bc, 0x27e1814e94c136f6, 0xc9477a0f8a95ce5d,
+        0x4dcc1da08543ba44, 0xb585ab7a5dc7dee8, 0x4512d31ad4ccb667, 0x42a1f013748a941b,
+        0xcb13944793d440fd, 0x4d7f97a0134ae36a, 0x23bb874bc2eb0171, 0xabace44f21a0d5f0,
+        0xff1d89af13afdda1, 0x7b34bbeff95c08b7, 0xe7982d727b7220a2, 0xb1d70d93a0de5545,
+        0x2baf2fd69e315ee4, 0xad9cd8b978095c4, 0x7ccf3460fdc7541b, 0xcd1d50a0f3c9d827,
+        0x78f3548545e6a139, 0xa3d5b61da89c1d7d, 0xd02e5b5ab5838644, 0x1b9eef48b9de0,
+        0xf04010c642428154, 0xa41100456891102, 0x8a4412010f90cd09, 0xa024030658a11a1d,
+        0x2361904102a09a00, 0x82a1a45043c1c04a, 0x2066ab11004a15c0, 0x40416a71dab20008,
+        0xc86206063081825a, 0xd18078400a00a042, 0x2073901118404095, 0x10a1080144061a29,
+        0x2219096208824602, 0x480b1088a5b40420, 0x1b501026c1200800, 0x7264281110800000,
+        0x26a54010020cab3, 0x1498116806480a6, 0x53904428c11d2989, 0x8021601003710,
+        0x741a101087204912, 0x60801108c5c54630, 0x1c009418b208049, 0xbc9b8000e0a8191,
+        0x43700104a2808a42, 0x49404e58210c3384, 0x3040281664011813, 0x330640000425208,
+        0x3fe80881041425, 0x16800f602a1a1288, 0x7e42f9080d1e26c0, 0x9c10031262ac92,
+        0x9303845a929b8380, 0x84bb627f01840087, 0x6c6c499f505e8469, 0x206574616e696d75,
+        0x69746172636f6d44, 0x697274734420657a, 0x2d9c5aa065747562, 0xb690eb26a2882d74,
+        0x6007b42e69d464d2, 0xbfe1e0f78a7dea39, 0x88b81931a844, 0x3b84000000000000,
+        0x137ae4e6a0139cfb, 0x96851f9f4a39b4f5, 0x6da2d7e5d4742e79, 0x9af6dae5691c1b22,
+        0x1483cc2f1a31, 0xe2cda06725700c84, 0x582f29afd511ec60, 0x7b38af835c44e903,
+        0xa5f2d1bd45982c71, 0xe3a07f14a8e25ce0, 0x9a141cfc9842c4b0, 0x2724b96f99c8f4fb,
+        0xa44c939b64e441ae, 0x55b852781b9995,
+    ]
+        .span();
+
+    let block_number: u256 = 10195546;
+    let hash_keccak: u256 = 0x0f1721fbb6d61170172accd29d6d1518c29cf8b727f87bac73013bf3a8e851d8;
+    let hash_poseidon: u256 = 0x40d8850d0e0d27fe0d460ac5031ffcd582925601059830cc7c2498c7858eb4b;
+    // 0xe6bf8b7fbc03c09059b7e952f636c1944e81e1275dce958a0f7a47c944ba4385
+
+    (header_rlp, block_number, hash_keccak, hash_poseidon)
+}
+
 #[test]
 fn test_translate_parent_hash_1() {
     let chain_id: u256 = 11155111;
@@ -98,6 +132,33 @@ fn test_translate_parent_hash_1() {
 fn test_translate_parent_hash_2() {
     let chain_id: u256 = 11155111;
     let (header_rlp, block_number, hash_keccak, hash_poseidon) = get_example_2();
+
+    let mut contract = Satellite::contract_state_for_testing();
+
+    contract
+        .state
+        .received_parent_hashes
+        .entry(chain_id)
+        .entry(KECCAK_HASHING_FUNCTION)
+        .entry(block_number)
+        .write(hash_keccak);
+
+    contract.translateParentHashFunction(chain_id, block_number, header_rlp);
+
+    let result = contract
+        .state
+        .received_parent_hashes
+        .entry(chain_id)
+        .entry(POSEIDON_HASHING_FUNCTION)
+        .entry(block_number)
+        .read();
+    assert(result == hash_poseidon, 'Result mismatch');
+}
+
+#[test]
+fn test_translate_parent_hash_3() {
+    let chain_id: u256 = 11155111;
+    let (header_rlp, block_number, hash_keccak, hash_poseidon) = get_example_3();
 
     let mut contract = Satellite::contract_state_for_testing();
 

@@ -5,3 +5,4 @@ solidity/artifacts
 solidity/cache_hardhat
 solidity/ignition/deployments
 solidity/typechain-types
+cairo/target

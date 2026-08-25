@@ -107,6 +107,14 @@ pub mod Satellite {
             );
     }
 
+    #[l1_handler]
+    fn receiveFactHash(
+        ref self: ContractState, from_address: felt252, fact_hash: u256, is_mocked: bool,
+    ) {
+        assert(from_address == self.l1_message_sender.read(), 'ONLY_L1_MESSAGE_SENDER');
+        self._receiveKeccakFactHash(fact_hash, is_mocked);
+    }
+
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
@@ -141,6 +149,8 @@ pub mod Satellite {
     #[abi(embed_v0)]
     impl EvmGrowingImpl = evm_growing_component::EvmGrowing<ContractState>;
 
+    impl CairoFactRegistryInternalImpl =
+        cairo_fact_registry_component::CairoFactRegistryInternal<ContractState>;
     #[abi(embed_v0)]
     impl CairoFactRegistryImpl =
         cairo_fact_registry_component::CairoFactRegistry<ContractState>;

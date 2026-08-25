@@ -1,13 +1,17 @@
+use cairo_lib::utils::bitwise::reverse_endianness_u256;
+use core::keccak::keccak_u256s_be_inputs;
 use integrity::contracts::fact_registry_interface::{
     IFactRegistryDispatcher, IFactRegistryDispatcherTrait, Verification, VerificationListElement,
 };
 use integrity::settings::{FactHash, SecurityBits, VerificationHash, VerifierConfiguration};
+use integrity::{SHARP_BOOTLOADER_PROGRAM_HASH, calculate_bootloaded_fact_hash};
 use starknet::ContractAddress;
 
 
 // For now, unlike solidity version, this module does not store non-mocked facts locally.
 
 const ALLOWED_SECURITY_BITS: SecurityBits = 96;
+const TRANSLATED_SECURITY_BITS: SecurityBits = 96;
 
 #[starknet::interface]
 pub trait ICairoFactRegistry<TContractState> {
@@ -69,6 +73,27 @@ pub trait ICairoFactRegistry<TContractState> {
     fn isAdmin(self: @TContractState, account: ContractAddress) -> bool;
 
     fn manageAdmins(ref self: TContractState, accounts: Span<ContractAddress>, is_admin: bool);
+
+    // ======================= Keccak facts ======================== //
+
+    fn isKeccakFactHashValid(self: @TContractState, fact_hash: u256, is_mocked: bool) -> bool;
+
+    fn isKeccakVerifiedFactHashValid(self: @TContractState, fact_hash: u256) -> bool;
+
+    fn isKeccakMockedFactHashValid(self: @TContractState, fact_hash: u256) -> bool;
+
+    fn translateFactHash(
+        ref self: TContractState, program_hash: felt252, output: Span<felt252>, is_mocked: bool,
+    );
+
+    fn isTranslatedFactHashValid(
+        self: @TContractState, fact_hash: felt252, is_mocked: bool,
+    ) -> bool;
+}
+
+#[starknet::interface]
+pub trait ICairoFactRegistryInternal<TContractState> {
+    fn _receiveKeccakFactHash(ref self: TContractState, fact_hash: u256, is_mocked: bool);
 }
 
 #[starknet::component]
@@ -95,6 +120,8 @@ pub mod cairo_fact_registry_component {
         is_mocked_for_internal: bool,
         fallback_mocked_contract: ContractAddress,
         admins: Map<ContractAddress, bool>,
+        keccak_facts: Map<(u256, bool), bool>,
+        translated_fact_hashes: Map<(felt252, bool), bool>,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -122,6 +149,19 @@ pub mod cairo_fact_registry_component {
         is_mocked: bool,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct CairoKeccakHashSet {
+        fact_hash: u256,
+        is_mocked: bool,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct TranslatedFactHashSet {
+        keccak_fact_hash: u256,
+        integrity_fact_hash: felt252,
+        is_mocked: bool,
+    }
+
     #[event]
     #[derive(Drop, starknet::Event)]
     pub enum Event {
@@ -130,6 +170,8 @@ pub mod cairo_fact_registry_component {
         CairoMockedFactSet: CairoMockedFactSet,
         CairoMockedFactRegistryFallbackContractSet: CairoMockedFactRegistryFallbackContractSet,
         IsMockedForInternalSet: IsMockedForInternalSet,
+        CairoKeccakHashSet: CairoKeccakHashSet,
+        TranslatedFactHashSet: TranslatedFactHashSet,
     }
 
     #[embeddable_as(CairoFactRegistry)]
@@ -144,11 +186,12 @@ pub mod cairo_fact_registry_component {
         fn isCairoFactValid(
             self: @ComponentState<TContractState>, fact_hash: felt252, is_mocked: bool,
         ) -> bool {
-            if is_mocked {
+            let standard = if is_mocked {
                 self.mocked_facts.entry(fact_hash).read()
             } else {
                 self.isCairoVerifiedFactValid(fact_hash)
-            }
+            };
+            standard || self.translated_fact_hashes.entry((fact_hash, is_mocked)).read()
         }
 
         fn get_all_verifications_for_fact_hash(
@@ -159,9 +202,26 @@ pub mod cairo_fact_registry_component {
             } else {
                 self.external_fact_registry.read()
             };
-            IFactRegistryDispatcher { contract_address }
-                .get_all_verifications_for_fact_hash(fact_hash)
-                .span()
+            let mut verifications = IFactRegistryDispatcher { contract_address }
+                .get_all_verifications_for_fact_hash(fact_hash);
+
+            // Check for translated fact hashes
+            if self.translated_fact_hashes.entry((fact_hash, is_mocked)).read() {
+                verifications
+                    .append(
+                        VerificationListElement {
+                            verification_hash: 0x0,
+                            security_bits: TRANSLATED_SECURITY_BITS,
+                            verifier_config: VerifierConfiguration {
+                                layout: 'translated',
+                                hasher: 'translated',
+                                stone_version: 'translated',
+                                memory_verification: 'translated',
+                            },
+                        },
+                    )
+            }
+            verifications.span()
         }
 
         fn get_verification(
@@ -184,6 +244,7 @@ pub mod cairo_fact_registry_component {
         ) -> bool {
             Integrity::from_address(self.external_fact_registry.read())
                 .is_fact_hash_valid_with_security(fact_hash, ALLOWED_SECURITY_BITS)
+                || self.translated_fact_hashes.entry((fact_hash, false)).read()
         }
 
         fn getCairoVerifiedFactRegistryContract(
@@ -215,12 +276,13 @@ pub mod cairo_fact_registry_component {
                 return true;
             }
             let fallback_mocked_contract = self.fallback_mocked_contract.read();
-            if fallback_mocked_contract.is_non_zero() {
+            let standard = if fallback_mocked_contract.is_non_zero() {
                 Integrity::from_address(fallback_mocked_contract)
                     .is_fact_hash_valid_with_security(fact_hash, ALLOWED_SECURITY_BITS)
             } else {
                 false
-            }
+            };
+            standard || self.translated_fact_hashes.entry((fact_hash, true)).read()
         }
 
         fn setCairoMockedFact(
@@ -299,5 +361,82 @@ pub mod cairo_fact_registry_component {
                 self.admins.entry(*account).write(is_admin);
             };
         }
+
+        // ======================= Keccak facts ======================== //
+        // Facts can be sent from Ethereum satellite contract instead of calling Integrity.
+        // THe fact will be different, because it uses keccak, not poseidon and bootloader is
+        // decommited.
+
+        fn isKeccakFactHashValid(
+            self: @ComponentState<TContractState>, fact_hash: u256, is_mocked: bool,
+        ) -> bool {
+            self.keccak_facts.entry((fact_hash, is_mocked)).read()
+        }
+
+        fn isKeccakVerifiedFactHashValid(
+            self: @ComponentState<TContractState>, fact_hash: u256,
+        ) -> bool {
+            self.keccak_facts.entry((fact_hash, false)).read()
+        }
+
+        fn isKeccakMockedFactHashValid(
+            self: @ComponentState<TContractState>, fact_hash: u256,
+        ) -> bool {
+            self.keccak_facts.entry((fact_hash, true)).read()
+        }
+
+        fn translateFactHash(
+            ref self: ComponentState<TContractState>,
+            program_hash: felt252,
+            output: Span<felt252>,
+            is_mocked: bool,
+        ) {
+            let (keccak_fact_hash, integrity_fact_hash) = get_fact_hashes(program_hash, output);
+            assert(
+                self.keccak_facts.entry((keccak_fact_hash, is_mocked)).read() == true,
+                'KECCAK_FACT_HASH_NOT_SAVED',
+            );
+            self.translated_fact_hashes.entry((integrity_fact_hash, is_mocked)).write(true);
+            self
+                .emit(
+                    Event::TranslatedFactHashSet(
+                        TranslatedFactHashSet { keccak_fact_hash, integrity_fact_hash, is_mocked },
+                    ),
+                );
+        }
+
+        fn isTranslatedFactHashValid(
+            self: @ComponentState<TContractState>, fact_hash: felt252, is_mocked: bool,
+        ) -> bool {
+            self.translated_fact_hashes.entry((fact_hash, is_mocked)).read()
+        }
     }
+
+    #[embeddable_as(CairoFactRegistryInternal)]
+    pub impl CairoFactRegistryInternalImpl<
+        TContractState, +HasComponent<TContractState>, +Drop<TContractState>,
+        // impl State: state_component::HasComponent<TContractState>
+    > of ICairoFactRegistryInternal<ComponentState<TContractState>> {
+        fn _receiveKeccakFactHash(
+            ref self: ComponentState<TContractState>, fact_hash: u256, is_mocked: bool,
+        ) {
+            self.keccak_facts.entry((fact_hash, is_mocked)).write(true);
+            self.emit(Event::CairoKeccakHashSet(CairoKeccakHashSet { fact_hash, is_mocked }));
+        }
+    }
+}
+
+pub fn get_fact_hashes(program_hash: felt252, output: Span<felt252>) -> (u256, felt252) {
+    let mut output_u256s = array![];
+    for value in output {
+        output_u256s.append((*value).into());
+    }
+    let output_hash = reverse_endianness_u256(keccak_u256s_be_inputs(output_u256s.span()));
+    let keccak_fact = reverse_endianness_u256(
+        keccak_u256s_be_inputs(array![program_hash.into(), output_hash].span()),
+    );
+    let poseidon_fact = calculate_bootloaded_fact_hash(
+        SHARP_BOOTLOADER_PROGRAM_HASH, program_hash, output,
+    );
+    (keccak_fact, poseidon_fact)
 }
